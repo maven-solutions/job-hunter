@@ -12,54 +12,49 @@ interface JobsData {
   aboutUs?: any;
 }
 const App: React.FC<{}> = () => {
-  const [isActive, setIsActive] = useState<any>(window.location.href);
+  const [companyName, setCompanyName] = useState<string>("");
+  const [jobsTitle, setJobstitle] = useState<string>("");
+  const [companyLocation, setCompanyLocation] = useState<string>("");
+  const [aboutUs, setAboutUs] = useState<string>("");
+  const [postUrl, setPostUrl] = useState<string>("");
+  const jobsData: JobsData = {};
 
   const getContentFromLinkedInJobs = () => {
-    const jobsData: JobsData = {};
     jobsData.postUrl = window.location.href;
+    setPostUrl(window.location.href);
 
     const jobsBody = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__job-title"
     );
     if (jobsBody[0]) {
       jobsData.title = jobsBody[0]?.textContent.trim();
+      setJobstitle(jobsBody[0]?.textContent.trim());
     }
-    // const jobsLocation = document.getElementsByClassName(
-    //   "job-details-jobs-unified-top-card__primary-description"
-    // );
 
-    // console.log("jobsLocation--", jobsLocation[0].children[0].textContent);
-
-    // const a = document.querySelector(".jobs-box__html-content");
-    // console.log(
-    //   "loc--",
-    //   a
-    //     .getElementsByClassName("text-heading-large")[0]
-    //     .getElementsByTagName("span")
-    // );
-    // const a = document.getElementById("job-details");
-    // console.log("a----", a);
-    // Get the DOM element with the id "job-details"
     const jobDetailsElement = document.getElementById("job-details");
 
     // Find the first <span> element inside the jobDetailsElement
     const aboutUs = jobDetailsElement.querySelector("span");
     if (aboutUs) {
-      console.log("aboutus---");
-      jobsData.aboutUs = aboutUs;
+      jobsData.aboutUs = aboutUs.toString();
     }
-    console.log("jobsData---", jobsData);
 
-    // Log the HTML content to the console
-    // console.log(htmlContentInsideFirstSpan);
+    const location = document.getElementsByClassName(
+      "job-details-jobs-unified-top-card__bullet"
+    );
+    if (location[0]) {
+      jobsData.location = location[0]?.textContent?.trim();
+      setCompanyLocation(location[0]?.textContent?.trim());
+    }
+
+    console.log("jobsData---", jobsData);
   };
 
   useEffect(() => {
-    // console.log("url----", window.location.href);
     getContentFromLinkedInJobs();
   }, [window.location]);
 
-  // useEffect(() => {}, [isActive]);
+  useEffect(() => {}, []);
 
   return (
     <div className="content__script__section">
@@ -67,10 +62,22 @@ const App: React.FC<{}> = () => {
       <div className="job__detail__container">
         <div className="job_detail_header"> Jobs Hunter </div>
         <div className="job_detail_content_section">
-          <InputBox title="Company" />
-          <InputBox title="Job title" />
-          <InputBox title="Location" />
-          <InputBox title="Post Url" />
+          <InputBox
+            title="Company"
+            value={companyName}
+            valueSetter={setCompanyName}
+          />
+          <InputBox
+            title="Job title"
+            value={jobsTitle}
+            valueSetter={setJobstitle}
+          />
+          <InputBox
+            title="Location"
+            value={companyLocation}
+            valueSetter={setCompanyLocation}
+          />
+          <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
           <InputBox title="Description" />
         </div>
         <div className="job__detail__footer">
