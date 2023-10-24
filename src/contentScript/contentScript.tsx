@@ -1,6 +1,7 @@
 // TODO: content script
 import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
+import { useDebounce } from "use-debounce";
 import "./index.css";
 import InputBox from "../component/InputBox";
 
@@ -17,6 +18,8 @@ const App: React.FC<{}> = () => {
   const [companyLocation, setCompanyLocation] = useState<string>("");
   const [aboutUs, setAboutUs] = useState<string>("");
   const [postUrl, setPostUrl] = useState<string>("");
+  const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
+  const [debounceValue] = useDebounce(activeUrl, 3000);
   const jobsData: JobsData = {};
 
   const getContentFromLinkedInJobs = () => {
@@ -46,15 +49,46 @@ const App: React.FC<{}> = () => {
       jobsData.location = location[0]?.textContent?.trim();
       setCompanyLocation(location[0]?.textContent?.trim());
     }
-
-    console.log("jobsData---", jobsData);
   };
 
   useEffect(() => {
-    getContentFromLinkedInJobs();
-  }, [window.location]);
+    if (window.location.href.includes("www.linkedin.com/jobs/collections")) {
+      getContentFromLinkedInJobs();
+    }
+  }, [debounceValue]);
 
-  useEffect(() => {}, []);
+  // useEffect(() => {
+  //   chrome.runtime.sendMessage(
+  //     { action: "generateDynamicURL", inputValue: window.location.href },
+  //     function (response) {
+  //       // var dynamicURL = response.url;
+  //       console.log("res---", response);
+  //       // Open the dynamicURL or use it as needed.
+  //     }
+  //   );
+  // }, [window.location.href]);
+  // const observer = new MutationObserver(() => {
+  //   const url = window.location.href;
+  //   chrome.runtime.sendMessage({ action: "urlChange", url });
+  // });
+
+  // // Observe changes in the DOM
+  // observer.observe(document, { childList: true, subtree: true });
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const url = window.location.href;
+      // chrome.runtime.sendMessage({ action: "urlChange", url });
+      if (url !== activeUrl) {
+        setActiveUrl(url);
+        console.log("url--", url);
+      }
+    });
+
+    // Observe changes in the DOM
+    observer.observe(document, { childList: true, subtree: true });
+  }, []);
+  // const debouncedSearch = debounce(handleSearch, 300);
 
   return (
     <div className="content__script__section">
@@ -90,4 +124,5 @@ const App: React.FC<{}> = () => {
 
 const root = document.createElement("div");
 document.body.appendChild(root);
-ReactDOM.render(<App />, root);
+const rootElement = ReactDOM.createRoot(root);
+rootElement.render(<App />);
