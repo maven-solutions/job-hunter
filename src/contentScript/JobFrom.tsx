@@ -1,4 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
+import JoditEditor from "jodit-react";
+
 import InputBox from "../component/InputBox";
 
 const JobFrom = (props: any) => {
@@ -80,6 +82,8 @@ const JobFrom = (props: any) => {
     }),
     []
   );
+  const editor = useRef(null);
+
   const {
     companyName,
     setCompanyName,
@@ -90,6 +94,8 @@ const JobFrom = (props: any) => {
     postUrl,
     setPostUrl,
     targetElementRef,
+    aboutUs,
+    setAboutUs,
   } = props;
   return (
     <div className="job__detail__container">
@@ -114,12 +120,17 @@ const JobFrom = (props: any) => {
         <div className="job_input_section">
           <span className="job_box_title">Description </span>
           {/* <JoditEditor
-              ref={editor}
-              value={aboutUs}
-              config={editorConfig}
-              onBlur={(newContent) => setAboutUs(newContent)}
-            /> */}
-          <div ref={targetElementRef} className="about__us__section" />
+            ref={editor}
+            value={aboutUs}
+            config={editorConfig}
+            onBlur={(newContent) => setAboutUs(newContent)}
+          /> */}
+          {/* {ReactHtmlParser(aboutUs)} */}
+          {/* <div dangerouslySetInnerHTML={{ __html: aboutUs }} /> */}
+          <div className="about__us__section">
+            <div dangerouslySetInnerHTML={{ __html: aboutUs }} />
+          </div>
+          {/* <div ref={targetElementRef} className="about__us__section" /> */}
         </div>
       </div>
       <div className="job__detail__footer">

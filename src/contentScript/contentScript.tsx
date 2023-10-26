@@ -27,10 +27,14 @@ const App: React.FC<{}> = () => {
       setJobstitle(jobsBody[0]?.textContent.trim());
     }
 
-    let jobDetailsElement = document.getElementById("job-details");
+    setTimeout(() => {
+      let jobDetailsElement = document.getElementById("job-details");
+      const about = jobDetailsElement.querySelector("span");
+
+      setAboutUs(about?.innerHTML);
+    }, 500);
 
     // Find the first <span> element inside the jobDetailsElement
-    const about = jobDetailsElement.querySelector("span");
 
     const location = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__bullet"
@@ -40,22 +44,12 @@ const App: React.FC<{}> = () => {
     }
 
     // Assuming you have a reference to the DOM element
-    const domElement = document.querySelector(".jobs-unified-top-card.t-14");
     setTimeout(() => {
+      const domElement = document.querySelector(".jobs-unified-top-card.t-14");
+
       const aTag = domElement.querySelector("a.app-aware-link");
-      const companyName = aTag.textContent;
-      setCompanyName(companyName.trim());
-
-      if (about) {
-        setAboutUs(about);
-        // Clear existing content in the target element
-        while (targetElement.firstChild) {
-          targetElement.removeChild(targetElement.firstChild);
-        }
-
-        // Append the new content to the target element
-        targetElement.appendChild(about);
-      }
+      const companyName = aTag?.textContent;
+      setCompanyName(companyName?.trim());
     }, 500);
   };
 
@@ -89,6 +83,9 @@ const App: React.FC<{}> = () => {
     if (companyElement) {
       setCompanyName(companyElement[0]?.textContent);
     }
+
+    const about = document.getElementById("jobDescriptionText");
+    setAboutUs(about?.innerHTML);
   };
 
   useEffect(() => {
@@ -132,7 +129,10 @@ const App: React.FC<{}> = () => {
         postUrl={postUrl}
         setPostUrl={setPostUrl}
         targetElementRef={targetElementRef}
+        aboutUs={aboutUs}
+        setAboutUs={setAboutUs}
       />
+      {/* <div dangerouslySetInnerHTML={} */}
     </div>
   );
 };
