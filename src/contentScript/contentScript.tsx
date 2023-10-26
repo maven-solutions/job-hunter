@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { useDebounce } from "use-debounce";
+import ReactHtmlParser from "react-html-parser";
 import JoditEditor from "jodit-react";
 import "./index.css";
 import InputBox from "../component/InputBox";
@@ -17,12 +18,13 @@ const App: React.FC<{}> = () => {
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [aboutUs, setAboutUs] = useState<any>("<h1> arun </h1>");
+  const [aboutUs, setAboutUs] = useState<any>("");
   const [postUrl, setPostUrl] = useState<string>("");
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const editor = useRef(null);
-  console.log("companyName--", companyName);
+  const targetElementRef = useRef();
+  console.log("companyName--", aboutUs.toString());
 
   const clearFrorm = () => {
     setCompanyName("");
@@ -112,6 +114,7 @@ const App: React.FC<{}> = () => {
   );
   const getContentFromLinkedInJobs = async () => {
     setPostUrl(window.location.href);
+    const targetElement: any = targetElementRef.current;
 
     const jobsBody = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__job-title"
@@ -120,13 +123,14 @@ const App: React.FC<{}> = () => {
       setJobstitle(jobsBody[0]?.textContent.trim());
     }
 
-    const jobDetailsElement = document.getElementById("job-details");
+    let jobDetailsElement = document.getElementById("job-details");
 
     // Find the first <span> element inside the jobDetailsElement
-    const aboutUs = jobDetailsElement.querySelector("span");
+    const about = jobDetailsElement.querySelector("span");
 
-    if (aboutUs) {
-      setAboutUs(aboutUs);
+    if (about) {
+      // setAboutUs(aboutUs);
+      // console.log("a----", about);
     }
 
     const location = document.getElementsByClassName(
@@ -142,6 +146,17 @@ const App: React.FC<{}> = () => {
       const aTag = domElement.querySelector("a.app-aware-link");
       const companyName = aTag.textContent;
       setCompanyName(companyName.trim());
+
+      if (about) {
+        setAboutUs(about);
+        // Clear existing content in the target element
+        while (targetElement.firstChild) {
+          targetElement.removeChild(targetElement.firstChild);
+        }
+
+        // Append the new content to the target element
+        targetElement.appendChild(about);
+      }
     }, 500);
   };
 
@@ -219,17 +234,22 @@ const App: React.FC<{}> = () => {
             valueSetter={setCompanyLocation}
           />
           <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
-          <InputBox title="Description" />
+          {/* <InputBox title="Description" /> */}
 
           <div className="job_input_section">
             <span className="job_box_title">Description </span>
             {/* <JoditEditor
               ref={editor}
-              value={""}
+              value={aboutUs}
               config={editorConfig}
               onBlur={(newContent) => setAboutUs(newContent)}
             /> */}
-            <div dangerouslySetInnerHTML={{ __html: aboutUs }} />
+            {/* <div dangerouslySetInnerHTML={{ __html: aboutUs }} /> */}
+            {/* {aboutUs} */}
+            {/* {ReactHtmlParser(aboutUs)} */}
+            <div ref={targetElementRef} className="about__us__section">
+              {/* The target element where you want to render the saveButton HTML */}
+            </div>
           </div>
         </div>
         <div className="job__detail__footer">

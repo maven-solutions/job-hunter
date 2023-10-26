@@ -31,6 +31,7 @@
     "@ckeditor/ckeditor5-react": "^6.1.0",
     "@types/react-router-dom": "^5.3.3",
     "jodit-react": "^1.3.39",
+    "react-html-parser": "^2.0.2",
     "react-router-dom": "^6.17.0",
     "use-debounce": "^9.0.4"
   }
