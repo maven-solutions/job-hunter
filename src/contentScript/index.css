@@ -29,6 +29,7 @@
   background-color: #d9d8df !important;
   z-index: 99999;
   border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .job_detail_header {

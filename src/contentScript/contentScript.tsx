@@ -1,7 +1,8 @@
 // TODO: content script
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { useDebounce } from "use-debounce";
+import JoditEditor from "jodit-react";
 import "./index.css";
 import InputBox from "../component/InputBox";
 
@@ -16,21 +17,106 @@ const App: React.FC<{}> = () => {
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [aboutUs, setAboutUs] = useState<string>("");
+  const [aboutUs, setAboutUs] = useState<any>("<h1> arun </h1>");
   const [postUrl, setPostUrl] = useState<string>("");
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
-  const jobsData: JobsData = {};
+  const editor = useRef(null);
+  console.log("companyName--", companyName);
 
-  const getContentFromLinkedInJobs = () => {
-    jobsData.postUrl = window.location.href;
+  const clearFrorm = () => {
+    setCompanyName("");
+    setJobstitle("");
+    setCompanyLocation("");
+    setAboutUs("");
+    // setPostUrl("");
+  };
+
+  const editorConfig: any = useMemo(
+    () => ({
+      readonly: false,
+      height: "200px",
+      width: "100%",
+      buttons: [
+        "source",
+        "|",
+        "bold",
+        "italic",
+        "underline",
+        "|",
+        "ul",
+        "ol",
+        "|",
+        "font",
+        "fontsize",
+        "brush",
+        "paragraph",
+        "|",
+        "image",
+        "table",
+        "link",
+        "|",
+        "left",
+        "center",
+        "right",
+        "justify",
+        "|",
+        "undo",
+        "redo",
+        "|",
+        "hr",
+        "eraser",
+        "fullsize",
+      ],
+      removeButtons: [
+        "brush",
+        "file",
+        "eraser",
+        "hr",
+        "redo",
+        "undo",
+        "justify",
+        "right",
+        "center",
+        "justify",
+        "left",
+        "link",
+        "table",
+        "image",
+        "paragraph",
+        "brush",
+        "fontsize",
+        "font",
+        "source",
+        "fullsize",
+        "|",
+      ],
+      showXPathInStatusbar: false,
+      showCharsCounter: false,
+      showWordsCounter: true,
+      toolbarAdaptive: false,
+      toolbarSticky: false,
+      spellcheck: true,
+      theme: "default",
+      i18n: "en",
+      // limitWords: 3,
+      // autofocus: true,
+      // cursorAfterAutofocus: "end",
+      // saveSelectionOnBlur: true,
+      style: {
+        fontFamily: "Montserrat !important",
+        textAlign: "justify",
+      },
+    }),
+    []
+  );
+  const getContentFromLinkedInJobs = async () => {
     setPostUrl(window.location.href);
 
     const jobsBody = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__job-title"
     );
     if (jobsBody[0]) {
-      jobsData.title = jobsBody[0]?.textContent.trim();
       setJobstitle(jobsBody[0]?.textContent.trim());
     }
 
@@ -38,17 +124,25 @@ const App: React.FC<{}> = () => {
 
     // Find the first <span> element inside the jobDetailsElement
     const aboutUs = jobDetailsElement.querySelector("span");
+
     if (aboutUs) {
-      jobsData.aboutUs = aboutUs.toString();
+      setAboutUs(aboutUs);
     }
 
     const location = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__bullet"
     );
     if (location[0]) {
-      jobsData.location = location[0]?.textContent?.trim();
       setCompanyLocation(location[0]?.textContent?.trim());
     }
+
+    // Assuming you have a reference to the DOM element
+    const domElement = document.querySelector(".jobs-unified-top-card.t-14");
+    setTimeout(() => {
+      const aTag = domElement.querySelector("a.app-aware-link");
+      const companyName = aTag.textContent;
+      setCompanyName(companyName.trim());
+    }, 500);
   };
 
   useEffect(() => {
@@ -56,12 +150,17 @@ const App: React.FC<{}> = () => {
       getContentFromLinkedInJobs();
     }
   }, [debounceValue]);
+  // useEffect(() => {
+  //   if (window.location.href.includes("www.linkedin.com/jobs/collections")) {
+  //     clearFrorm();
+  //   }
+  // }, [activeUrl]);
 
   // useEffect(() => {
   //   chrome.runtime.sendMessage(
   //     { action: "generateDynamicURL", inputValue: window.location.href },
   //     function (response) {
-  //       // var dynamicURL = response.url;
+  //       // const dynamicURL = response.url;
   //       console.log("res---", response);
   //       // Open the dynamicURL or use it as needed.
   //     }
@@ -81,7 +180,6 @@ const App: React.FC<{}> = () => {
       // chrome.runtime.sendMessage({ action: "urlChange", url });
       if (url !== activeUrl) {
         setActiveUrl(url);
-        console.log("url--", url);
       }
     });
 
@@ -90,6 +188,15 @@ const App: React.FC<{}> = () => {
   }, []);
   // const debouncedSearch = debounce(handleSearch, 300);
 
+  // useEffect(() => {
+  //   if (editor.current) {
+  //     // Set the HTML content you want to render
+  //     const htmlContent = aboutUs;
+
+  //     // Use the Jodit API to set the content
+  //     editor.current.value = htmlContent;
+  //   }
+  // }, []);
   return (
     <div className="content__script__section">
       <div className="job_circle_button">JH</div>
@@ -113,6 +220,17 @@ const App: React.FC<{}> = () => {
           />
           <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
           <InputBox title="Description" />
+
+          <div className="job_input_section">
+            <span className="job_box_title">Description </span>
+            {/* <JoditEditor
+              ref={editor}
+              value={""}
+              config={editorConfig}
+              onBlur={(newContent) => setAboutUs(newContent)}
+            /> */}
+            <div dangerouslySetInnerHTML={{ __html: aboutUs }} />
+          </div>
         </div>
         <div className="job__detail__footer">
           <button className="job_save_button">Save</button>
