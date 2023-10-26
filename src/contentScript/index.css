@@ -11,15 +11,17 @@
   bottom: 40px;
   max-width: 240px;
   max-height: 240px;
-  background-color: #7662e7 !important;
+  /* background-color: #7662e7 !important; */
   z-index: 99999;
   cursor: pointer;
-  color: #fff;
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+}
+.job_circle_button_img {
+  width: 100%;
+  object-fit: cover;
 }
 .job__detail__container {
   position: fixed;

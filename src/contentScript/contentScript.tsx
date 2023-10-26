@@ -6,6 +6,7 @@ import ReactHtmlParser from "react-html-parser";
 import JoditEditor from "jodit-react";
 import "./index.css";
 import InputBox from "../component/InputBox";
+// import logo from "../static";
 
 interface JobsData {
   title?: string;
@@ -214,7 +215,13 @@ const App: React.FC<{}> = () => {
   // }, []);
   return (
     <div className="content__script__section">
-      <div className="job_circle_button">JH</div>
+      <div className="job_circle_button">
+        <img
+          src={chrome.runtime.getURL("icon.png")}
+          className="job_circle_button_img"
+          alt="logo"
+        />
+      </div>
       <div className="job__detail__container">
         <div className="job_detail_header"> Jobs Hunter </div>
         <div className="job_detail_content_section">

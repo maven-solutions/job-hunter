@@ -1,6 +1,6 @@
 {
-  "name": "Weather Extension",
-  "description": "Weather Extension in React!",
+  "name": "Job Hunter",
+  "description": "Grab the oppurtinity!",
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Weather Extension",
+    "default_title": "Job Hunter",
     "default_icon": "icon.png"
   },
   "permissions": ["storage"],
@@ -22,6 +22,12 @@
     {
       "matches": ["<all_urls>"],
       "js": ["contentScript.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon.png"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
