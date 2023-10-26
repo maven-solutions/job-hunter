@@ -112,26 +112,32 @@ const App: React.FC<{}> = () => {
 
   return (
     <div className="content__script__section">
-      <div className="job_circle_button" role="button">
+      <div
+        className="job_circle_button"
+        role="button"
+        onClick={() => setShowFrom(!showFrom)}
+      >
         <img
           src={chrome.runtime.getURL("icon.png")}
           className="job_circle_button_img"
           alt="logo"
         />
       </div>
-      <JobFrom
-        companyName={companyName}
-        setCompanyName={setCompanyName}
-        jobsTitle={jobsTitle}
-        setJobstitle={setJobstitle}
-        companyLocation={companyLocation}
-        setCompanyLocation={setCompanyLocation}
-        postUrl={postUrl}
-        setPostUrl={setPostUrl}
-        targetElementRef={targetElementRef}
-        aboutUs={aboutUs}
-        setAboutUs={setAboutUs}
-      />
+      {showFrom && (
+        <JobFrom
+          companyName={companyName}
+          setCompanyName={setCompanyName}
+          jobsTitle={jobsTitle}
+          setJobstitle={setJobstitle}
+          companyLocation={companyLocation}
+          setCompanyLocation={setCompanyLocation}
+          postUrl={postUrl}
+          setPostUrl={setPostUrl}
+          targetElementRef={targetElementRef}
+          aboutUs={aboutUs}
+          setAboutUs={setAboutUs}
+        />
+      )}
       {/* <div dangerouslySetInnerHTML={} */}
     </div>
   );
