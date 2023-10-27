@@ -94,7 +94,7 @@ const App: React.FC<{}> = () => {
     const titleElement = document.querySelector('[data-cy="jobTitle"]');
     if (titleElement) {
       // Get the text content from the element
-      const title = titleElement.textContent.trim();
+      const title = titleElement?.textContent?.trim();
       setJobstitle(title);
     }
     const companyNameEle = document.querySelector(
@@ -102,7 +102,7 @@ const App: React.FC<{}> = () => {
     );
     if (companyNameEle) {
       // Get the text content from the element
-      const companyName = companyNameEle.textContent.trim();
+      const companyName = companyNameEle?.textContent?.trim();
       setCompanyName(companyName);
     }
     // Get the HTML element by its data-testid attribute
@@ -111,7 +111,7 @@ const App: React.FC<{}> = () => {
     );
     if (locationElement) {
       // Get the text content from the element
-      const location = locationElement.textContent.trim();
+      const location = locationElement?.textContent?.trim();
       setCompanyLocation(location);
     }
 
@@ -120,7 +120,29 @@ const App: React.FC<{}> = () => {
     );
     if (jobDescriptionEle) {
       // Get the text content from the element
-      const description = jobDescriptionEle.innerHTML;
+      const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+  };
+
+  const getJobFrozipRecuriter = (): void => {
+    setPostUrl(window.location.href);
+
+    const titleEle = document.querySelector(".u-mv--remove.u-textH2");
+    const title = titleEle?.textContent?.trim();
+    setJobstitle(title);
+
+    const companyEle = document.querySelector(".text-primary.text-large");
+    const companyName = companyEle?.textContent?.trim();
+    setCompanyName(companyName);
+
+    const locationEle = document.querySelector(".text-primary.text-large");
+    const location = locationEle?.textContent?.trim();
+    setCompanyLocation(location);
+
+    const jobDescriptionEle = document.querySelector(".job-body");
+    if (jobDescriptionEle) {
+      const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
     }
   };
@@ -134,6 +156,9 @@ const App: React.FC<{}> = () => {
     }
     if (window.location.href.includes("dice.com/job-detail")) {
       getJobsFromDice();
+    }
+    if (window.location.href.includes("ziprecruiter.in/jobs")) {
+      getJobFrozipRecuriter();
     }
   }, [debounceValue]);
 
