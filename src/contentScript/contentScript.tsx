@@ -10,13 +10,13 @@ const App: React.FC<{}> = () => {
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [aboutUs, setAboutUs] = useState<any>("");
+  const [jobDescription, setJobDescription] = useState<any>("");
   const [postUrl, setPostUrl] = useState<string>("");
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
 
-  const getContentFromLinkedInJobs = async () => {
+  const getContentFromLinkedInJobs = (): void => {
     setPostUrl(window.location.href);
     const targetElement: any = targetElementRef.current;
 
@@ -31,7 +31,7 @@ const App: React.FC<{}> = () => {
       let jobDetailsElement = document.getElementById("job-details");
       const about = jobDetailsElement.querySelector("span");
 
-      setAboutUs(about?.innerHTML);
+      setJobDescription(about?.innerHTML);
     }, 500);
 
     // Find the first <span> element inside the jobDetailsElement
@@ -53,7 +53,7 @@ const App: React.FC<{}> = () => {
     }, 500);
   };
 
-  const getJobsFromIndeed = () => {
+  const getJobsFromIndeed = (): void => {
     setPostUrl(window.location.href);
 
     setTimeout(() => {
@@ -85,7 +85,44 @@ const App: React.FC<{}> = () => {
     }
 
     const about = document.getElementById("jobDescriptionText");
-    setAboutUs(about?.innerHTML);
+    setJobDescription(about?.innerHTML);
+  };
+
+  const getJobsFromDice = (): void => {
+    setPostUrl(window.location.href);
+    // Get the HTML element by its data-cy attribute
+    const titleElement = document.querySelector('[data-cy="jobTitle"]');
+    if (titleElement) {
+      // Get the text content from the element
+      const title = titleElement.textContent.trim();
+      setJobstitle(title);
+    }
+    const companyNameEle = document.querySelector(
+      '[data-cy="companyNameLink"]'
+    );
+    if (companyNameEle) {
+      // Get the text content from the element
+      const companyName = companyNameEle.textContent.trim();
+      setCompanyName(companyName);
+    }
+    // Get the HTML element by its data-testid attribute
+    const locationElement = document.querySelector(
+      '[data-cy="locationDetails"]'
+    );
+    if (locationElement) {
+      // Get the text content from the element
+      const location = locationElement.textContent.trim();
+      setCompanyLocation(location);
+    }
+
+    const jobDescriptionEle = document.querySelector(
+      '[data-testid="jobDescriptionHtml"]'
+    );
+    if (jobDescriptionEle) {
+      // Get the text content from the element
+      const description = jobDescriptionEle.innerHTML;
+      setJobDescription(description);
+    }
   };
 
   useEffect(() => {
@@ -94,6 +131,9 @@ const App: React.FC<{}> = () => {
     }
     if (window.location.href.includes("in.indeed.com")) {
       getJobsFromIndeed();
+    }
+    if (window.location.href.includes("dice.com/job-detail")) {
+      getJobsFromDice();
     }
   }, [debounceValue]);
 
@@ -134,8 +174,8 @@ const App: React.FC<{}> = () => {
           postUrl={postUrl}
           setPostUrl={setPostUrl}
           targetElementRef={targetElementRef}
-          aboutUs={aboutUs}
-          setAboutUs={setAboutUs}
+          jobDescription={jobDescription}
+          setJobDescription={setJobDescription}
         />
       )}
       {/* <div dangerouslySetInnerHTML={} */}

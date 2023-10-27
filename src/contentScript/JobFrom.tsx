@@ -94,8 +94,8 @@ const JobFrom = (props: any) => {
     postUrl,
     setPostUrl,
     targetElementRef,
-    aboutUs,
-    setAboutUs,
+    jobDescription,
+    setJobDescription,
   } = props;
   return (
     <div className="job__detail__container">
@@ -121,14 +121,14 @@ const JobFrom = (props: any) => {
           <span className="job_box_title">Description </span>
           {/* <JoditEditor
             ref={editor}
-            value={aboutUs}
+            value={jobDescription}
             config={editorConfig}
-            onBlur={(newContent) => setAboutUs(newContent)}
+            onBlur={(newContent) => setJobDescription(newContent)}
           /> */}
-          {/* {ReactHtmlParser(aboutUs)} */}
-          {/* <div dangerouslySetInnerHTML={{ __html: aboutUs }} /> */}
+          {/* {ReactHtmlParser(jobDescription)} */}
+          {/* <div dangerouslySetInnerHTML={{ __html: jobDescription }} /> */}
           <div className="about__us__section">
-            <div dangerouslySetInnerHTML={{ __html: aboutUs }} />
+            <div dangerouslySetInnerHTML={{ __html: jobDescription }} />
           </div>
           {/* <div ref={targetElementRef} className="about__us__section" /> */}
         </div>
