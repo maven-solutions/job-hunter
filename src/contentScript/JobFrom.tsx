@@ -1,88 +1,13 @@
 import React, { useMemo, useRef } from "react";
-import JoditEditor from "jodit-react";
 
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import InputBox from "../component/InputBox";
 
 const JobFrom = (props: any) => {
-  const editorConfig: any = useMemo(
-    () => ({
-      readonly: false,
-      height: "200px",
-      width: "100%",
-      buttons: [
-        "source",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "|",
-        "ul",
-        "ol",
-        "|",
-        "font",
-        "fontsize",
-        "brush",
-        "paragraph",
-        "|",
-        "image",
-        "table",
-        "link",
-        "|",
-        "left",
-        "center",
-        "right",
-        "justify",
-        "|",
-        "undo",
-        "redo",
-        "|",
-        "hr",
-        "eraser",
-        "fullsize",
-      ],
-      removeButtons: [
-        "brush",
-        "file",
-        "eraser",
-        "hr",
-        "redo",
-        "undo",
-        "justify",
-        "right",
-        "center",
-        "justify",
-        "left",
-        "link",
-        "table",
-        "image",
-        "paragraph",
-        "brush",
-        "fontsize",
-        "font",
-        "source",
-        "fullsize",
-        "|",
-      ],
-      showXPathInStatusbar: false,
-      showCharsCounter: false,
-      showWordsCounter: true,
-      toolbarAdaptive: false,
-      toolbarSticky: false,
-      spellcheck: true,
-      theme: "default",
-      i18n: "en",
-      // limitWords: 3,
-      // autofocus: true,
-      // cursorAfterAutofocus: "end",
-      // saveSelectionOnBlur: true,
-      style: {
-        fontFamily: "Montserrat !important",
-        textAlign: "justify",
-      },
-    }),
-    []
-  );
-  const editor = useRef(null);
+  const modules = {
+    toolbar: [["bold", "italic", "underline"]],
+  };
 
   const {
     companyName,
@@ -93,10 +18,13 @@ const JobFrom = (props: any) => {
     setCompanyLocation,
     postUrl,
     setPostUrl,
-    targetElementRef,
     jobDescription,
     setJobDescription,
   } = props;
+
+  const style = {
+    height: "150px",
+  };
   return (
     <div className="job__detail__container">
       <div className="job_detail_header"> Jobs Hunter </div>
@@ -119,18 +47,15 @@ const JobFrom = (props: any) => {
         <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
         <div className="job_input_section">
           <span className="job_box_title">Description </span>
-          {/* <JoditEditor
-            ref={editor}
-            value={jobDescription}
-            config={editorConfig}
-            onBlur={(newContent) => setJobDescription(newContent)}
-          /> */}
-          {/* {ReactHtmlParser(jobDescription)} */}
-          {/* <div dangerouslySetInnerHTML={{ __html: jobDescription }} /> */}
-          <div className="about__us__section">
-            <div dangerouslySetInnerHTML={{ __html: jobDescription }} />
+
+          <div className="scrollbar-container">
+            <ReactQuill
+              theme="snow"
+              value={jobDescription}
+              onChange={setJobDescription}
+              modules={modules}
+            />
           </div>
-          {/* <div ref={targetElementRef} className="about__us__section" /> */}
         </div>
       </div>
       <div className="job__detail__footer">

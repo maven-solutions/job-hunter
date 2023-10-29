@@ -90,3 +90,27 @@
   border-radius: 8px;
   padding: 10px;
 }
+.scrollbar-container {
+  height: 150px;
+  overflow: auto;
+}
+
+.scrollbar-container::-webkit-scrollbar {
+  width: 5px;
+  /* background: rgb(200, 185, 185); */
+  background: transparent;
+}
+
+/* Track */
+.scrollbar-container::-webkit-scrollbar-track {
+  width: 5px;
+  /* background: rgb(200, 185, 185); */
+  background: transparent;
+}
+
+/* Handle */
+.scrollbar-container::-webkit-scrollbar-thumb {
+  background: #c0c0c5;
+
+  border-radius: 5px;
+}

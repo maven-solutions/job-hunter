@@ -203,7 +203,6 @@ const App: React.FC<{}> = () => {
           setJobDescription={setJobDescription}
         />
       )}
-      {/* <div dangerouslySetInnerHTML={} */}
     </div>
   );
 };
