@@ -1,6 +1,5 @@
 .content__script__section {
   all: unset !important;
-  border: 2px solid red;
 }
 .job_circle_button {
   width: 50px;
@@ -54,19 +53,33 @@
 }
 .job_box_title {
   display: block;
-  font-size: 14px;
-  font-weight: 400;
-  margin-bottom: 5px;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  margin-bottom: 5px !important;
 }
 .job_input_box {
-  width: 260px !important;
-  border: 1px solid #7662e7;
-  height: 30px;
-  border-radius: 8px;
+  all: unset !important;
+  width: 230px !important;
+  border: 1px solid #7662e7 !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  padding: 2px 15px !important;
+  font-size: 14px !important;
+
   /* padding: 2px 10px; */
 }
+.job_input_box:hover {
+  border: 1px solid #7662e7 !important;
+}
+.job_input_box:focus {
+  box-shadow: 0 0 5px #7662e7 !important;
+
+  border: 1px solid #7662e7 !important;
+}
+
 .job__detail__footer {
-  border-top: 1px solid rgb(200, 185, 185);
+  border-top: 1px solid rgb(200, 185, 185) !important;
   padding: 10px;
   display: flex;
   align-items: center;
@@ -74,11 +87,11 @@
 }
 .job_save_button {
   all: unset;
-  background: #7662e7;
+  background: #7662e7 !important;
   font-size: 14px;
   font-weight: bold;
   color: #fff;
-  padding: 5px 40px;
+  padding: 5px 40px !important;
   border-radius: 10px;
   cursor: pointer;
 }
@@ -86,12 +99,12 @@
   word-wrap: break-word !important;
   max-height: 150px;
   overflow: auto;
-  border: 1px solid rgb(200, 185, 185);
+  border: 1px solid rgb(200, 185, 185) !important;
   border-radius: 8px;
   padding: 10px;
 }
 .scrollbar-container {
-  height: 150px;
+  height: 150px !important;
   overflow: auto;
 }
 
@@ -110,7 +123,7 @@
 
 /* Handle */
 .scrollbar-container::-webkit-scrollbar-thumb {
-  background: #c0c0c5;
+  background: #c0c0c5 !important;
 
   border-radius: 5px;
 }

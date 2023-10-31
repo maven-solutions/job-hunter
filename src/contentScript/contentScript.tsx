@@ -18,7 +18,6 @@ const App: React.FC<{}> = () => {
 
   const getContentFromLinkedInJobs = (): void => {
     setPostUrl(window.location.href);
-    const targetElement: any = targetElementRef.current;
 
     const jobsBody = document.getElementsByClassName(
       "job-details-jobs-unified-top-card__job-title"
@@ -29,7 +28,7 @@ const App: React.FC<{}> = () => {
 
     setTimeout(() => {
       let jobDetailsElement = document.getElementById("job-details");
-      const about = jobDetailsElement.querySelector("span");
+      const about = jobDetailsElement?.querySelector("span");
 
       setJobDescription(about?.innerHTML);
     }, 500);
@@ -148,16 +147,16 @@ const App: React.FC<{}> = () => {
   };
 
   useEffect(() => {
-    if (window.location.href.includes("linkedin.com/jobs/collections")) {
+    if (window.location.href.includes("linkedin.")) {
       getContentFromLinkedInJobs();
     }
-    if (window.location.href.includes("in.indeed.com")) {
+    if (window.location.href.includes("indeed.")) {
       getJobsFromIndeed();
     }
-    if (window.location.href.includes("dice.com/job-detail")) {
+    if (window.location.href.includes("dice.")) {
       getJobsFromDice();
     }
-    if (window.location.href.includes("ziprecruiter.in/jobs")) {
+    if (window.location.href.includes("ziprecruiter.")) {
       getJobFrozipRecuriter();
     }
   }, [debounceValue]);
