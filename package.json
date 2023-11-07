@@ -27,7 +27,7 @@
     "webpack-merge": "^5.7.3"
   },
   "dependencies": {
-    "react-quill": "^2.0.0",
+    "react-simple-wysiwyg": "^2.2.5",
     "use-debounce": "^9.0.4"
   }
 }

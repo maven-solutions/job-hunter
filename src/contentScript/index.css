@@ -106,6 +106,8 @@
 .scrollbar-container {
   height: 150px !important;
   overflow: auto;
+  border: 1px solid #7662e7 !important;
+  border-radius: 8px;
 }
 
 .scrollbar-container::-webkit-scrollbar {
