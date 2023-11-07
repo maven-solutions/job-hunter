@@ -23,6 +23,11 @@ const AllInputField = (props: any) => {
     jobDescription,
     setJobDescription,
   } = props;
+  const setDescValue = (e: any) => {
+    if (e.target.value) {
+      setJobDescription(e.target.value);
+    }
+  };
   return (
     <div className="job_detail_content_section">
       <InputBox
@@ -47,18 +52,15 @@ const AllInputField = (props: any) => {
       <div className="job_input_section">
         <span className="job_box_title">Description </span>
         <div className="scrollbar-container">
-          {/* <EditorProvider>
-            <Editor
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            >
+          <EditorProvider>
+            <Editor value={jobDescription ?? ""} onChange={setDescValue}>
               <Toolbar>
                 <BtnBold />
                 <BtnItalic />
                 <BtnUnderline />
               </Toolbar>
             </Editor>
-          </EditorProvider> */}
+          </EditorProvider>
         </div>
       </div>
     </div>
