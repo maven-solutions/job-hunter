@@ -1,16 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
-
-import {
-  BtnBold,
-  BtnItalic,
-  Editor,
-  EditorProvider,
-  Toolbar,
-  BtnUnderline,
-} from "react-simple-wysiwyg";
-
-import InputBox from "../component/InputBox";
+import AllInputField from "./AllInputField";
 
 const JobFrom = (props: any) => {
   const [companyName, setCompanyName] = useState<string>("");
@@ -69,14 +59,16 @@ const JobFrom = (props: any) => {
     setPostUrl(window.location.href);
 
     setTimeout(() => {
-      const titleElement = document.querySelector(
+      const titleElement = document?.querySelector(
         ".jobsearch-JobInfoHeader-title"
       );
       // Get the text content from the titleElement
       const text = titleElement?.textContent?.trim();
       // Extract "React.js Developer"
       const jobTitle = text?.split(" - ")[0];
-      setJobstitle(jobTitle);
+      if (jobTitle) {
+        setJobstitle(jobTitle);
+      }
     }, 1000);
 
     // Get the HTML element by its data-testid attribute
@@ -89,11 +81,12 @@ const JobFrom = (props: any) => {
       setCompanyLocation(location);
     }
 
-    const companyElement = document.getElementsByClassName(
-      "css-1f8zkg3 e19afand0"
+    const companyElement = document.querySelector(
+      '[data-testid="inlineHeader-companyName"]'
     );
+
     if (companyElement) {
-      setCompanyName(companyElement[0]?.textContent);
+      setCompanyName(companyElement?.textContent.trim());
     }
 
     const about = document.getElementById("jobDescriptionText");
@@ -186,60 +179,24 @@ const JobFrom = (props: any) => {
     // Observe changes in the DOM
     observer.observe(document, { childList: true, subtree: true });
   }, []);
-  // const {
-  //   companyName,
-  //   setCompanyName,
-  //   jobsTitle,
-  //   setJobstitle,
-  //   companyLocation,
-  //   setCompanyLocation,
-  //   postUrl,
-  //   setPostUrl,
-  //   jobDescription,
-  //   setJobDescription,
-  // } = props;
 
   return (
     <div className="job__detail__container">
       <div className="job_detail_header"> Jobs Hunter </div>
-      <div className="job_detail_content_section">
-        <InputBox
-          title="Company"
-          value={companyName}
-          valueSetter={setCompanyName}
-          name="company"
-        />
-        <InputBox
-          title="Job title"
-          value={jobsTitle}
-          valueSetter={setJobstitle}
-          name="jobtitle"
-        />
-        <InputBox
-          title="Location"
-          value={companyLocation}
-          valueSetter={setCompanyLocation}
-          name="location"
-        />
-        <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
-        <div className="job_input_section">
-          <span className="job_box_title">Description </span>
-          <div className="scrollbar-container">
-            <EditorProvider>
-              <Editor
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-              >
-                <Toolbar>
-                  <BtnBold />
-                  <BtnItalic />
-                  <BtnUnderline />
-                </Toolbar>
-              </Editor>
-            </EditorProvider>
-          </div>
-        </div>
-      </div>
+      <AllInputField
+        companyName={companyName}
+        setCompanyName={setCompanyName}
+        jobsTitle={jobsTitle}
+        setJobstitle={setJobstitle}
+        companyLocation={companyLocation}
+        setCompanyLocation={setCompanyLocation}
+        postUrl={postUrl}
+        setPostUrl={setPostUrl}
+        targetElementRef={targetElementRef}
+        jobDescription={jobDescription}
+        setJobDescription={setJobDescription}
+      />
+
       <div className="job__detail__footer">
         <button className="job_save_button">Save</button>
       </div>

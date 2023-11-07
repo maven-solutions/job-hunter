@@ -53,6 +53,7 @@
 }
 .job_box_title {
   display: block;
+  color: #000 !important;
   font-size: 14px !important;
   font-weight: 400 !important;
   margin-bottom: 5px !important;

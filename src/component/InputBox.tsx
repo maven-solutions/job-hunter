@@ -4,7 +4,9 @@ const InputBox = (props: any) => {
   const { title, value, valueSetter, name } = props;
   return (
     <div className="job_input_section">
-      <span className="job_box_title">{title} </span>
+      <label htmlFor={name} className="job_box_title">
+        {title}{" "}
+      </label>
       <input
         id={name}
         name={name}
