@@ -47,7 +47,7 @@ const AllInputField = (props: any) => {
       <div className="job_input_section">
         <span className="job_box_title">Description </span>
         <div className="scrollbar-container">
-          <EditorProvider>
+          {/* <EditorProvider>
             <Editor
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
@@ -58,7 +58,7 @@ const AllInputField = (props: any) => {
                 <BtnUnderline />
               </Toolbar>
             </Editor>
-          </EditorProvider>
+          </EditorProvider> */}
         </div>
       </div>
     </div>
