@@ -33,28 +33,30 @@ const JobFrom = (props: any) => {
           title="Company"
           value={companyName}
           valueSetter={setCompanyName}
+          name="company"
         />
         <InputBox
           title="Job title"
           value={jobsTitle}
           valueSetter={setJobstitle}
+          name="jobtitle"
         />
         <InputBox
           title="Location"
           value={companyLocation}
           valueSetter={setCompanyLocation}
+          name="location"
         />
         <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
         <div className="job_input_section">
           <span className="job_box_title">Description </span>
-
           <div className="scrollbar-container">
-            <ReactQuill
+            {/* <ReactQuill
               theme="snow"
               value={jobDescription}
               onChange={setJobDescription}
               modules={modules}
-            />
+            /> */}
           </div>
         </div>
       </div>

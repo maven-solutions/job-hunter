@@ -17,39 +17,46 @@ const App: React.FC<{}> = () => {
   const targetElementRef = useRef();
 
   const getContentFromLinkedInJobs = (): void => {
-    setPostUrl(window.location.href);
+    try {
+      setPostUrl(window.location.href);
 
-    const jobsBody = document.getElementsByClassName(
-      "job-details-jobs-unified-top-card__job-title"
-    );
-    if (jobsBody[0]) {
-      setJobstitle(jobsBody[0]?.textContent.trim());
+      const jobsBody = document?.getElementsByClassName(
+        "job-details-jobs-unified-top-card__job-title"
+      );
+      if (jobsBody[0]) {
+        setJobstitle(jobsBody[0]?.textContent.trim());
+      }
+
+      setTimeout(() => {
+        let jobDetailsElement = document?.getElementById("job-details");
+
+        const about = jobDetailsElement?.querySelector("span");
+
+        setJobDescription(about?.innerHTML);
+      }, 500);
+
+      // Find the first <span> element inside the jobDetailsElement
+
+      const location = document.getElementsByClassName(
+        "job-details-jobs-unified-top-card__bullet"
+      );
+      if (location[0]) {
+        setCompanyLocation(location[0]?.textContent?.trim());
+      }
+
+      // Assuming you have a reference to the DOM element
+      setTimeout(() => {
+        const domElement = document?.querySelector(
+          ".jobs-unified-top-card.t-14"
+        );
+
+        const aTag = domElement?.querySelector("a.app-aware-link");
+        const companyName = aTag?.textContent;
+        setCompanyName(companyName?.trim());
+      }, 500);
+    } catch (error) {
+      console.log("error---", error);
     }
-
-    setTimeout(() => {
-      let jobDetailsElement = document.getElementById("job-details");
-      const about = jobDetailsElement?.querySelector("span");
-
-      setJobDescription(about?.innerHTML);
-    }, 500);
-
-    // Find the first <span> element inside the jobDetailsElement
-
-    const location = document.getElementsByClassName(
-      "job-details-jobs-unified-top-card__bullet"
-    );
-    if (location[0]) {
-      setCompanyLocation(location[0]?.textContent?.trim());
-    }
-
-    // Assuming you have a reference to the DOM element
-    setTimeout(() => {
-      const domElement = document.querySelector(".jobs-unified-top-card.t-14");
-
-      const aTag = domElement.querySelector("a.app-aware-link");
-      const companyName = aTag?.textContent;
-      setCompanyName(companyName?.trim());
-    }, 500);
   };
 
   const getJobsFromIndeed = (): void => {
