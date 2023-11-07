@@ -19,7 +19,7 @@ const InputBox = (props: any) => {
         name={name}
         type="text"
         className="job_input_box"
-        value={value}
+        value={value ?? ""}
         onChange={setValue}
       />
     </div>
