@@ -22,3 +22,11 @@ export const dateExtractorFromDom = (daysAgoEle: any): any => {
     return getExactDate;
   }
 };
+
+export const extractDateFromDiceDom = (daysAgoEle: any): any => {
+  if (daysAgoEle) {
+    const date = daysAgoEle?.textContent?.trim().split(" ");
+    const getExactDate = getPostedDate(Number(date[1]));
+    return getExactDate;
+  }
+};

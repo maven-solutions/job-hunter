@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import AllInputField from "./AllInputField";
-import { dateExtractorFromDom, getPostedDate } from "./helper";
+import { dateExtractorFromDom, extractDateFromDiceDom } from "./helper";
 
 const JobFrom = (props: any) => {
   const [companyName, setCompanyName] = useState<string>("");
@@ -130,6 +130,11 @@ const JobFrom = (props: any) => {
       const location = locationElement?.textContent?.trim();
       setCompanyLocation(location);
     }
+
+    // Get the HTML element by its data-testid attribute
+    const dateElement = document.querySelector("#timeAgo");
+    const date = extractDateFromDiceDom(dateElement);
+    setPostedDate(date);
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="jobDescriptionHtml"]'
