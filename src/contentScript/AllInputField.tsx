@@ -22,6 +22,8 @@ const AllInputField = (props: any) => {
     setPostUrl,
     jobDescription,
     setJobDescription,
+    postedDate,
+    setPostedDate,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -48,7 +50,19 @@ const AllInputField = (props: any) => {
         valueSetter={setCompanyLocation}
         name="location"
       />
-      <InputBox title="Post Url" value={postUrl} valueSetter={setPostUrl} />
+      <InputBox
+        title="Post Url"
+        value={postUrl}
+        valueSetter={setPostUrl}
+        name="posturl"
+      />
+      <InputBox
+        title="Posted On"
+        value={postedDate}
+        valueSetter={setPostedDate}
+        name="posteddate"
+      />
+
       <div className="job_input_section">
         <span className="job_box_title">Description </span>
         <div className="scrollbar-container">

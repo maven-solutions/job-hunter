@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import AllInputField from "./AllInputField";
+import { dateExtractorFromDom, getPostedDate } from "./helper";
 
 const JobFrom = (props: any) => {
   const [companyName, setCompanyName] = useState<string>("");
@@ -8,6 +9,7 @@ const JobFrom = (props: any) => {
   const [companyLocation, setCompanyLocation] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>("");
   const [postUrl, setPostUrl] = useState<string>("");
+  const [postedDate, setPostedDate] = useState<any>("");
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
@@ -30,6 +32,15 @@ const JobFrom = (props: any) => {
 
         setJobDescription(about?.innerHTML);
       }, 500);
+
+      // find posted date
+
+      const daysAgoEle = document?.querySelector(
+        ".tvm__text.tvm__text--neutral"
+      );
+
+      const getExactpostedDate = dateExtractorFromDom(daysAgoEle);
+      setPostedDate(getExactpostedDate);
 
       // Find the first <span> element inside the jobDetailsElement
 
@@ -77,7 +88,7 @@ const JobFrom = (props: any) => {
     );
     if (locationElement) {
       // Get the text content from the element
-      const location = locationElement.textContent.trim();
+      const location = locationElement?.textContent.trim();
       setCompanyLocation(location);
     }
 
@@ -188,6 +199,8 @@ const JobFrom = (props: any) => {
         setCompanyName={setCompanyName}
         jobsTitle={jobsTitle}
         setJobstitle={setJobstitle}
+        postedDate={postedDate}
+        setPostedDate={setPostedDate}
         companyLocation={companyLocation}
         setCompanyLocation={setCompanyLocation}
         postUrl={postUrl}

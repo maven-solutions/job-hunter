@@ -7,7 +7,7 @@
   border-radius: 10px;
   position: fixed;
   right: 40px;
-  bottom: 40px;
+  bottom: 20px;
   max-width: 240px;
   max-height: 240px;
   /* background-color: #7662e7 !important; */
@@ -26,7 +26,7 @@
   position: fixed;
   width: 300px !important;
   right: 40px;
-  bottom: 100px;
+  bottom: 80px;
   background-color: #d9d8df !important;
   z-index: 99999;
   border-radius: 10px;
@@ -45,8 +45,30 @@
 }
 .job_detail_content_section {
   padding: 20px;
-  padding-top: 10px;
+  padding-top: 0px !important;
   padding-bottom: 0;
+  max-height: calc(100vh - 250px);
+  overflow: auto;
+}
+
+.job_detail_content_section::-webkit-scrollbar {
+  width: 5px;
+  /* background: rgb(200, 185, 185); */
+  background: transparent;
+}
+
+/* Track */
+.job_detail_content_section::-webkit-scrollbar-track {
+  width: 5px;
+  /* background: rgb(200, 185, 185); */
+  background: transparent;
+}
+
+/* Handle */
+.job_detail_content_section::-webkit-scrollbar-thumb {
+  background: #c0c0c5 !important;
+
+  border-radius: 5px;
 }
 .job_input_section {
   margin-bottom: 10px;
