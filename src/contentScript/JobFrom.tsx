@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import AllInputField from "./AllInputField";
-import { dateExtractorFromDom, extractDateFromDiceDom } from "./helper";
+import {
+  dateExtractorFromDom,
+  extractDateFromDiceDom,
+  extractDateFromZipRecruterDom,
+} from "./helper";
 
 const JobFrom = (props: any) => {
   const [companyName, setCompanyName] = useState<string>("");
@@ -156,6 +160,11 @@ const JobFrom = (props: any) => {
     const companyEle = document.querySelector(".text-primary.text-large");
     const companyName = companyEle?.textContent?.trim();
     setCompanyName(companyName);
+
+    const dateEle = document.querySelector(".text-muted");
+
+    const date = extractDateFromZipRecruterDom(dateEle);
+    setPostedDate(date);
 
     const locationEle = document.querySelector(".text-primary.text-large");
     const location = locationEle?.textContent?.trim();

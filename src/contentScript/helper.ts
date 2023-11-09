@@ -30,3 +30,13 @@ export const extractDateFromDiceDom = (daysAgoEle: any): any => {
     return getExactDate;
   }
 };
+
+export const extractDateFromZipRecruterDom = (dateEle: any): any => {
+  const dateInArray = dateEle?.textContent?.trim().split(" ");
+  dateInArray.shift();
+  const date = dateInArray.join("");
+  const formattedDate = date.replace(",", "");
+  // Convert the formatted date string to a JavaScript Date object
+  const jsDate = new Date(formattedDate);
+  return jsDate;
+};
