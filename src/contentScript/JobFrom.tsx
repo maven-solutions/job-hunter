@@ -1,19 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useDebounce } from "use-debounce";
-import AllInputField from "./AllInputField";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+import AllInputField from './AllInputField';
 import {
   dateExtractorFromDom,
   extractDateFromDiceDom,
   extractDateFromZipRecruterDom,
-} from "./helper";
+} from './helper';
 
 const JobFrom = (props: any) => {
-  const [companyName, setCompanyName] = useState<string>("");
-  const [jobsTitle, setJobstitle] = useState<string>("");
-  const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [jobDescription, setJobDescription] = useState<any>("");
-  const [postUrl, setPostUrl] = useState<string>("");
-  const [postedDate, setPostedDate] = useState<any>("");
+  const [companyName, setCompanyName] = useState<string>('');
+  const [jobsTitle, setJobstitle] = useState<string>('');
+  const [companyLocation, setCompanyLocation] = useState<string>('');
+  const [jobDescription, setJobDescription] = useState<any>('');
+  const [postUrl, setPostUrl] = useState<string>('');
+  const [postedDate, setPostedDate] = useState<any>('');
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
@@ -23,33 +23,46 @@ const JobFrom = (props: any) => {
       setPostUrl(window.location.href);
 
       const jobsBody = document?.getElementsByClassName(
-        "job-details-jobs-unified-top-card__job-title"
+        'job-details-jobs-unified-top-card__job-title'
       );
       if (jobsBody[0]) {
         setJobstitle(jobsBody[0]?.textContent.trim());
       }
 
       setTimeout(() => {
-        let jobDetailsElement = document?.getElementById("job-details");
+        let jobDetailsElement = document?.getElementById('job-details');
 
-        const about = jobDetailsElement?.querySelector("span");
+        const about = jobDetailsElement?.querySelector('span');
 
         setJobDescription(about?.innerHTML);
       }, 500);
 
       // find posted date
 
-      const daysAgoEle = document?.querySelector(
-        ".tvm__text.tvm__text--neutral"
-      );
+      const daysAgoEle = document?.querySelector('#job-details');
+      const targetElement = document.querySelector('#job-details');
+      let date = [];
+      // Check if the element is found
+      if (targetElement) {
+        // Get the next sibling element
+        const nextElement = targetElement.nextElementSibling;
 
-      const getExactpostedDate = dateExtractorFromDom(daysAgoEle);
-      setPostedDate(getExactpostedDate);
+        // Check if the next sibling exists
+        if (nextElement) {
+          const modifiedDate = nextElement.innerHTML
+            .replace('Posted on ', '')
+            .replace('.', '');
+          setPostedDate(modifiedDate);
+        }
+      }
+
+      // const getExactpostedDate = dateExtractorFromDom(daysAgoEle);
+      // setPostedDate(getExactpostedDate);
 
       // Find the first <span> element inside the jobDetailsElement
 
       const location = document.getElementsByClassName(
-        "job-details-jobs-unified-top-card__bullet"
+        'job-details-jobs-unified-top-card__bullet'
       );
       if (location[0]) {
         setCompanyLocation(location[0]?.textContent?.trim());
@@ -58,15 +71,15 @@ const JobFrom = (props: any) => {
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
         const domElement = document?.querySelector(
-          ".jobs-unified-top-card.t-14"
+          '.jobs-unified-top-card.t-14'
         );
 
-        const aTag = domElement?.querySelector("a.app-aware-link");
+        const aTag = domElement?.querySelector('a.app-aware-link');
         const companyName = aTag?.textContent;
         setCompanyName(companyName?.trim());
       }, 500);
     } catch (error) {
-      console.log("error---", error);
+      console.log('error---', error);
     }
   };
 
@@ -75,12 +88,12 @@ const JobFrom = (props: any) => {
 
     setTimeout(() => {
       const titleElement = document?.querySelector(
-        ".jobsearch-JobInfoHeader-title"
+        '.jobsearch-JobInfoHeader-title'
       );
       // Get the text content from the titleElement
       const text = titleElement?.textContent?.trim();
       // Extract "React.js Developer"
-      const jobTitle = text?.split(" - ")[0];
+      const jobTitle = text?.split(' - ')[0];
       if (jobTitle) {
         setJobstitle(jobTitle);
       }
@@ -104,7 +117,7 @@ const JobFrom = (props: any) => {
       setCompanyName(companyElement?.textContent.trim());
     }
 
-    const about = document.getElementById("jobDescriptionText");
+    const about = document.getElementById('jobDescriptionText');
     setJobDescription(about?.innerHTML);
   };
 
@@ -136,7 +149,7 @@ const JobFrom = (props: any) => {
     }
 
     // Get the HTML element by its data-testid attribute
-    const dateElement = document.querySelector("#timeAgo");
+    const dateElement = document.querySelector('#timeAgo');
     const date = extractDateFromDiceDom(dateElement);
     setPostedDate(date);
 
@@ -153,24 +166,24 @@ const JobFrom = (props: any) => {
   const getJobFrozipRecuriter = (): void => {
     setPostUrl(window.location.href);
 
-    const titleEle = document.querySelector(".u-mv--remove.u-textH2");
+    const titleEle = document.querySelector('.u-mv--remove.u-textH2');
     const title = titleEle?.textContent?.trim();
     setJobstitle(title);
 
-    const companyEle = document.querySelector(".text-primary.text-large");
+    const companyEle = document.querySelector('.text-primary.text-large');
     const companyName = companyEle?.textContent?.trim();
     setCompanyName(companyName);
 
-    const dateEle = document.querySelector(".text-muted");
+    const dateEle = document.querySelector('.text-muted');
 
     const date = extractDateFromZipRecruterDom(dateEle);
     setPostedDate(date);
 
-    const locationEle = document.querySelector(".text-primary.text-large");
+    const locationEle = document.querySelector('.text-primary.text-large');
     const location = locationEle?.textContent?.trim();
     setCompanyLocation(location);
 
-    const jobDescriptionEle = document.querySelector(".job-body");
+    const jobDescriptionEle = document.querySelector('.job-body');
     if (jobDescriptionEle) {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
@@ -178,16 +191,16 @@ const JobFrom = (props: any) => {
   };
 
   useEffect(() => {
-    if (window.location.href.includes("linkedin.")) {
+    if (window.location.href.includes('linkedin.')) {
       getContentFromLinkedInJobs();
     }
-    if (window.location.href.includes("indeed.")) {
+    if (window.location.href.includes('indeed.')) {
       getJobsFromIndeed();
     }
-    if (window.location.href.includes("dice.")) {
+    if (window.location.href.includes('dice.')) {
       getJobsFromDice();
     }
-    if (window.location.href.includes("ziprecruiter.")) {
+    if (window.location.href.includes('ziprecruiter.')) {
       getJobFrozipRecuriter();
     }
   }, [debounceValue]);
