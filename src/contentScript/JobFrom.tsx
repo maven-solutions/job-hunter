@@ -17,6 +17,9 @@ const JobFrom = (props: any) => {
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
+  const [success, setSuccess] = useState<Boolean>(false);
+  const [failed, setFailed] = useState<Boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<any>('');
 
   const getContentFromLinkedInJobs = (): void => {
     try {
@@ -218,6 +221,66 @@ const JobFrom = (props: any) => {
     observer.observe(document, { childList: true, subtree: true });
   }, []);
 
+  const handleSuccess = () => {
+    setSuccess(true);
+
+    // Hide success message after some seconds (e.g., 3 seconds)
+    setTimeout(() => {
+      setSuccess(false);
+    }, 3000);
+  };
+
+  // Function to handle API call error
+  const handleFailed = () => {
+    setFailed(true);
+
+    // Hide error message after some seconds (e.g., 3 seconds)
+    setTimeout(() => {
+      setFailed(false);
+    }, 3000);
+  };
+
+  const handleAlreadySaved = () => {
+    setErrorMessage('Already Saved');
+    // Hide error message after some seconds (e.g., 3 seconds)
+    setTimeout(() => {
+      setErrorMessage('');
+    }, 3000);
+  };
+
+  const handleSaveClick = async () => {
+    const data = {
+      company: companyName,
+      title: jobsTitle,
+      location: companyLocation,
+      post_url: postUrl,
+      posted_on: postedDate,
+      description: jobDescription,
+    };
+
+    const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+    const settings = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    };
+    try {
+      const fetchResponse = await fetch(url, settings);
+      const data = await fetchResponse.json();
+      if (data?.status === 'failed') {
+        handleAlreadySaved();
+        return;
+      }
+      handleSuccess();
+      return;
+    } catch (e) {
+      handleFailed();
+      console.log(e);
+    }
+  };
   return (
     <div className="job__detail__container">
       <div className="job_detail_header"> Jobs Hunter </div>
@@ -238,7 +301,16 @@ const JobFrom = (props: any) => {
       />
 
       <div className="job__detail__footer">
-        <button className="job_save_button">Save</button>
+        <div>
+          <button className="job_save_button" onClick={handleSaveClick}>
+            Save
+          </button>
+        </div>
+        {success ? <div className="success">Saved successfully</div> : null}
+        {failed ? <div className="failed">Saving failed</div> : null}
+        {errorMessage?.length > 0 && (
+          <div className="failed">{errorMessage}</div>
+        )}
       </div>
     </div>
   );
