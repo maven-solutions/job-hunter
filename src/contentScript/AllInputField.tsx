@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   BtnBold,
   BtnItalic,
@@ -6,9 +6,9 @@ import {
   EditorProvider,
   Toolbar,
   BtnUnderline,
-} from "react-simple-wysiwyg";
+} from 'react-simple-wysiwyg';
 
-import InputBox from "../component/InputBox";
+import InputBox from '../component/InputBox';
 
 const AllInputField = (props: any) => {
   const {
@@ -24,6 +24,8 @@ const AllInputField = (props: any) => {
     setJobDescription,
     postedDate,
     setPostedDate,
+    jobType,
+    setJobType,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -62,12 +64,18 @@ const AllInputField = (props: any) => {
         valueSetter={setPostedDate}
         name="posteddate"
       />
+      <InputBox
+        title="Job Type"
+        value={jobType}
+        valueSetter={setJobType}
+        name="jobtype"
+      />
 
       <div className="job_input_section">
         <span className="job_box_title">Description </span>
         <div className="scrollbar-container">
           <EditorProvider>
-            <Editor value={jobDescription ?? ""} onChange={setDescValue}>
+            <Editor value={jobDescription ?? ''} onChange={setDescValue}>
               <Toolbar>
                 <BtnBold />
                 <BtnItalic />

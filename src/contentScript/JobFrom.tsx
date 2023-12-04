@@ -14,6 +14,7 @@ const JobFrom = (props: any) => {
   const [jobDescription, setJobDescription] = useState<any>('');
   const [postUrl, setPostUrl] = useState<string>('');
   const [postedDate, setPostedDate] = useState<any>('');
+  const [jobType, setJobType] = useState<any>('');
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
@@ -63,6 +64,11 @@ const JobFrom = (props: any) => {
       // setPostedDate(getExactpostedDate);
 
       // Find the first <span> element inside the jobDetailsElement
+      const jobType = document?.querySelector(
+        '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
+      );
+      const jobTypeText = jobType?.innerHTML?.replace(/<!---->/g, '')?.trim();
+      setJobType(jobTypeText);
 
       const location = document.getElementsByClassName(
         'job-details-jobs-unified-top-card__bullet'
@@ -298,6 +304,8 @@ const JobFrom = (props: any) => {
         targetElementRef={targetElementRef}
         jobDescription={jobDescription}
         setJobDescription={setJobDescription}
+        jobType={jobType}
+        setJobType={setJobType}
       />
 
       <div className="job__detail__footer">
