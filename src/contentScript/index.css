@@ -2,14 +2,14 @@
   all: unset !important;
 }
 .job_circle_button {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   border-radius: 10px;
   position: fixed;
-  right: 40px;
-  bottom: 20px;
-  max-width: 240px;
-  max-height: 240px;
+  right: 0;
+  bottom: 10rem;
+  /* max-width: 240px;
+  max-height: 240px; */
   /* background-color: #7662e7 !important; */
   z-index: 99999;
   cursor: pointer;
@@ -17,17 +17,20 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  background-color: linear-gradient(270deg, #22d1ee, #3d5af1);
 }
 .job_circle_button_img {
   width: 100%;
   object-fit: cover;
+  color: white;
+  background-color: linear-gradient(270deg, #22d1ee, #3d5af1);
 }
 .job__detail__container {
   position: fixed;
   width: 300px !important;
   right: 40px;
   bottom: 80px;
-  background-color: #d9d8df !important;
+  background-color: #fff !important;
   z-index: 99999;
   border-radius: 10px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
@@ -163,4 +166,36 @@
   background: #c0c0c5 !important;
 
   border-radius: 5px;
+}
+
+/* select {
+  background-color: #fff !important;
+  width: 102% !important;
+  border: 1px solid #7662e7 !important;
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+select:hover {
+  border: 1px solid #7662e7 !important;
+}
+select:focus {
+  box-shadow: 0 0 5px #7662e7 !important;
+
+  border: 1px solid #7662e7 !important;
+} */
+
+select,
+textarea {
+  box-shadow: unset !important;
+}
+
+.category_selector input {
+  min-width: 0 !important;
+  grid-area: unset !important;
+}
+
+#react-select-2-input {
+  min-width: 0 !important;
+  grid-area: unset !important;
 }

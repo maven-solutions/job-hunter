@@ -21,6 +21,15 @@ const JobFrom = (props: any) => {
   const [success, setSuccess] = useState<Boolean>(false);
   const [failed, setFailed] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<any>('');
+  const [category, setCategory] = useState<any>('Product Owner');
+
+  function isDateString(str) {
+    // Attempt to create a new Date object from the string
+    let date = new Date(str);
+
+    // Check if the created date is valid and the original string is not empty
+    return !isNaN(date.getTime()) && !isNaN(Date.parse(str));
+  }
 
   const getContentFromLinkedInJobs = (): void => {
     try {
@@ -56,7 +65,11 @@ const JobFrom = (props: any) => {
           const modifiedDate = nextElement.innerHTML
             .replace('Posted on ', '')
             .replace('.', '');
-          setPostedDate(modifiedDate);
+          if (isDateString(modifiedDate)) {
+            setPostedDate(modifiedDate);
+          } else {
+            setPostedDate('n/a');
+          }
         }
       }
 
@@ -65,10 +78,19 @@ const JobFrom = (props: any) => {
 
       // Find the first <span> element inside the jobDetailsElement
       const jobType = document?.querySelector(
-        '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
+        '.job-details-jobs-unified-top-card__job-insight > span > span'
       );
+
       const jobTypeText = jobType?.innerHTML?.replace(/<!---->/g, '')?.trim();
-      setJobType(jobTypeText);
+      if (
+        jobTypeText?.toLowerCase() === 'remote' ||
+        jobTypeText?.toLowerCase() === 'on-site' ||
+        jobTypeText?.toLowerCase() === 'hybrid'
+      ) {
+        setJobType(jobTypeText);
+      } else {
+        setJobType('n/a');
+      }
 
       const location = document.getElementsByClassName(
         'job-details-jobs-unified-top-card__bullet'
@@ -256,15 +278,19 @@ const JobFrom = (props: any) => {
 
   const handleSaveClick = async () => {
     const data = {
-      company: companyName,
-      title: jobsTitle,
+      companyName,
+      jobTitle: jobsTitle,
       location: companyLocation,
-      post_url: postUrl,
+      jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
+      jobType,
+      category,
     };
 
-    const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+    const url =
+      // 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+      'http://localhost:8000/public/jobs';
     const settings = {
       method: 'POST',
       headers: {
@@ -306,6 +332,8 @@ const JobFrom = (props: any) => {
         setJobDescription={setJobDescription}
         jobType={jobType}
         setJobType={setJobType}
+        category={category}
+        setCategory={setCategory}
       />
 
       <div className="job__detail__footer">
