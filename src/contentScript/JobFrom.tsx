@@ -71,6 +71,8 @@ const JobFrom = (props: any) => {
             setPostedDate('n/a');
           }
         }
+      } else {
+        setPostedDate('n/a');
       }
 
       // const getExactpostedDate = dateExtractorFromDom(daysAgoEle);
@@ -150,6 +152,9 @@ const JobFrom = (props: any) => {
 
     const about = document.getElementById('jobDescriptionText');
     setJobDescription(about?.innerHTML);
+
+    setJobType('n/a');
+    setPostedDate('n/a');
   };
 
   const getJobsFromDice = (): void => {
@@ -177,6 +182,8 @@ const JobFrom = (props: any) => {
       // Get the text content from the element
       const location = locationElement?.textContent?.trim();
       setCompanyLocation(location);
+    } else {
+      setCompanyLocation('n/a');
     }
 
     // Get the HTML element by its data-testid attribute
@@ -192,32 +199,71 @@ const JobFrom = (props: any) => {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
     }
+
+    const jobTypeText = document.querySelector('[data-cy="locationDetails"]');
+    if (jobTypeText) {
+      // Get the text content from the element
+      const jobType = jobTypeText?.textContent?.trim();
+      if (
+        jobType?.toLowerCase() === 'remote' ||
+        jobType?.toLowerCase() === 'on site' ||
+        jobType?.toLowerCase() === 'hybrid'
+      ) {
+        setJobType(jobTypeText);
+      } else {
+        setJobType('n/a');
+      }
+      setJobType(jobType);
+    } else {
+      setJobType('n/a');
+    }
   };
 
-  const getJobFrozipRecuriter = (): void => {
+  const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
 
-    const titleEle = document.querySelector('.u-mv--remove.u-textH2');
+    const titleEle = document.querySelector('.job_title');
     const title = titleEle?.textContent?.trim();
     setJobstitle(title);
 
-    const companyEle = document.querySelector('.text-primary.text-large');
-    const companyName = companyEle?.textContent?.trim();
-    setCompanyName(companyName);
+    let companyEle = document.querySelector('.hiring_company');
+    if (companyEle) {
+      const companyName = companyEle?.textContent?.trim();
+      setCompanyName(companyName);
+    } else {
+      companyEle = document.querySelector('.job_company');
+      const companyName = companyEle?.textContent?.trim();
+      setCompanyName(companyName);
+    }
 
     const dateEle = document.querySelector('.text-muted');
 
-    const date = extractDateFromZipRecruterDom(dateEle);
-    setPostedDate(date);
+    // const date = extractDateFromZipRecruterDom(dateEle);
+    // setPostedDate(date);
+    setPostedDate('n/a');
 
-    const locationEle = document.querySelector('.text-primary.text-large');
-    const location = locationEle?.textContent?.trim();
-    setCompanyLocation(location);
+    let locationEle = document.querySelector('.hiring_location');
+    if (locationEle) {
+      const location = locationEle?.textContent?.trim();
+      setCompanyLocation(location);
+    } else {
+      locationEle = document.querySelector('.job_location');
+      const location = locationEle?.textContent?.trim();
+      setCompanyLocation(location);
+    }
 
-    const jobDescriptionEle = document.querySelector('.job-body');
+    const jobDescriptionEle = document.querySelector('.job_description');
     if (jobDescriptionEle) {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
+    }
+    const jobType = document.querySelector('.remote_tag');
+    if (jobType) {
+      const text = jobType?.innerHTML;
+      console.log;
+      setJobType(text);
+    } else {
+      setJobType('n/a');
     }
   };
 
@@ -232,7 +278,7 @@ const JobFrom = (props: any) => {
       getJobsFromDice();
     }
     if (window.location.href.includes('ziprecruiter.')) {
-      getJobFrozipRecuriter();
+      getJobFromZipRecruiter();
     }
   }, [debounceValue]);
 
