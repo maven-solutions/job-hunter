@@ -21,7 +21,8 @@ const JobFrom = (props: any) => {
   const [success, setSuccess] = useState<Boolean>(false);
   const [failed, setFailed] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<any>('');
-  const [category, setCategory] = useState<any>('Product Owner');
+  const [category, setCategory] = useState<any>(null);
+  const [source, setSource] = useState<any>('');
 
   function isDateString(str) {
     // Attempt to create a new Date object from the string
@@ -93,6 +94,7 @@ const JobFrom = (props: any) => {
       } else {
         setJobType('n/a');
       }
+      setSource('linkedin');
 
       const location = document.getElementsByClassName(
         'job-details-jobs-unified-top-card__bullet'
@@ -155,6 +157,7 @@ const JobFrom = (props: any) => {
 
     setJobType('n/a');
     setPostedDate('n/a');
+    setSource('indeed');
   };
 
   const getJobsFromDice = (): void => {
@@ -217,6 +220,7 @@ const JobFrom = (props: any) => {
     } else {
       setJobType('n/a');
     }
+    setSource('dice');
   };
 
   const getJobFromZipRecruiter = (): void => {
@@ -265,6 +269,7 @@ const JobFrom = (props: any) => {
     } else {
       setJobType('n/a');
     }
+    setSource('zip recruiter');
   };
 
   useEffect(() => {
@@ -323,6 +328,13 @@ const JobFrom = (props: any) => {
   };
 
   const handleSaveClick = async () => {
+    if (category === null) {
+      setErrorMessage('Please pick a category');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+      return;
+    }
     const data = {
       companyName,
       jobTitle: jobsTitle,
@@ -334,9 +346,8 @@ const JobFrom = (props: any) => {
       category,
     };
 
-    const url =
-      // 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
-      'http://localhost:8000/public/jobs';
+    const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+    // 'http://localhost:8000/public/jobs';
     const settings = {
       method: 'POST',
       headers: {
@@ -380,6 +391,8 @@ const JobFrom = (props: any) => {
         setJobType={setJobType}
         category={category}
         setCategory={setCategory}
+        source={source}
+        setSource={setSource}
       />
 
       <div className="job__detail__footer">

@@ -29,6 +29,8 @@ const AllInputField = (props: any) => {
     setJobType,
     category,
     setCategory,
+    source,
+    setSource,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -67,7 +69,8 @@ const AllInputField = (props: any) => {
                 background: state.isSelected ? '#7662e7' : '#white',
               }),
             }}
-            defaultValue={options[0]}
+            // defaultValue={options[0]}
+            placeholder="Select a category"
             onChange={(option) => {
               setCategory(option.value);
             }}
@@ -101,6 +104,7 @@ const AllInputField = (props: any) => {
         valueSetter={setCompanyLocation}
         name="location"
       />
+
       <InputBox
         title="Post Url"
         value={postUrl}
@@ -118,6 +122,12 @@ const AllInputField = (props: any) => {
         value={jobType}
         valueSetter={setJobType}
         name="jobtype"
+      />
+      <InputBox
+        title="Source"
+        value={source}
+        valueSetter={setSource}
+        name="source"
       />
 
       <div className="job_input_section">
