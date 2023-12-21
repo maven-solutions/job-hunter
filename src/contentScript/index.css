@@ -133,6 +133,16 @@
   border-radius: 10px;
   cursor: pointer;
 }
+.job_saved_button {
+  all: unset;
+  background: green !important;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  padding: 5px 40px !important;
+  border-radius: 10px;
+  cursor: pointer;
+}
 .about__us__section {
   word-wrap: break-word !important;
   max-height: 150px;

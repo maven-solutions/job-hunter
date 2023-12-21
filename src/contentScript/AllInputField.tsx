@@ -69,10 +69,11 @@ const AllInputField = (props: any) => {
                 background: state.isSelected ? '#7662e7' : '#white',
               }),
             }}
-            // defaultValue={options[0]}
+            value={category}
+            defaultValue={null}
             placeholder="Select a category"
             onChange={(option) => {
-              setCategory(option.value);
+              setCategory(option);
             }}
           />
         </div>

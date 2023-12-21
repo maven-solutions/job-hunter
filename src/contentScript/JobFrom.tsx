@@ -23,6 +23,7 @@ const JobFrom = (props: any) => {
   const [errorMessage, setErrorMessage] = useState<any>('');
   const [category, setCategory] = useState<any>(null);
   const [source, setSource] = useState<any>('');
+  const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
 
   function isDateString(str) {
     // Attempt to create a new Date object from the string
@@ -302,11 +303,11 @@ const JobFrom = (props: any) => {
 
   const handleSuccess = () => {
     setSuccess(true);
-
     // Hide success message after some seconds (e.g., 3 seconds)
     setTimeout(() => {
       setSuccess(false);
     }, 3000);
+    setCategory(null);
   };
 
   // Function to handle API call error
@@ -317,10 +318,12 @@ const JobFrom = (props: any) => {
     setTimeout(() => {
       setFailed(false);
     }, 3000);
+    setCategory(null);
   };
 
   const handleAlreadySaved = () => {
     setErrorMessage('Already Saved');
+    setCategory(null);
     // Hide error message after some seconds (e.g., 3 seconds)
     setTimeout(() => {
       setErrorMessage('');
@@ -343,7 +346,7 @@ const JobFrom = (props: any) => {
       posted_on: postedDate,
       description: jobDescription,
       jobType,
-      category,
+      category: category?.value,
     };
 
     const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
@@ -364,12 +367,49 @@ const JobFrom = (props: any) => {
         return;
       }
       handleSuccess();
+
       return;
     } catch (e) {
       handleFailed();
       console.log(e);
     }
   };
+
+  const checkJobStatus = async () => {
+    const data = {
+      jobLink: postUrl,
+    };
+
+    const url =
+      'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status';
+    // 'http://localhost:8000/public/jobs';
+    const settings = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    };
+    try {
+      const fetchResponse = await fetch(url, settings);
+      const response = await fetchResponse.json();
+      if (response?.data?.already_saved) {
+        setAlreadySavedStatus(true);
+        return;
+      } else {
+        setAlreadySavedStatus(false);
+      }
+      return;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    checkJobStatus();
+  }, [postUrl]);
+
   return (
     <div className="job__detail__container">
       <div className="job_detail_header"> Jobs Hunter </div>
@@ -397,9 +437,15 @@ const JobFrom = (props: any) => {
 
       <div className="job__detail__footer">
         <div>
-          <button className="job_save_button" onClick={handleSaveClick}>
-            Save
-          </button>
+          {alreadySavedStatus ? (
+            <button className="job_saved_button" disabled={true}>
+              Saved
+            </button>
+          ) : (
+            <button className="job_save_button" onClick={handleSaveClick}>
+              Save
+            </button>
+          )}
         </div>
         {success ? <div className="success">Saved successfully</div> : null}
         {failed ? <div className="failed">Saving failed</div> : null}
