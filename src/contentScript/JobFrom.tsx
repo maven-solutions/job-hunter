@@ -82,9 +82,10 @@ const JobFrom = (props: any) => {
 
       // Find the first <span> element inside the jobDetailsElement
       const jobType = document?.querySelector(
-        '.job-details-jobs-unified-top-card__job-insight > span > span'
+        '.job-details-jobs-unified-top-card__job-insight > span'
       );
 
+      console.log(jobType);
       const jobTypeText = jobType?.innerHTML?.replace(/<!---->/g, '')?.trim();
       if (
         jobTypeText?.toLowerCase() === 'remote' ||
@@ -92,6 +93,52 @@ const JobFrom = (props: any) => {
         jobTypeText?.toLowerCase() === 'hybrid'
       ) {
         setJobType(jobTypeText);
+      } else {
+        setJobType('n/a');
+      }
+
+      const values = ['Remote', 'Hybrid', 'On-site'];
+
+      const jobTypeElement = Array.from(
+        document.querySelectorAll(
+          '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
+        )
+      ).find((element) =>
+        values.some((value) => element.textContent.includes(value))
+      );
+      console.log(jobTypeElement);
+      if (jobTypeElement) {
+        const jobTypeText = jobTypeElement.textContent.trim();
+
+        setJobType(jobTypeText);
+      } else {
+        setJobType('n/a');
+      }
+
+      const jobDetailsElement = document.querySelector(
+        '.job-details-jobs-unified-top-card__job-insight'
+      );
+
+      if (jobDetailsElement) {
+        // Extract location information
+        const locationElements = Array.from(
+          jobDetailsElement.querySelectorAll(
+            'span.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
+          )
+        );
+
+        // Extract locations with 'Remote', 'Hybrid', or 'On-site'
+        const validLocations = locationElements
+          .filter((element) =>
+            ['Remote', 'Hybrid', 'On-site'].some((location) =>
+              element.textContent.includes(location)
+            )
+          )
+          .map((element) => element.textContent.trim());
+        console.log(validLocations, 'location');
+
+        // Log or use the extracted information as needed
+        setJobType(validLocations);
       } else {
         setJobType('n/a');
       }
@@ -349,7 +396,7 @@ const JobFrom = (props: any) => {
       category: category?.value,
     };
 
-    const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+    const url = 'https://backend.careerai.io/public/jobs';
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: 'POST',
@@ -380,8 +427,7 @@ const JobFrom = (props: any) => {
       jobLink: postUrl,
     };
 
-    const url =
-      'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status';
+    const url = 'https://backend.careerai.io/public/jobs/check-job-status';
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: 'POST',
