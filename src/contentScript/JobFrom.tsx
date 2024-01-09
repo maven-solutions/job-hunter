@@ -97,23 +97,23 @@ const JobFrom = (props: any) => {
         setJobType('n/a');
       }
 
-      const values = ['Remote', 'Hybrid', 'On-site'];
+      // const values = ['Remote', 'Hybrid', 'On-site'];
 
-      const jobTypeElement = Array.from(
-        document.querySelectorAll(
-          '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
-        )
-      ).find((element) =>
-        values.some((value) => element.textContent.includes(value))
-      );
-      console.log(jobTypeElement);
-      if (jobTypeElement) {
-        const jobTypeText = jobTypeElement.textContent.trim();
+      // const jobTypeElement = Array.from(
+      //   document.querySelectorAll(
+      //     '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
+      //   )
+      // ).find((element) =>
+      //   values.some((value) => element.textContent.includes(value))
+      // );
+      // console.log(jobTypeElement);
+      // if (jobTypeElement) {
+      //   const jobTypeText = jobTypeElement.textContent.trim();
 
-        setJobType(jobTypeText);
-      } else {
-        setJobType('n/a');
-      }
+      //   setJobType(jobTypeText);
+      // } else {
+      //   setJobType('n/a');
+      // }
 
       const jobDetailsElement = document.querySelector(
         '.job-details-jobs-unified-top-card__job-insight'
@@ -392,7 +392,7 @@ const JobFrom = (props: any) => {
       jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
-      jobType,
+      jobType: jobType instanceof Array ? 'n/a' : jobType,
       category: category?.value,
     };
 
@@ -409,12 +409,16 @@ const JobFrom = (props: any) => {
     try {
       const fetchResponse = await fetch(url, settings);
       const data = await fetchResponse.json();
+      console.log(data, 'response');
       if (data?.status === 'failed') {
         handleAlreadySaved();
         return;
       }
-      handleSuccess();
-
+      if (data?.status === 'error') {
+        handleFailed();
+      } else {
+        handleSuccess();
+      }
       return;
     } catch (e) {
       handleFailed();
