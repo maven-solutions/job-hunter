@@ -31,6 +31,8 @@ const AllInputField = (props: any) => {
     setCategory,
     source,
     setSource,
+    locked,
+    setLocked,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -46,8 +48,41 @@ const AllInputField = (props: any) => {
   return (
     <div className="job_detail_content_section">
       <div className="job_input_section">
-        <label htmlFor="category" className="job_box_title">
-          Category
+        <label
+          htmlFor="category"
+          className="job_box_title"
+          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+        >
+          Category{' '}
+          {locked ? (
+            <div
+              style={{
+                backgroundColor: 'red',
+                color: 'white',
+                padding: '0.5rem 0.5rem',
+              }}
+              onClick={() => {
+                setLocked(!locked);
+                localStorage.setItem('lock_status', JSON.stringify(!locked));
+              }}
+            >
+              Locked
+            </div>
+          ) : (
+            <div
+              style={{
+                backgroundColor: 'green',
+                color: 'white',
+                padding: '0.5rem 0.5rem',
+              }}
+              onClick={() => {
+                setLocked(!locked);
+                localStorage.setItem('lock_status', JSON.stringify(!locked));
+              }}
+            >
+              Unlocked
+            </div>
+          )}
         </label>
         <div className="category_selector">
           <Select
@@ -73,7 +108,9 @@ const AllInputField = (props: any) => {
             defaultValue={null}
             placeholder="Select a category"
             onChange={(option) => {
+              setLocked(false);
               setCategory(option);
+              localStorage.setItem('categoryOption', JSON.stringify(option));
             }}
           />
         </div>

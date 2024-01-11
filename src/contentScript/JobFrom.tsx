@@ -21,9 +21,17 @@ const JobFrom = (props: any) => {
   const [success, setSuccess] = useState<Boolean>(false);
   const [failed, setFailed] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<any>('');
-  const [category, setCategory] = useState<any>(null);
+  const [category, setCategory] = useState<any>(
+    localStorage.getItem('lock_status') === 'true' &&
+      localStorage.getItem('categoryOption')
+      ? JSON.parse(localStorage.getItem('categoryOption'))
+      : null
+  );
   const [source, setSource] = useState<any>('');
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
+  const [locked, setLocked] = useState<Boolean>(
+    localStorage.getItem('lock_status') === 'true' ? true : false
+  );
 
   function isDateString(str) {
     // Attempt to create a new Date object from the string
@@ -354,7 +362,9 @@ const JobFrom = (props: any) => {
     setTimeout(() => {
       setSuccess(false);
     }, 3000);
-    setCategory(null);
+    if (!locked) {
+      setCategory(null);
+    }
   };
 
   // Function to handle API call error
@@ -365,12 +375,17 @@ const JobFrom = (props: any) => {
     setTimeout(() => {
       setFailed(false);
     }, 3000);
-    setCategory(null);
+    if (!locked) {
+      setCategory(null);
+    }
   };
 
   const handleAlreadySaved = () => {
     setErrorMessage('Already Saved');
-    setCategory(null);
+    if (!locked) {
+      setCategory(null);
+    }
+
     // Hide error message after some seconds (e.g., 3 seconds)
     setTimeout(() => {
       setErrorMessage('');
@@ -483,6 +498,8 @@ const JobFrom = (props: any) => {
         setCategory={setCategory}
         source={source}
         setSource={setSource}
+        locked={locked}
+        setLocked={setLocked}
       />
 
       <div className="job__detail__footer">
