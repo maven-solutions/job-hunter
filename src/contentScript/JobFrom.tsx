@@ -11,10 +11,13 @@ const JobFrom = (props: any) => {
   const [companyName, setCompanyName] = useState<string>('');
   const [jobsTitle, setJobstitle] = useState<string>('');
   const [companyLocation, setCompanyLocation] = useState<string>('');
+  const [jobDetails, setJobDetails] = useState<string>('');
   const [jobDescription, setJobDescription] = useState<any>('');
   const [postUrl, setPostUrl] = useState<string>('');
   const [postedDate, setPostedDate] = useState<any>('');
   const [jobType, setJobType] = useState<any>('');
+  const [companyInfo, setCompanyInfo] = useState<any>('');
+  const [skills, setSkills] = useState<any>('');
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
@@ -85,71 +88,37 @@ const JobFrom = (props: any) => {
         setPostedDate('n/a');
       }
 
-      // const getExactpostedDate = dateExtractorFromDom(daysAgoEle);
-      // setPostedDate(getExactpostedDate);
-
-      // Find the first <span> element inside the jobDetailsElement
-      const jobType = document?.querySelector(
-        '.job-details-jobs-unified-top-card__job-insight > span'
-      );
-
-      console.log(jobType);
-      const jobTypeText = jobType?.innerHTML?.replace(/<!---->/g, '')?.trim();
-      if (
-        jobTypeText?.toLowerCase() === 'remote' ||
-        jobTypeText?.toLowerCase() === 'on-site' ||
-        jobTypeText?.toLowerCase() === 'hybrid'
-      ) {
-        setJobType(jobTypeText);
-      } else {
-        setJobType('n/a');
-      }
-
-      // const values = ['Remote', 'Hybrid', 'On-site'];
-
-      // const jobTypeElement = Array.from(
-      //   document.querySelectorAll(
-      //     '.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
-      //   )
-      // ).find((element) =>
-      //   values.some((value) => element.textContent.includes(value))
+      // const jobType = document.querySelectorAll(
+      //   'job-details-jobs-unified-top-card__job-insight'
       // );
-      // console.log(jobTypeElement);
-      // if (jobTypeElement) {
-      //   const jobTypeText = jobTypeElement.textContent.trim();
 
+      // console.log(jobType, 'jobType');
+
+      // if (jobType[0]) {
+      //   const jobTypeText = jobType[0]?.textContent?.trim() || 'n/a';
       //   setJobType(jobTypeText);
-      // } else {
-      //   setJobType('n/a');
       // }
 
-      const jobDetailsElement = document.querySelector(
-        '.job-details-jobs-unified-top-card__job-insight'
-      );
-
-      if (jobDetailsElement) {
-        // Extract location information
-        const locationElements = Array.from(
-          jobDetailsElement.querySelectorAll(
-            'span.job-details-jobs-unified-top-card__job-insight-view-model-secondary'
-          )
-        );
-
-        // Extract locations with 'Remote', 'Hybrid', or 'On-site'
-        const validLocations = locationElements
-          .filter((element) =>
-            ['Remote', 'Hybrid', 'On-site'].some((location) =>
-              element.textContent.includes(location)
-            )
-          )
-          .map((element) => element.textContent.trim());
-        console.log(validLocations, 'location');
-
-        // Log or use the extracted information as needed
-        setJobType(validLocations);
-      } else {
-        setJobType('n/a');
+      const jobDetailsElement = document.querySelector('.mt3.mb2');
+      // Loop through all li elements and extract their text content
+      const liElements = jobDetailsElement.querySelectorAll('li');
+      if (liElements && liElements?.length > 0 && liElements[0]) {
+        setJobType(liElements[0]?.textContent?.trim());
       }
+
+      liElements.forEach(function (liElement, index) {
+        const liTextContent = liElement.innerText || liElement.textContent;
+        if (index === 0) {
+          setJobType(liTextContent);
+        }
+        if (index === 1) {
+          setCompanyInfo(liTextContent);
+        }
+        if (index === 2) {
+          setSkills(liTextContent);
+        }
+      });
+
       setSource('linkedin');
 
       const location = document.getElementsByClassName(
@@ -157,6 +126,13 @@ const JobFrom = (props: any) => {
       );
       if (location[0]) {
         setCompanyLocation(location[0]?.textContent?.trim());
+      }
+
+      var jobDetailsElem = document.querySelector(
+        '.job-details-jobs-unified-top-card__primary-description-without-tagline'
+      );
+      if (jobDetailsElem) {
+        setJobDetails(jobDetailsElem.textContent?.trim() || 'n/a');
       }
 
       // Assuming you have a reference to the DOM element
@@ -500,6 +476,12 @@ const JobFrom = (props: any) => {
         setSource={setSource}
         locked={locked}
         setLocked={setLocked}
+        jobDetails={jobDetails}
+        setJobDetails={setJobDetails}
+        companyInfo={companyInfo}
+        setCompanyInfo={setCompanyInfo}
+        skills={skills}
+        setSkills={setSkills}
       />
 
       <div className="job__detail__footer">

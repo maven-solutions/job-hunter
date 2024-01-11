@@ -33,6 +33,12 @@ const AllInputField = (props: any) => {
     setSource,
     locked,
     setLocked,
+    jobDetails,
+    setJobDetails,
+    companyInfo,
+    setCompanyInfo,
+    skills,
+    setSkills,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -125,17 +131,19 @@ const AllInputField = (props: any) => {
       </div>
 
       <InputBox
-        title="Company"
-        value={companyName}
-        valueSetter={setCompanyName}
-        name="company"
-      />
-      <InputBox
         title="Job title"
         value={jobsTitle}
         valueSetter={setJobstitle}
         name="jobtitle"
       />
+
+      <InputBox
+        title="Company"
+        value={companyName}
+        valueSetter={setCompanyName}
+        name="company"
+      />
+
       <InputBox
         title="Location"
         value={companyLocation}
@@ -143,6 +151,24 @@ const AllInputField = (props: any) => {
         name="location"
       />
 
+      <InputBox
+        title="Job Details"
+        value={jobDetails}
+        valueSetter={setJobDetails}
+        name="location"
+      />
+      <InputBox
+        title="Company Info"
+        value={companyInfo}
+        valueSetter={setCompanyInfo}
+        name="company-info"
+      />
+      <InputBox
+        title="Skills"
+        value={skills}
+        valueSetter={setSkills}
+        name="skills"
+      />
       <InputBox
         title="Post Url"
         value={postUrl}
