@@ -39,6 +39,8 @@ const AllInputField = (props: any) => {
     setCompanyInfo,
     skills,
     setSkills,
+    employment,
+    setEmployment,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -50,6 +52,16 @@ const AllInputField = (props: any) => {
     { value: 'Scrum Master', label: 'Scrum Master' },
     { value: 'Project Manager', label: 'Project Manager' },
     { value: 'Business Analyst', label: 'Business Analyst' },
+  ];
+  const employmentOptions = [
+    { value: 'part-time', label: 'Part-time' },
+    { value: 'full-time', label: 'Full-time' },
+    { value: 'contract', label: 'Contract' },
+  ];
+  const jobTypeOptions = [
+    { value: 'remote', label: 'Remote' },
+    { value: 'on-site', label: 'On-site' },
+    { value: 'hybrid', label: 'Hybrid' },
   ];
   return (
     <div className="job_detail_content_section">
@@ -150,12 +162,88 @@ const AllInputField = (props: any) => {
         valueSetter={setCompanyLocation}
         name="location"
       />
+      <div className="job_input_section">
+        <label
+          htmlFor="employment"
+          className="job_box_title"
+          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+        >
+          Employment
+        </label>
+        <div className="category_selector">
+          <Select
+            options={employmentOptions}
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                borderColor: state.isFocused ? 'grey' : '#7662e7',
+                boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+                fontSize: 14,
 
-      <InputBox
+                padding: '-2px 10px',
+                borderRadius: '8px',
+                width: '102%',
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? '#7662e7' : '#white',
+              }),
+            }}
+            value={employment}
+            defaultValue={null}
+            placeholder="Select a employment type"
+            onChange={(option) => {
+              setEmployment(option);
+              localStorage.setItem('employmentOption', JSON.stringify(option));
+            }}
+          />
+        </div>
+      </div>
+      <div className="job_input_section">
+        <label
+          htmlFor="JobType"
+          className="job_box_title"
+          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+        >
+          JobType
+        </label>
+        <div className="category_selector">
+          <Select
+            options={jobTypeOptions}
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                borderColor: state.isFocused ? 'grey' : '#7662e7',
+                boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+                fontSize: 14,
+
+                padding: '-2px 10px',
+                borderRadius: '8px',
+                width: '102%',
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? '#7662e7' : '#white',
+              }),
+            }}
+            value={jobType}
+            defaultValue={null}
+            placeholder="Select a job type"
+            onChange={(option) => {
+              setJobType(option);
+              localStorage.setItem('jobTypeOption', JSON.stringify(option));
+            }}
+          />
+        </div>
+      </div>
+
+      {/* <InputBox
         title="Job Details"
         value={jobDetails}
         valueSetter={setJobDetails}
-        name="location"
+        name="job-details"
       />
       <InputBox
         title="Company Info"
@@ -168,7 +256,7 @@ const AllInputField = (props: any) => {
         value={skills}
         valueSetter={setSkills}
         name="skills"
-      />
+      /> */}
       <InputBox
         title="Post Url"
         value={postUrl}
@@ -181,12 +269,12 @@ const AllInputField = (props: any) => {
         valueSetter={setPostedDate}
         name="posteddate"
       />
-      <InputBox
+      {/* <InputBox
         title="Job Type"
         value={jobType}
         valueSetter={setJobType}
         name="jobtype"
-      />
+      /> */}
       <InputBox
         title="Source"
         value={source}

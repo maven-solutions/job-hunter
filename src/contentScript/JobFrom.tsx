@@ -15,7 +15,16 @@ const JobFrom = (props: any) => {
   const [jobDescription, setJobDescription] = useState<any>('');
   const [postUrl, setPostUrl] = useState<string>('');
   const [postedDate, setPostedDate] = useState<any>('');
-  const [jobType, setJobType] = useState<any>('');
+  const [jobType, setJobType] = useState<any>(
+    localStorage.getItem('jobTypeOption')
+      ? JSON.parse(localStorage.getItem('jobTypeOption'))
+      : null
+  );
+  const [employment, setEmployment] = useState<any>(
+    localStorage.getItem('employmentOption')
+      ? JSON.parse(localStorage.getItem('employmentOption'))
+      : null
+  );
   const [companyInfo, setCompanyInfo] = useState<any>('');
   const [skills, setSkills] = useState<any>('');
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
@@ -99,25 +108,25 @@ const JobFrom = (props: any) => {
       //   setJobType(jobTypeText);
       // }
 
-      const jobDetailsElement = document.querySelector('.mt3.mb2');
-      // Loop through all li elements and extract their text content
-      const liElements = jobDetailsElement.querySelectorAll('li');
-      if (liElements && liElements?.length > 0 && liElements[0]) {
-        setJobType(liElements[0]?.textContent?.trim());
-      }
+      // const jobDetailsElement = document.querySelector('.mt3.mb2');
+      // // Loop through all li elements and extract their text content
+      // const liElements = jobDetailsElement.querySelectorAll('li');
+      // if (liElements && liElements?.length > 0 && liElements[0]) {
+      //   setJobType(liElements[0]?.textContent?.trim());
+      // }
 
-      liElements.forEach(function (liElement, index) {
-        const liTextContent = liElement.innerText || liElement.textContent;
-        if (index === 0) {
-          setJobType(liTextContent);
-        }
-        if (index === 1) {
-          setCompanyInfo(liTextContent);
-        }
-        if (index === 2) {
-          setSkills(liTextContent);
-        }
-      });
+      // liElements.forEach(function (liElement, index) {
+      //   const liTextContent = liElement.innerText || liElement.textContent;
+      //   if (index === 0) {
+      //     setJobType(liTextContent);
+      //   }
+      //   if (index === 1) {
+      //     setCompanyInfo(liTextContent);
+      //   }
+      //   if (index === 2) {
+      //     setSkills(liTextContent);
+      //   }
+      // });
 
       setSource('linkedin');
 
@@ -376,6 +385,20 @@ const JobFrom = (props: any) => {
       }, 3000);
       return;
     }
+    if (jobType === null) {
+      setErrorMessage('Please pick a job type');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+      return;
+    }
+    if (employment === null) {
+      setErrorMessage('Please pick a employment type');
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+      return;
+    }
     const data = {
       companyName,
       jobTitle: jobsTitle,
@@ -383,8 +406,9 @@ const JobFrom = (props: any) => {
       jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
-      jobType: jobType instanceof Array ? 'n/a' : jobType,
+      jobType: jobType?.value,
       category: category?.value,
+      employment: employment?.value,
     };
 
     const url = 'https://backend.careerai.io/public/jobs';
@@ -482,6 +506,8 @@ const JobFrom = (props: any) => {
         setCompanyInfo={setCompanyInfo}
         skills={skills}
         setSkills={setSkills}
+        employment={employment}
+        setEmployment={setEmployment}
       />
 
       <div className="job__detail__footer">
