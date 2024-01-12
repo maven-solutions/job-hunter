@@ -213,14 +213,22 @@ const JobFrom = (props: any) => {
     const companyNameEle = document.querySelector(
       '[data-cy="companyNameLink"]'
     );
+    const companyNameWithNoLinkEle = document.querySelector(
+      '[data-cy="companyNameNoLink"]'
+    );
     if (companyNameEle) {
       // Get the text content from the element
       const companyName = companyNameEle?.textContent?.trim();
       setCompanyName(companyName);
+    } else if (companyNameWithNoLinkEle) {
+      const companyNameWithNoLink =
+        companyNameWithNoLinkEle?.textContent?.trim();
+      setCompanyName(companyNameWithNoLink);
     }
+
     // Get the HTML element by its data-testid attribute
     const locationElement = document.querySelector(
-      '[data-cy="locationDetails"]'
+      '.job-header_jobDetail__ZGjiQ'
     );
     if (locationElement) {
       // Get the text content from the element
