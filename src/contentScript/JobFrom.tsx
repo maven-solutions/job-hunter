@@ -409,6 +409,7 @@ const JobFrom = (props: any) => {
       jobType: jobType?.value,
       category: category?.value,
       employment: employment?.value,
+      jobBoard: source,
     };
 
     const url = 'https://backend.careerai.io/public/jobs';
