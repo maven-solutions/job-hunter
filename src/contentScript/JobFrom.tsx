@@ -39,6 +39,8 @@ const JobFrom = (props: any) => {
       ? JSON.parse(localStorage.getItem('categoryOption'))
       : null
   );
+  const [state, setState] = useState<any>('');
+  const [city, setCity] = useState<any>('');
   const [source, setSource] = useState<any>('');
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
   const [locked, setLocked] = useState<Boolean>(
@@ -517,6 +519,10 @@ const JobFrom = (props: any) => {
         setSkills={setSkills}
         employment={employment}
         setEmployment={setEmployment}
+        state={state}
+        setState={setState}
+        city={city}
+        setCity={setCity}
       />
 
       <div className="job__detail__footer">

@@ -11,6 +11,8 @@ import Select from 'react-select';
 
 import InputBox from '../component/InputBox';
 
+import {getUsaStateList} from '../data/usaCountryData';
+
 const AllInputField = (props: any) => {
   const {
     companyName,
@@ -41,6 +43,10 @@ const AllInputField = (props: any) => {
     setSkills,
     employment,
     setEmployment,
+    state,
+    setState,
+    city,
+    setCity,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -57,6 +63,16 @@ const AllInputField = (props: any) => {
     { value: 'part-time', label: 'Part-time' },
     { value: 'full-time', label: 'Full-time' },
     { value: 'contract', label: 'Contract' },
+  ];
+  const stateOptions = [
+    { value: 'Omaha', label: 'Omaha' },
+    { value: 'Naperville', label: 'Naperville' },
+    { value: 'New York', label: 'New York' },
+  ];
+  const cityOptions = [
+    { value: 'Milbury', label: 'Milbury' },
+    { value: 'Newville', label: 'Newville' },
+    { value: 'Huntsville', label: 'Huntsville' },
   ];
   const jobTypeOptions = [
     { value: 'remote', label: 'Remote' },
@@ -155,13 +171,88 @@ const AllInputField = (props: any) => {
         valueSetter={setCompanyName}
         name="company"
       />
+      <div className="job_input_section">
+        <label
+          htmlFor="state"
+          className="job_box_title"
+          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+        >
+          State
+        </label>
+        <div className="category_selector">
+          <Select
+            options={getUsaStateList()}
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                borderColor: state.isFocused ? 'grey' : '#7662e7',
+                boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+                fontSize: 14,
 
-      <InputBox
+                padding: '-2px 10px',
+                borderRadius: '8px',
+                width: '102%',
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? '#7662e7' : '#white',
+              }),
+            }}
+            value={state}
+            defaultValue={null}
+            placeholder="Select a state"
+            onChange={(option) => {
+              setState(option);
+              localStorage.setItem('stateOption', JSON.stringify(option));
+            }}
+          />
+        </div>
+      </div>
+      <div className="job_input_section">
+        <label
+          htmlFor="state"
+          className="job_box_title"
+          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+        >
+          City
+        </label>
+        <div className="category_selector">
+          <Select
+            options={cityOptions}
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                borderColor: state.isFocused ? 'grey' : '#7662e7',
+                boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+                fontSize: 14,
+
+                padding: '-2px 10px',
+                borderRadius: '8px',
+                width: '102%',
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? '#7662e7' : '#white',
+              }),
+            }}
+            value={city}
+            defaultValue={null}
+            placeholder="Select a city"
+            onChange={(option) => {
+              setCity(option);
+              localStorage.setItem('stateOption', JSON.stringify(option));
+            }}
+          />
+        </div>
+      </div>
+      {/* <InputBox
         title="Location"
         value={companyLocation}
         valueSetter={setCompanyLocation}
         name="location"
-      />
+      /> */}
       <div className="job_input_section">
         <label
           htmlFor="employment"
