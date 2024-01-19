@@ -11,7 +11,7 @@ import Select from 'react-select';
 
 import InputBox from '../component/InputBox';
 
-import {getUsaStateList} from '../data/usaCountryData';
+
 
 const AllInputField = (props: any) => {
   const {
@@ -181,7 +181,7 @@ const AllInputField = (props: any) => {
         </label>
         <div className="category_selector">
           <Select
-            options={getUsaStateList()}
+            options={cityOptions}
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
