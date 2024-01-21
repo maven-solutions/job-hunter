@@ -1,3 +1,7 @@
+body {
+  background-color: #1c1c1c;
+}
+
 .content__script__section {
   all: unset !important;
 }
@@ -200,12 +204,23 @@ textarea {
   box-shadow: unset !important;
 }
 
-.category_selector input {
-  min-width: 0 !important;
-  grid-area: unset !important;
+/* .category_selector input {
+
+  border-radius: 0px;
+  box-shadow: none;
+  border: 0;
+  box-shadow: none;
 }
 
-#react-select-2-input {
-  min-width: 0 !important;
-  grid-area: unset !important;
+.job_input_section input{
+  border-radius: 0px;
+  box-shadow: none;
+  border: 0; 
+  box-shadow: none;
+} */
+
+#react-select-1-input,#react-select-2-input, #react-select-3-input,#react-select-4-input,#react-select-5-input,#react-select-6-input{
+  border: 0;
+  box-shadow: none;
+
 }

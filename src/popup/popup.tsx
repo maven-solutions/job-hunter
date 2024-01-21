@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './popup.css'
+
 
 const App: React.FC<{}> = () => {
   return (

@@ -11,6 +11,7 @@ import Select from "react-select";
 
 import InputBox from "../component/InputBox";
 import { getUsaCityList, getUsaStateList } from "../constants/usaCountryData";
+// import Select from "@atlaskit/select";
 
 const AllInputField = (props: any) => {
   const {
@@ -181,6 +182,7 @@ const AllInputField = (props: any) => {
         <div className="category_selector">
           <Select
             options={getUsaStateList()}
+            isSearchable={true}
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
@@ -196,10 +198,10 @@ const AllInputField = (props: any) => {
                 ...provided,
                 fontSize: 14,
                 background: state.isSelected ? "#7662e7" : "#white",
+                border: state.isFocused ? "1px solid #7662e7" : "none",
               }),
             }}
             value={state}
-            defaultValue={null}
             placeholder="Select a state"
             onChange={(option) => {
               console.log({ option });
@@ -219,6 +221,10 @@ const AllInputField = (props: any) => {
         </label>
         <div className="category_selector">
           <Select
+           isSearchable={true}
+           filterOption={(option, inputValue) =>
+             option.label.toLowerCase().includes(inputValue.toLowerCase())
+           }
             options={getUsaCityList(state?.value)}
             styles={{
               control: (baseStyles, state) => ({
@@ -300,54 +306,37 @@ const AllInputField = (props: any) => {
           JobType
         </label>
         <div className="category_selector">
-          <Select
-            options={jobTypeOptions}
-            styles={{
-              control: (baseStyles, state) => ({
-                ...baseStyles,
-                borderColor: state.isFocused ? "grey" : "#7662e7",
-                boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
-                fontSize: 14,
-
-                padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
-              }),
-              option: (provided, state) => ({
-                ...provided,
-                fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
-              }),
-            }}
-            value={jobType}
-            defaultValue={null}
-            placeholder="Select a job type"
-            onChange={(option) => {
-              setJobType(option);
-              localStorage.setItem("jobTypeOption", JSON.stringify(option));
-            }}
-          />
+        <Select
+      options={jobTypeOptions}
+      isSearchable={true}
+      styles={{
+        control: (baseStyles, state) => ({
+          ...baseStyles,
+          borderColor: state.isFocused ? 'grey' : '#7662e7',
+          boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+          fontSize: 14,
+          padding: '-2px 10px',
+          borderRadius: '8px',
+          width: '102%',
+        }),
+        option: (provided, state) => ({
+          ...provided,
+          fontSize: 14,
+          background: state.isSelected ? '#7662e7' : '#white',
+        }),
+      }}
+      value={jobType}
+      defaultValue={null}
+      placeholder="Select a job type"
+      onChange={(option) => {
+        setJobType(option);
+        localStorage.setItem('jobTypeOption', JSON.stringify(option));
+      }}
+    />
         </div>
       </div>
 
-      {/* <InputBox
-        title="Job Details"
-        value={jobDetails}
-        valueSetter={setJobDetails}
-        name="job-details"
-      />
-      <InputBox
-        title="Company Info"
-        value={companyInfo}
-        valueSetter={setCompanyInfo}
-        name="company-info"
-      />
-      <InputBox
-        title="Skills"
-        value={skills}
-        valueSetter={setSkills}
-        name="skills"
-      /> */}
+   
       <InputBox
         title="Post Url"
         value={postUrl}
@@ -360,12 +349,7 @@ const AllInputField = (props: any) => {
         valueSetter={setPostedDate}
         name="posteddate"
       />
-      {/* <InputBox
-        title="Job Type"
-        value={jobType}
-        valueSetter={setJobType}
-        name="jobtype"
-      /> */}
+    
       <InputBox
         title="Source"
         value={source}
