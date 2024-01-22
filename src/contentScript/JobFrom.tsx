@@ -1,50 +1,50 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useDebounce } from "use-debounce";
-import AllInputField from "./AllInputField";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+import AllInputField from './AllInputField';
 import {
   dateExtractorFromDom,
   extractDateFromDiceDom,
   extractDateFromZipRecruterDom,
-} from "./helper";
+} from './helper';
 
 const JobFrom = (props: any) => {
-  const [companyName, setCompanyName] = useState<string>("");
-  const [jobsTitle, setJobstitle] = useState<string>("");
-  const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [jobDetails, setJobDetails] = useState<string>("");
-  const [jobDescription, setJobDescription] = useState<any>("");
-  const [postUrl, setPostUrl] = useState<string>("");
-  const [postedDate, setPostedDate] = useState<any>("");
+  const [companyName, setCompanyName] = useState<string>('');
+  const [jobsTitle, setJobstitle] = useState<string>('');
+  const [companyLocation, setCompanyLocation] = useState<string>('');
+  const [jobDetails, setJobDetails] = useState<string>('');
+  const [jobDescription, setJobDescription] = useState<any>('');
+  const [postUrl, setPostUrl] = useState<string>('');
+  const [postedDate, setPostedDate] = useState<any>('');
   const [jobType, setJobType] = useState<any>(
-    localStorage.getItem("jobTypeOption")
-      ? JSON.parse(localStorage.getItem("jobTypeOption"))
+    localStorage.getItem('jobTypeOption')
+      ? JSON.parse(localStorage.getItem('jobTypeOption'))
       : null
   );
   const [employment, setEmployment] = useState<any>(
-    localStorage.getItem("employmentOption")
-      ? JSON.parse(localStorage.getItem("employmentOption"))
+    localStorage.getItem('employmentOption')
+      ? JSON.parse(localStorage.getItem('employmentOption'))
       : null
   );
-  const [companyInfo, setCompanyInfo] = useState<any>("");
-  const [skills, setSkills] = useState<any>("");
+  const [companyInfo, setCompanyInfo] = useState<any>('');
+  const [skills, setSkills] = useState<any>('');
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
   const [success, setSuccess] = useState<Boolean>(false);
   const [failed, setFailed] = useState<Boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<any>("");
+  const [errorMessage, setErrorMessage] = useState<any>('');
   const [category, setCategory] = useState<any>(
-    localStorage.getItem("lock_status") === "true" &&
-      localStorage.getItem("categoryOption")
-      ? JSON.parse(localStorage.getItem("categoryOption"))
+    localStorage.getItem('lock_status') === 'true' &&
+      localStorage.getItem('categoryOption')
+      ? JSON.parse(localStorage.getItem('categoryOption'))
       : null
   );
   const [state, setState] = useState<any>(null);
   const [city, setCity] = useState<any>(null);
-  const [source, setSource] = useState<any>("");
+  const [source, setSource] = useState<any>('');
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
   const [locked, setLocked] = useState<Boolean>(
-    localStorage.getItem("lock_status") === "true" ? true : false
+    localStorage.getItem('lock_status') === 'true' ? true : false
   );
 
   function isDateString(str) {
@@ -60,24 +60,24 @@ const JobFrom = (props: any) => {
       setPostUrl(window.location.href);
 
       const jobsBody = document?.getElementsByClassName(
-        "job-details-jobs-unified-top-card__job-title"
+        'job-details-jobs-unified-top-card__job-title'
       );
       if (jobsBody[0]) {
         setJobstitle(jobsBody[0]?.textContent.trim());
       }
 
       setTimeout(() => {
-        let jobDetailsElement = document?.getElementById("job-details");
+        let jobDetailsElement = document?.getElementById('job-details');
 
-        const about = jobDetailsElement?.querySelector("span");
+        const about = jobDetailsElement?.querySelector('span');
 
         setJobDescription(about?.innerHTML);
       }, 500);
 
       // find posted date
 
-      const daysAgoEle = document?.querySelector("#job-details");
-      const targetElement = document.querySelector("#job-details");
+      const daysAgoEle = document?.querySelector('#job-details');
+      const targetElement = document.querySelector('#job-details');
       let date = [];
       // Check if the element is found
       if (targetElement) {
@@ -87,16 +87,16 @@ const JobFrom = (props: any) => {
         // Check if the next sibling exists
         if (nextElement) {
           const modifiedDate = nextElement.innerHTML
-            .replace("Posted on ", "")
-            .replace(".", "");
+            .replace('Posted on ', '')
+            .replace('.', '');
           if (isDateString(modifiedDate)) {
             setPostedDate(modifiedDate);
           } else {
-            setPostedDate("n/a");
+            setPostedDate('n/a');
           }
         }
       } else {
-        setPostedDate("n/a");
+        setPostedDate('n/a');
       }
 
       // const jobType = document.querySelectorAll(
@@ -130,34 +130,34 @@ const JobFrom = (props: any) => {
       //   }
       // });
 
-      setSource("linkedin");
+      setSource('linkedin');
 
       const location = document.getElementsByClassName(
-        "job-details-jobs-unified-top-card__bullet"
+        'job-details-jobs-unified-top-card__bullet'
       );
       if (location[0]) {
         setCompanyLocation(location[0]?.textContent?.trim());
       }
 
       var jobDetailsElem = document.querySelector(
-        ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+        '.job-details-jobs-unified-top-card__primary-description-without-tagline'
       );
       if (jobDetailsElem) {
-        setJobDetails(jobDetailsElem.textContent?.trim() || "n/a");
+        setJobDetails(jobDetailsElem.textContent?.trim() || 'n/a');
       }
 
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
         const domElement = document?.querySelector(
-          ".jobs-unified-top-card.t-14"
+          '.jobs-unified-top-card.t-14'
         );
 
-        const aTag = domElement?.querySelector("a.app-aware-link");
+        const aTag = domElement?.querySelector('a.app-aware-link');
         const companyName = aTag?.textContent;
         setCompanyName(companyName?.trim());
       }, 500);
     } catch (error) {
-      console.log("error---", error);
+      console.log('error---', error);
     }
   };
 
@@ -166,12 +166,12 @@ const JobFrom = (props: any) => {
 
     setTimeout(() => {
       const titleElement = document?.querySelector(
-        ".jobsearch-JobInfoHeader-title"
+        '.jobsearch-JobInfoHeader-title'
       );
       // Get the text content from the titleElement
       const text = titleElement?.textContent?.trim();
       // Extract "React.js Developer"
-      const jobTitle = text?.split(" - ")[0];
+      const jobTitle = text?.split(' - ')[0];
       if (jobTitle) {
         setJobstitle(jobTitle);
       }
@@ -195,12 +195,12 @@ const JobFrom = (props: any) => {
       setCompanyName(companyElement?.textContent.trim());
     }
 
-    const about = document.getElementById("jobDescriptionText");
+    const about = document.getElementById('jobDescriptionText');
     setJobDescription(about?.innerHTML);
 
-    setJobType("n/a");
-    setPostedDate("n/a");
-    setSource("indeed");
+    setJobType('n/a');
+    setPostedDate('n/a');
+    setSource('indeed');
   };
 
   const getJobsFromDice = (): void => {
@@ -230,18 +230,18 @@ const JobFrom = (props: any) => {
 
     // Get the HTML element by its data-testid attribute
     const locationElement = document.querySelector(
-      ".job-header_jobDetail__ZGjiQ"
+      '.job-header_jobDetail__ZGjiQ'
     );
     if (locationElement) {
       // Get the text content from the element
       const location = locationElement?.textContent?.trim();
       setCompanyLocation(location);
     } else {
-      setCompanyLocation("n/a");
+      setCompanyLocation('n/a');
     }
 
     // Get the HTML element by its data-testid attribute
-    const dateElement = document.querySelector("#timeAgo");
+    const dateElement = document.querySelector('#timeAgo');
     const date = extractDateFromDiceDom(dateElement);
     setPostedDate(date);
 
@@ -259,81 +259,81 @@ const JobFrom = (props: any) => {
       // Get the text content from the element
       const jobType = jobTypeText?.textContent?.trim();
       if (
-        jobType?.toLowerCase() === "remote" ||
-        jobType?.toLowerCase() === "on site" ||
-        jobType?.toLowerCase() === "hybrid"
+        jobType?.toLowerCase() === 'remote' ||
+        jobType?.toLowerCase() === 'on site' ||
+        jobType?.toLowerCase() === 'hybrid'
       ) {
         setJobType(jobTypeText);
       } else {
-        setJobType("n/a");
+        setJobType('n/a');
       }
       setJobType(jobType);
     } else {
-      setJobType("n/a");
+      setJobType('n/a');
     }
-    setSource("dice");
+    setSource('dice');
   };
 
   const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
 
-    const titleEle = document.querySelector(".job_title");
+    const titleEle = document.querySelector('.job_title');
     const title = titleEle?.textContent?.trim();
     setJobstitle(title);
 
-    let companyEle = document.querySelector(".hiring_company");
+    let companyEle = document.querySelector('.hiring_company');
     if (companyEle) {
       const companyName = companyEle?.textContent?.trim();
       setCompanyName(companyName);
     } else {
-      companyEle = document.querySelector(".job_company");
+      companyEle = document.querySelector('.job_company');
       const companyName = companyEle?.textContent?.trim();
       setCompanyName(companyName);
     }
 
-    const dateEle = document.querySelector(".text-muted");
+    const dateEle = document.querySelector('.text-muted');
 
     // const date = extractDateFromZipRecruterDom(dateEle);
     // setPostedDate(date);
-    setPostedDate("n/a");
+    setPostedDate('n/a');
 
-    let locationEle = document.querySelector(".hiring_location");
+    let locationEle = document.querySelector('.hiring_location');
     if (locationEle) {
       const location = locationEle?.textContent?.trim();
       setCompanyLocation(location);
     } else {
-      locationEle = document.querySelector(".job_location");
+      locationEle = document.querySelector('.job_location');
       const location = locationEle?.textContent?.trim();
       setCompanyLocation(location);
     }
 
-    const jobDescriptionEle = document.querySelector(".job_description");
+    const jobDescriptionEle = document.querySelector('.job_description');
     if (jobDescriptionEle) {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
     }
-    const jobType = document.querySelector(".remote_tag");
+    const jobType = document.querySelector('.remote_tag');
     if (jobType) {
       const text = jobType?.innerHTML;
       console.log;
       setJobType(text);
     } else {
-      setJobType("n/a");
+      setJobType('n/a');
     }
-    setSource("zip recruiter");
+    setSource('zip recruiter');
   };
 
   useEffect(() => {
-    if (window.location.href.includes("linkedin.")) {
+    if (window.location.href.includes('linkedin.')) {
       getContentFromLinkedInJobs();
     }
-    if (window.location.href.includes("indeed.")) {
+    if (window.location.href.includes('indeed.')) {
       getJobsFromIndeed();
     }
-    if (window.location.href.includes("dice.")) {
+    if (window.location.href.includes('dice.')) {
       getJobsFromDice();
     }
-    if (window.location.href.includes("ziprecruiter.")) {
+    if (window.location.href.includes('ziprecruiter.')) {
       getJobFromZipRecruiter();
     }
   }, [debounceValue]);
@@ -376,36 +376,36 @@ const JobFrom = (props: any) => {
   };
 
   const handleAlreadySaved = () => {
-    setErrorMessage("Already Saved");
+    setErrorMessage('Already Saved');
     if (!locked) {
       setCategory(null);
     }
 
     // Hide error message after some seconds (e.g., 3 seconds)
     setTimeout(() => {
-      setErrorMessage("");
+      setErrorMessage('');
     }, 3000);
   };
 
   const handleSaveClick = async () => {
     if (category === null) {
-      setErrorMessage("Please pick a category");
+      setErrorMessage('Please pick a category');
       setTimeout(() => {
-        setErrorMessage("");
+        setErrorMessage('');
       }, 3000);
       return;
     }
     if (jobType === null) {
-      setErrorMessage("Please pick a job type");
+      setErrorMessage('Please pick a job type');
       setTimeout(() => {
-        setErrorMessage("");
+        setErrorMessage('');
       }, 3000);
       return;
     }
     if (employment === null) {
-      setErrorMessage("Please pick a employment type");
+      setErrorMessage('Please pick a employment type');
       setTimeout(() => {
-        setErrorMessage("");
+        setErrorMessage('');
       }, 3000);
       return;
     }
@@ -424,27 +424,26 @@ const JobFrom = (props: any) => {
       city: city?.value,
     };
 
-    console.log({ data });
-    const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-    // const url = "https://backend.careerai.io/public/jobs";
+    // const url = 'https://d2fa6tipx2eq6v.cloudfront.net/public/jobs';
+    const url = 'https://backend.careerai.io/public/jobs';
     // 'http://localhost:8000/public/jobs';
     const settings = {
-      method: "POST",
+      method: 'POST',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     };
     try {
       const fetchResponse = await fetch(url, settings);
       const data = await fetchResponse.json();
-      console.log(data, "response");
-      if (data?.status === "failed") {
+      console.log(data, 'response');
+      if (data?.status === 'failed') {
         handleAlreadySaved();
         return;
       }
-      if (data?.status === "error") {
+      if (data?.status === 'error') {
         handleFailed();
       } else {
         handleSuccess();
@@ -461,13 +460,13 @@ const JobFrom = (props: any) => {
       jobLink: postUrl,
     };
 
-    const url = "https://backend.careerai.io/public/jobs/check-job-status";
+    const url = 'https://backend.careerai.io/public/jobs/check-job-status';
     // 'http://localhost:8000/public/jobs';
     const settings = {
-      method: "POST",
+      method: 'POST',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     };
