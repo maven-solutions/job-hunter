@@ -219,7 +219,7 @@ textarea {
   box-shadow: none;
 } */
 
-#react-select-1-input,
+/* #react-select-1-input,
 #react-select-2-input,
 #react-select-3-input,
 #react-select-4-input,
@@ -227,4 +227,10 @@ textarea {
 #react-select-6-input {
   border: 0;
   box-shadow: none;
+} */
+
+* input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
