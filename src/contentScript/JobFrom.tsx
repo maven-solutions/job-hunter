@@ -47,6 +47,8 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" ? true : false
   );
 
+  const [easyApply, setEasyApply] = useState<any>(null);
+
   const clearStateAndCity = () => {
     setState(null);
     setCity(null);
@@ -575,6 +577,8 @@ const JobFrom = (props: any) => {
         setState={setState}
         city={city}
         setCity={setCity}
+        easyApply={easyApply}
+        setEasyApply={setEasyApply}
       />
 
       <div className="job__detail__footer">

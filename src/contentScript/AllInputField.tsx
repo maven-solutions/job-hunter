@@ -47,6 +47,8 @@ const AllInputField = (props: any) => {
     setState,
     city,
     setCity,
+    easyApply,
+    setEasyApply,
   } = props;
   const setDescValue = (e: any) => {
     if (e.target.value) {
@@ -78,6 +80,11 @@ const AllInputField = (props: any) => {
     { value: "remote", label: "Remote" },
     { value: "on-site", label: "On-site" },
     { value: "hybrid", label: "Hybrid" },
+  ];
+
+  const easyApplyOptions = [
+    { value: "remote", label: "Easy Apply" },
+    { value: "on-site", label: "Company" },
   ];
   return (
     <div className="job_detail_content_section">
@@ -173,6 +180,46 @@ const AllInputField = (props: any) => {
         valueSetter={setCompanyName}
         name="company"
       />
+      <div className="job_input_section">
+        <label
+          htmlFor="state"
+          className="job_box_title"
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
+        >
+          Easy Apply
+        </label>
+        <div className="category_selector">
+          <Select
+            options={easyApplyOptions}
+            className="react-select-container"
+            classNamePrefix="react-select"
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                // borderColor: state.isFocused ? "grey" : "#7662e7",
+                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
+                fontSize: 14,
+
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? "#7662e7" : "#white",
+                border: state.isFocused ? "1px solid #7662e7" : "none",
+              }),
+            }}
+            value={easyApply}
+            placeholder="Select Easy Apply"
+            onChange={(option) => {
+              setEasyApply(option);
+              // localStorage.setItem("stateOption", JSON.stringify(option));
+            }}
+          />
+        </div>
+      </div>
       <div className="job_input_section">
         <label
           htmlFor="state"
