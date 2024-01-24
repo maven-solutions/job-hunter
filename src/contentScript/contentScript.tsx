@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import JobFrom from './JobFrom';
+import React, { useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import JobFrom from "./JobFrom";
 
 const App: React.FC<{}> = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
   useEffect(() => {
     if (
-      ['linkedin', 'indeed', 'dice', 'ziprecruiter'].some((domain) =>
-        window.location.href.includes(domain)
+      ["linkedin", "indeed", "dice", "ziprecruiter", "glassdoor"].some(
+        (domain) => window.location.href.includes(domain)
       )
     ) {
       setShowIcon(true);
@@ -100,7 +100,7 @@ const App: React.FC<{}> = () => {
   );
 };
 
-const root = document.createElement('div');
+const root = document.createElement("div");
 document.body.appendChild(root);
 const rootElement = ReactDOM.createRoot(root);
 rootElement.render(<App />);

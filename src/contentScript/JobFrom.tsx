@@ -332,6 +332,41 @@ const JobFrom = (props: any) => {
     setSource("zip recruiter");
   };
 
+  const getJobFromGlassdoor = (): void => {
+    setPostUrl(window.location.href);
+
+    const titleElement = document.querySelector(".JobDetails_jobTitle__Rw_gn");
+    if (titleElement) {
+      // Get the text content from the element
+      const title = titleElement?.textContent?.trim();
+      setJobstitle(title);
+    }
+
+    const companyNameEle = document.querySelector(
+      ".EmployerProfile_employerName__Xemli"
+    );
+    if (companyNameEle) {
+      // Get the text content from the element
+      const companyName = companyNameEle?.textContent?.trim();
+      setCompanyName(companyName);
+    }
+
+    setEmployment("n/a");
+    setJobType("n/a");
+    setPostedDate("n/a");
+
+    const jobDescriptionEle = document.querySelector(
+      ".JobDetails_jobDescription__6VeBn"
+    );
+    if (jobDescriptionEle) {
+      // Get the text content from the element
+      const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+
+    setSource("glassdoor");
+  };
+
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
       getContentFromLinkedInJobs();
@@ -344,6 +379,9 @@ const JobFrom = (props: any) => {
     }
     if (window.location.href.includes("ziprecruiter.")) {
       getJobFromZipRecruiter();
+    }
+    if (window.location.href.includes("glassdoor.")) {
+      getJobFromGlassdoor();
     }
   }, [debounceValue]);
 
