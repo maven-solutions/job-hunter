@@ -39,11 +39,9 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" ? true : false
   );
 
-  const setSelectFieldtoDefault = () => {
+  const clearStateAndCity = () => {
     setState(null);
     setCity(null);
-    setJobType(null);
-    setEmployment(null);
   };
 
   function isDateString(str) {
@@ -57,7 +55,7 @@ const JobFrom = (props: any) => {
   const getContentFromLinkedInJobs = (): void => {
     try {
       setPostUrl(window.location.href);
-      setSelectFieldtoDefault();
+      clearStateAndCity();
 
       const jobsBody = document?.getElementsByClassName(
         "job-details-jobs-unified-top-card__job-title"
@@ -163,7 +161,7 @@ const JobFrom = (props: any) => {
 
   const getJobsFromIndeed = (): void => {
     setPostUrl(window.location.href);
-    setSelectFieldtoDefault();
+    clearStateAndCity();
 
     setTimeout(() => {
       const titleElement = document?.querySelector(
@@ -206,7 +204,7 @@ const JobFrom = (props: any) => {
 
   const getJobsFromDice = (): void => {
     setPostUrl(window.location.href);
-    setSelectFieldtoDefault();
+    clearStateAndCity();
     // Get the HTML element by its data-cy attribute
     const titleElement = document.querySelector('[data-cy="jobTitle"]');
     if (titleElement) {
@@ -278,7 +276,7 @@ const JobFrom = (props: any) => {
 
   const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
-    setSelectFieldtoDefault();
+    clearStateAndCity();
 
     const titleEle = document.querySelector(".job_title");
     const title = titleEle?.textContent?.trim();

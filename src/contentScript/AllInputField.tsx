@@ -300,7 +300,7 @@ const AllInputField = (props: any) => {
             placeholder="Select a employment type"
             onChange={(option) => {
               setEmployment(option);
-              // localStorage.setItem("employmentOption", JSON.stringify(option));
+              localStorage.setItem("employmentOption", JSON.stringify(option));
             }}
           />
         </div>
@@ -341,7 +341,7 @@ const AllInputField = (props: any) => {
             placeholder="Select a job type"
             onChange={(option) => {
               setJobType(option);
-              // localStorage.setItem('jobTypeOption', JSON.stringify(option));
+              localStorage.setItem("jobTypeOption", JSON.stringify(option));
             }}
           />
         </div>
