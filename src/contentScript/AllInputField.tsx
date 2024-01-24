@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   BtnBold,
   BtnItalic,
@@ -6,11 +6,11 @@ import {
   EditorProvider,
   Toolbar,
   BtnUnderline,
-} from 'react-simple-wysiwyg';
-import Select from 'react-select';
+} from "react-simple-wysiwyg";
+import Select from "react-select";
 
-import InputBox from '../component/InputBox';
-import { getUsaCityList, getUsaStateList } from '../constants/usaCountryData';
+import InputBox from "../component/InputBox";
+import { getUsaCityList, getUsaStateList } from "../constants/usaCountryData";
 // import Select from "@atlaskit/select";
 
 const AllInputField = (props: any) => {
@@ -54,30 +54,30 @@ const AllInputField = (props: any) => {
     }
   };
   const options = [
-    { value: 'Product Owner', label: 'Product Owner' },
-    { value: 'Scrum Master', label: 'Scrum Master' },
-    { value: 'Project Manager', label: 'Project Manager' },
-    { value: 'Business Analyst', label: 'Business Analyst' },
+    { value: "Product Owner", label: "Product Owner" },
+    { value: "Scrum Master", label: "Scrum Master" },
+    { value: "Project Manager", label: "Project Manager" },
+    { value: "Business Analyst", label: "Business Analyst" },
   ];
   const employmentOptions = [
-    { value: 'part-time', label: 'Part-time' },
-    { value: 'full-time', label: 'Full-time' },
-    { value: 'contract', label: 'Contract' },
+    { value: "part-time", label: "Part-time" },
+    { value: "full-time", label: "Full-time" },
+    { value: "contract", label: "Contract" },
   ];
   const stateOptions = [
-    { value: 'Omaha', label: 'Omaha' },
-    { value: 'Naperville', label: 'Naperville' },
-    { value: 'New York', label: 'New York' },
+    { value: "Omaha", label: "Omaha" },
+    { value: "Naperville", label: "Naperville" },
+    { value: "New York", label: "New York" },
   ];
   const cityOptions = [
-    { value: 'Milbury', label: 'Milbury' },
-    { value: 'Newville', label: 'Newville' },
-    { value: 'Huntsville', label: 'Huntsville' },
+    { value: "Milbury", label: "Milbury" },
+    { value: "Newville", label: "Newville" },
+    { value: "Huntsville", label: "Huntsville" },
   ];
   const jobTypeOptions = [
-    { value: 'remote', label: 'Remote' },
-    { value: 'on-site', label: 'On-site' },
-    { value: 'hybrid', label: 'Hybrid' },
+    { value: "remote", label: "Remote" },
+    { value: "on-site", label: "On-site" },
+    { value: "hybrid", label: "Hybrid" },
   ];
   return (
     <div className="job_detail_content_section">
@@ -85,19 +85,19 @@ const AllInputField = (props: any) => {
         <label
           htmlFor="category"
           className="job_box_title"
-          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
         >
-          Category{' '}
+          Category{" "}
           {locked ? (
             <div
               style={{
-                backgroundColor: 'red',
-                color: 'white',
-                padding: '0.5rem 0.5rem',
+                backgroundColor: "red",
+                color: "white",
+                padding: "0.5rem 0.5rem",
               }}
               onClick={() => {
                 setLocked(!locked);
-                localStorage.setItem('lock_status', JSON.stringify(!locked));
+                localStorage.setItem("lock_status", JSON.stringify(!locked));
               }}
             >
               Locked
@@ -105,13 +105,13 @@ const AllInputField = (props: any) => {
           ) : (
             <div
               style={{
-                backgroundColor: 'green',
-                color: 'white',
-                padding: '0.5rem 0.5rem',
+                backgroundColor: "green",
+                color: "white",
+                padding: "0.5rem 0.5rem",
               }}
               onClick={() => {
                 setLocked(!locked);
-                localStorage.setItem('lock_status', JSON.stringify(!locked));
+                localStorage.setItem("lock_status", JSON.stringify(!locked));
               }}
             >
               Unlocked
@@ -130,14 +130,14 @@ const AllInputField = (props: any) => {
                 // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
-                padding: '-2px 10px',
-                borderRadius: '8px',
-                width: '102%',
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? '#7662e7' : '#white',
+                background: state.isSelected ? "#7662e7" : "#white",
               }),
             }}
             value={category}
@@ -146,7 +146,7 @@ const AllInputField = (props: any) => {
             onChange={(option) => {
               setLocked(false);
               setCategory(option);
-              localStorage.setItem('categoryOption', JSON.stringify(option));
+              localStorage.setItem("categoryOption", JSON.stringify(option));
             }}
           />
         </div>
@@ -177,7 +177,7 @@ const AllInputField = (props: any) => {
         <label
           htmlFor="state"
           className="job_box_title"
-          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
         >
           State
         </label>
@@ -194,15 +194,15 @@ const AllInputField = (props: any) => {
                 // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
-                padding: '-2px 10px',
-                borderRadius: '8px',
-                width: '102%',
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? '#7662e7' : '#white',
-                border: state.isFocused ? '1px solid #7662e7' : 'none',
+                background: state.isSelected ? "#7662e7" : "#white",
+                border: state.isFocused ? "1px solid #7662e7" : "none",
               }),
             }}
             value={state}
@@ -210,7 +210,7 @@ const AllInputField = (props: any) => {
             onChange={(option) => {
               console.log({ option });
               setState(option);
-              localStorage.setItem('stateOption', JSON.stringify(option));
+              // localStorage.setItem("stateOption", JSON.stringify(option));
             }}
           />
         </div>
@@ -219,7 +219,7 @@ const AllInputField = (props: any) => {
         <label
           htmlFor="state"
           className="job_box_title"
-          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
         >
           City
         </label>
@@ -239,14 +239,14 @@ const AllInputField = (props: any) => {
                 // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
-                padding: '-2px 10px',
-                borderRadius: '8px',
-                width: '102%',
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? '#7662e7' : '#white',
+                background: state.isSelected ? "#7662e7" : "#white",
               }),
             }}
             value={city}
@@ -254,7 +254,7 @@ const AllInputField = (props: any) => {
             placeholder="Select a city"
             onChange={(option) => {
               setCity(option);
-              localStorage.setItem('stateOption', JSON.stringify(option));
+              // localStorage.setItem("stateOption", JSON.stringify(option));
             }}
           />
         </div>
@@ -269,7 +269,7 @@ const AllInputField = (props: any) => {
         <label
           htmlFor="employment"
           className="job_box_title"
-          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
         >
           Employment
         </label>
@@ -285,14 +285,14 @@ const AllInputField = (props: any) => {
                 // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
-                padding: '-2px 10px',
-                borderRadius: '8px',
-                width: '102%',
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? '#7662e7' : '#white',
+                background: state.isSelected ? "#7662e7" : "#white",
               }),
             }}
             value={employment}
@@ -300,7 +300,7 @@ const AllInputField = (props: any) => {
             placeholder="Select a employment type"
             onChange={(option) => {
               setEmployment(option);
-              localStorage.setItem('employmentOption', JSON.stringify(option));
+              // localStorage.setItem("employmentOption", JSON.stringify(option));
             }}
           />
         </div>
@@ -309,7 +309,7 @@ const AllInputField = (props: any) => {
         <label
           htmlFor="JobType"
           className="job_box_title"
-          style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}
+          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
         >
           JobType
         </label>
@@ -322,18 +322,18 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                borderColor: state.isFocused ? 'grey' : '#7662e7',
-                boxShadow: state.isFocused ? '0 0 5px #7662e7' : 'none',
+                borderColor: state.isFocused ? "grey" : "#7662e7",
+                boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
-                padding: '-2px 10px',
-                borderRadius: '8px',
-                width: '102%',
+                padding: "-2px 10px",
+                borderRadius: "8px",
+                width: "102%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? '#7662e7' : '#white',
-                border: 'none',
+                background: state.isSelected ? "#7662e7" : "#white",
+                border: "none",
               }),
             }}
             value={jobType}
@@ -341,7 +341,7 @@ const AllInputField = (props: any) => {
             placeholder="Select a job type"
             onChange={(option) => {
               setJobType(option);
-              localStorage.setItem('jobTypeOption', JSON.stringify(option));
+              // localStorage.setItem('jobTypeOption', JSON.stringify(option));
             }}
           />
         </div>
@@ -371,7 +371,7 @@ const AllInputField = (props: any) => {
         <span className="job_box_title">Description </span>
         <div className="scrollbar-container">
           <EditorProvider>
-            <Editor value={jobDescription ?? ''} onChange={setDescValue}>
+            <Editor value={jobDescription ?? ""} onChange={setDescValue}>
               <Toolbar>
                 <BtnBold />
                 <BtnItalic />
