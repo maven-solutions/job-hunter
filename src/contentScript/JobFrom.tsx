@@ -39,6 +39,13 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" ? true : false
   );
 
+  const setSelectFieldtoDefault = () => {
+    setState(null);
+    setCity(null);
+    setJobType(null);
+    setEmployment(null);
+  };
+
   function isDateString(str) {
     // Attempt to create a new Date object from the string
     let date = new Date(str);
@@ -50,6 +57,7 @@ const JobFrom = (props: any) => {
   const getContentFromLinkedInJobs = (): void => {
     try {
       setPostUrl(window.location.href);
+      setSelectFieldtoDefault();
 
       const jobsBody = document?.getElementsByClassName(
         "job-details-jobs-unified-top-card__job-title"
