@@ -47,7 +47,7 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" ? true : false
   );
 
-  const [easyApply, setEasyApply] = useState<any>(null);
+  const [easyApply, setEasyApply] = useState<any>(0);
 
   const clearStateAndCity = () => {
     setState(null);
@@ -106,6 +106,8 @@ const JobFrom = (props: any) => {
       } else {
         setPostedDate("n/a");
       }
+
+      setEasyApply(0);
 
       // const jobType = document.querySelectorAll(
       //   'job-details-jobs-unified-top-card__job-insight'
@@ -471,6 +473,7 @@ const JobFrom = (props: any) => {
       jobBoard: source,
       state: state?.value,
       city: city?.value,
+      easyApply: easyApply?.value,
     };
 
     const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";

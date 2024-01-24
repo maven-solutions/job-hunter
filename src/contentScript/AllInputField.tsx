@@ -83,8 +83,8 @@ const AllInputField = (props: any) => {
   ];
 
   const easyApplyOptions = [
-    { value: "remote", label: "Easy Apply" },
-    { value: "on-site", label: "Company" },
+    { value: 1, label: "Easy Apply" },
+    { value: 0, label: "Company" },
   ];
   return (
     <div className="job_detail_content_section">
@@ -212,6 +212,7 @@ const AllInputField = (props: any) => {
               }),
             }}
             value={easyApply}
+            defaultValue={{ label: "Select Dept", value: 1 }}
             placeholder="Select Easy Apply"
             onChange={(option) => {
               setEasyApply(option);
