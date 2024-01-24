@@ -15,8 +15,16 @@ const JobFrom = (props: any) => {
   const [jobDescription, setJobDescription] = useState<any>("");
   const [postUrl, setPostUrl] = useState<string>("");
   const [postedDate, setPostedDate] = useState<any>("");
-  const [jobType, setJobType] = useState<any>(null);
-  const [employment, setEmployment] = useState<any>(null);
+  const [jobType, setJobType] = useState<any>(
+    localStorage.getItem("jobTypeOption")
+      ? JSON.parse(localStorage.getItem("jobTypeOption"))
+      : null
+  );
+  const [employment, setEmployment] = useState<any>(
+    localStorage.getItem("employmentOption")
+      ? JSON.parse(localStorage.getItem("employmentOption"))
+      : null
+  );
   const [companyInfo, setCompanyInfo] = useState<any>("");
   const [skills, setSkills] = useState<any>("");
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
