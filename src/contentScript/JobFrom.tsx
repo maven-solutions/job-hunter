@@ -163,6 +163,7 @@ const JobFrom = (props: any) => {
 
   const getJobsFromIndeed = (): void => {
     setPostUrl(window.location.href);
+    setSelectFieldtoDefault();
 
     setTimeout(() => {
       const titleElement = document?.querySelector(
@@ -205,6 +206,7 @@ const JobFrom = (props: any) => {
 
   const getJobsFromDice = (): void => {
     setPostUrl(window.location.href);
+    setSelectFieldtoDefault();
     // Get the HTML element by its data-cy attribute
     const titleElement = document.querySelector('[data-cy="jobTitle"]');
     if (titleElement) {
@@ -276,6 +278,7 @@ const JobFrom = (props: any) => {
 
   const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
+    setSelectFieldtoDefault();
 
     const titleEle = document.querySelector(".job_title");
     const title = titleEle?.textContent?.trim();
