@@ -337,7 +337,7 @@ const JobFrom = (props: any) => {
   };
 
   const getJobFromGlassdoor = (): void => {
-    setPostUrl(window.location.href);
+    // setPostUrl(window.location.href);
 
     const titleElement = document.querySelector(".JobDetails_jobTitle__Rw_gn");
     if (titleElement) {
@@ -353,6 +353,15 @@ const JobFrom = (props: any) => {
       // Get the text content from the element
       const companyName = companyNameEle?.textContent?.trim();
       setCompanyName(companyName);
+    }
+
+    const jobLinkEleSection = document.querySelector('[data-selected="true"]');
+    const jobLinkEle = jobLinkEleSection.querySelector(
+      ".JobCard_seoLink__WdqHZ"
+    );
+    const jobLink = jobLinkEle.getAttribute("href");
+    if (jobLink) {
+      setPostUrl(jobLink);
     }
 
     setEmployment("n/a");
