@@ -73,9 +73,8 @@ const App: React.FC<{}> = () => {
 
   useEffect(() => {
     if (
-      window.location.href.includes("glassdoor")
-      // &&
-      // window.location.href!.includes("job-listing")
+      window.location.href.includes("glassdoor") &&
+      !window.location.href.includes("job-listing")
     ) {
       // Clear any existing intervals before setting a new one
       const intervalId = setInterval(myFunction, 3000);
