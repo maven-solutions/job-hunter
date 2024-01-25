@@ -520,6 +520,9 @@ const JobFrom = (props: any) => {
     const data = {
       jobLink: postUrl,
     };
+    if (!postUrl) {
+      return;
+    }
 
     // const url = 'https://backend.careerai.io/public/jobs/check-job-status';
     const url =
