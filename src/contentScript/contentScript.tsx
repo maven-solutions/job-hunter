@@ -6,6 +6,8 @@ import JobFrom from "./JobFrom";
 const App: React.FC<{}> = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [glassdoorUrl, setGlassDoorUrl] = useState<string>("");
+
   useEffect(() => {
     if (
       ["linkedin", "indeed", "dice", "ziprecruiter", "glassdoor"].some(
@@ -13,6 +15,72 @@ const App: React.FC<{}> = () => {
       )
     ) {
       setShowIcon(true);
+    }
+  }, []);
+
+  const myFunction = () => {
+    try {
+      let jobLinkEle: any = "";
+      let jobLink: any = "";
+      const jobLinkEleSection = document.querySelector(
+        '[data-selected="true"]'
+      );
+      if (jobLinkEleSection) {
+        jobLinkEle = jobLinkEleSection?.querySelector(
+          ".JobCard_seoLink__WdqHZ"
+        );
+      }
+      if (jobLinkEle) {
+        jobLink = jobLinkEle?.getAttribute("href");
+      }
+
+      if (glassdoorUrl.toLowerCase() !== jobLink.toLowerCase()) {
+        setGlassDoorUrl(jobLink);
+
+        const jobHeader = document.querySelector(
+          ".JobDetails_jobDetailsHeader__qKuvs"
+        );
+
+        // Remove previously appended buttons
+        const existingButtons = jobHeader.querySelectorAll("a");
+        existingButtons.forEach((button) => {
+          button.remove();
+        });
+
+        // Create a button element
+        const beautifulButton = document.createElement("a");
+
+        // Set attributes and styles for the button
+        beautifulButton.href = jobLink;
+        beautifulButton.target = "_blank";
+        beautifulButton.textContent = "Add This jobs to Careerai";
+        beautifulButton.style.display = "inline-block";
+        beautifulButton.style.padding = "10px 20px";
+        beautifulButton.style.backgroundColor = "#0145FD";
+        beautifulButton.style.color = "#ffffff";
+        beautifulButton.style.textDecoration = "none";
+        beautifulButton.style.borderRadius = "5px";
+        beautifulButton.style.fontSize = "18px";
+        beautifulButton.style.fontWeight = "500";
+        beautifulButton.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
+        beautifulButton.style.transition = "background-color 0.3s ease";
+        jobHeader.prepend(beautifulButton);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      window.location.href.includes("glassdoor")
+      // &&
+      // window.location.href!.includes("job-listing")
+    ) {
+      // Clear any existing intervals before setting a new one
+      const intervalId = setInterval(myFunction, 3000);
+      // Clear the interval when the component unmounts
+      return () => clearInterval(intervalId);
     }
   }, []);
 

@@ -167,7 +167,7 @@ const JobFrom = (props: any) => {
         setCompanyName(companyName?.trim());
       }, 500);
     } catch (error) {
-      console.log("error---", error);
+      console.log(error);
     }
   };
 
@@ -286,6 +286,16 @@ const JobFrom = (props: any) => {
     setSource("dice");
   };
 
+  const removeRatingFromEnd = (inputString) => {
+    // Remove the rating at the end of the string
+    let stringWithoutRating = inputString.replace(/\d+(\.\d+)?★$/, "");
+    // Remove any trailing whitespace
+    let finalString = stringWithoutRating.trim();
+    return finalString;
+  };
+
+  // Example usage
+
   const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
     clearStateAndCity();
@@ -296,7 +306,8 @@ const JobFrom = (props: any) => {
 
     let companyEle = document.querySelector(".hiring_company");
     if (companyEle) {
-      const companyName = companyEle?.textContent?.trim();
+      const inputString = companyEle?.textContent?.trim();
+      let companyName = removeRatingFromEnd(inputString);
       setCompanyName(companyName);
     } else {
       companyEle = document.querySelector(".job_company");
@@ -328,7 +339,6 @@ const JobFrom = (props: any) => {
     const jobType = document.querySelector(".remote_tag");
     if (jobType) {
       const text = jobType?.innerHTML;
-      console.log;
       setJobType(text);
     } else {
       setJobType("n/a");
@@ -337,9 +347,10 @@ const JobFrom = (props: any) => {
   };
 
   const getJobFromGlassdoor = (): void => {
-    // setPostUrl(window.location.href);
+    setPostUrl(window.location.href);
 
-    const titleElement = document.querySelector(".JobDetails_jobTitle__Rw_gn");
+    const titleElement = document.querySelector('[data-test="job-title"]');
+
     if (titleElement) {
       // Get the text content from the element
       const title = titleElement?.textContent?.trim();
@@ -347,30 +358,22 @@ const JobFrom = (props: any) => {
     }
 
     const companyNameEle = document.querySelector(
-      ".EmployerProfile_employerName__Xemli"
+      '[data-test="employer-name"]'
     );
+
     if (companyNameEle) {
       // Get the text content from the element
-      const companyName = companyNameEle?.textContent?.trim();
+      const inputString = companyNameEle?.textContent?.trim();
+      const companyName = removeRatingFromEnd(inputString);
       setCompanyName(companyName);
-    }
-
-    const jobLinkEleSection = document.querySelector('[data-selected="true"]');
-    const jobLinkEle = jobLinkEleSection.querySelector(
-      ".JobCard_seoLink__WdqHZ"
-    );
-    const jobLink = jobLinkEle.getAttribute("href");
-    if (jobLink) {
-      setPostUrl(jobLink);
     }
 
     setEmployment("n/a");
     setJobType("n/a");
     setPostedDate("n/a");
+    setEasyApply(0);
 
-    const jobDescriptionEle = document.querySelector(
-      ".JobDetails_jobDescription__6VeBn"
-    );
+    const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
     if (jobDescriptionEle) {
       // Get the text content from the element
       const description = jobDescriptionEle?.innerHTML;
@@ -393,7 +396,10 @@ const JobFrom = (props: any) => {
     if (window.location.href.includes("ziprecruiter.")) {
       getJobFromZipRecruiter();
     }
-    if (window.location.href.includes("glassdoor.")) {
+    if (
+      window.location.href.includes("glassdoor.") &&
+      window.location.href.includes("job-listing")
+    ) {
       getJobFromGlassdoor();
     }
   }, [debounceValue]);
@@ -410,6 +416,16 @@ const JobFrom = (props: any) => {
     // Observe changes in the DOM
     observer.observe(document, { childList: true, subtree: true });
   }, []);
+
+  // useEffect(() => {
+  //   if (
+  //     window.location.href.includes("glassdoor.")
+  //     // &&
+  //     // window.location.href.includes("job-listing")
+  //   ) {
+  //     getJobFromGlassdoor();
+  //   }
+  // }, []);
 
   const handleSuccess = () => {
     setSuccess(true);
@@ -499,7 +515,6 @@ const JobFrom = (props: any) => {
     try {
       const fetchResponse = await fetch(url, settings);
       const data = await fetchResponse.json();
-      console.log(data, "response");
       if (data?.status === "failed") {
         handleAlreadySaved();
         return;
