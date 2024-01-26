@@ -501,8 +501,8 @@ const JobFrom = (props: any) => {
       easyApply: easyApply?.value,
     };
 
-    const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-    // const url = "https://backend.careerai.io/public/jobs";
+    // const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
+    const url = "https://backend.careerai.io/public/jobs";
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: "POST",
@@ -539,9 +539,9 @@ const JobFrom = (props: any) => {
       return;
     }
 
-    // const url = 'https://backend.careerai.io/public/jobs/check-job-status';
-    const url =
-      "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
+    const url = "https://backend.careerai.io/public/jobs/check-job-status";
+    // const url =
+    //   "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: "POST",
