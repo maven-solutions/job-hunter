@@ -354,6 +354,7 @@ const JobFrom = (props: any) => {
   const getJobFromGlassdoor = (): void => {
     setPostUrl(window.location.href);
 
+    // this is for the desing where there is tab section in that page
     const titleElement = document.querySelector('[data-test="job-title"]');
 
     if (titleElement) {
@@ -382,6 +383,41 @@ const JobFrom = (props: any) => {
     if (jobDescriptionEle) {
       // Get the text content from the element
       const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+
+    // end of   desing where there is tab section in that page
+
+    //  this is for where ther is no tabs in listing page
+
+    const titleElement2 = document.querySelector(".JobDetails_jobTitle__Rw_gn");
+
+    if (titleElement2) {
+      // Get the text content from the element
+      const title = titleElement2?.textContent?.trim();
+      if (title) {
+        setJobstitle(title);
+      }
+    }
+
+    const companyNameEle2 = document.querySelector(
+      ".EmployerProfile_employerName__Xemli"
+    );
+
+    if (companyNameEle2) {
+      // Get the text content from the element
+      const companyName = companyNameEle2?.textContent?.trim();
+      if (companyName) {
+        setCompanyName(companyName);
+      }
+    }
+
+    const jobDescriptionEle2 = document.querySelector(
+      ".JobDetails_jobDescription__6VeBn"
+    );
+    if (jobDescriptionEle2) {
+      // Get the text content from the element
+      const description = jobDescriptionEle2?.innerHTML;
       setJobDescription(description);
     }
 
