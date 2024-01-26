@@ -211,6 +211,7 @@ const JobFrom = (props: any) => {
 
     setJobType("n/a");
     setPostedDate("n/a");
+    setEasyApply(0);
     setSource("indeed");
   };
 
@@ -283,6 +284,8 @@ const JobFrom = (props: any) => {
     } else {
       setJobType("n/a");
     }
+    setEasyApply(0);
+
     setSource("dice");
   };
 
@@ -343,6 +346,8 @@ const JobFrom = (props: any) => {
     } else {
       setJobType("n/a");
     }
+    setEasyApply(0);
+
     setSource("zip recruiter");
   };
 
@@ -416,16 +421,6 @@ const JobFrom = (props: any) => {
     // Observe changes in the DOM
     observer.observe(document, { childList: true, subtree: true });
   }, []);
-
-  // useEffect(() => {
-  //   if (
-  //     window.location.href.includes("glassdoor.")
-  //     // &&
-  //     // window.location.href.includes("job-listing")
-  //   ) {
-  //     getJobFromGlassdoor();
-  //   }
-  // }, []);
 
   const handleSuccess = () => {
     setSuccess(true);
