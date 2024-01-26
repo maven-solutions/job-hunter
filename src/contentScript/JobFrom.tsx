@@ -47,6 +47,8 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" ? true : false
   );
 
+  const [easyApply, setEasyApply] = useState<any>(0);
+
   const clearStateAndCity = () => {
     setState(null);
     setCity(null);
@@ -104,6 +106,8 @@ const JobFrom = (props: any) => {
       } else {
         setPostedDate("n/a");
       }
+
+      setEasyApply(0);
 
       // const jobType = document.querySelectorAll(
       //   'job-details-jobs-unified-top-card__job-insight'
@@ -163,7 +167,7 @@ const JobFrom = (props: any) => {
         setCompanyName(companyName?.trim());
       }, 500);
     } catch (error) {
-      console.log("error---", error);
+      console.log(error);
     }
   };
 
@@ -207,6 +211,7 @@ const JobFrom = (props: any) => {
 
     setJobType("n/a");
     setPostedDate("n/a");
+    setEasyApply(0);
     setSource("indeed");
   };
 
@@ -279,8 +284,20 @@ const JobFrom = (props: any) => {
     } else {
       setJobType("n/a");
     }
+    setEasyApply(0);
+
     setSource("dice");
   };
+
+  const removeRatingFromEnd = (inputString) => {
+    // Remove the rating at the end of the string
+    let stringWithoutRating = inputString.replace(/\d+(\.\d+)?★$/, "");
+    // Remove any trailing whitespace
+    let finalString = stringWithoutRating.trim();
+    return finalString;
+  };
+
+  // Example usage
 
   const getJobFromZipRecruiter = (): void => {
     setPostUrl(window.location.href);
@@ -292,7 +309,8 @@ const JobFrom = (props: any) => {
 
     let companyEle = document.querySelector(".hiring_company");
     if (companyEle) {
-      const companyName = companyEle?.textContent?.trim();
+      const inputString = companyEle?.textContent?.trim();
+      let companyName = removeRatingFromEnd(inputString);
       setCompanyName(companyName);
     } else {
       companyEle = document.querySelector(".job_company");
@@ -324,12 +342,50 @@ const JobFrom = (props: any) => {
     const jobType = document.querySelector(".remote_tag");
     if (jobType) {
       const text = jobType?.innerHTML;
-      console.log;
       setJobType(text);
     } else {
       setJobType("n/a");
     }
+    setEasyApply(0);
+
     setSource("zip recruiter");
+  };
+
+  const getJobFromGlassdoor = (): void => {
+    setPostUrl(window.location.href);
+
+    const titleElement = document.querySelector('[data-test="job-title"]');
+
+    if (titleElement) {
+      // Get the text content from the element
+      const title = titleElement?.textContent?.trim();
+      setJobstitle(title);
+    }
+
+    const companyNameEle = document.querySelector(
+      '[data-test="employer-name"]'
+    );
+
+    if (companyNameEle) {
+      // Get the text content from the element
+      const inputString = companyNameEle?.textContent?.trim();
+      const companyName = removeRatingFromEnd(inputString);
+      setCompanyName(companyName);
+    }
+
+    setEmployment("n/a");
+    setJobType("n/a");
+    setPostedDate("n/a");
+    setEasyApply(0);
+
+    const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
+    if (jobDescriptionEle) {
+      // Get the text content from the element
+      const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+
+    setSource("glassdoor");
   };
 
   useEffect(() => {
@@ -344,6 +400,12 @@ const JobFrom = (props: any) => {
     }
     if (window.location.href.includes("ziprecruiter.")) {
       getJobFromZipRecruiter();
+    }
+    if (
+      window.location.href.includes("glassdoor.") &&
+      window.location.href.includes("job-listing")
+    ) {
+      getJobFromGlassdoor();
     }
   }, [debounceValue]);
 
@@ -431,10 +493,11 @@ const JobFrom = (props: any) => {
       jobBoard: source,
       state: state?.value,
       city: city?.value,
+      easyApply: easyApply?.value,
     };
 
-    const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-    // const url = "https://backend.careerai.io/public/jobs";
+    // const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
+    const url = "https://backend.careerai.io/public/jobs";
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: "POST",
@@ -447,7 +510,6 @@ const JobFrom = (props: any) => {
     try {
       const fetchResponse = await fetch(url, settings);
       const data = await fetchResponse.json();
-      console.log(data, "response");
       if (data?.status === "failed") {
         handleAlreadySaved();
         return;
@@ -472,9 +534,9 @@ const JobFrom = (props: any) => {
       return;
     }
 
-    // const url = 'https://backend.careerai.io/public/jobs/check-job-status';
-    const url =
-      "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
+    const url = "https://backend.careerai.io/public/jobs/check-job-status";
+    // const url =
+    //   "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
     // 'http://localhost:8000/public/jobs';
     const settings = {
       method: "POST",
@@ -540,6 +602,8 @@ const JobFrom = (props: any) => {
         setState={setState}
         city={city}
         setCity={setCity}
+        easyApply={easyApply}
+        setEasyApply={setEasyApply}
       />
 
       <div className="job__detail__footer">
