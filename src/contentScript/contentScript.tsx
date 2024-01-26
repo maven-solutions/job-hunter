@@ -18,7 +18,8 @@ const App: React.FC<{}> = () => {
     }
   }, []);
 
-  const myFunction = () => {
+  // this button will be added on glassdoor website
+  const addButtonToGlassdoorWebsite = () => {
     try {
       let jobLinkEle: any = "";
       let jobLink: any = "";
@@ -71,13 +72,14 @@ const App: React.FC<{}> = () => {
     }
   };
 
+  //  this is only for glassdoor webiste
   useEffect(() => {
     if (
       window.location.href.includes("glassdoor") &&
       !window.location.href.includes("job-listing")
     ) {
       // Clear any existing intervals before setting a new one
-      const intervalId = setInterval(myFunction, 3000);
+      const intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
       // Clear the interval when the component unmounts
       return () => clearInterval(intervalId);
     }
