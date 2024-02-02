@@ -448,6 +448,8 @@ const JobFrom = (props: any) => {
     setEmployment("n/a");
     setJobType("n/a");
     setPostedDate("n/a");
+    setCity("n/a");
+    setState("n/a");
     setEasyApply(0);
 
     const jobDescriptionEle = document.querySelector(
@@ -615,7 +617,7 @@ const JobFrom = (props: any) => {
     const url = "https://backend.careerai.io/public/jobs/check-job-status";
     // const url =
     // "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
-    ("http://localhost:8000/public/jobs");
+
     const settings = {
       method: "POST",
       headers: {
