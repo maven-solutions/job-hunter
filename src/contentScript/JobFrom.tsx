@@ -363,9 +363,7 @@ const JobFrom = (props: any) => {
       setJobstitle(title);
     }
 
-    const companyNameEle = document.querySelector(
-      '[data-test="employer-name"]'
-    );
+    const companyNameEle = document.querySelector('[data-testid="detailText"]');
 
     if (companyNameEle) {
       // Get the text content from the element
@@ -424,6 +422,46 @@ const JobFrom = (props: any) => {
     setSource("glassdoor");
   };
 
+  const getJobFromSimplyhired = (): void => {
+    setPostUrl(window.location.href);
+    // this is for the desing where there is tab section in that page
+    const titleElement = document.querySelector('[data-testid="viewJobTitle"]');
+
+    if (titleElement) {
+      // Get the text content from the element
+      const title = titleElement?.textContent?.trim();
+      setJobstitle(title);
+    }
+
+    const companyNameEle = document.querySelector(
+      // '[data-test="employer-name"]'
+      '[data-testid="detailText"]'
+    );
+
+    console.log("companyNameEle---", companyNameEle);
+    if (companyNameEle) {
+      // Get the text content from the element
+      const inputString = companyNameEle?.textContent?.trim();
+      setCompanyName(inputString);
+    }
+
+    setEmployment("n/a");
+    setJobType("n/a");
+    setPostedDate("n/a");
+    setEasyApply(0);
+
+    const jobDescriptionEle = document.querySelector(
+      '[data-testid="viewJobBodyJobFullDescriptionContent"]'
+    );
+    if (jobDescriptionEle) {
+      // Get the text content from the element
+      const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+
+    setSource("simplyhired");
+  };
+
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
       getContentFromLinkedInJobs();
@@ -442,6 +480,10 @@ const JobFrom = (props: any) => {
       window.location.href.includes("job-listing")
     ) {
       getJobFromGlassdoor();
+    }
+
+    if (window.location.href.includes("simplyhired.")) {
+      getJobFromSimplyhired();
     }
   }, [debounceValue]);
 

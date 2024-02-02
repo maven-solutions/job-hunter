@@ -10,9 +10,14 @@ const App: React.FC<{}> = () => {
 
   useEffect(() => {
     if (
-      ["linkedin", "indeed", "dice", "ziprecruiter", "glassdoor"].some(
-        (domain) => window.location.href.includes(domain)
-      )
+      [
+        "linkedin",
+        "indeed",
+        "dice",
+        "ziprecruiter",
+        "glassdoor",
+        "simplyhired",
+      ].some((domain) => window.location.href.includes(domain))
     ) {
       setShowIcon(true);
     }
