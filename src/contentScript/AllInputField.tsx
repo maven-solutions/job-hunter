@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BtnBold,
   BtnItalic,
@@ -15,6 +15,7 @@ import { getUsaCityList, getUsaStateList } from "../constants/usaCountryData";
 
 const AllInputField = (props: any) => {
   const {
+    inputErrors,
     companyName,
     setCompanyName,
     jobsTitle,
@@ -50,6 +51,7 @@ const AllInputField = (props: any) => {
     easyApply,
     setEasyApply,
   } = props;
+
   const setDescValue = (e: any) => {
     if (e.target.value) {
       setJobDescription(e.target.value);
@@ -86,46 +88,82 @@ const AllInputField = (props: any) => {
     { value: 1, label: "Easy Apply" },
     { value: 0, label: "Company" },
   ];
+  const LockedIcon = () => {
+    return (
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 10 10"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8.11111 4.55667H1.88889C1.39797 4.55667 1 4.95464 1 5.44556V8.55667C1 9.04759 1.39797 9.44556 1.88889 9.44556H8.11111C8.60203 9.44556 9 9.04759 9 8.55667V5.44556C9 4.95464 8.60203 4.55667 8.11111 4.55667Z"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M2.77789 4.55668V2.7789C2.77734 2.22781 2.98157 1.69618 3.35095 1.2872C3.72032 0.878223 4.22849 0.621083 4.77678 0.565699C5.32508 0.510315 5.8744 0.660639 6.3181 0.987488C6.7618 1.31434 7.06823 1.79439 7.17789 2.33446"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    );
+  };
+  const UnLockedIcon = () => {
+    return (
+      <svg
+        width="10"
+        height="11"
+        viewBox="0 0 10 11"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8.11111 5H1.88889C1.39797 5 1 5.39797 1 5.88889V9C1 9.49092 1.39797 9.88889 1.88889 9.88889H8.11111C8.60203 9.88889 9 9.49092 9 9V5.88889C9 5.39797 8.60203 5 8.11111 5Z"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M2.77777 5V3.22222C2.77777 2.63285 3.0119 2.06762 3.42864 1.65087C3.84539 1.23413 4.41062 1 4.99999 1C5.58936 1 6.15459 1.23413 6.57134 1.65087C6.98809 2.06762 7.22222 2.63285 7.22222 3.22222V5"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    );
+  };
   return (
-    <div className="job_detail_content_section">
-      <div className="job_input_section">
-        <label
-          htmlFor="category"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          Category{" "}
-          {locked ? (
-            <div
-              style={{
-                backgroundColor: "red",
-                color: "white",
-                padding: "0.5rem 0.5rem",
-              }}
-              onClick={() => {
-                setLocked(!locked);
-                localStorage.setItem("lock_status", JSON.stringify(!locked));
-              }}
-            >
-              Locked
-            </div>
-          ) : (
-            <div
-              style={{
-                backgroundColor: "green",
-                color: "white",
-                padding: "0.5rem 0.5rem",
-              }}
-              onClick={() => {
-                setLocked(!locked);
-                localStorage.setItem("lock_status", JSON.stringify(!locked));
-              }}
-            >
-              Unlocked
-            </div>
-          )}
-        </label>
-        <div className="category_selector">
+    <>
+      <div className="job-detail-grid">
+        <label htmlFor="category">
+          <div className="label-top">
+            Category<span className="star">*</span>
+            {locked ? (
+              <div
+                onClick={() => {
+                  setLocked(!locked);
+                  localStorage.setItem("lock_status", JSON.stringify(!locked));
+                }}
+                className="lock locked"
+              >
+                <LockedIcon />
+              </div>
+            ) : (
+              <div
+                onClick={() => {
+                  setLocked(!locked);
+                  localStorage.setItem("lock_status", JSON.stringify(!locked));
+                }}
+                className="lock unlocked"
+              >
+                <UnLockedIcon />
+              </div>
+            )}
+          </div>
           <Select
             options={options}
             className="react-select-container"
@@ -133,18 +171,14 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                // borderColor: state.isFocused ? "grey" : "#7662e7",
-                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
-
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
+                background: state.isSelected ? "#4339f2" : "#white",
               }),
             }}
             value={category}
@@ -156,39 +190,12 @@ const AllInputField = (props: any) => {
               localStorage.setItem("categoryOption", JSON.stringify(option));
             }}
           />
-        </div>
-
-        {/* <select id="category" name="category">
-          <option value="1">All Categories</option>
-          <option value="1">Product Owner</option>
-          <option value="1">Scrum Master</option>
-          <option value="1">Project Manager</option>
-          <option value="1">Business Analyst</option>
-        </select> */}
-      </div>
-
-      <InputBox
-        title="Job title"
-        value={jobsTitle}
-        valueSetter={setJobstitle}
-        name="jobtitle"
-      />
-
-      <InputBox
-        title="Company"
-        value={companyName}
-        valueSetter={setCompanyName}
-        name="company"
-      />
-      <div className="job_input_section">
-        <label
-          htmlFor="state"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          Easy Apply
+          <div className="error">{inputErrors.category}</div>
         </label>
-        <div className="category_selector">
+        <label htmlFor="category">
+          <div className="label-top">
+            Easy Apply<span className="star">*</span>
+          </div>
           <Select
             options={easyApplyOptions}
             className="react-select-container"
@@ -196,19 +203,16 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                // borderColor: state.isFocused ? "grey" : "#7662e7",
-                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
-
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
+                width: "100%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
-                border: state.isFocused ? "1px solid #7662e7" : "none",
+                background: state.isSelected ? "#4339f2" : "#white",
+                border: state.isFocused ? "1px solid #4339f2" : "none",
               }),
             }}
             value={easyApply}
@@ -219,17 +223,10 @@ const AllInputField = (props: any) => {
               // localStorage.setItem("stateOption", JSON.stringify(option));
             }}
           />
-        </div>
-      </div>
-      <div className="job_input_section">
-        <label
-          htmlFor="state"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          State
+          <div className="error">{inputErrors.easyApply}</div>
         </label>
-        <div className="category_selector">
+        <label htmlFor="category">
+          <div className="label-top">State</div>
           <Select
             options={getUsaStateList()}
             isSearchable={true}
@@ -238,19 +235,17 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                // borderColor: state.isFocused ? "grey" : "#7662e7",
-                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
-                fontSize: 14,
 
+                fontSize: 14,
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
+                width: "100%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
-                border: state.isFocused ? "1px solid #7662e7" : "none",
+                background: state.isSelected ? "#4339f2" : "#white",
+                border: state.isFocused ? "1px solid #4339f2" : "none",
               }),
             }}
             value={state}
@@ -261,17 +256,9 @@ const AllInputField = (props: any) => {
               // localStorage.setItem("stateOption", JSON.stringify(option));
             }}
           />
-        </div>
-      </div>
-      <div className="job_input_section">
-        <label
-          htmlFor="state"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          City
         </label>
-        <div className="category_selector">
+        <label htmlFor="category">
+          <div className="label-top">City</div>
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
@@ -283,18 +270,16 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                // borderColor: state.isFocused ? "grey" : "#7662e7",
-                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
+                width: "100%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
+                background: state.isSelected ? "#4339f2" : "#white",
               }),
             }}
             value={city}
@@ -305,23 +290,11 @@ const AllInputField = (props: any) => {
               // localStorage.setItem("stateOption", JSON.stringify(option));
             }}
           />
-        </div>
-      </div>
-      {/* <InputBox
-        title="Location"
-        value={companyLocation}
-        valueSetter={setCompanyLocation}
-        name="location"
-      /> */}
-      <div className="job_input_section">
-        <label
-          htmlFor="employment"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          Employment
         </label>
-        <div className="category_selector">
+        <label htmlFor="category">
+          <div className="label-top">
+            Employment<span className="star">*</span>
+          </div>
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
@@ -329,39 +302,32 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                // borderColor: state.isFocused ? "grey" : "#7662e7",
-                // boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
                 fontSize: 14,
 
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
+                width: "100%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
+                background: state.isSelected ? "#4339f2" : "#white",
               }),
             }}
             value={employment}
             defaultValue={null}
-            placeholder="Select a employment type"
+            placeholder="Select employment"
             onChange={(option) => {
               setEmployment(option);
               localStorage.setItem("employmentOption", JSON.stringify(option));
             }}
           />
-        </div>
-      </div>
-      <div className="job_input_section">
-        <label
-          htmlFor="JobType"
-          className="job_box_title"
-          style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-        >
-          JobType
+          <div className="error">{inputErrors.employment}</div>
         </label>
-        <div className="category_selector">
+        <label htmlFor="category">
+          <div className="label-top">
+            Job Type<span className="star">*</span>
+          </div>
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
@@ -370,66 +336,88 @@ const AllInputField = (props: any) => {
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
-                borderColor: state.isFocused ? "grey" : "#7662e7",
-                boxShadow: state.isFocused ? "0 0 5px #7662e7" : "none",
+
                 fontSize: 14,
                 padding: "-2px 10px",
-                borderRadius: "8px",
-                width: "102%",
+                borderRadius: "5px",
+                width: "100%",
               }),
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#7662e7" : "#white",
+                background: state.isSelected ? "#4339f2" : "#white",
                 border: "none",
               }),
             }}
             value={jobType}
             defaultValue={null}
-            placeholder="Select a job type"
+            placeholder="Select job type"
             onChange={(option) => {
               setJobType(option);
               localStorage.setItem("jobTypeOption", JSON.stringify(option));
             }}
           />
+          <div className="error">{inputErrors.jobType}</div>
+        </label>
+      </div>
+      <div className="job-detail-grid-container">
+        <div className="job-detail-grid">
+          <InputBox
+            title="Job title"
+            value={jobsTitle}
+            valueSetter={setJobstitle}
+            name="jobtitle"
+          />
+          <InputBox
+            title="Company"
+            value={companyName}
+            valueSetter={setCompanyName}
+            name="company"
+          />
+
+          <InputBox
+            title="Source"
+            value={source}
+            valueSetter={setSource}
+            name="source"
+          />
+          <InputBox
+            title="Posted On"
+            value={postedDate}
+            valueSetter={setPostedDate}
+            name="posteddate"
+          />
+          <div className="full">
+            <InputBox
+              title="Post Url"
+              value={postUrl}
+              valueSetter={setPostUrl}
+              name="posturl"
+            />
+          </div>
+          <div className="full">
+            <label>
+              <div className="label-top">Description</div>
+              <EditorProvider>
+                <Editor
+                  value={jobDescription ?? ""}
+                  onChange={setDescValue}
+                  onBlur={() => console.log("Editor lost focus")}
+                  onFocus={() => console.log("Editor gained focus")}
+                >
+                  {/* <Toolbar /> */}
+                  <Toolbar>
+                    <BtnBold />
+                    <BtnItalic />
+                    <BtnUnderline />
+                  </Toolbar>
+                </Editor>
+              </EditorProvider>
+            </label>
+          </div>
         </div>
       </div>
-
-      <InputBox
-        title="Post Url"
-        value={postUrl}
-        valueSetter={setPostUrl}
-        name="posturl"
-      />
-      <InputBox
-        title="Posted On"
-        value={postedDate}
-        valueSetter={setPostedDate}
-        name="posteddate"
-      />
-
-      <InputBox
-        title="Source"
-        value={source}
-        valueSetter={setSource}
-        name="source"
-      />
-
-      <div className="job_input_section">
-        <span className="job_box_title">Description </span>
-        <div className="scrollbar-container">
-          <EditorProvider>
-            <Editor value={jobDescription ?? ""} onChange={setDescValue}>
-              <Toolbar>
-                <BtnBold />
-                <BtnItalic />
-                <BtnUnderline />
-              </Toolbar>
-            </Editor>
-          </EditorProvider>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 

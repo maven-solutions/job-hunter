@@ -169,7 +169,7 @@ const App: React.FC<{}> = () => {
           /> */}
         </div>
       ) : null}
-      {showFrom && <JobFrom />}
+      {showFrom && <JobFrom setShowForm={setShowFrom} />}
     </div>
   );
 };
