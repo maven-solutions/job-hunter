@@ -399,7 +399,7 @@ const JobFrom = (props: any) => {
     }
 
     const companyNameEle2 = document.querySelector(
-      ".EmployerProfile_employerName__Xemli"
+      ".EmployerProfile_employerName__8w0tV"
     );
 
     if (companyNameEle2) {

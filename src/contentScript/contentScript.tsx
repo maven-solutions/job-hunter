@@ -32,9 +32,7 @@ const App: React.FC<{}> = () => {
         '[data-selected="true"]'
       );
       if (jobLinkEleSection) {
-        jobLinkEle = jobLinkEleSection?.querySelector(
-          ".JobCard_seoLink__WdqHZ"
-        );
+        jobLinkEle = jobLinkEleSection?.querySelector("a");
       }
       if (jobLinkEle) {
         jobLink = jobLinkEle?.getAttribute("href");
@@ -42,7 +40,6 @@ const App: React.FC<{}> = () => {
 
       if (glassdoorUrl.toLowerCase() !== jobLink.toLowerCase()) {
         setGlassDoorUrl(jobLink);
-
         const jobHeader = document.querySelector(
           ".JobDetails_jobDetailsHeader__qKuvs"
         );
