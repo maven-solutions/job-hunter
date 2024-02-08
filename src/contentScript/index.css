@@ -41,24 +41,53 @@
   right: 0;
   top: 0;
   height: 100vh;
-  background-color: #fff !important;
+  background-color: #fafbff !important;
   z-index: 99999;
-  border-radius: 10px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  /* border-radius: 10px; */
+  /* box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08); */
+  box-shadow: 0px 35px 35px 0px #00000080;
+}
+.job__detail__container-inner {
+  background-color: #4339f2cc;
+  border-bottom: 1px solid #e4e6ea;
+  position: relative;
+  z-index: 5;
+}
+.jd-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.jd-bg-1 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+.jd-bg-2 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
 }
 .scroll-form {
   height: calc(100vh - 98px);
   overflow: auto;
+  background-color: transparent;
+  position: relative;
+  z-index: 5;
 }
 .jobs__collapse {
   position: absolute;
-  width: 22px;
-  height: 73px;
-  left: -22px;
-  top: 50vh;
-  transform: translateY(-40px);
-  background-color: #4339f2;
-  border-radius: 5px 0px 0px 5px;
+  width: 39px;
+  height: 42px;
+  border-radius: 20px 0px 0px 20px;
+  left: -39px;
+  top: 68px;
+  background-color: #fafbff;
+  box-shadow: 0px 10px 15px 0px #00000026;
+  z-index: 5;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,9 +99,23 @@
 }
 .job-detail-grid-container {
   /* padding: 15px; */
-  background-color: #e9f5ff66;
-  margin: 3px 15px 0 15px;
+  /* background-color: #e9f5ff66; */
+
+  background-color: transparent;
+  padding: 0 20px;
   border-radius: 5px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.jdg-title {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+  letter-spacing: 0em;
+  text-align: left;
+  margin-bottom: 10px;
 }
 .job-detail-grid {
   display: grid;
@@ -80,6 +123,9 @@
   column-gap: 10px;
   row-gap: 13px;
   padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 8px 0px #00000014;
+  background-color: #fff;
 }
 .job-detail-grid > label {
   display: flex;
@@ -91,12 +137,22 @@
   display: flex;
   align-items: center;
   color: #262626;
-  /* font-family: Inter; */
+  font-family: Inter;
   font-size: 14px;
   font-weight: 400;
   line-height: 17px;
   letter-spacing: 0em;
   text-align: left;
+}
+.full label .label-top {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #262626;
+  margin-bottom: 5px;
 }
 .job-detail-grid > label .label-top .star {
   color: #ff3a29 !important;
@@ -170,8 +226,8 @@
   text-align: left;
   color: #4339f2;
   padding: 8px 15px;
-  background-color: #fff;
-  box-shadow: 0px 4px 4px 0px #0000000a;
+  /* background-color: #fff; */
+  /* box-shadow: 0px 4px 4px 0px #0000000a; */
 }
 .job_detail_content_section {
   padding: 20px;
@@ -205,6 +261,11 @@
 } */
 .job_box_title {
   display: block;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  line-height: 17px !important;
+  letter-spacing: 0em;
+  text-align: left;
   color: #000 !important;
   font-size: 14px !important;
   font-weight: 400 !important;
@@ -216,31 +277,57 @@
   height: 38px !important;
   border: none;
   border-radius: 5px;
-  border: 1px solid transparent !important;
+  border: 1px solid #e4e6ea !important;
   outline: 1px solid transparent !important;
   padding: 0 10px;
   background-color: #fff !important;
+  transition: all 0.2s ease-in-out;
+  font-family: Inter !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  /* line-height: 15px !important; */
+  letter-spacing: 0em;
+  text-align: left;
 }
 .job_input_box:hover {
-  border: 1px solid #4339f2 !important;
+  /* border: 1px solid #4339f2 !important; */
+  border: 1px solid #b3b3b3 !important;
 }
 .job_input_box:focus {
-  box-shadow: 0 0 5px #4339f2 !important;
-
-  border: 1px solid #4339f2 !important;
+  /* box-shadow: 0 0 5px #4339f2 !important; */
+  box-shadow: 0px 0px 0px 1px #2684ff !important;
+  border: 1px solid #2684ff !important;
 }
 .react-select__indicator-separator {
   background-color: transparent !important;
 }
+.react-select__placeholder,
+.react-select__single-value,
+.job_input_box,
+.react-select__input {
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #333333;
+}
+.react-select__single-value {
+  color: #34b53a !important;
+}
 
 .job__detail__footer {
   /* border-top: 1px solid rgb(200, 185, 185) !important; */
-  padding: 10px 15px;
+  z-index: 5;
+  position: relative;
+  padding: 15px 20px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
   gap: 20px;
+  background-color: transparent;
 }
 .job__detail__footer button {
   display: flex;
