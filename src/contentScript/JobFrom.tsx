@@ -299,55 +299,56 @@ const JobFrom = (props: any) => {
 
   // Example usage
 
-  const getJobFromZipRecruiter = (): void => {
-    setPostUrl(window.location.href);
-    clearStateAndCity();
-
-    const titleEle = document.querySelector(".job_title");
+  const getJobsFromZipRecuriter1 = (zipDom: any) => {
+    const titleEle = zipDom.querySelector("h1");
     const title = titleEle?.textContent?.trim();
     setJobstitle(title);
-
-    let companyEle = document.querySelector(".hiring_company");
+    let companyEle = zipDom.querySelector("a");
     if (companyEle) {
       const inputString = companyEle?.textContent?.trim();
-      let companyName = removeRatingFromEnd(inputString);
-      setCompanyName(companyName);
-    } else {
-      companyEle = document.querySelector(".job_company");
-      const companyName = companyEle?.textContent?.trim();
-      setCompanyName(companyName);
+      setCompanyName(inputString);
     }
-
-    const dateEle = document.querySelector(".text-muted");
-
-    // const date = extractDateFromZipRecruterDom(dateEle);
-    // setPostedDate(date);
-    setPostedDate("n/a");
-
-    let locationEle = document.querySelector(".hiring_location");
-    if (locationEle) {
-      const location = locationEle?.textContent?.trim();
-      setCompanyLocation(location);
-    } else {
-      locationEle = document.querySelector(".job_location");
-      const location = locationEle?.textContent?.trim();
-      setCompanyLocation(location);
-    }
-
-    const jobDescriptionEle = document.querySelector(".job_description");
+    const jobDescriptionEle = zipDom.querySelector(".job_description");
     if (jobDescriptionEle) {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
     }
-    const jobType = document.querySelector(".remote_tag");
-    if (jobType) {
-      const text = jobType?.innerHTML;
-      setJobType(text);
-    } else {
-      setJobType("n/a");
-    }
-    setEasyApply(0);
+  };
+  const getJobsFromZipRecuriter2 = (zipDom: any) => {
+    const titleEle = zipDom.querySelector(".job_title");
+    const title = titleEle?.textContent?.trim();
+    setJobstitle(title);
 
+    let companyEle = zipDom.querySelector(".hiring_company");
+    if (companyEle) {
+      const inputString = companyEle?.textContent?.trim();
+      setCompanyName(inputString);
+    }
+
+    const jobDescriptionEle = zipDom.querySelector(".job_description");
+    if (jobDescriptionEle) {
+      const description = jobDescriptionEle?.innerHTML;
+      setJobDescription(description);
+    }
+  };
+
+  const getJobFromZipRecruiter = (): void => {
+    setPostUrl(window.location.href);
+    clearStateAndCity();
+
+    const zipDom = document.querySelector('[data-testid="right-pane"]');
+    const zipDom2 = document.querySelector(".job_details");
+    if (zipDom) {
+      getJobsFromZipRecuriter1(zipDom);
+    }
+    if (zipDom2) {
+      getJobsFromZipRecuriter2(zipDom2);
+    }
+
+    setPostedDate("n/a");
+    setCompanyLocation("n/a");
+    setJobType("n/a");
+    setEasyApply(0);
     setSource("zip recruiter");
   };
 
