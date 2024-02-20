@@ -300,6 +300,12 @@ const JobFrom = (props: any) => {
   // Example usage
 
   const getJobsFromZipRecuriter1 = (zipDom: any) => {
+    const zipDomForLink = document.querySelector(".job_result_selected");
+    if (zipDomForLink) {
+      const link = zipDomForLink.querySelector("a");
+      setPostUrl(link.href);
+    }
+
     const titleEle = zipDom.querySelector("h1");
     const title = titleEle?.textContent?.trim();
     setJobstitle(title);
@@ -333,15 +339,17 @@ const JobFrom = (props: any) => {
   };
 
   const getJobFromZipRecruiter = (): void => {
-    setPostUrl(window.location.href);
     clearStateAndCity();
 
     const zipDom = document.querySelector('[data-testid="right-pane"]');
+
     const zipDom2 = document.querySelector(".job_details");
     if (zipDom) {
       getJobsFromZipRecuriter1(zipDom);
     }
     if (zipDom2) {
+      setPostUrl(window.location.href);
+
       getJobsFromZipRecuriter2(zipDom2);
     }
 
@@ -439,7 +447,6 @@ const JobFrom = (props: any) => {
       '[data-testid="detailText"]'
     );
 
-    console.log("companyNameEle---", companyNameEle);
     if (companyNameEle) {
       // Get the text content from the element
       const inputString = companyNameEle?.textContent?.trim();
