@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import JobFrom from "./JobFrom";
+import JobListTable from "./JobListTable";
 
 const App: React.FC<{}> = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
@@ -166,7 +167,8 @@ const App: React.FC<{}> = () => {
           /> */}
         </div>
       ) : null}
-      {showFrom && <JobFrom setShowForm={setShowFrom} />}
+      {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
+      {<JobListTable />}
     </div>
   );
 };
