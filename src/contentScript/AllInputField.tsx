@@ -267,7 +267,6 @@ const AllInputField = (props: any) => {
               value={state}
               placeholder="Select a state"
               onChange={(option) => {
-                console.log({ option });
                 setState(option);
                 // localStorage.setItem("stateOption", JSON.stringify(option));
               }}
@@ -424,8 +423,8 @@ const AllInputField = (props: any) => {
                 <Editor
                   value={jobDescription ?? ""}
                   onChange={setDescValue}
-                  onBlur={() => console.log("Editor lost focus")}
-                  onFocus={() => console.log("Editor gained focus")}
+                  // onBlur={() => console.log("Editor lost focus")}
+                  // onFocus={() => console.log("Editor gained focus")}
                 >
                   {/* <Toolbar /> */}
                   <Toolbar>

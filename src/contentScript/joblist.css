@@ -94,6 +94,9 @@
 .job__table__td {
   padding: 15px;
 }
+.job__data__local {
+  color: #02a0fc;
+}
 .job__table__link {
   all: unset;
   color: #02a0fc;

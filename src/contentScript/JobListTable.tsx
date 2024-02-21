@@ -1,7 +1,20 @@
 import React from "react";
 import "./joblist.css";
 
-const JobListTable = () => {
+const JobListTable = (props: any) => {
+  const { setShowJobsTable, jobTableData, loading, saveNewJob } = props;
+
+  const saveAsNewJobFn = () => {
+    saveNewJob("restored");
+    setShowJobsTable(false);
+  };
+  const saveAsRedundantJobFn = () => {
+    saveNewJob("redundant");
+    setShowJobsTable(false);
+  };
+
+  console.log("jobTableData--", jobTableData);
+
   return (
     <div className="job__table__overlay">
       <div className="job__table__modal">
@@ -14,12 +27,33 @@ const JobListTable = () => {
           </span>
 
           <div className="job__table__button__row">
-            <button className="job__tabel__button save">
-              {" "}
-              Save as New Job
+            <button
+              className="job__tabel__button save"
+              type="button"
+              onClick={saveAsNewJobFn}
+            >
+              {loading ? (
+                <>
+                  <div id="jhloading" />
+                  Saving...
+                </>
+              ) : (
+                "Save as New Job"
+              )}
             </button>
-            <button className="job__tabel__button redundent">
-              Save as Redundant Job
+            <button
+              className="job__tabel__button redundent"
+              type="button"
+              onClick={saveAsRedundantJobFn}
+            >
+              {loading ? (
+                <>
+                  <div id="jhloading" />
+                  Saving...
+                </>
+              ) : (
+                "Save as Redundant Job"
+              )}
             </button>
           </div>
         </div>
@@ -36,18 +70,28 @@ const JobListTable = () => {
               </tr>
 
               <tbody>
-                {[1, 2, 3, 4].map((e) => {
+                {jobTableData.map((data: any) => {
                   return (
-                    <tr className="job__table__tr">
+                    <tr className="job__table__tr" key={data.id}>
                       {" "}
-                      <td className="job__table__td"> Scrum Master</td>{" "}
-                      <td>Maven Solutions</td> <td> New York City, NY</td>{" "}
-                      <td> 02/15/2024</td>{" "}
+                      <td
+                        className={`job__table__td ${
+                          data.local && "job__data__local"
+                        }`}
+                      >
+                        {" "}
+                        {data.jobTitle}
+                      </td>{" "}
+                      <td> {data.companyName}</td> <td> {data.location}</td>{" "}
+                      <td>{data.createdAt}</td>{" "}
                       <td>
                         {" "}
-                        <a className="job__table__link" href="" target="_blank">
-                          {" "}
-                          LinkedIn
+                        <a
+                          className="job__table__link"
+                          href={data.jobLink}
+                          target="_blank"
+                        >
+                          {data.jobBoard}
                         </a>{" "}
                       </td>{" "}
                     </tr>
@@ -57,7 +101,13 @@ const JobListTable = () => {
             </table>
           </div>
           <div className="job__table__footer">
-            <button className="job__tabel__button cancel">Cancel </button>
+            <button
+              className="job__tabel__button cancel"
+              type="button"
+              onClick={() => setShowJobsTable(false)}
+            >
+              Cancel{" "}
+            </button>
           </div>{" "}
         </div>
       </div>

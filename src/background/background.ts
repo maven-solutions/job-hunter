@@ -12,6 +12,6 @@ chrome.runtime.onInstalled.addListener(() => {
 // Background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "urlChange") {
-    console.log("URL changed to:", message.url);
+    // console.log("URL changed to:", message.url);
   }
 });
