@@ -290,16 +290,13 @@
   font-family: Inter !important;
   font-size: 12px !important;
   font-weight: 400 !important;
-  /* line-height: 15px !important; */
   letter-spacing: 0em;
   text-align: left;
 }
 .job_input_box:hover {
-  /* border: 1px solid #4339f2 !important; */
   border: 1px solid #b3b3b3 !important;
 }
 .job_input_box:focus {
-  /* box-shadow: 0 0 5px #4339f2 !important; */
   box-shadow: 0px 0px 0px 1px #2684ff !important;
   border: 1px solid #2684ff !important;
 }
@@ -479,10 +476,10 @@ select:focus {
   border: 1px solid #4339f2 !important;
 } */
 
-select,
+/* select,
 textarea {
   box-shadow: unset !important;
-}
+} */
 
 /* .category_selector input {
 
@@ -509,7 +506,12 @@ textarea {
   box-shadow: none;
 } */
 
-* input {
+/* input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+} */
+.react-select__input {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;

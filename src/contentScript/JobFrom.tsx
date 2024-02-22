@@ -8,6 +8,7 @@ import JobListTable from "./JobListTable";
 import { checkJobStatus, saveJobs } from "./api";
 import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
+import { getJobFromBuiltin } from "../jobExtractor/builtin";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -461,6 +462,27 @@ const JobFrom = (props: any) => {
     setSource("Simplyhired");
   };
 
+  const getBuiltinDomForJobs = () => {
+    const dom = document.querySelector(".block-region-middle");
+    const dom2 = document.querySelector(".block-content");
+
+    getJobFromBuiltin(
+      dom,
+      dom2,
+      setPostUrl,
+      setJobstitle,
+      setCompanyName,
+      setEmployment,
+      setJobType,
+      setPostedDate,
+      setCity,
+      setState,
+      setEasyApply,
+      setJobDescription,
+      setSource
+    );
+  };
+
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
       getContentFromLinkedInJobs();
@@ -483,6 +505,10 @@ const JobFrom = (props: any) => {
 
     if (window.location.href.includes("simplyhired.")) {
       getJobFromSimplyhired();
+    }
+
+    if (window.location.href.includes("builtin.")) {
+      getBuiltinDomForJobs();
     }
   }, [debounceValue]);
 
