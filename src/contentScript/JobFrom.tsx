@@ -15,7 +15,7 @@ const JobFrom = (props: any) => {
   const [hasErrors, setHasErrors] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
-  const [companyLocation, setCompanyLocation] = useState<string>("");
+  // const [companyLocation, setCompanyLocation] = useState<string>("");
   const [jobDetails, setJobDetails] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>(
     "<b>Job Description</b>"
@@ -168,13 +168,6 @@ const JobFrom = (props: any) => {
 
       setSource("linkedin");
 
-      const location = document.getElementsByClassName(
-        "job-details-jobs-unified-top-card__bullet"
-      );
-      if (location[0]) {
-        setCompanyLocation(location[0]?.textContent?.trim());
-      }
-
       var jobDetailsElem = document.querySelector(
         ".job-details-jobs-unified-top-card__primary-description-without-tagline"
       );
@@ -213,16 +206,6 @@ const JobFrom = (props: any) => {
         setJobstitle(jobTitle);
       }
     }, 1000);
-
-    // Get the HTML element by its data-testid attribute
-    const locationElement = document.querySelector(
-      '[data-testid="inlineHeader-companyLocation"]'
-    );
-    if (locationElement) {
-      // Get the text content from the element
-      const location = locationElement?.textContent.trim();
-      setCompanyLocation(location);
-    }
 
     const companyElement = document.querySelector(
       '[data-testid="inlineHeader-companyName"]'
@@ -271,13 +254,6 @@ const JobFrom = (props: any) => {
     const locationElement = document.querySelector(
       ".job-header_jobDetail__ZGjiQ"
     );
-    if (locationElement) {
-      // Get the text content from the element
-      const location = locationElement?.textContent?.trim();
-      setCompanyLocation(location);
-    } else {
-      setCompanyLocation("n/a");
-    }
 
     // Get the HTML element by its data-testid attribute
     const dateElement = document.querySelector("#timeAgo");
@@ -380,7 +356,6 @@ const JobFrom = (props: any) => {
     }
 
     setPostedDate("n/a");
-    setCompanyLocation("n/a");
     setJobType("n/a");
     setEasyApply(0);
     setSource("ziprecruiter");
@@ -651,7 +626,6 @@ const JobFrom = (props: any) => {
     const data: any = {
       companyName,
       jobTitle: jobsTitle,
-      location: companyLocation,
       jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
@@ -678,14 +652,13 @@ const JobFrom = (props: any) => {
       handleSuccess,
       setSavedNotification,
       postUrl,
-      setAlreadySavedStatus,
-      jobTableData
+      setAlreadySavedStatus
     );
   };
 
-  // useEffect(() => {
-  //   checkJobStatus(postUrl, setAlreadySavedStatus, setSavedNotification);
-  // }, [postUrl]);
+  useEffect(() => {
+    checkJobStatus(postUrl, setAlreadySavedStatus, setSavedNotification);
+  }, [postUrl]);
 
   return (
     <div className="job__detail__container">
@@ -707,8 +680,6 @@ const JobFrom = (props: any) => {
             setJobstitle={setJobstitle}
             postedDate={postedDate}
             setPostedDate={setPostedDate}
-            companyLocation={companyLocation}
-            setCompanyLocation={setCompanyLocation}
             postUrl={postUrl}
             setPostUrl={setPostUrl}
             targetElementRef={targetElementRef}

@@ -52,8 +52,7 @@ export const saveJobs = async (
   handleSuccess,
   setSavedNotification,
   postUrl,
-  setAlreadySavedStatus,
-  jobTableData
+  setAlreadySavedStatus
 ) => {
   const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
   // const url = "https://backend.careerai.io/public/jobs";
@@ -75,7 +74,6 @@ export const saveJobs = async (
     const data = await fetchResponse.json();
 
     if (data?.status === "duplicate-jobs") {
-      console.log("dataWithLocal--", dataWithLocal);
       setLoading(false);
       setShowJobsTable(true);
 
@@ -83,7 +81,6 @@ export const saveJobs = async (
     }
 
     if (data?.status === "failed") {
-      console.log("failed--");
       handleAlreadySaved();
       setLoading(false);
       setNotification(false);
@@ -94,8 +91,6 @@ export const saveJobs = async (
       return;
     }
     if (data?.status === "error") {
-      console.log("error--");
-
       handleFailed();
       setLoading(false);
       setNotification(false);
@@ -104,7 +99,6 @@ export const saveJobs = async (
       }, 3000);
     }
     if (data?.status === "success") {
-      console.log("success--");
       handleSuccess();
       setLoading(false);
       setNotification(false);
@@ -117,8 +111,6 @@ export const saveJobs = async (
     }
     return;
   } catch (e) {
-    console.log("last--");
-
     handleFailed();
     setLoading(false);
     setNotification(false);

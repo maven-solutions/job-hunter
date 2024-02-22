@@ -20,8 +20,6 @@ const AllInputField = (props: any) => {
     setCompanyName,
     jobsTitle,
     setJobstitle,
-    companyLocation,
-    setCompanyLocation,
     postUrl,
     setPostUrl,
     jobDescription,

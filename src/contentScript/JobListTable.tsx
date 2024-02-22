@@ -1,5 +1,6 @@
 import React from "react";
 import "./joblist.css";
+import { getTimeInFormattetDesing } from "./helper";
 
 const JobListTable = (props: any) => {
   const { setShowJobsTable, jobTableData, loading, saveNewJob } = props;
@@ -12,8 +13,6 @@ const JobListTable = (props: any) => {
     saveNewJob("redundant");
     setShowJobsTable(false);
   };
-
-  console.log("jobTableData--", jobTableData);
 
   return (
     <div className="job__table__overlay">
@@ -82,8 +81,11 @@ const JobListTable = (props: any) => {
                         {" "}
                         {data.jobTitle}
                       </td>{" "}
-                      <td> {data.companyName}</td> <td> {data.location}</td>{" "}
-                      <td>{data.createdAt}</td>{" "}
+                      <td> {data.companyName}</td>{" "}
+                      <td>
+                        {data.city}, {data.state}
+                      </td>{" "}
+                      <td>{getTimeInFormattetDesing(data.createdAt)}</td>{" "}
                       <td>
                         {" "}
                         <a
