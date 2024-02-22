@@ -15,8 +15,6 @@ const JobFrom = (props: any) => {
   const [hasErrors, setHasErrors] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
-  // const [companyLocation, setCompanyLocation] = useState<string>("");
-  const [jobDetails, setJobDetails] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>(
     "<b>Job Description</b>"
   );
@@ -32,8 +30,7 @@ const JobFrom = (props: any) => {
       ? JSON.parse(localStorage.getItem("employmentOption"))
       : null
   );
-  const [companyInfo, setCompanyInfo] = useState<any>("");
-  const [skills, setSkills] = useState<any>("");
+
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
   const targetElementRef = useRef();
@@ -69,14 +66,12 @@ const JobFrom = (props: any) => {
     category: "",
     jobType: "",
     employment: "",
-    easyApply: "",
   });
   const resetInputErrors = () => {
     setInputErrors({
       category: "",
       jobType: "",
       employment: "",
-      easyApply: "",
     });
   };
 
@@ -168,13 +163,6 @@ const JobFrom = (props: any) => {
 
       setSource("linkedin");
 
-      var jobDetailsElem = document.querySelector(
-        ".job-details-jobs-unified-top-card__primary-description-without-tagline"
-      );
-      if (jobDetailsElem) {
-        setJobDetails(jobDetailsElem.textContent?.trim() || "n/a");
-      }
-
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
         const domElement = document?.querySelector(
@@ -218,10 +206,10 @@ const JobFrom = (props: any) => {
     const about = document.getElementById("jobDescriptionText");
     setJobDescription(about?.innerHTML);
 
-    setJobType("n/a");
+    setJobType(null);
     setPostedDate("n/a");
     setEasyApply(0);
-    setSource("indeed");
+    setSource("Indeed");
   };
 
   const getJobsFromDice = (): void => {
@@ -280,15 +268,15 @@ const JobFrom = (props: any) => {
       ) {
         setJobType(jobTypeText);
       } else {
-        setJobType("n/a");
+        setJobType(null);
       }
       setJobType(jobType);
     } else {
-      setJobType("n/a");
+      setJobType(null);
     }
     setEasyApply(0);
 
-    setSource("dice");
+    setSource("Dice");
   };
 
   const removeRatingFromEnd = (inputString) => {
@@ -356,9 +344,9 @@ const JobFrom = (props: any) => {
     }
 
     setPostedDate("n/a");
-    setJobType("n/a");
+    setJobType(null);
     setEasyApply(0);
-    setSource("ziprecruiter");
+    setSource("Ziprecruiter");
   };
 
   const getJobFromGlassdoor = (): void => {
@@ -383,7 +371,7 @@ const JobFrom = (props: any) => {
     }
 
     setEmployment("n/a");
-    setJobType("n/a");
+    setJobType(null);
     setPostedDate("n/a");
     setEasyApply(0);
 
@@ -429,7 +417,7 @@ const JobFrom = (props: any) => {
       setJobDescription(description);
     }
 
-    setSource("glassdoor");
+    setSource("Glassdoor");
   };
 
   const getJobFromSimplyhired = (): void => {
@@ -455,7 +443,7 @@ const JobFrom = (props: any) => {
     }
 
     setEmployment("n/a");
-    setJobType("n/a");
+    setJobType(null);
     setPostedDate("n/a");
     setCity("n/a");
     setState("n/a");
@@ -470,7 +458,7 @@ const JobFrom = (props: any) => {
       setJobDescription(description);
     }
 
-    setSource("simplyhired");
+    setSource("Simplyhired");
   };
 
   useEffect(() => {
@@ -560,18 +548,7 @@ const JobFrom = (props: any) => {
       }, 3000);
       // return;
     }
-    if (easyApply === 0) {
-      setErrorMessage("Easy apply is required.");
-      setHasErrors(true);
-      setInputErrors((prev) => {
-        return { ...prev, easyApply: "Easy apply is required." };
-      });
-      setTimeout(() => {
-        setErrorMessage("");
-        resetInputErrors();
-      }, 3000);
-      // return;
-    }
+
     if (jobType === null) {
       setErrorMessage("Please pick a job type");
       setHasErrors(true);
@@ -605,12 +582,7 @@ const JobFrom = (props: any) => {
       }
     }
     setLoading(true);
-    if (
-      category !== null &&
-      easyApply !== 0 &&
-      jobType !== null &&
-      employment !== null
-    ) {
+    if (category !== null && jobType !== null && employment !== null) {
       setHasErrors(false);
       setNotification(true);
     } else {
@@ -693,12 +665,6 @@ const JobFrom = (props: any) => {
             setSource={setSource}
             locked={locked}
             setLocked={setLocked}
-            jobDetails={jobDetails}
-            setJobDetails={setJobDetails}
-            companyInfo={companyInfo}
-            setCompanyInfo={setCompanyInfo}
-            skills={skills}
-            setSkills={setSkills}
             employment={employment}
             setEmployment={setEmployment}
             state={state}

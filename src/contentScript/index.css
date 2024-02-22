@@ -117,6 +117,11 @@
   text-align: left;
   margin-bottom: 10px;
 }
+.black-title {
+  color: #000000;
+  display: block;
+  margin-top: -5px;
+}
 .job-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -225,7 +230,7 @@
   letter-spacing: 0em;
   text-align: left;
   color: #4339f2;
-  padding: 8px 15px;
+  padding: 12px 20px 10px 20px;
   /* background-color: #fff; */
   /* box-shadow: 0px 4px 4px 0px #0000000a; */
 }
