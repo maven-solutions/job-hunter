@@ -40,3 +40,16 @@ export const extractDateFromZipRecruterDom = (dateEle: any): any => {
   const jsDate = new Date(formattedDate);
   return jsDate;
 };
+
+export const getTimeInFormattetDesing = (inputTime: string) => {
+  const date = new Date(inputTime);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const formattedDate = `${month}/${day}/${year}`;
+  if (inputTime && formattedDate) {
+    return formattedDate;
+  } else {
+    return "";
+  }
+};

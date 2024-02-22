@@ -1,18 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import AllInputField from "./AllInputField";
-import {
-  dateExtractorFromDom,
-  extractDateFromDiceDom,
-  extractDateFromZipRecruterDom,
-} from "./helper";
+import { extractDateFromDiceDom } from "./helper";
+import AllSvg from "./AllSvg";
+import Notification from "./Notification";
+import JobListTable from "./JobListTable";
+import { checkJobStatus, saveJobs } from "./api";
+import CloseIcon from "../component/CloseIcon";
+import SaveButton from "../component/SaveButton";
 
 const JobFrom = (props: any) => {
+  const { setShowForm } = props;
+  const [loading, setLoading] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
-  const [companyLocation, setCompanyLocation] = useState<string>("");
+  // const [companyLocation, setCompanyLocation] = useState<string>("");
   const [jobDetails, setJobDetails] = useState<string>("");
-  const [jobDescription, setJobDescription] = useState<any>("");
+  const [jobDescription, setJobDescription] = useState<any>(
+    "<b>Job Description</b>"
+  );
   const [postUrl, setPostUrl] = useState<string>("");
   const [postedDate, setPostedDate] = useState<any>("");
   const [jobType, setJobType] = useState<any>(
@@ -48,10 +55,29 @@ const JobFrom = (props: any) => {
   );
 
   const [easyApply, setEasyApply] = useState<any>(0);
+  const [notification, setNotification] = useState(false);
+  const [savedNotification, setSavedNotification] = useState(false);
+
+  const [showJobsTable, setShowJobsTable] = useState(false);
+  const [jobTableData, setJobTableData] = useState([]);
 
   const clearStateAndCity = () => {
     setState(null);
     setCity(null);
+  };
+  const [inputErrors, setInputErrors] = useState({
+    category: "",
+    jobType: "",
+    employment: "",
+    easyApply: "",
+  });
+  const resetInputErrors = () => {
+    setInputErrors({
+      category: "",
+      jobType: "",
+      employment: "",
+      easyApply: "",
+    });
   };
 
   function isDateString(str) {
@@ -142,13 +168,6 @@ const JobFrom = (props: any) => {
 
       setSource("linkedin");
 
-      const location = document.getElementsByClassName(
-        "job-details-jobs-unified-top-card__bullet"
-      );
-      if (location[0]) {
-        setCompanyLocation(location[0]?.textContent?.trim());
-      }
-
       var jobDetailsElem = document.querySelector(
         ".job-details-jobs-unified-top-card__primary-description-without-tagline"
       );
@@ -187,16 +206,6 @@ const JobFrom = (props: any) => {
         setJobstitle(jobTitle);
       }
     }, 1000);
-
-    // Get the HTML element by its data-testid attribute
-    const locationElement = document.querySelector(
-      '[data-testid="inlineHeader-companyLocation"]'
-    );
-    if (locationElement) {
-      // Get the text content from the element
-      const location = locationElement?.textContent.trim();
-      setCompanyLocation(location);
-    }
 
     const companyElement = document.querySelector(
       '[data-testid="inlineHeader-companyName"]'
@@ -245,13 +254,6 @@ const JobFrom = (props: any) => {
     const locationElement = document.querySelector(
       ".job-header_jobDetail__ZGjiQ"
     );
-    if (locationElement) {
-      // Get the text content from the element
-      const location = locationElement?.textContent?.trim();
-      setCompanyLocation(location);
-    } else {
-      setCompanyLocation("n/a");
-    }
 
     // Get the HTML element by its data-testid attribute
     const dateElement = document.querySelector("#timeAgo");
@@ -354,10 +356,9 @@ const JobFrom = (props: any) => {
     }
 
     setPostedDate("n/a");
-    setCompanyLocation("n/a");
     setJobType("n/a");
     setEasyApply(0);
-    setSource("zip recruiter");
+    setSource("ziprecruiter");
   };
 
   const getJobFromGlassdoor = (): void => {
@@ -549,29 +550,82 @@ const JobFrom = (props: any) => {
   const handleSaveClick = async () => {
     if (category === null) {
       setErrorMessage("Please pick a category");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, category: "Category is required." };
+      });
       setTimeout(() => {
         setErrorMessage("");
+        resetInputErrors();
       }, 3000);
-      return;
+      // return;
+    }
+    if (easyApply === 0) {
+      setErrorMessage("Easy apply is required.");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, easyApply: "Easy apply is required." };
+      });
+      setTimeout(() => {
+        setErrorMessage("");
+        resetInputErrors();
+      }, 3000);
+      // return;
     }
     if (jobType === null) {
       setErrorMessage("Please pick a job type");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, jobType: "Job type is required." };
+      });
       setTimeout(() => {
         setErrorMessage("");
+        resetInputErrors();
       }, 3000);
-      return;
+      // return;
     }
     if (employment === null) {
       setErrorMessage("Please pick a employment type");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, employment: "Employment is required." };
+      });
       setTimeout(() => {
         setErrorMessage("");
+        resetInputErrors();
       }, 3000);
-      return;
+      // return;
     }
-    const data = {
+    for (const key in inputErrors) {
+      if (inputErrors.hasOwnProperty(key) && inputErrors[key] === "") {
+        continue;
+      } else {
+        setLoading(false);
+        return;
+      }
+    }
+    setLoading(true);
+    if (
+      category !== null &&
+      easyApply !== 0 &&
+      jobType !== null &&
+      employment !== null
+    ) {
+      setHasErrors(false);
+      setNotification(true);
+    } else {
+      setNotification(false);
+      setLoading(false);
+      return false;
+    }
+
+    saveNewJob();
+  };
+
+  const saveNewJob = (jobStatus?: String) => {
+    const data: any = {
       companyName,
       jobTitle: jobsTitle,
-      location: companyLocation,
       jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
@@ -583,134 +637,97 @@ const JobFrom = (props: any) => {
       city: city?.value,
       easyApply: easyApply?.value,
     };
-
-    // const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-    const url = "https://backend.careerai.io/public/jobs";
-    // 'http://localhost:8000/public/jobs';
-    const settings = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    };
-    try {
-      const fetchResponse = await fetch(url, settings);
-      const data = await fetchResponse.json();
-      if (data?.status === "failed") {
-        handleAlreadySaved();
-        return;
-      }
-      if (data?.status === "error") {
-        handleFailed();
-      } else {
-        handleSuccess();
-      }
-      return;
-    } catch (e) {
-      handleFailed();
-      console.log(e);
-    }
-  };
-
-  const checkJobStatus = async () => {
-    const data = {
-      jobLink: postUrl,
-    };
-    if (!postUrl) {
-      return;
+    if (jobStatus) {
+      data.jobStatus = jobStatus;
     }
 
-    const url = "https://backend.careerai.io/public/jobs/check-job-status";
-    // const url =
-    // "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
-
-    const settings = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    };
-    try {
-      const fetchResponse = await fetch(url, settings);
-      const response = await fetchResponse.json();
-      if (response?.data?.already_saved) {
-        setAlreadySavedStatus(true);
-        return;
-      } else {
-        setAlreadySavedStatus(false);
-      }
-      return;
-    } catch (e) {
-      console.log(e);
-    }
+    saveJobs(
+      data,
+      setLoading,
+      setShowJobsTable,
+      setJobTableData,
+      handleAlreadySaved,
+      setNotification,
+      handleFailed,
+      handleSuccess,
+      setSavedNotification,
+      postUrl,
+      setAlreadySavedStatus
+    );
   };
 
   useEffect(() => {
-    checkJobStatus();
+    checkJobStatus(postUrl, setAlreadySavedStatus, setSavedNotification);
   }, [postUrl]);
 
   return (
     <div className="job__detail__container">
-      <div className="job_detail_header"> Jobs Hunter </div>
-      <AllInputField
-        companyName={companyName}
-        setCompanyName={setCompanyName}
-        jobsTitle={jobsTitle}
-        setJobstitle={setJobstitle}
-        postedDate={postedDate}
-        setPostedDate={setPostedDate}
-        companyLocation={companyLocation}
-        setCompanyLocation={setCompanyLocation}
-        postUrl={postUrl}
-        setPostUrl={setPostUrl}
-        targetElementRef={targetElementRef}
-        jobDescription={jobDescription}
-        setJobDescription={setJobDescription}
-        jobType={jobType}
-        setJobType={setJobType}
-        category={category}
-        setCategory={setCategory}
-        source={source}
-        setSource={setSource}
-        locked={locked}
-        setLocked={setLocked}
-        jobDetails={jobDetails}
-        setJobDetails={setJobDetails}
-        companyInfo={companyInfo}
-        setCompanyInfo={setCompanyInfo}
-        skills={skills}
-        setSkills={setSkills}
-        employment={employment}
-        setEmployment={setEmployment}
-        state={state}
-        setState={setState}
-        city={city}
-        setCity={setCity}
-        easyApply={easyApply}
-        setEasyApply={setEasyApply}
-      />
-
-      <div className="job__detail__footer">
-        <div>
-          {alreadySavedStatus ? (
-            <button className="job_saved_button" disabled={true}>
-              Saved
-            </button>
-          ) : (
-            <button className="job_save_button" onClick={handleSaveClick}>
-              Save
-            </button>
-          )}
+      <div className="jd-inner">
+        <div className="jobs__collapse" onClick={() => setShowForm(false)}>
+          <CloseIcon />
         </div>
-        {success ? <div className="success">Saved successfully</div> : null}
-        {failed ? <div className="failed">Saving failed</div> : null}
-        {errorMessage?.length > 0 && (
-          <div className="failed">{errorMessage}</div>
+        <AllSvg />
+        <div className="scroll-form">
+          <Notification
+            notification={notification}
+            savedNotification={savedNotification}
+            setSavedNotification={setSavedNotification}
+          />
+          <AllInputField
+            companyName={companyName}
+            setCompanyName={setCompanyName}
+            jobsTitle={jobsTitle}
+            setJobstitle={setJobstitle}
+            postedDate={postedDate}
+            setPostedDate={setPostedDate}
+            postUrl={postUrl}
+            setPostUrl={setPostUrl}
+            targetElementRef={targetElementRef}
+            jobDescription={jobDescription}
+            setJobDescription={setJobDescription}
+            jobType={jobType}
+            setJobType={setJobType}
+            category={category}
+            setCategory={setCategory}
+            source={source}
+            setSource={setSource}
+            locked={locked}
+            setLocked={setLocked}
+            jobDetails={jobDetails}
+            setJobDetails={setJobDetails}
+            companyInfo={companyInfo}
+            setCompanyInfo={setCompanyInfo}
+            skills={skills}
+            setSkills={setSkills}
+            employment={employment}
+            setEmployment={setEmployment}
+            state={state}
+            setState={setState}
+            city={city}
+            setCity={setCity}
+            easyApply={easyApply}
+            setEasyApply={setEasyApply}
+            inputErrors={inputErrors}
+          />
+        </div>
+
+        {showJobsTable && (
+          <JobListTable
+            loading={loading}
+            jobTableData={jobTableData}
+            setShowJobsTable={setShowJobsTable}
+            saveNewJob={saveNewJob}
+          />
         )}
+
+        <SaveButton
+          success={success}
+          failed={failed}
+          errorMessage={errorMessage}
+          alreadySavedStatus={alreadySavedStatus}
+          handleSaveClick={handleSaveClick}
+          loading={loading}
+        />
       </div>
     </div>
   );
