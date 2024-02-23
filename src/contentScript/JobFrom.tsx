@@ -505,7 +505,12 @@ const JobFrom = (props: any) => {
       getJobFromGlassdoor();
     }
 
-    if (window.location.href.includes("simplyhired.")) {
+    if (
+      window.location.href.toLowerCase.toString() !==
+        "https://www.simplyhired.com/" &&
+      window.location.href.includes("simplyhired.")
+    ) {
+      console.log(window.location.href);
       getJobFromSimplyhired();
     }
 
