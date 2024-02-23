@@ -131,7 +131,7 @@ const JobFrom = (props: any) => {
         setPostedDate("n/a");
       }
 
-      setEasyApply(0);
+      setEasyApply(null);
 
       // const jobType = document.querySelectorAll(
       //   'job-details-jobs-unified-top-card__job-insight'
@@ -211,7 +211,7 @@ const JobFrom = (props: any) => {
 
     setJobType(null);
     setPostedDate("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
     setSource("Indeed");
   };
 
@@ -277,7 +277,7 @@ const JobFrom = (props: any) => {
     } else {
       setJobType(null);
     }
-    setEasyApply(0);
+    setEasyApply(null);
 
     setSource("Dice");
   };
@@ -348,7 +348,7 @@ const JobFrom = (props: any) => {
 
     setPostedDate("n/a");
     setJobType(null);
-    setEasyApply(0);
+    setEasyApply(null);
     setSource("Ziprecruiter");
   };
 
@@ -376,7 +376,7 @@ const JobFrom = (props: any) => {
     setEmployment(null);
     setJobType(null);
     setPostedDate("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
     if (jobDescriptionEle) {
@@ -450,7 +450,7 @@ const JobFrom = (props: any) => {
     setPostedDate("n/a");
     setCity("n/a");
     setState("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="viewJobBodyJobFullDescriptionContent"]'
@@ -465,12 +465,10 @@ const JobFrom = (props: any) => {
   };
 
   const getBuiltinDomForJobs = () => {
-    const dom = document.querySelector(".block-region-middle");
-    const dom2 = document.querySelector(".block-content");
+    const dom = document?.querySelector(".block-region-middle");
+    const dom2 = document?.querySelector(".block-content");
 
     getJobFromBuiltin(
-      dom,
-      dom2,
       setPostUrl,
       setJobstitle,
       setCompanyName,
@@ -481,7 +479,9 @@ const JobFrom = (props: any) => {
       setState,
       setEasyApply,
       setJobDescription,
-      setSource
+      setSource,
+      dom,
+      dom2
     );
   };
 
@@ -636,7 +636,6 @@ const JobFrom = (props: any) => {
       setLoading(false);
       return false;
     }
-
     saveNewJob();
   };
 
