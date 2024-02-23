@@ -30,7 +30,8 @@
         "icon.png",
         "closeicon.svg",
         "lockedicon.svg",
-        "unlockicon.svg"
+        "unlockicon.svg",
+        "logo.svg"
       ],
       "matches": ["<all_urls>"]
     }
