@@ -39,7 +39,7 @@ export const getJobFromBuiltin = (
     }
   }
 
-  setEmployment("n/a");
+  setEmployment(null);
   setJobType(null);
   setPostedDate("n/a");
   setCity("n/a");

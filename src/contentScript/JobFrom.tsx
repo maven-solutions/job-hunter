@@ -67,12 +67,14 @@ const JobFrom = (props: any) => {
     category: "",
     jobType: "",
     employment: "",
+    easyApply: "",
   });
   const resetInputErrors = () => {
     setInputErrors({
       category: "",
       jobType: "",
       employment: "",
+      easyApply: "",
     });
   };
 
@@ -371,7 +373,7 @@ const JobFrom = (props: any) => {
       setCompanyName(companyName);
     }
 
-    setEmployment("n/a");
+    setEmployment(null);
     setJobType(null);
     setPostedDate("n/a");
     setEasyApply(0);
@@ -443,7 +445,7 @@ const JobFrom = (props: any) => {
       setCompanyName(inputString);
     }
 
-    setEmployment("n/a");
+    setEmployment(null);
     setJobType(null);
     setPostedDate("n/a");
     setCity("n/a");
@@ -575,6 +577,19 @@ const JobFrom = (props: any) => {
       // return;
     }
 
+    if (easyApply === null || !easyApply) {
+      setErrorMessage("Please pick a EasyApply");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, easyApply: "Company/Easy Apply is required." };
+      });
+      setTimeout(() => {
+        setErrorMessage("");
+        resetInputErrors();
+      }, 3000);
+      // return;
+    }
+
     if (jobType === null) {
       setErrorMessage("Please pick a job type");
       setHasErrors(true);
@@ -608,7 +623,12 @@ const JobFrom = (props: any) => {
       }
     }
     setLoading(true);
-    if (category !== null && jobType !== null && employment !== null) {
+    if (
+      category !== null &&
+      jobType !== null &&
+      employment !== null &&
+      easyApply !== null
+    ) {
       setHasErrors(false);
       setNotification(true);
     } else {
@@ -635,6 +655,7 @@ const JobFrom = (props: any) => {
       city: city?.value,
       easyApply: easyApply?.value,
     };
+
     if (jobStatus) {
       data.jobStatus = jobStatus;
     }
