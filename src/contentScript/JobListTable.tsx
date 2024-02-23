@@ -60,42 +60,40 @@ const JobListTable = (props: any) => {
         <div className="job_table_and_canceL_button_section">
           <div className="job__table__section">
             <table className="job__table">
-              <tr className="job__table__row">
-                <th className="job__heading"> Job title</th>
-                <th> Company Name</th>
-                <th> Location</th>
-                <th> Date Posted</th>
-                <th> Job URL</th>
-              </tr>
-
+              <thead>
+                <tr className="job__table__row">
+                  <th className="job__heading">Job title</th>
+                  <th>Company Name</th>
+                  <th>Location</th>
+                  <th>Date Posted</th>
+                  <th>Job URL</th>
+                </tr>
+              </thead>
               <tbody>
-                {jobTableData.map((data: any) => {
+                {jobTableData.map((data: any, i: number) => {
                   return (
-                    <tr className="job__table__tr" key={data.id}>
-                      {" "}
+                    <tr className="job__table__tr" key={data.id ?? i + 1}>
                       <td
                         className={`job__table__td ${
                           data.local && "job__data__local"
                         }`}
                       >
-                        {" "}
                         {data.jobTitle}
-                      </td>{" "}
-                      <td> {data.companyName}</td>{" "}
+                      </td>
+                      <td>{data.companyName}</td>
                       <td>
                         {data.city}, {data.state}
-                      </td>{" "}
-                      <td>{getTimeInFormattetDesing(data.createdAt)}</td>{" "}
+                      </td>
+                      <td>{getTimeInFormattetDesing(data.createdAt)}</td>
                       <td>
-                        {" "}
                         <a
                           className="job__table__link"
                           href={data.jobLink}
                           target="_blank"
                         >
                           {data.jobBoard}
-                        </a>{" "}
-                      </td>{" "}
+                        </a>
+                      </td>
                     </tr>
                   );
                 })}
