@@ -31,7 +31,10 @@
         "closeicon.svg",
         "lockedicon.svg",
         "unlockicon.svg",
-        "logo.svg"
+        "logo.svg",
+        "info.svg",
+        "x.svg",
+        "success.svg"
       ],
       "matches": ["<all_urls>"]
     }
