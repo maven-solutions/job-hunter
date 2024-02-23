@@ -67,12 +67,14 @@ const JobFrom = (props: any) => {
     category: "",
     jobType: "",
     employment: "",
+    easyApply: "",
   });
   const resetInputErrors = () => {
     setInputErrors({
       category: "",
       jobType: "",
       employment: "",
+      easyApply: "",
     });
   };
 
@@ -129,7 +131,7 @@ const JobFrom = (props: any) => {
         setPostedDate("n/a");
       }
 
-      setEasyApply(0);
+      setEasyApply(null);
 
       // const jobType = document.querySelectorAll(
       //   'job-details-jobs-unified-top-card__job-insight'
@@ -209,7 +211,7 @@ const JobFrom = (props: any) => {
 
     setJobType(null);
     setPostedDate("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
     setSource("Indeed");
   };
 
@@ -275,7 +277,7 @@ const JobFrom = (props: any) => {
     } else {
       setJobType(null);
     }
-    setEasyApply(0);
+    setEasyApply(null);
 
     setSource("Dice");
   };
@@ -346,7 +348,7 @@ const JobFrom = (props: any) => {
 
     setPostedDate("n/a");
     setJobType(null);
-    setEasyApply(0);
+    setEasyApply(null);
     setSource("Ziprecruiter");
   };
 
@@ -371,10 +373,10 @@ const JobFrom = (props: any) => {
       setCompanyName(companyName);
     }
 
-    setEmployment("n/a");
+    setEmployment(null);
     setJobType(null);
     setPostedDate("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
     if (jobDescriptionEle) {
@@ -443,12 +445,12 @@ const JobFrom = (props: any) => {
       setCompanyName(inputString);
     }
 
-    setEmployment("n/a");
+    setEmployment(null);
     setJobType(null);
     setPostedDate("n/a");
     setCity("n/a");
     setState("n/a");
-    setEasyApply(0);
+    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="viewJobBodyJobFullDescriptionContent"]'
@@ -463,12 +465,10 @@ const JobFrom = (props: any) => {
   };
 
   const getBuiltinDomForJobs = () => {
-    const dom = document.querySelector(".block-region-middle");
-    const dom2 = document.querySelector(".block-content");
+    const dom = document?.querySelector(".block-region-middle");
+    const dom2 = document?.querySelector(".block-content");
 
     getJobFromBuiltin(
-      dom,
-      dom2,
       setPostUrl,
       setJobstitle,
       setCompanyName,
@@ -479,7 +479,9 @@ const JobFrom = (props: any) => {
       setState,
       setEasyApply,
       setJobDescription,
-      setSource
+      setSource,
+      dom,
+      dom2
     );
   };
 
@@ -575,6 +577,19 @@ const JobFrom = (props: any) => {
       // return;
     }
 
+    if (easyApply === null || !easyApply) {
+      setErrorMessage("Please pick a EasyApply");
+      setHasErrors(true);
+      setInputErrors((prev) => {
+        return { ...prev, easyApply: "Company/Easy Apply is required." };
+      });
+      setTimeout(() => {
+        setErrorMessage("");
+        resetInputErrors();
+      }, 3000);
+      // return;
+    }
+
     if (jobType === null) {
       setErrorMessage("Please pick a job type");
       setHasErrors(true);
@@ -608,7 +623,12 @@ const JobFrom = (props: any) => {
       }
     }
     setLoading(true);
-    if (category !== null && jobType !== null && employment !== null) {
+    if (
+      category !== null &&
+      jobType !== null &&
+      employment !== null &&
+      easyApply !== null
+    ) {
       setHasErrors(false);
       setNotification(true);
     } else {
@@ -616,7 +636,6 @@ const JobFrom = (props: any) => {
       setLoading(false);
       return false;
     }
-
     saveNewJob();
   };
 
@@ -635,6 +654,7 @@ const JobFrom = (props: any) => {
       city: city?.value,
       easyApply: easyApply?.value,
     };
+
     if (jobStatus) {
       data.jobStatus = jobStatus;
     }

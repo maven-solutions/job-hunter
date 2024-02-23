@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import JobFrom from "./JobFrom";
-import JobListTable from "./JobListTable";
 import Logo from "../component/Logo";
 
 const App: React.FC<{}> = () => {

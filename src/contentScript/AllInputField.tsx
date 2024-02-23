@@ -152,7 +152,9 @@ const AllInputField = (props: any) => {
             )}
           </label>
           <label htmlFor="category">
-            <div className="label-top">Company/Easy Apply</div>
+            <div className="label-top">
+              Company/Easy Apply <span className="star">*</span>
+            </div>
             <Select
               options={easyApplyOptions}
               className="react-select-container"
@@ -180,6 +182,11 @@ const AllInputField = (props: any) => {
                 // localStorage.setItem("stateOption", JSON.stringify(option));
               }}
             />
+            {inputErrors.easyApply.trim().length ? (
+              <div className="error">{inputErrors.easyApply}</div>
+            ) : (
+              ""
+            )}
           </label>
           <label htmlFor="category">
             <div className="label-top">State</div>
