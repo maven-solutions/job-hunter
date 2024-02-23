@@ -34,7 +34,10 @@
         "logo.svg",
         "info.svg",
         "x.svg",
-        "success.svg"
+        "success.svg",
+        "ovalbg.svg",
+        "ovalbg2.svg",
+        "hub.svg"
       ],
       "matches": ["<all_urls>"]
     }
