@@ -21,16 +21,8 @@ const JobFrom = (props: any) => {
   );
   const [postUrl, setPostUrl] = useState<string>("");
   const [postedDate, setPostedDate] = useState<any>("");
-  const [jobType, setJobType] = useState<any>(
-    localStorage.getItem("jobTypeOption")
-      ? JSON.parse(localStorage.getItem("jobTypeOption"))
-      : null
-  );
-  const [employment, setEmployment] = useState<any>(
-    localStorage.getItem("employmentOption")
-      ? JSON.parse(localStorage.getItem("employmentOption"))
-      : null
-  );
+  const [jobType, setJobType] = useState<any>(null);
+  const [employment, setEmployment] = useState<any>(null);
 
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
@@ -132,37 +124,8 @@ const JobFrom = (props: any) => {
       }
 
       setEasyApply(null);
-
-      // const jobType = document.querySelectorAll(
-      //   'job-details-jobs-unified-top-card__job-insight'
-      // );
-
-      // console.log(jobType, 'jobType');
-
-      // if (jobType[0]) {
-      //   const jobTypeText = jobType[0]?.textContent?.trim() || 'n/a';
-      //   setJobType(jobTypeText);
-      // }
-
-      // const jobDetailsElement = document.querySelector('.mt3.mb2');
-      // // Loop through all li elements and extract their text content
-      // const liElements = jobDetailsElement.querySelectorAll('li');
-      // if (liElements && liElements?.length > 0 && liElements[0]) {
-      //   setJobType(liElements[0]?.textContent?.trim());
-      // }
-
-      // liElements.forEach(function (liElement, index) {
-      //   const liTextContent = liElement.innerText || liElement.textContent;
-      //   if (index === 0) {
-      //     setJobType(liTextContent);
-      //   }
-      //   if (index === 1) {
-      //     setCompanyInfo(liTextContent);
-      //   }
-      //   if (index === 2) {
-      //     setSkills(liTextContent);
-      //   }
-      // });
+      setJobType(null);
+      setEmployment(null);
 
       setSource("linkedin");
 
@@ -210,6 +173,7 @@ const JobFrom = (props: any) => {
     setJobDescription(about?.innerHTML);
 
     setJobType(null);
+    setEmployment(null);
     setPostedDate("n/a");
     setEasyApply(null);
     setSource("Indeed");
@@ -260,23 +224,25 @@ const JobFrom = (props: any) => {
       setJobDescription(description);
     }
 
-    const jobTypeText = document.querySelector('[data-cy="locationDetails"]');
-    if (jobTypeText) {
-      // Get the text content from the element
-      const jobType = jobTypeText?.textContent?.trim();
-      if (
-        jobType?.toLowerCase() === "remote" ||
-        jobType?.toLowerCase() === "on site" ||
-        jobType?.toLowerCase() === "hybrid"
-      ) {
-        setJobType(jobTypeText);
-      } else {
-        setJobType(null);
-      }
-      setJobType(jobType);
-    } else {
-      setJobType(null);
-    }
+    // const jobTypeText = document.querySelector('[data-cy="locationDetails"]');
+    // if (jobTypeText) {
+    //   // Get the text content from the element
+    //   const jobType = jobTypeText?.textContent?.trim();
+    //   if (
+    //     jobType?.toLowerCase() === "remote" ||
+    //     jobType?.toLowerCase() === "on site" ||
+    //     jobType?.toLowerCase() === "hybrid"
+    //   ) {
+    //     setJobType(jobTypeText);
+    //   } else {
+    //     setJobType(null);
+    //   }
+    //   setJobType(jobType);
+    // } else {
+    //   setJobType(null);
+    // }
+    setEmployment(null);
+    setJobType(null);
     setEasyApply(null);
 
     setSource("Dice");
@@ -347,6 +313,7 @@ const JobFrom = (props: any) => {
     }
 
     setPostedDate("n/a");
+    setEmployment(null);
     setJobType(null);
     setEasyApply(null);
     setSource("Ziprecruiter");
