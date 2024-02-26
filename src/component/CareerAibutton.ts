@@ -23,6 +23,9 @@ const careerAiButton = (jobHeader, jobLink, website) => {
 };
 
 export const addButtonToSimplyHired = () => {
+  if (window.location.href !== "https://www.simplyhired.com/") {
+    return;
+  }
   try {
     //  data-testid="viewJobHeadingContainer"
     const jobHeader = document.querySelector(

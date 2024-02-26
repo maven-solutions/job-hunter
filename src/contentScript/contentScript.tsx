@@ -46,8 +46,8 @@ const App: React.FC<{}> = () => {
     }
 
     if (window.location.href === "https://www.simplyhired.com/") {
+      console.log(window.location.href);
       simplyHiredNotiification();
-
       intervalId = setInterval(addButtonToSimplyHired, 3000);
     }
     // Clear the interval when the component unmounts
