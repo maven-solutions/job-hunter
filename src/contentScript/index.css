@@ -516,3 +516,22 @@ textarea {
   outline: none !important;
   box-shadow: none !important;
 }
+
+.careerhub-notification-bar {
+  background-color: #f1f6fd;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  color: #181818 !important;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  border: 2px solid #a7c5fd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.careerhub-notification-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+}

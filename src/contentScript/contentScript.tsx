@@ -4,6 +4,8 @@ import "./index.css";
 import JobFrom from "./JobFrom";
 import Logo from "../component/Logo";
 
+import { simplyHiredNotiification } from "../component/InfoNotification";
+
 const App: React.FC<{}> = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -86,6 +88,13 @@ const App: React.FC<{}> = () => {
       const intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
       // Clear the interval when the component unmounts
       return () => clearInterval(intervalId);
+    }
+  }, []);
+
+  //  this is only for glassdoor webiste
+  useEffect(() => {
+    if (window.location.href === "https://www.simplyhired.com/") {
+      simplyHiredNotiification();
     }
   }, []);
 
