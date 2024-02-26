@@ -654,6 +654,7 @@ const JobFrom = (props: any) => {
         <AllSvg />
         <div className="scroll-form">
           <Notification
+            alreadySavedStatus={alreadySavedStatus}
             notification={notification}
             savedNotification={savedNotification}
             setSavedNotification={setSavedNotification}

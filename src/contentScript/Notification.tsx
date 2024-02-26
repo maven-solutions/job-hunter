@@ -1,11 +1,16 @@
 import React from "react";
 
 const Notification = (props: any) => {
-  const { notification, savedNotification, setSavedNotification } = props;
+  const {
+    notification,
+    savedNotification,
+    setSavedNotification,
+    alreadySavedStatus,
+  } = props;
   return (
     <>
       {" "}
-      {notification && (
+      {/* {notification && (
         <div className="jobs-notification">
           <div className="jobs-notification-inner">
             <img src={chrome.runtime.getURL("info.svg")} alt="info-icon" />
@@ -16,8 +21,23 @@ const Notification = (props: any) => {
             <button type="button"></button>
           </div>
         </div>
+      )} */}
+      {alreadySavedStatus && (
+        <div className="jobs-notification">
+          <div className="jobs-notification-inner">
+            <img src={chrome.runtime.getURL("info.svg")} alt="info-icon" />
+            <div className="text">
+              This job is alreay saved, please try another one!
+            </div>
+
+            {/* <button type="button" >
+              {" "}
+              <img src={chrome.runtime.getURL("x.svg")} alt="x-icon" />
+            </button> */}
+          </div>
+        </div>
       )}
-      {savedNotification && (
+      {!alreadySavedStatus && savedNotification && (
         <div className="jobs-notification">
           <div className="jobs-notification-inner jobs-notification-inner-saved">
             <img
