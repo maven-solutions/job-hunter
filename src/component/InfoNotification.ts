@@ -1,8 +1,20 @@
-const infoNotification = (container: any) => {
+const infoNotification = (container: any, website) => {
   // Create the notification bar element
   const notificationBar = document.createElement("div");
-  notificationBar.classList.add("careerhub-notification-bar");
 
+  if (website === "glassdoor") {
+    notificationBar.classList.add(
+      "careerhub-notification-bar",
+      "glassdoor-spacing-for-bar"
+    );
+  }
+
+  if (website === "simplyhired") {
+    notificationBar.classList.add(
+      "careerhub-notification-bar",
+      "simplyhired-spacing-for-bar"
+    );
+  }
   // Create the info icon element
   const infoIcon = document.createElement("img");
   infoIcon.src = chrome.runtime.getURL("info.svg"); // replace 'info_icon.png' with your actual icon image path
@@ -25,5 +37,11 @@ const infoNotification = (container: any) => {
 
 export const simplyHiredNotiification = () => {
   const container = document.querySelector(".css-imseer");
-  infoNotification(container);
+  infoNotification(container, "simplyhired");
+};
+export const glassDoorNotiification = () => {
+  const container = document.querySelector(
+    ".TwoColumnLayout_columnRight__XhhAg"
+  );
+  infoNotification(container, "glassdoor");
 };

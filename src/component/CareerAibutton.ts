@@ -1,21 +1,25 @@
-const careerAiButton = (jobHeader, jobLink) => {
-  const beautifulButton = document.createElement("a");
+const careerAiButton = (jobHeader, jobLink, website) => {
+  const careerAiButton = document.createElement("a");
 
   // Set attributes and styles for the button
-  beautifulButton.href = jobLink;
-  beautifulButton.target = "_blank";
-  beautifulButton.textContent = "Add This Job to CareerAi";
-  beautifulButton.style.display = "inline-block";
-  beautifulButton.style.padding = "7px 20px";
-  beautifulButton.style.backgroundColor = "#0145FD";
-  beautifulButton.style.color = "#ffffff";
-  beautifulButton.style.textDecoration = "none";
-  beautifulButton.style.borderRadius = "5px";
-  beautifulButton.style.fontSize = "16px";
-  beautifulButton.style.fontWeight = "500";
-  beautifulButton.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.1)";
-  beautifulButton.style.transition = "background-color 0.3s ease";
-  jobHeader.prepend(beautifulButton);
+  careerAiButton.href = jobLink;
+  careerAiButton.target = "_blank";
+  careerAiButton.textContent = "Add This Job to CareerAi";
+
+  if (website === "simplyhired") {
+    careerAiButton.classList.add(
+      "landingpage-careerai-button",
+      "landingpage-careerai-button-simplyhired"
+    );
+  }
+  if (website === "glassdoor") {
+    careerAiButton.classList.add(
+      "landingpage-careerai-button",
+      "landingpage-careerai-button-glassdoor"
+    );
+  }
+
+  jobHeader.prepend(careerAiButton);
 };
 
 export const addButtonToSimplyHired = () => {
@@ -39,6 +43,34 @@ export const addButtonToSimplyHired = () => {
       button.remove();
     });
 
-    careerAiButton(jobHeader, jobLink);
+    careerAiButton(jobHeader, jobLink, "simplyhired");
   } catch (error) {}
+};
+
+// this button will be added on glassdoor website
+export const addButtonToGlassdoorWebsite = () => {
+  try {
+    let jobLinkEle: any = "";
+    let jobLink: any = "";
+    const jobLinkEleSection = document.querySelector('[data-selected="true"]');
+    if (jobLinkEleSection) {
+      jobLinkEle = jobLinkEleSection?.querySelector("a");
+    }
+    if (jobLinkEle) {
+      jobLink = jobLinkEle?.getAttribute("href");
+    }
+
+    const jobHeader = document.querySelector(
+      ".JobDetails_jobDetailsHeader__qKuvs"
+    );
+
+    // Remove previously appended buttons
+    const existingButtons = jobHeader.querySelectorAll("a");
+    existingButtons.forEach((button) => {
+      button.remove();
+    });
+    careerAiButton(jobHeader, jobLink, "glassdoor");
+  } catch (error) {
+    console.log(error);
+  }
 };

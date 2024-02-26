@@ -519,14 +519,20 @@ textarea {
 
 .careerhub-notification-bar {
   background-color: #f1f6fd;
-  font-weight: bold !important;
-  font-size: 16px !important;
   color: #181818 !important;
   padding: 15px;
   display: flex;
   align-items: center;
   border: 2px solid #a7c5fd;
   border-radius: 8px;
+}
+.glassdoor-spacing-for-bar {
+  margin: 25px 25px 0 25px !important;
+  font-weight: 600;
+  font-size: 16px !important;
+}
+.simplyhired-spacing-for-bar {
+  font-weight: bold !important;
   margin-bottom: 20px;
 }
 
@@ -534,4 +540,21 @@ textarea {
   width: 24px;
   height: 24px;
   margin-right: 10px;
+}
+.landingpage-careerai-button {
+  display: inline-block;
+  padding: 7px 20px;
+  background-color: #0145fd;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.landingpage-careerai-button-simplyhired {
+  margin-top: 20px;
+}
+.landingpage-careerai-button-glassdoor {
+  margin-bottom: 20px;
 }
