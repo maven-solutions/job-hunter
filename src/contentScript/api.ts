@@ -1,7 +1,8 @@
 export const checkJobStatus = async (
   postUrl,
   setAlreadySavedStatus,
-  setSavedNotification
+  setSavedNotification,
+  SetAlreadySavedInfo
 ) => {
   const data = {
     jobLink: postUrl,
@@ -10,9 +11,9 @@ export const checkJobStatus = async (
     return;
   }
 
-  const url = "https://backend.careerai.io/public/jobs/check-job-status";
-  // const url =
-  // "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
+  // const url = "https://backend.careerai.io/public/jobs/check-job-status";
+  const url =
+    "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
 
   const settings = {
     method: "POST",
@@ -28,6 +29,7 @@ export const checkJobStatus = async (
     if (response?.data?.already_saved) {
       setAlreadySavedStatus(true);
       setSavedNotification(true);
+      SetAlreadySavedInfo(true);
       setTimeout(() => {
         setSavedNotification(false);
       }, 3000);
@@ -54,9 +56,9 @@ export const saveJobs = async (
   postUrl,
   setAlreadySavedStatus
 ) => {
-  // const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-  const url = "https://backend.careerai.io/public/jobs";
-  ("http://localhost:8000/public/jobs");
+  const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
+  // const url = "https://backend.careerai.io/public/jobs";
+  // ("http://localhost:8000/public/jobs");
   const settings = {
     method: "POST",
     headers: {
@@ -102,9 +104,17 @@ export const saveJobs = async (
       handleSuccess();
       setLoading(false);
       setNotification(false);
+      setAlreadySavedStatus(true);
       setSavedNotification(true);
-
-      checkJobStatus(postUrl, setAlreadySavedStatus, setSavedNotification);
+      setTimeout(() => {
+        setSavedNotification(false);
+      }, 3000);
+      // checkJobStatus(
+      //   postUrl,
+      //   setAlreadySavedStatus,
+      //   setSavedNotification,
+      //   SetAlreadySavedInfo
+      // );
       setTimeout(() => {
         setSavedNotification(false);
       }, 3000);

@@ -40,6 +40,7 @@ const JobFrom = (props: any) => {
   const [city, setCity] = useState<any>(null);
   const [source, setSource] = useState<any>("");
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
+  const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
   const [locked, setLocked] = useState<Boolean>(
     localStorage.getItem("lock_status") === "true" ? true : false
   );
@@ -453,6 +454,7 @@ const JobFrom = (props: any) => {
   };
 
   useEffect(() => {
+    SetAlreadySavedInfo(false);
     if (window.location.href.includes("linkedin.")) {
       getContentFromLinkedInJobs();
     }
@@ -642,7 +644,12 @@ const JobFrom = (props: any) => {
   };
 
   useEffect(() => {
-    checkJobStatus(postUrl, setAlreadySavedStatus, setSavedNotification);
+    checkJobStatus(
+      postUrl,
+      setAlreadySavedStatus,
+      setSavedNotification,
+      SetAlreadySavedInfo
+    );
   }, [postUrl]);
 
   return (
@@ -658,6 +665,8 @@ const JobFrom = (props: any) => {
             notification={notification}
             savedNotification={savedNotification}
             setSavedNotification={setSavedNotification}
+            SetAlreadySavedInfo={SetAlreadySavedInfo}
+            alreadySavedInfo={alreadySavedInfo}
           />
           <AllInputField
             companyName={companyName}

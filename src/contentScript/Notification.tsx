@@ -6,6 +6,8 @@ const Notification = (props: any) => {
     savedNotification,
     setSavedNotification,
     alreadySavedStatus,
+    alreadySavedInfo,
+    SetAlreadySavedInfo,
   } = props;
   return (
     <>
@@ -22,22 +24,21 @@ const Notification = (props: any) => {
           </div>
         </div>
       )} */}
-      {alreadySavedStatus && (
+      {alreadySavedInfo && (
         <div className="jobs-notification">
           <div className="jobs-notification-inner">
             <img src={chrome.runtime.getURL("info.svg")} alt="info-icon" />
             <div className="text">
               This job is alreay saved, please try another one!
             </div>
-
-            {/* <button type="button" >
+            <button type="button" onClick={() => SetAlreadySavedInfo(false)}>
               {" "}
               <img src={chrome.runtime.getURL("x.svg")} alt="x-icon" />
-            </button> */}
+            </button>
           </div>
         </div>
       )}
-      {!alreadySavedStatus && savedNotification && (
+      {!alreadySavedInfo && savedNotification && (
         <div className="jobs-notification">
           <div className="jobs-notification-inner jobs-notification-inner-saved">
             <img
