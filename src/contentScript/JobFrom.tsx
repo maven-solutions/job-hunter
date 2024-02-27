@@ -9,6 +9,7 @@ import { checkJobStatus, saveJobs } from "./api";
 import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
+import { getJobFromSimplyhiredLandingPage } from "../jobExtractor/simplyhired";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -474,9 +475,20 @@ const JobFrom = (props: any) => {
       getJobFromGlassdoor();
     }
 
-    if (window.location.href.includes("simplyhired.")) {
+    if (
+      window.location.href.toLowerCase.toString() !==
+        "https://www.simplyhired.com/" &&
+      window.location.href.includes("simplyhired.")
+    ) {
       getJobFromSimplyhired();
     }
+
+    // if (
+    //   window.location.href.toLowerCase.toString() ===
+    //   "https://www.simplyhired.com/"
+    // ) {
+    //   getJobFromSimplyhiredLandingPage();
+    // }
 
     if (window.location.href.includes("builtin.")) {
       getBuiltinDomForJobs();
