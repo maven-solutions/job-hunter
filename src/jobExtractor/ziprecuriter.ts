@@ -47,6 +47,26 @@ const getJobsFromZipRecuriter2 = (
     const inputString = companyEle?.textContent?.trim();
     setCompanyName(inputString);
   }
+  const locationtext =
+    zipDom.querySelector(".hiring_location")?.textContent?.trim() ?? "";
+  setLocation(locationtext);
+
+  const jobCharacterstics = zipDom.querySelector(".job_characteristics");
+  const workType =
+    jobCharacterstics.querySelector(".wfh_label")?.textContent?.trim() ?? "";
+  const employmentType =
+    jobCharacterstics
+      .querySelector(".t_employment_type")
+      ?.textContent?.trim() ?? "";
+  const benefits =
+    jobCharacterstics.querySelector(".t_benefits")?.textContent?.trim() ?? "";
+  setAddationalInfo([workType, employmentType, benefits]);
+
+  const compensation =
+    jobCharacterstics.querySelector(".t_compensation")?.textContent?.trim() ??
+    "";
+
+  setAddationalInfo([workType, employmentType, benefits, compensation]);
 
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {
@@ -93,8 +113,6 @@ export const getJobFromZipRecruiter = (
       zipDom2
     );
   }
-
-  setLocation("n/a");
 
   setSource("Ziprecruiter");
 };
