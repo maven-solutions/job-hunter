@@ -37,9 +37,11 @@ export const getJobsFromDice = (
   );
 
   // Get the HTML element by its data-testid attribute
-  const dateElement = document.querySelector("#timeAgo");
-  const date = extractDateFromDiceDom(dateElement);
-  setLocation(date);
+  const locationText = document
+    .querySelector('[data-cy="location"]')
+    .textContent.trim();
+
+  setLocation(locationText);
 
   const jobDescriptionEle = document.querySelector(
     '[data-testid="jobDescriptionHtml"]'
@@ -50,7 +52,28 @@ export const getJobsFromDice = (
     setJobDescription(description);
   }
 
-  // const jobTypeText = document.querySelector('[data-cy="locationDetails"]');
+  const jobTypeText =
+    document.querySelector('[data-cy="locationDetails"]').textContent.trim() ??
+    "";
+
+  const payDetailText =
+    document.querySelector('[data-cy="payDetails"]').textContent.trim() ?? "";
+
+  const employmentDetailsText =
+    document
+      .querySelector('[data-cy="employmentDetails"]')
+      .textContent.trim() ?? "";
+
+  const willingToSponsorText =
+    document.querySelector('[data-cy="willingToSponsor"]').textContent.trim() ??
+    "";
+
+  setAddationalInfo([
+    jobTypeText,
+    payDetailText,
+    employmentDetailsText,
+    willingToSponsorText,
+  ]);
   // if (jobTypeText) {
   //   // Get the text content from the element
   //   const jobType = jobTypeText?.textContent?.trim();
