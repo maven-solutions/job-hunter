@@ -20,7 +20,7 @@ const JobFrom = (props: any) => {
     "<b>Job Description</b>"
   );
   const [postUrl, setPostUrl] = useState<string>("");
-  const [postedDate, setPostedDate] = useState<any>("");
+  const [location, setLocation] = useState<any>("");
 
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
@@ -55,7 +55,6 @@ const JobFrom = (props: any) => {
   const getContentFromLinkedInJobs = (): void => {
     try {
       setPostUrl(window.location.href);
-
       const jobsBody = document?.getElementsByClassName(
         "job-details-jobs-unified-top-card__job-title"
       );
@@ -65,45 +64,28 @@ const JobFrom = (props: any) => {
 
       setTimeout(() => {
         let jobDetailsElement = document?.getElementById("job-details");
-
         const about = jobDetailsElement?.querySelector("span");
-
         setJobDescription(about?.innerHTML);
       }, 500);
 
       // find posted date
-
-      const daysAgoEle = document?.querySelector("#job-details");
-      const targetElement = document.querySelector("#job-details");
-      let date = [];
-      // Check if the element is found
-      if (targetElement) {
-        // Get the next sibling element
-        const nextElement = targetElement.nextElementSibling;
-
-        // Check if the next sibling exists
-        if (nextElement) {
-          const modifiedDate = nextElement.innerHTML
-            .replace("Posted on ", "")
-            .replace(".", "");
-          if (isDateString(modifiedDate)) {
-            setPostedDate(modifiedDate);
-          } else {
-            setPostedDate("n/a");
-          }
-        }
-      } else {
-        setPostedDate("n/a");
+      const locationText = document
+        .querySelector(
+          ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+        )
+        .textContent.trim()
+        .split("·")[1]
+        .trim();
+      if (locationText) {
+        setLocation(locationText);
       }
 
       setSource("linkedin");
-
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
         const domElement = document?.querySelector(
           ".jobs-unified-top-card.t-14"
         );
-
         const aTag = domElement?.querySelector("a.app-aware-link");
         const companyName = aTag?.textContent;
         setCompanyName(companyName?.trim());
@@ -140,7 +122,7 @@ const JobFrom = (props: any) => {
     const about = document.getElementById("jobDescriptionText");
     setJobDescription(about?.innerHTML);
 
-    setPostedDate("n/a");
+    setLocation("n/a");
 
     setSource("Indeed");
   };
@@ -179,7 +161,7 @@ const JobFrom = (props: any) => {
     // Get the HTML element by its data-testid attribute
     const dateElement = document.querySelector("#timeAgo");
     const date = extractDateFromDiceDom(dateElement);
-    setPostedDate(date);
+    setLocation(date);
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="jobDescriptionHtml"]'
@@ -273,7 +255,7 @@ const JobFrom = (props: any) => {
       getJobsFromZipRecuriter2(zipDom2);
     }
 
-    setPostedDate("n/a");
+    setLocation("n/a");
 
     setSource("Ziprecruiter");
   };
@@ -299,7 +281,7 @@ const JobFrom = (props: any) => {
       setCompanyName(companyName);
     }
 
-    setPostedDate("n/a");
+    setLocation("n/a");
 
     const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
     if (jobDescriptionEle) {
@@ -368,7 +350,7 @@ const JobFrom = (props: any) => {
       setCompanyName(inputString);
     }
 
-    setPostedDate("n/a");
+    setLocation("n/a");
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="viewJobBodyJobFullDescriptionContent"]'
@@ -390,7 +372,7 @@ const JobFrom = (props: any) => {
       setPostUrl,
       setJobstitle,
       setCompanyName,
-      setPostedDate,
+      setLocation,
       setJobDescription,
       setSource,
       dom,
@@ -490,7 +472,7 @@ const JobFrom = (props: any) => {
       companyName,
       jobTitle: jobsTitle,
       jobLink: postUrl,
-      posted_on: postedDate,
+      posted_on: location,
       description: jobDescription,
       jobBoard: source,
     };
@@ -544,8 +526,8 @@ const JobFrom = (props: any) => {
             setCompanyName={setCompanyName}
             jobsTitle={jobsTitle}
             setJobstitle={setJobstitle}
-            postedDate={postedDate}
-            setPostedDate={setPostedDate}
+            location={location}
+            setLocation={setLocation}
             postUrl={postUrl}
             setPostUrl={setPostUrl}
             targetElementRef={targetElementRef}

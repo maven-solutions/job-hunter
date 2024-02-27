@@ -21,8 +21,8 @@ const AllInputField = (props: any) => {
     setPostUrl,
     jobDescription,
     setJobDescription,
-    postedDate,
-    setPostedDate,
+    location,
+    setLocation,
     source,
     setSource,
   } = props;
@@ -59,10 +59,10 @@ const AllInputField = (props: any) => {
             name="source"
           />
           <InputBox
-            title="Posted On"
-            value={postedDate}
-            valueSetter={setPostedDate}
-            name="posteddate"
+            title="Location"
+            value={location}
+            valueSetter={setLocation}
+            name="location"
           />
           <div className="full">
             <InputBox
