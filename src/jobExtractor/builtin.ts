@@ -2,12 +2,7 @@ export const getJobFromBuiltin = (
   setPostUrl: any,
   setJobstitle: any,
   setCompanyName: any,
-  setEmployment: any,
-  setJobType: any,
   setPostedDate: any,
-  setCity: any,
-  setState: any,
-  setEasyApply: any,
   setJobDescription: any,
   setSource: any,
   dom?: any,
@@ -39,12 +34,7 @@ export const getJobFromBuiltin = (
     }
   }
 
-  setEmployment(null);
-  setJobType(null);
   setPostedDate("n/a");
-  setCity("n/a");
-  setState("n/a");
-  setEasyApply(null);
 
   const jobDescriptionEle = dom?.querySelector(".job-description");
   if (jobDescriptionEle) {

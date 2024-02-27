@@ -9,7 +9,6 @@ import { checkJobStatus, saveJobs } from "./api";
 import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
-import { getJobFromSimplyhiredLandingPage } from "../jobExtractor/simplyhired";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -22,8 +21,6 @@ const JobFrom = (props: any) => {
   );
   const [postUrl, setPostUrl] = useState<string>("");
   const [postedDate, setPostedDate] = useState<any>("");
-  const [jobType, setJobType] = useState<any>(null);
-  const [employment, setEmployment] = useState<any>(null);
 
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
@@ -31,45 +28,20 @@ const JobFrom = (props: any) => {
   const [success, setSuccess] = useState<Boolean>(false);
   const [failed, setFailed] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<any>("");
-  const [category, setCategory] = useState<any>(
-    localStorage.getItem("lock_status") === "true" &&
-      localStorage.getItem("categoryOption")
-      ? JSON.parse(localStorage.getItem("categoryOption"))
-      : null
-  );
-  const [state, setState] = useState<any>(null);
-  const [city, setCity] = useState<any>(null);
+
   const [source, setSource] = useState<any>("");
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
-  const [locked, setLocked] = useState<Boolean>(
-    localStorage.getItem("lock_status") === "true" ? true : false
-  );
 
-  const [easyApply, setEasyApply] = useState<any>(0);
   const [notification, setNotification] = useState(false);
   const [savedNotification, setSavedNotification] = useState(false);
 
   const [showJobsTable, setShowJobsTable] = useState(false);
   const [jobTableData, setJobTableData] = useState([]);
 
-  const clearStateAndCity = () => {
-    setState(null);
-    setCity(null);
-  };
-  const [inputErrors, setInputErrors] = useState({
-    category: "",
-    jobType: "",
-    employment: "",
-    easyApply: "",
-  });
+  const [inputErrors, setInputErrors] = useState({});
   const resetInputErrors = () => {
-    setInputErrors({
-      category: "",
-      jobType: "",
-      employment: "",
-      easyApply: "",
-    });
+    setInputErrors({});
   };
 
   function isDateString(str) {
@@ -83,7 +55,6 @@ const JobFrom = (props: any) => {
   const getContentFromLinkedInJobs = (): void => {
     try {
       setPostUrl(window.location.href);
-      clearStateAndCity();
 
       const jobsBody = document?.getElementsByClassName(
         "job-details-jobs-unified-top-card__job-title"
@@ -125,10 +96,6 @@ const JobFrom = (props: any) => {
         setPostedDate("n/a");
       }
 
-      setEasyApply(null);
-      setJobType(null);
-      setEmployment(null);
-
       setSource("linkedin");
 
       // Assuming you have a reference to the DOM element
@@ -148,7 +115,6 @@ const JobFrom = (props: any) => {
 
   const getJobsFromIndeed = (): void => {
     setPostUrl(window.location.href);
-    clearStateAndCity();
 
     setTimeout(() => {
       const titleElement = document?.querySelector(
@@ -174,16 +140,14 @@ const JobFrom = (props: any) => {
     const about = document.getElementById("jobDescriptionText");
     setJobDescription(about?.innerHTML);
 
-    setJobType(null);
-    setEmployment(null);
     setPostedDate("n/a");
-    setEasyApply(null);
+
     setSource("Indeed");
   };
 
   const getJobsFromDice = (): void => {
     setPostUrl(window.location.href);
-    clearStateAndCity();
+
     // Get the HTML element by its data-cy attribute
     const titleElement = document.querySelector('[data-cy="jobTitle"]');
     if (titleElement) {
@@ -243,9 +207,6 @@ const JobFrom = (props: any) => {
     // } else {
     //   setJobType(null);
     // }
-    setEmployment(null);
-    setJobType(null);
-    setEasyApply(null);
 
     setSource("Dice");
   };
@@ -300,8 +261,6 @@ const JobFrom = (props: any) => {
   };
 
   const getJobFromZipRecruiter = (): void => {
-    clearStateAndCity();
-
     const zipDom = document.querySelector('[data-testid="right-pane"]');
 
     const zipDom2 = document.querySelector(".job_details");
@@ -315,9 +274,7 @@ const JobFrom = (props: any) => {
     }
 
     setPostedDate("n/a");
-    setEmployment(null);
-    setJobType(null);
-    setEasyApply(null);
+
     setSource("Ziprecruiter");
   };
 
@@ -342,10 +299,7 @@ const JobFrom = (props: any) => {
       setCompanyName(companyName);
     }
 
-    setEmployment(null);
-    setJobType(null);
     setPostedDate("n/a");
-    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
     if (jobDescriptionEle) {
@@ -414,12 +368,7 @@ const JobFrom = (props: any) => {
       setCompanyName(inputString);
     }
 
-    setEmployment(null);
-    setJobType(null);
     setPostedDate("n/a");
-    setCity("n/a");
-    setState("n/a");
-    setEasyApply(null);
 
     const jobDescriptionEle = document.querySelector(
       '[data-testid="viewJobBodyJobFullDescriptionContent"]'
@@ -441,12 +390,7 @@ const JobFrom = (props: any) => {
       setPostUrl,
       setJobstitle,
       setCompanyName,
-      setEmployment,
-      setJobType,
       setPostedDate,
-      setCity,
-      setState,
-      setEasyApply,
       setJobDescription,
       setSource,
       dom,
@@ -514,9 +458,6 @@ const JobFrom = (props: any) => {
     setTimeout(() => {
       setSuccess(false);
     }, 3000);
-    if (!locked) {
-      setCategory(null);
-    }
   };
 
   // Function to handle API call error
@@ -527,16 +468,10 @@ const JobFrom = (props: any) => {
     setTimeout(() => {
       setFailed(false);
     }, 3000);
-    if (!locked) {
-      setCategory(null);
-    }
   };
 
   const handleAlreadySaved = () => {
     setErrorMessage("Already Saved");
-    if (!locked) {
-      setCategory(null);
-    }
 
     // Hide error message after some seconds (e.g., 3 seconds)
     setTimeout(() => {
@@ -545,78 +480,8 @@ const JobFrom = (props: any) => {
   };
 
   const handleSaveClick = async () => {
-    if (category === null) {
-      setErrorMessage("Please pick a category");
-      setHasErrors(true);
-      setInputErrors((prev) => {
-        return { ...prev, category: "Category is required." };
-      });
-      setTimeout(() => {
-        setErrorMessage("");
-        resetInputErrors();
-      }, 3000);
-      // return;
-    }
-
-    if (easyApply === null || !easyApply) {
-      setErrorMessage("Please pick a EasyApply");
-      setHasErrors(true);
-      setInputErrors((prev) => {
-        return { ...prev, easyApply: "Company/Easy Apply is required." };
-      });
-      setTimeout(() => {
-        setErrorMessage("");
-        resetInputErrors();
-      }, 3000);
-      // return;
-    }
-
-    if (jobType === null) {
-      setErrorMessage("Please pick a job type");
-      setHasErrors(true);
-      setInputErrors((prev) => {
-        return { ...prev, jobType: "Job type is required." };
-      });
-      setTimeout(() => {
-        setErrorMessage("");
-        resetInputErrors();
-      }, 3000);
-      // return;
-    }
-    if (employment === null) {
-      setErrorMessage("Please pick a employment type");
-      setHasErrors(true);
-      setInputErrors((prev) => {
-        return { ...prev, employment: "Employment is required." };
-      });
-      setTimeout(() => {
-        setErrorMessage("");
-        resetInputErrors();
-      }, 3000);
-      // return;
-    }
-    for (const key in inputErrors) {
-      if (inputErrors.hasOwnProperty(key) && inputErrors[key] === "") {
-        continue;
-      } else {
-        setLoading(false);
-        return;
-      }
-    }
     setLoading(true);
-    if (
-      category !== null &&
-      jobType !== null &&
-      employment !== null &&
-      easyApply !== null
-    ) {
-      setHasErrors(false);
-      setNotification(true);
-    } else {
-      setNotification(false);
-      setLoading(false);
-      return false;
-    }
+
     saveNewJob();
   };
 
@@ -627,13 +492,7 @@ const JobFrom = (props: any) => {
       jobLink: postUrl,
       posted_on: postedDate,
       description: jobDescription,
-      jobType: jobType?.value,
-      category: category?.value,
-      employment: employment?.value,
       jobBoard: source,
-      state: state?.value ?? "USA",
-      city: city?.value,
-      easyApply: easyApply?.value,
     };
 
     if (jobStatus) {
@@ -692,22 +551,8 @@ const JobFrom = (props: any) => {
             targetElementRef={targetElementRef}
             jobDescription={jobDescription}
             setJobDescription={setJobDescription}
-            jobType={jobType}
-            setJobType={setJobType}
-            category={category}
-            setCategory={setCategory}
             source={source}
             setSource={setSource}
-            locked={locked}
-            setLocked={setLocked}
-            employment={employment}
-            setEmployment={setEmployment}
-            state={state}
-            setState={setState}
-            city={city}
-            setCity={setCity}
-            easyApply={easyApply}
-            setEasyApply={setEasyApply}
             inputErrors={inputErrors}
           />
         </div>
