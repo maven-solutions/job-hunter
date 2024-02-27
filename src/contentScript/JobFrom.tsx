@@ -10,6 +10,11 @@ import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
 import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
+import { getJobsFromIndeed } from "../jobExtractor/indeed";
+import { getJobsFromDice } from "../jobExtractor/dice";
+import { getJobFromSimplyhired } from "../jobExtractor/simplyhired";
+import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
+import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -54,274 +59,7 @@ const JobFrom = (props: any) => {
     return !isNaN(date.getTime()) && !isNaN(Date.parse(str));
   }
 
-  const getJobsFromIndeed = (): void => {
-    setPostUrl(window.location.href);
-
-    setTimeout(() => {
-      const titleElement = document?.querySelector(
-        ".jobsearch-JobInfoHeader-title"
-      );
-      // Get the text content from the titleElement
-      const text = titleElement?.textContent?.trim();
-      // Extract "React.js Developer"
-      const jobTitle = text?.split(" - ")[0];
-      if (jobTitle) {
-        setJobstitle(jobTitle);
-      }
-    }, 1000);
-
-    const companyElement = document.querySelector(
-      '[data-testid="inlineHeader-companyName"]'
-    );
-
-    if (companyElement) {
-      setCompanyName(companyElement?.textContent.trim());
-    }
-
-    const about = document.getElementById("jobDescriptionText");
-    setJobDescription(about?.innerHTML);
-
-    setLocation("n/a");
-
-    setSource("Indeed");
-  };
-
-  const getJobsFromDice = (): void => {
-    setPostUrl(window.location.href);
-
-    // Get the HTML element by its data-cy attribute
-    const titleElement = document.querySelector('[data-cy="jobTitle"]');
-    if (titleElement) {
-      // Get the text content from the element
-      const title = titleElement?.textContent?.trim();
-      setJobstitle(title);
-    }
-    const companyNameEle = document.querySelector(
-      '[data-cy="companyNameLink"]'
-    );
-    const companyNameWithNoLinkEle = document.querySelector(
-      '[data-cy="companyNameNoLink"]'
-    );
-    if (companyNameEle) {
-      // Get the text content from the element
-      const companyName = companyNameEle?.textContent?.trim();
-      setCompanyName(companyName);
-    } else if (companyNameWithNoLinkEle) {
-      const companyNameWithNoLink =
-        companyNameWithNoLinkEle?.textContent?.trim();
-      setCompanyName(companyNameWithNoLink);
-    }
-
-    // Get the HTML element by its data-testid attribute
-    const locationElement = document.querySelector(
-      ".job-header_jobDetail__ZGjiQ"
-    );
-
-    // Get the HTML element by its data-testid attribute
-    const dateElement = document.querySelector("#timeAgo");
-    const date = extractDateFromDiceDom(dateElement);
-    setLocation(date);
-
-    const jobDescriptionEle = document.querySelector(
-      '[data-testid="jobDescriptionHtml"]'
-    );
-    if (jobDescriptionEle) {
-      // Get the text content from the element
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-
-    // const jobTypeText = document.querySelector('[data-cy="locationDetails"]');
-    // if (jobTypeText) {
-    //   // Get the text content from the element
-    //   const jobType = jobTypeText?.textContent?.trim();
-    //   if (
-    //     jobType?.toLowerCase() === "remote" ||
-    //     jobType?.toLowerCase() === "on site" ||
-    //     jobType?.toLowerCase() === "hybrid"
-    //   ) {
-    //     setJobType(jobTypeText);
-    //   } else {
-    //     setJobType(null);
-    //   }
-    //   setJobType(jobType);
-    // } else {
-    //   setJobType(null);
-    // }
-
-    setSource("Dice");
-  };
-
-  const removeRatingFromEnd = (inputString) => {
-    // Remove the rating at the end of the string
-    let stringWithoutRating = inputString.replace(/\d+(\.\d+)?★$/, "");
-    // Remove any trailing whitespace
-    let finalString = stringWithoutRating.trim();
-    return finalString;
-  };
-
   // Example usage
-
-  const getJobsFromZipRecuriter1 = (zipDom: any) => {
-    const zipDomForLink = document.querySelector(".job_result_selected");
-    if (zipDomForLink) {
-      const link = zipDomForLink.querySelector("a");
-      setPostUrl(link.href);
-    }
-
-    const titleEle = zipDom.querySelector("h1");
-    const title = titleEle?.textContent?.trim();
-    setJobstitle(title);
-    let companyEle = zipDom.querySelector("a");
-    if (companyEle) {
-      const inputString = companyEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-    const jobDescriptionEle = zipDom.querySelector(".job_description");
-    if (jobDescriptionEle) {
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-  };
-  const getJobsFromZipRecuriter2 = (zipDom: any) => {
-    const titleEle = zipDom.querySelector(".job_title");
-    const title = titleEle?.textContent?.trim();
-    setJobstitle(title);
-
-    let companyEle = zipDom.querySelector(".hiring_company");
-    if (companyEle) {
-      const inputString = companyEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-
-    const jobDescriptionEle = zipDom.querySelector(".job_description");
-    if (jobDescriptionEle) {
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-  };
-
-  const getJobFromZipRecruiter = (): void => {
-    const zipDom = document.querySelector('[data-testid="right-pane"]');
-
-    const zipDom2 = document.querySelector(".job_details");
-    if (zipDom) {
-      getJobsFromZipRecuriter1(zipDom);
-    }
-    if (zipDom2) {
-      setPostUrl(window.location.href);
-
-      getJobsFromZipRecuriter2(zipDom2);
-    }
-
-    setLocation("n/a");
-
-    setSource("Ziprecruiter");
-  };
-
-  const getJobFromGlassdoor = (): void => {
-    setPostUrl(window.location.href);
-
-    // this is for the desing where there is tab section in that page
-    const titleElement = document.querySelector('[data-test="job-title"]');
-
-    if (titleElement) {
-      // Get the text content from the element
-      const title = titleElement?.textContent?.trim();
-      setJobstitle(title);
-    }
-
-    const companyNameEle = document.querySelector('[data-testid="detailText"]');
-
-    if (companyNameEle) {
-      // Get the text content from the element
-      const inputString = companyNameEle?.textContent?.trim();
-      const companyName = removeRatingFromEnd(inputString);
-      setCompanyName(companyName);
-    }
-
-    setLocation("n/a");
-
-    const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
-    if (jobDescriptionEle) {
-      // Get the text content from the element
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-
-    // end of   desing where there is tab section in that page
-
-    //  this is for where ther is no tabs in listing page
-
-    const titleElement2 = document.querySelector(".JobDetails_jobTitle__Rw_gn");
-
-    if (titleElement2) {
-      // Get the text content from the element
-      const title = titleElement2?.textContent?.trim();
-      if (title) {
-        setJobstitle(title);
-      }
-    }
-
-    const companyNameEle2 = document.querySelector(
-      ".EmployerProfile_employerName__8w0tV"
-    );
-
-    if (companyNameEle2) {
-      // Get the text content from the element
-      const companyName = companyNameEle2?.textContent?.trim();
-      if (companyName) {
-        setCompanyName(companyName);
-      }
-    }
-
-    const jobDescriptionEle2 = document.querySelector(
-      ".JobDetails_jobDescription__6VeBn"
-    );
-    if (jobDescriptionEle2) {
-      // Get the text content from the element
-      const description = jobDescriptionEle2?.innerHTML;
-      setJobDescription(description);
-    }
-
-    setSource("Glassdoor");
-  };
-
-  const getJobFromSimplyhired = (): void => {
-    setPostUrl(window.location.href);
-    // this is for the desing where there is tab section in that page
-    const titleElement = document.querySelector('[data-testid="viewJobTitle"]');
-
-    if (titleElement) {
-      // Get the text content from the element
-      const title = titleElement?.textContent?.trim();
-      setJobstitle(title);
-    }
-
-    const companyNameEle = document.querySelector(
-      // '[data-test="employer-name"]'
-      '[data-testid="detailText"]'
-    );
-
-    if (companyNameEle) {
-      // Get the text content from the element
-      const inputString = companyNameEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-
-    setLocation("n/a");
-
-    const jobDescriptionEle = document.querySelector(
-      '[data-testid="viewJobBodyJobFullDescriptionContent"]'
-    );
-    if (jobDescriptionEle) {
-      // Get the text content from the element
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-
-    setSource("Simplyhired");
-  };
 
   const getBuiltinDomForJobs = () => {
     const dom = document?.querySelector(".block-region-middle");
@@ -353,19 +91,51 @@ const JobFrom = (props: any) => {
       );
     }
     if (window.location.href.includes("indeed.")) {
-      getJobsFromIndeed();
+      getJobsFromIndeed(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
     if (window.location.href.includes("dice.")) {
-      getJobsFromDice();
+      getJobsFromDice(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
     if (window.location.href.includes("ziprecruiter.")) {
-      getJobFromZipRecruiter();
+      getJobFromZipRecruiter(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
     if (
       window.location.href.includes("glassdoor.") &&
       window.location.href.includes("job-listing")
     ) {
-      getJobFromGlassdoor();
+      getJobFromGlassdoor(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
 
     if (
@@ -373,7 +143,15 @@ const JobFrom = (props: any) => {
         "https://www.simplyhired.com/" &&
       window.location.href.includes("simplyhired.")
     ) {
-      getJobFromSimplyhired();
+      getJobFromSimplyhired(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
 
     // if (
