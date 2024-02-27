@@ -30,10 +30,20 @@ export const getJobsFromIndeed = (
     setCompanyName(companyElement?.textContent.trim());
   }
 
+  const locationEle = document
+    .querySelector('[data-testid="inlineHeader-companyLocation"]')
+    .textContent.trim();
+
+  const locationText = locationEle.split("•")[0];
+  setLocation(locationText) ?? "";
+
+  const sallaryInfo =
+    document.querySelector("#salaryInfoAndJobType").textContent.trim() ?? "";
+
+  setAddationalInfo([locationEle, sallaryInfo]);
+
   const about = document.getElementById("jobDescriptionText");
   setJobDescription(about?.innerHTML);
-
-  setLocation("n/a");
 
   setSource("Indeed");
 };
