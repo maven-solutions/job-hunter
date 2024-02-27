@@ -25,6 +25,7 @@ const AllInputField = (props: any) => {
     setLocation,
     source,
     setSource,
+    addationalInfo,
   } = props;
 
   const setDescValue = (e: any) => {
@@ -71,6 +72,22 @@ const AllInputField = (props: any) => {
               valueSetter={setPostUrl}
               name="posturl"
             />
+          </div>
+
+          <div className="full">
+            <label>
+              <div className="label-top">Addational Info</div>
+              <div className="addational__info__section">
+                {addationalInfo.map((e, i) => {
+                  return (
+                    <span key={i} className="addational__info__text">
+                      {" "}
+                      {e}
+                    </span>
+                  );
+                })}
+              </div>
+            </label>
           </div>
           <div className="full">
             <label>

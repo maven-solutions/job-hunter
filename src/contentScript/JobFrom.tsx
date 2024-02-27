@@ -9,6 +9,7 @@ import { checkJobStatus, saveJobs } from "./api";
 import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
+import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -21,6 +22,7 @@ const JobFrom = (props: any) => {
   );
   const [postUrl, setPostUrl] = useState<string>("");
   const [location, setLocation] = useState<any>("");
+  const [addationalInfo, setAddationalInfo] = useState([]);
 
   const [activeUrl, setActiveUrl] = useState<string>(window.location.href);
   const [debounceValue] = useDebounce(activeUrl, 3000);
@@ -51,49 +53,6 @@ const JobFrom = (props: any) => {
     // Check if the created date is valid and the original string is not empty
     return !isNaN(date.getTime()) && !isNaN(Date.parse(str));
   }
-
-  const getContentFromLinkedInJobs = (): void => {
-    try {
-      setPostUrl(window.location.href);
-      const jobsBody = document?.getElementsByClassName(
-        "job-details-jobs-unified-top-card__job-title"
-      );
-      if (jobsBody[0]) {
-        setJobstitle(jobsBody[0]?.textContent.trim());
-      }
-
-      setTimeout(() => {
-        let jobDetailsElement = document?.getElementById("job-details");
-        const about = jobDetailsElement?.querySelector("span");
-        setJobDescription(about?.innerHTML);
-      }, 500);
-
-      // find posted date
-      const locationText = document
-        .querySelector(
-          ".job-details-jobs-unified-top-card__primary-description-without-tagline"
-        )
-        .textContent.trim()
-        .split("·")[1]
-        .trim();
-      if (locationText) {
-        setLocation(locationText);
-      }
-
-      setSource("linkedin");
-      // Assuming you have a reference to the DOM element
-      setTimeout(() => {
-        const domElement = document?.querySelector(
-          ".jobs-unified-top-card.t-14"
-        );
-        const aTag = domElement?.querySelector("a.app-aware-link");
-        const companyName = aTag?.textContent;
-        setCompanyName(companyName?.trim());
-      }, 500);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const getJobsFromIndeed = (): void => {
     setPostUrl(window.location.href);
@@ -383,7 +342,15 @@ const JobFrom = (props: any) => {
   useEffect(() => {
     SetAlreadySavedInfo(false);
     if (window.location.href.includes("linkedin.")) {
-      getContentFromLinkedInJobs();
+      getContentFromLinkedInJobs(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setLocation,
+        setSource,
+        setCompanyName,
+        setAddationalInfo
+      );
     }
     if (window.location.href.includes("indeed.")) {
       getJobsFromIndeed();
@@ -535,6 +502,7 @@ const JobFrom = (props: any) => {
             setJobDescription={setJobDescription}
             source={source}
             setSource={setSource}
+            addationalInfo={addationalInfo}
             inputErrors={inputErrors}
           />
         </div>
