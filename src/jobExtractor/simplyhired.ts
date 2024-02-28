@@ -28,7 +28,22 @@ export const getJobFromSimplyhired = (
     setCompanyName(inputString);
   }
 
-  setLocation("n/a");
+  const locationText =
+    document
+      .querySelector('[data-testid="viewJobCompanyLocation"]')
+      ?.textContent?.trim() ?? "";
+  setLocation(locationText);
+
+  const workType =
+    document
+      .querySelector('[data-testid="viewJobBodyJobDetailsJobType"]')
+      ?.textContent?.trim() ?? "";
+  const payment =
+    document
+      .querySelector('[data-testid="viewJobBodyJobCompensation"]')
+      ?.textContent?.trim() ?? "";
+
+  setAddationalInfo([workType, payment]);
 
   const jobDescriptionEle = document.querySelector(
     '[data-testid="viewJobBodyJobFullDescriptionContent"]'
