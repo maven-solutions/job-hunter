@@ -63,12 +63,13 @@ export const addButtonToGlassdoorWebsite = () => {
       jobLink = jobLinkEle?.getAttribute("href");
     }
 
-    const jobHeader = document.querySelector(
-      ".JobDetails_jobDetailsHeader__qKuvs"
+    const container = document.querySelector(
+      '[data-test="job-details-header"]'
     );
 
+    const jobHeader = container.children[0];
     // Remove previously appended buttons
-    const existingButtons = jobHeader.querySelectorAll("a");
+    const existingButtons = container.querySelectorAll("a");
     existingButtons.forEach((button) => {
       button.remove();
     });

@@ -40,8 +40,9 @@ export const simplyHiredNotiification = () => {
   infoNotification(container, "simplyhired");
 };
 export const glassDoorNotiification = () => {
-  const container = document.querySelector(
-    ".TwoColumnLayout_columnRight__XhhAg"
+  const containerChild = document.querySelector(
+    '[data-test="job-details-header"]'
   );
-  infoNotification(container, "glassdoor");
+  const parentElement = containerChild.parentElement;
+  infoNotification(parentElement, "glassdoor");
 };

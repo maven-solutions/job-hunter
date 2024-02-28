@@ -17,8 +17,10 @@ export const getJobFromGlassdoor = (
 ): void => {
   setPostUrl(window.location.href);
 
+  const glassDom = document.querySelector('[data-test="job-details-header"]');
+
   // this is for the desing where there is tab section in that page
-  const titleElement = document.querySelector('[data-test="job-title"]');
+  const titleElement = glassDom.querySelector("h1");
 
   if (titleElement) {
     // Get the text content from the element
@@ -26,7 +28,7 @@ export const getJobFromGlassdoor = (
     setJobstitle(title);
   }
 
-  const companyNameEle = document.querySelector('[data-testid="detailText"]');
+  const companyNameEle = glassDom.querySelector("span");
 
   if (companyNameEle) {
     // Get the text content from the element
@@ -35,13 +37,29 @@ export const getJobFromGlassdoor = (
     setCompanyName(companyName);
   }
 
-  setLocation("n/a");
+  const locationText =
+    glassDom.querySelector('[data-test="location"]')?.textContent?.trim() ?? "";
+  setLocation(locationText);
 
-  const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
-  if (jobDescriptionEle) {
-    // Get the text content from the element
-    const description = jobDescriptionEle?.innerHTML;
-    setJobDescription(description);
+  const salary = document
+    .querySelector(`[class*="SalaryEstimate_averageEstimate"]`)
+    .textContent.trim();
+
+  setAddationalInfo(["Average base salary estimate", salary]);
+
+  // for description
+  const sibling = glassDom.nextElementSibling;
+  if (sibling) {
+    const descDom = sibling.nextElementSibling;
+    if (descDom) {
+      const desc = descDom.children[0];
+      if (desc) {
+        const innderDesc = desc.children[0];
+        // Get the text content from the element
+        const description = innderDesc?.innerHTML;
+        setJobDescription(description);
+      }
+    }
   }
 
   // end of   desing where there is tab section in that page
