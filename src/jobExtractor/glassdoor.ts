@@ -44,13 +44,20 @@ export const getJobFromGlassdoor = (
   setPostedDate("n/a");
   setEasyApply(null);
 
-  const jobDescriptionEle = document.querySelector(".css-1vbe1p2");
-  if (jobDescriptionEle) {
-    // Get the text content from the element
-    const description = jobDescriptionEle?.innerHTML;
-    setJobDescription(description);
+  // for description
+  const sibling = glassDom.nextElementSibling;
+  if (sibling) {
+    const descDom = sibling.nextElementSibling;
+    if (descDom) {
+      const desc = descDom.children[0];
+      if (desc) {
+        const innderDesc = desc.children[0];
+        // Get the text content from the element
+        const description = innderDesc?.innerHTML;
+        setJobDescription(description);
+      }
+    }
   }
-
   // end of   desing where there is tab section in that page
 
   //  this is for where ther is no tabs in listing page
