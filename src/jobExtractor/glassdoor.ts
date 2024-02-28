@@ -19,8 +19,10 @@ export const getJobFromGlassdoor = (
 ): void => {
   setPostUrl(window.location.href);
 
+  const glassDom = document.querySelector('[data-test="job-details-header"]');
+
   // this is for the desing where there is tab section in that page
-  const titleElement = document.querySelector('[data-test="job-title"]');
+  const titleElement = glassDom.querySelector("h1");
 
   if (titleElement) {
     // Get the text content from the element
@@ -28,7 +30,7 @@ export const getJobFromGlassdoor = (
     setJobstitle(title);
   }
 
-  const companyNameEle = document.querySelector('[data-testid="detailText"]');
+  const companyNameEle = glassDom.querySelector("span");
 
   if (companyNameEle) {
     // Get the text content from the element
