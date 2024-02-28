@@ -17,7 +17,7 @@ const infoNotification = (container: any, website) => {
   }
   // Create the info icon element
   const infoIcon = document.createElement("img");
-  infoIcon.src = chrome.runtime.getURL("info.svg"); // replace 'info_icon.png' with your actual icon image path
+  infoIcon.src = chrome.runtime.getURL("waring.svg"); // replace 'info_icon.png' with your actual icon image path
   infoIcon.alt = "Info";
   infoIcon.classList.add("careerhub-notification-icon");
 

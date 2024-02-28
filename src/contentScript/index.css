@@ -518,12 +518,12 @@ textarea {
 }
 
 .careerhub-notification-bar {
-  background-color: #f1f6fd;
+  background-color: #fffbed;
   color: #181818 !important;
   padding: 15px;
   display: flex;
   align-items: center;
-  border: 2px solid #a7c5fd;
+  border: 2px solid #fca004;
   border-radius: 8px;
 }
 .glassdoor-spacing-for-bar {
@@ -544,7 +544,7 @@ textarea {
 .landingpage-careerai-button {
   display: inline-block;
   padding: 7px 20px;
-  background-color: #0145fd;
+  background-color: #ffb200;
   color: #ffffff !important;
   text-decoration: none !important;
   border-radius: 5px;
