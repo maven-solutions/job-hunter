@@ -1,12 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import AllInputField from "./AllInputField";
-import { extractDateFromDiceDom } from "./helper";
-import AllSvg from "./AllSvg";
 import Notification from "./Notification";
 import JobListTable from "./JobListTable";
 import { checkJobStatus, saveJobs } from "./api";
-import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
 import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
@@ -15,11 +12,11 @@ import { getJobsFromDice } from "../jobExtractor/dice";
 import { getJobFromSimplyhired } from "../jobExtractor/simplyhired";
 import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
 import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
+import Layout from "../template/Layout";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
   const [loading, setLoading] = useState(false);
-  const [hasErrors, setHasErrors] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>(
@@ -47,9 +44,6 @@ const JobFrom = (props: any) => {
   const [jobTableData, setJobTableData] = useState([]);
 
   const [inputErrors, setInputErrors] = useState({});
-  const resetInputErrors = () => {
-    setInputErrors({});
-  };
 
   function isDateString(str) {
     // Attempt to create a new Date object from the string
@@ -251,59 +245,53 @@ const JobFrom = (props: any) => {
   }, [postUrl]);
 
   return (
-    <div className="job__detail__container">
-      <div className="jd-inner">
-        <div className="jobs__collapse" onClick={() => setShowForm(false)}>
-          <CloseIcon />
-        </div>
-        <AllSvg />
-        <div className="scroll-form">
-          <Notification
-            alreadySavedStatus={alreadySavedStatus}
-            notification={notification}
-            savedNotification={savedNotification}
-            setSavedNotification={setSavedNotification}
-            SetAlreadySavedInfo={SetAlreadySavedInfo}
-            alreadySavedInfo={alreadySavedInfo}
-          />
-          <AllInputField
-            companyName={companyName}
-            setCompanyName={setCompanyName}
-            jobsTitle={jobsTitle}
-            setJobstitle={setJobstitle}
-            location={location}
-            setLocation={setLocation}
-            postUrl={postUrl}
-            setPostUrl={setPostUrl}
-            targetElementRef={targetElementRef}
-            jobDescription={jobDescription}
-            setJobDescription={setJobDescription}
-            source={source}
-            setSource={setSource}
-            addationalInfo={addationalInfo}
-            inputErrors={inputErrors}
-          />
-        </div>
-
-        {showJobsTable && (
-          <JobListTable
-            loading={loading}
-            jobTableData={jobTableData}
-            setShowJobsTable={setShowJobsTable}
-            saveNewJob={saveNewJob}
-          />
-        )}
-
-        <SaveButton
-          success={success}
-          failed={failed}
-          errorMessage={errorMessage}
+    <Layout setShowForm={setShowForm}>
+      <div className="scroll-form">
+        <Notification
           alreadySavedStatus={alreadySavedStatus}
-          handleSaveClick={handleSaveClick}
-          loading={loading}
+          notification={notification}
+          savedNotification={savedNotification}
+          setSavedNotification={setSavedNotification}
+          SetAlreadySavedInfo={SetAlreadySavedInfo}
+          alreadySavedInfo={alreadySavedInfo}
+        />
+        <AllInputField
+          companyName={companyName}
+          setCompanyName={setCompanyName}
+          jobsTitle={jobsTitle}
+          setJobstitle={setJobstitle}
+          location={location}
+          setLocation={setLocation}
+          postUrl={postUrl}
+          setPostUrl={setPostUrl}
+          targetElementRef={targetElementRef}
+          jobDescription={jobDescription}
+          setJobDescription={setJobDescription}
+          source={source}
+          setSource={setSource}
+          addationalInfo={addationalInfo}
+          inputErrors={inputErrors}
         />
       </div>
-    </div>
+
+      {showJobsTable && (
+        <JobListTable
+          loading={loading}
+          jobTableData={jobTableData}
+          setShowJobsTable={setShowJobsTable}
+          saveNewJob={saveNewJob}
+        />
+      )}
+
+      <SaveButton
+        success={success}
+        failed={failed}
+        errorMessage={errorMessage}
+        alreadySavedStatus={alreadySavedStatus}
+        handleSaveClick={handleSaveClick}
+        loading={loading}
+      />
+    </Layout>
   );
 };
 

@@ -1,0 +1,23 @@
+.ci_auth_form_or {
+  margin: 10px auto;
+  font-weight: 400;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+}
+.ci_auth_desc {
+  margin-top: 10px;
+  font-weight: 400;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+}
+.ci_signup_link {
+  color: #4339f2;
+  text-decoration: underline;
+  cursor: pointer;
+}

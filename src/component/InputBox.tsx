@@ -1,7 +1,7 @@
 import React from "react";
 
 const InputBox = (props: any) => {
-  const { title, value, valueSetter, name } = props;
+  const { title, value, valueSetter, name, placeholder } = props;
 
   const setValue = (e: any) => {
     if (e.target.value) {
@@ -21,6 +21,7 @@ const InputBox = (props: any) => {
         className="job_input_box"
         value={value ?? ""}
         onChange={setValue}
+        placeholder={placeholder ?? ""}
       />
     </div>
   );

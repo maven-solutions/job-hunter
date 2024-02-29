@@ -1,0 +1,7 @@
+.ci_heading_title {
+  all: unset;
+  display: block;
+  font-weight: 600;
+  font-size: 18px;
+  color: #000000;
+}

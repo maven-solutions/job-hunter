@@ -10,6 +10,7 @@ import {
 } from "../../component/CareerAibutton";
 import Logo from "../../component/Logo";
 import JobFrom from "../../contentScript/JobFrom";
+import LoginFrom from "../../auth/LoginForm/LoginFrom";
 
 const JobDetector = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
@@ -56,7 +57,8 @@ const JobDetector = () => {
       {showIcon ? (
         <Logo showFrom={showFrom} setShowFrom={setShowFrom} jobFound />
       ) : null}
-      {showFrom && <JobFrom setShowForm={setShowFrom} />}
+      {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
+      <LoginFrom setShowForm={setShowFrom} />
     </div>
   );
 };
