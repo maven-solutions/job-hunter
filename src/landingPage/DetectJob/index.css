@@ -26,7 +26,25 @@
   justify-content: center;
   font-weight: bold;
   background-color: linear-gradient(270deg, #22d1ee, #3d5af1);
+  /* position: relative; */
 }
+.job__post__detected {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 20px !important;
+  height: 20px !important;
+  background: #f0506e;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+
 .job_circle_button_img {
   width: 100%;
   object-fit: cover;
