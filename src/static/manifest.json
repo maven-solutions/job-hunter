@@ -41,7 +41,10 @@
         "tick.svg",
         "linkedin.svg",
         "job.svg",
-        "company.svg"
+        "company.svg",
+        "pin.svg",
+        "user.svg",
+        "jobboard.svg"
       ],
       "matches": ["<all_urls>"]
     }
