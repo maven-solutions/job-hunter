@@ -30,9 +30,14 @@ const JobSummary = () => {
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
         <div className="ci_job_worktype_section">
-          <span> Remote . Full time Enter Level</span>
+          <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
+          <span>
+            Remote . Full time Enter Level Remote . Full time Enter Level
+          </span>
         </div>
+        <Height height="10" />
         <div className="ci_job_more_info">
+          <img src={chrome.runtime.getURL("company.svg")} alt="company-icon" />
           <span> 1 - 10 Employees , Technology, Information and Internet</span>
         </div>
       </div>{" "}

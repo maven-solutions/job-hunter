@@ -38,16 +38,29 @@
 }
 .ci_job_worktype_section {
   display: flex;
+  align-items: flex-start;
 }
 .ci_job_worktype_section span {
   color: #000000;
   font-weight: 400;
   font-size: 14px;
+  line-height: 17px;
+}
+.ci_job_worktype_section img {
+  margin-right: 10px;
+}
+.ci_job_more_info {
+  display: flex;
+  align-items: flex-start;
+}
+.ci_job_more_info img {
+  margin-right: 10px;
 }
 .ci_job_more_info span {
   color: #000000;
   font-weight: 400;
   font-size: 14px;
+  line-height: 17px;
 }
 .ci_job_more_info {
   display: flex;
