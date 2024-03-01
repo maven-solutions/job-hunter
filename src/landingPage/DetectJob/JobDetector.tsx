@@ -11,6 +11,7 @@ import {
 import Logo from "../../component/Logo";
 import JobFrom from "../../contentScript/JobFrom";
 import LoginFrom from "../../auth/LoginForm/LoginFrom";
+import SignupForm from "../../auth/signup/Signup";
 
 const JobDetector = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
@@ -59,6 +60,7 @@ const JobDetector = () => {
       ) : null}
       {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
       <LoginFrom setShowForm={setShowFrom} />
+      {/* <SignupForm setShowForm={setShowFrom} /> */}
     </div>
   );
 };

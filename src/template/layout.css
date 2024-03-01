@@ -3,14 +3,17 @@
   width: 452px !important;
   /* right: 65px;
   bottom: 80px; */
-  right: 0;
-  top: 0;
-  height: 100vh;
+  right: 1rem;
+  bottom: 10rem;
+  /* height: 100vh; */
   background-color: #fafbff !important;
   z-index: 99999;
-  /* border-radius: 10px; */
   /* box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08); */
-  box-shadow: 0px 35px 35px 0px #00000080;
+  /* box-shadow: 0px 35px 35px 0px #00000080; */
+  filter: drop-shadow(0px 23px 25px rgba(0, 0, 0, 0.25));
+
+  border-radius: 10px !important;
+  overflow: hidden;
 }
 .job__detail__container-inner {
   background-color: #4339f2cc;
@@ -24,6 +27,5 @@
   width: 100%;
 }
 .jd-inner-padding {
-  padding: 20px;
-  border: 1px solid red;
+  padding: 10px 20px 20px 20px;
 }
