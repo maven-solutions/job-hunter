@@ -1,0 +1,34 @@
+.ci_profile_titile {
+  all: unset;
+  display: block;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-family: "Inter";
+  font-size: 16px;
+  font-weight: 500;
+  color: #000000;
+}
+.ci_profile_section {
+  border-bottom: 1px solid #e4e6ea;
+  display: flex;
+  gap: 10px;
+  padding-bottom: 20px;
+}
+.ci_profile_section img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.ci_profile_name {
+  display: block;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+}
+.ci_profile_email {
+  display: block;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+}

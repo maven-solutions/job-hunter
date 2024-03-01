@@ -62,6 +62,7 @@
 .ci_ovalbg {
   width: 80%;
   border-radius: 10px;
+  margin-left: auto;
 }
 .ci_ovalbg2 {
   width: 70%;
