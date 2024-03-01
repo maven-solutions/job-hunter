@@ -5,10 +5,18 @@ const AllSvg = () => {
     <>
       {" "}
       <div className="jd-bg-1">
-        <img src={chrome.runtime.getURL("ovalbg.svg")} alt="ovalbg-icon" />
+        <img
+          className="ci_ovalbg"
+          src={chrome.runtime.getURL("ovalbg.svg")}
+          alt="ovalbg-icon"
+        />
       </div>
       <div className="jd-bg-2">
-        <img src={chrome.runtime.getURL("ovalbg2.svg")} alt="ovalbg2-icon" />
+        <img
+          className="ci_ovalbg2"
+          src={chrome.runtime.getURL("ovalbg2.svg")}
+          alt="ovalbg2-icon"
+        />
       </div>
       <div className="job__detail__container-inner">
         <div className="job_detail_header">

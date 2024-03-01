@@ -57,13 +57,21 @@
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 1;
+  z-index: -1;
+}
+.ci_ovalbg {
+  width: 80%;
+  border-radius: 10px;
+}
+.ci_ovalbg2 {
+  width: 70%;
+  border-radius: 10px;
 }
 .jd-bg-2 {
   position: absolute;
   bottom: 0;
   left: 0;
-  z-index: 1;
+  z-index: -1;
 }
 .scroll-form {
   height: calc(100vh - 98px);
@@ -320,7 +328,7 @@
   color: #333333;
 }
 .react-select__single-value {
-  color: #34b53a !important;
+  color: #4339f2 !important;
 }
 
 .job__detail__footer {

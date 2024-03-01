@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Select from "react-select";
 import "./index.css";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -9,12 +9,12 @@ import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 
 const DisplayJob = (props: any) => {
   const { setShowFrom } = props;
-  const jobTypeOptions: any = [
-    { value: "remote", label: "Remote" },
-    { value: "on-site", label: "On-site" },
-    { value: "hybrid", label: "Hybrid" },
-    { value: "remote", label: "Remote" },
-    { value: "on-site", label: "On-site" },
+  const [state, setStage] = useState<any>("");
+  const stageOptions: any = [
+    { value: "Wishlist", label: "Wishlist" },
+    { value: "Applied", label: "Applied" },
+    { value: "Interview", label: "Interview" },
+    { value: "Interview", label: "Interview" },
   ];
   return (
     <Layout setShowFrom={setShowFrom}>
@@ -24,31 +24,40 @@ const DisplayJob = (props: any) => {
       <Height height="15" />
       <WhiteCard>
         <span className="ci_job_stage_title"> Application Stage</span>
-        <Select
-          className="react-select-container"
-          classNamePrefix="react-select"
-          options={jobTypeOptions}
-          styles={{
-            control: (baseStyles, state) => ({
-              ...baseStyles,
-              fontSize: 14,
-              padding: "-2px 10px",
-              borderRadius: "5px",
-              width: "100%",
-            }),
-            option: (provided, state) => ({
-              ...provided,
-              fontSize: 14,
-              background: state.isSelected ? "#4339f2" : "#white",
-              border: "none",
-            }),
-          }}
-          value=""
-          placeholder="Select job type"
-          onChange={(option) => {
-            console.log("options---", option);
-          }}
-        />
+        <div className="aaaaaaaaaa">
+          {" "}
+          <Select
+            className="react-select-container"
+            classNamePrefix="react-select"
+            options={stageOptions}
+            styles={{
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                fontSize: 14,
+                padding: "-2px 10px",
+                borderRadius: "5px",
+                width: "100%",
+                cursor: "pointer",
+
+                // position: "relative",
+                // zIndex: 10000,
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontSize: 14,
+                background: state.isSelected ? "#4339f2" : "#white",
+                border: "none",
+                cursor: "pointer",
+              }),
+            }}
+            value={state}
+            placeholder="Select job type"
+            onChange={(option) => {
+              setStage(option);
+              console.log("options---", option);
+            }}
+          />
+        </div>
       </WhiteCard>
       <Height height="15" />
       <div className="ci_job_summary_button_section">
