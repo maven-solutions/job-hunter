@@ -6,3 +6,8 @@
   z-index: 5;
   justify-content: flex-end;
 }
+.ci_job_stage_title {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+}

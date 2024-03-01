@@ -14,7 +14,9 @@ const DisplayJob = (props: any) => {
         <JobSummary />
       </WhiteCard>
       <Height height="15" />
-      <WhiteCard>Application Stage</WhiteCard>
+      <WhiteCard>
+        <span className="ci_job_stage_title"> Application Stage</span>
+      </WhiteCard>
       <Height height="15" />
       <div className="ci_job_summary_button_section">
         <PrimaryButton
