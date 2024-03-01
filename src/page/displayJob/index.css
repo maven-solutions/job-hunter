@@ -1,0 +1,8 @@
+.ci_display_job_section {
+}
+.ci_job_summary_button_section {
+  position: relative;
+  display: flex;
+  z-index: 5;
+  justify-content: flex-end;
+}

@@ -1,0 +1,54 @@
+.ci_job_summary_section {
+  font-family: "Montserrat", sans-serif;
+}
+.ci_job_summary_heading_section {
+  display: flex;
+  align-items: flex-start;
+}
+.ci_job_comapny_icon {
+  width: 37px;
+  height: 37px;
+  object-fit: cover;
+  margin-right: 10px;
+}
+.ci_job_company_detail_section {
+}
+.ci_company_job_title {
+  all: unset;
+  display: block;
+  color: #6961f5;
+  font-weight: 600;
+  font-size: 16px;
+}
+.ci_job_company_detail_row {
+  color: #000000;
+  font-weight: 400;
+  font-size: 12px;
+  display: flex;
+}
+.ci_job_company_detail_separator {
+  display: block;
+  margin: 0 4px;
+}
+.ci_job_website_icon {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  margin-left: auto;
+}
+.ci_job_worktype_section {
+  display: flex;
+}
+.ci_job_worktype_section span {
+  color: #000000;
+  font-weight: 400;
+  font-size: 14px;
+}
+.ci_job_more_info span {
+  color: #000000;
+  font-weight: 400;
+  font-size: 14px;
+}
+.ci_job_more_info {
+  display: flex;
+}

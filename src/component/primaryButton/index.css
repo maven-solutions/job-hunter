@@ -1,5 +1,6 @@
 .ci_job_save_button {
   all: unset;
+  font-family: "Inter", sans-serif;
   width: 100%;
   background: #4339f2 !important;
   font-size: 14px;
@@ -11,4 +12,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ci_job_save_button_outline {
+  background: #ffffff !important;
+  border: 1px solid #4339f2 !important;
+  color: #4339f2 !important;
 }

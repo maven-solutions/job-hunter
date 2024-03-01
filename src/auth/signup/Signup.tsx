@@ -35,7 +35,7 @@ const SignupForm = (props: any) => {
           />
           <Height height="15" />
 
-          <PrimaryButton loading={false} text="Login" />
+          <PrimaryButton loading={false} text="Sing Up" />
           <span className="ci_auth_form_or">OR</span>
 
           <span className="ci_auth_desc">

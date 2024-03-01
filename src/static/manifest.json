@@ -38,7 +38,8 @@
         "ovalbg.svg",
         "ovalbg2.svg",
         "hub.svg",
-        "tick.svg"
+        "tick.svg",
+        "linkedin.svg"
       ],
       "matches": ["<all_urls>"]
     }
