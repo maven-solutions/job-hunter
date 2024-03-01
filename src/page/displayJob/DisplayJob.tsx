@@ -38,9 +38,6 @@ const DisplayJob = (props: any) => {
                 borderRadius: "5px",
                 width: "100%",
                 cursor: "pointer",
-
-                // position: "relative",
-                // zIndex: 10000,
               }),
               option: (provided, state) => ({
                 ...provided,
@@ -51,10 +48,9 @@ const DisplayJob = (props: any) => {
               }),
             }}
             value={state}
-            placeholder="Select job type"
+            placeholder="Select Application Stage"
             onChange={(option) => {
               setStage(option);
-              console.log("options---", option);
             }}
           />
         </div>
