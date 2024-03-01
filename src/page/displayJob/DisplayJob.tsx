@@ -8,6 +8,11 @@ import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 
 const DisplayJob = (props: any) => {
   const { setShowFrom } = props;
+  const jobTypeOptions = [
+    { value: "remote", label: "Remote" },
+    { value: "on-site", label: "On-site" },
+    { value: "hybrid", label: "Hybrid" },
+  ];
   return (
     <Layout setShowFrom={setShowFrom}>
       <WhiteCard>
