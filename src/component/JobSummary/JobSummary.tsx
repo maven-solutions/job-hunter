@@ -1,8 +1,12 @@
 import React from "react";
 import "./index.css";
 import Height from "../height/Height";
+import { RootStore, useAppSelector } from "../../store/store";
 
 const JobSummary = () => {
+  const jobDetailState: any = useAppSelector((store: RootStore) => {
+    return store.JobDetailSlice;
+  });
   return (
     <div className="ci_job_summary_section">
       <div className="ci_job_summary_heading_section">
@@ -12,12 +16,14 @@ const JobSummary = () => {
           alt="company-icon"
         />
         <div className="ci_job_company_detail_section">
-          <h3 className="ci_company_job_title"> Product Manager (Growth)</h3>
+          <h3 className="ci_company_job_title"> {jobDetailState?.title}</h3>
           <div className="ci_job_company_detail_row">
-            <span className="ci_job_company_name"> Catalyst Innovators</span>
+            <span className="ci_job_company_name">
+              {jobDetailState?.company}
+            </span>
             <span className="ci_job_company_detail_separator"> . </span>
             <span className="ci_job_company_location">
-              Alaska, United States
+              {jobDetailState?.location}
             </span>
           </div>
         </div>
@@ -29,17 +35,25 @@ const JobSummary = () => {
       </div>
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
-        <div className="ci_job_worktype_section">
-          <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
-          <span>
-            Remote . Full time Enter Level Remote . Full time Enter Level
-          </span>
-        </div>
-        <Height height="10" />
-        <div className="ci_job_more_info">
-          <img src={chrome.runtime.getURL("company.svg")} alt="company-icon" />
-          <span> 1 - 10 Employees , Technology, Information and Internet</span>
-        </div>
+        {jobDetailState.addationlIfo.length > 0 && (
+          <div className="ci_job_worktype_section">
+            <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
+            <span>{jobDetailState.addationlIfo[0]}</span>
+          </div>
+        )}
+
+        {jobDetailState.addationlIfo.length > 1 && (
+          <>
+            <Height height="10" />
+            <div className="ci_job_more_info">
+              <img
+                src={chrome.runtime.getURL("company.svg")}
+                alt="company-icon"
+              />
+              <span>{jobDetailState.addationlIfo[1]}</span>
+            </div>
+          </>
+        )}
       </div>{" "}
     </div>
   );

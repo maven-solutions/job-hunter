@@ -5,10 +5,10 @@ const initialState: any = {
   res_success: false,
   title: "",
   location: "",
-  comapny: "",
+  company: "",
   postUrl: "",
   description: "",
-  summary: [],
+  addationlIfo: [],
   jobFound: false,
   source: "",
 };
@@ -21,7 +21,7 @@ const JobDetails = createSlice({
       state.title = payload;
     },
     setJobCompany: (state: any, { payload }: PayloadAction<any>) => {
-      state.comapny = payload;
+      state.company = payload;
     },
     setJobLocation: (state: any, { payload }: PayloadAction<any>) => {
       state.location = payload;
@@ -30,7 +30,7 @@ const JobDetails = createSlice({
       state.postUrl = payload;
     },
     setJobSummary: (state: any, { payload }: PayloadAction<any>) => {
-      state.summary = payload;
+      state.addationlIfo = payload;
     },
     setJobDesc: (state: any, { payload }: PayloadAction<any>) => {
       state.description = payload;
@@ -44,10 +44,10 @@ const JobDetails = createSlice({
     clearJobState: (state: any, { payload }: PayloadAction<any>) => {
       state.title = "";
       state.location = "";
-      state.comapny = "";
+      state.company = "";
       state.postUrl = "";
       state.description = "";
-      state.summary = [];
+      state.addationlIfo = [];
       state.jobFound = false;
       state.source = "";
     },

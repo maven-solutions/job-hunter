@@ -18,13 +18,13 @@ import { RootStore, useAppSelector } from "../../store/store";
 const JobDetail = (props: any) => {
   const {
     setShowPage,
-    companyName,
+
     setCompanyName,
-    jobsTitle,
+
     setJobstitle,
-    location,
+
     setLocation,
-    jobDescription,
+
     setDescValue,
   } = props;
   const jobDetailState: any = useAppSelector((store: RootStore) => {
@@ -45,7 +45,7 @@ const JobDetail = (props: any) => {
         <Height height="10" />
         <InputBox
           title="Company"
-          value={jobDetailState.comapny}
+          value={jobDetailState.company}
           valueSetter={setCompanyName}
           name="company"
         />
