@@ -20,6 +20,7 @@ import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 const JobDetector = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [postUrl, setPostUrl] = useState<string>("");
 
   useEffect(() => {
     if (
@@ -38,23 +39,37 @@ const JobDetector = () => {
   }, []);
 
   useEffect(() => {
+    if (window.location.href.includes("linkedin.")) {
+      // getContentFromLinkedInJobs(
+      //   setPostUrl,
+      //   setJobstitle,
+      //   setJobDescription,
+      //   setLocation,
+      //   setSource,
+      //   setCompanyName,
+      //   setAddationalInfo
+      // );
+    }
+  }, [postUrl]);
+
+  useEffect(() => {
     let intervalId: any = "";
 
-    if (
-      window.location.href.includes("glassdoor") &&
-      !window.location.href.includes("job-listing")
-    ) {
-      glassDoorNotiification();
-      // Clear any existing intervals before setting a new one
-      intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
-    }
+    // if (
+    //   window.location.href.includes("glassdoor") &&
+    //   !window.location.href.includes("job-listing")
+    // ) {
+    //   glassDoorNotiification();
+    //   // Clear any existing intervals before setting a new one
+    //   intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
+    // }
 
-    if (window.location.href === "https://www.simplyhired.com/") {
-      simplyHiredNotiification();
-      intervalId = setInterval(addButtonToSimplyHired, 3000);
-    }
-    // Clear the interval when the component unmounts
-    return () => clearInterval(intervalId);
+    // if (window.location.href === "https://www.simplyhired.com/") {
+    //   simplyHiredNotiification();
+    //   intervalId = setInterval(addButtonToSimplyHired, 3000);
+    // }
+    // // Clear the interval when the component unmounts
+    // return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -68,7 +83,7 @@ const JobDetector = () => {
       {/* <DisplayJob setShowForm={setShowFrom} /> */}
       {/* <Profile setShowForm={setShowFrom} /> */}
       {/* <JobDetail setShowForm={setShowFrom} /> */}
-      <MenuPopUp />
+      {/* <MenuPopUp /> */}
     </div>
   );
 };
