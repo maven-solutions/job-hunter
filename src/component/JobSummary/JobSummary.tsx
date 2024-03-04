@@ -2,6 +2,7 @@ import React from "react";
 import "./index.css";
 import Height from "../height/Height";
 import { RootStore, useAppSelector } from "../../store/store";
+import CompanySourceLogo from "./CompanySourceLogo";
 
 const JobSummary = () => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
@@ -29,11 +30,8 @@ const JobSummary = () => {
             </span>
           </div>
         </div>
-        <img
-          className="ci_job_website_icon"
-          src={chrome.runtime.getURL("linkedin.svg")}
-          alt="company-icon"
-        />
+
+        <CompanySourceLogo source={jobDetailState.source} />
       </div>
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
