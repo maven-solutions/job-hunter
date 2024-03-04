@@ -6,6 +6,7 @@ import Height from "../../component/height/Height";
 import JobSummary from "../../component/JobSummary/JobSummary";
 import Layout from "../../template/Layout";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
+import { SHOW_PAGE } from "../../utils/constant";
 
 const DisplayJob = (props: any) => {
   const { setShowPage } = props;
@@ -18,7 +19,7 @@ const DisplayJob = (props: any) => {
   ];
   return (
     <Layout setShowPage={setShowPage}>
-      <WhiteCard>
+      <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
         <JobSummary />
       </WhiteCard>
       <Height height="15" />

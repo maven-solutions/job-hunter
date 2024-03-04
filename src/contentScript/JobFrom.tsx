@@ -8,7 +8,7 @@ import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
 import { getJobsFromIndeed } from "../jobExtractor/indeed";
 import { getJobsFromDice } from "../jobExtractor/dice";
-import { getJobFromSimplyhired } from "../jobExtractor/simplyhired";
+
 import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
 import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
 import Layout from "../template/Layout";
@@ -131,21 +131,21 @@ const JobFrom = (props: any) => {
       );
     }
 
-    if (
-      window.location.href.toLowerCase.toString() !==
-        "https://www.simplyhired.com/" &&
-      window.location.href.includes("simplyhired.")
-    ) {
-      getJobFromSimplyhired(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
-    }
+    // if (
+    //   window.location.href.toLowerCase.toString() !==
+    //     "https://www.simplyhired.com/" &&
+    //   window.location.href.includes("simplyhired.")
+    // ) {
+    //   getJobFromSimplyhired(
+    //     setPostUrl,
+    //     setJobstitle,
+    //     setJobDescription,
+    //     setLocation,
+    //     setSource,
+    //     setCompanyName,
+    //     setAddationalInfo
+    //   );
+    // }
 
     // if (
     //   window.location.href.toLowerCase.toString() ===

@@ -1,6 +1,7 @@
 .ci_job_summary_section {
   font-family: "Montserrat", sans-serif;
 }
+
 .ci_job_summary_heading_section {
   display: flex;
   align-items: flex-start;
@@ -12,8 +13,7 @@
   margin-right: 10px;
   border-radius: 5px;
 }
-.ci_job_company_detail_section {
-}
+
 .ci_company_job_title {
   all: unset;
   display: block;
@@ -36,6 +36,7 @@
   height: 24px;
   object-fit: cover;
   margin-left: auto;
+  border-radius: 5px;
 }
 .ci_job_worktype_section {
   display: flex;

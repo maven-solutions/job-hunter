@@ -20,6 +20,7 @@ import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import Linkedin from "../../jobExtractor/Linkedin";
 import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
 import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
+import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -53,6 +54,9 @@ const JobDetector = () => {
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
       setWebsite(SUPPORTED_WEBSITE.linkedin);
+    }
+    if (window.location.href.includes("simplyhired.")) {
+      setWebsite(SUPPORTED_WEBSITE.simplyhired);
     }
   }, [postUrl]);
 
@@ -105,6 +109,11 @@ const JobDetector = () => {
       {website === SUPPORTED_WEBSITE.linkedin && (
         <Linkedin setShowPage={setShowPage} />
       )}
+
+      {website === SUPPORTED_WEBSITE.simplyhired && (
+        <SimplyHiredJob setShowPage={setShowPage} />
+      )}
+
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
       )}

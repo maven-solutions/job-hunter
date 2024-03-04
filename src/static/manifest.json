@@ -44,7 +44,8 @@
         "company.svg",
         "pin.svg",
         "user.svg",
-        "jobboard.svg"
+        "jobboard.svg",
+        "simplyhired.svg"
       ],
       "matches": ["<all_urls>"]
     }

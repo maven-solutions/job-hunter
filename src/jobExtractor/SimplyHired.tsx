@@ -1,20 +1,25 @@
-export const getJobFromSimplyhired = (
-  setPostUrl,
-  setJobstitle,
-  setJobDescription,
-  setLocation,
-  setSource,
-  setCompanyName,
-  setAddationalInfo
-): void => {
-  setPostUrl(window.location.href);
+import React, { useEffect } from "react";
+import { useAppDispatch } from "../store/store";
+import {
+  setJobCompany,
+  setJobDesc,
+  setJobFoundStatus,
+  setJobLocation,
+  setJobPostUrl,
+  setJobSource,
+  setJobSummary,
+  setJobTitle,
+} from "../store/features/JobDetail/JobDetailSlice";
+
+const getJobFromSimplyhired = (dispatch): void => {
+  dispatch(setJobPostUrl(window.location.href));
   // this is for the desing where there is tab section in that page
   const titleElement = document.querySelector('[data-testid="viewJobTitle"]');
 
   if (titleElement) {
     // Get the text content from the element
     const title = titleElement?.textContent?.trim();
-    setJobstitle(title);
+    dispatch(setJobTitle(title));
   }
 
   const companyNameEle = document.querySelector(
@@ -25,14 +30,15 @@ export const getJobFromSimplyhired = (
   if (companyNameEle) {
     // Get the text content from the element
     const inputString = companyNameEle?.textContent?.trim();
-    setCompanyName(inputString);
+    dispatch(setJobCompany(inputString));
   }
 
   const locationText =
     document
       .querySelector('[data-testid="viewJobCompanyLocation"]')
       ?.textContent?.trim() ?? "";
-  setLocation(locationText);
+
+  dispatch(setJobLocation(locationText));
 
   const workType =
     document
@@ -43,7 +49,8 @@ export const getJobFromSimplyhired = (
       .querySelector('[data-testid="viewJobBodyJobCompensation"]')
       ?.textContent?.trim() ?? "";
 
-  setAddationalInfo([workType, payment]);
+  dispatch(setJobSummary([workType, payment]));
+  dispatch(setJobFoundStatus(true));
 
   const jobDescriptionEle = document.querySelector(
     '[data-testid="viewJobBodyJobFullDescriptionContent"]'
@@ -51,8 +58,24 @@ export const getJobFromSimplyhired = (
   if (jobDescriptionEle) {
     // Get the text content from the element
     const description = jobDescriptionEle?.innerHTML;
-    setJobDescription(description);
+    dispatch(setJobDesc(description));
   }
 
-  setSource("Simplyhired");
+  dispatch(setJobSource("Simplyhired"));
 };
+
+const SimplyHiredJob = (props: any) => {
+  const { setShowPage } = props;
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    setTimeout(() => {
+      getJobFromSimplyhired(dispatch);
+    }, 3000);
+    setShowPage("");
+    dispatch(setJobFoundStatus(false));
+  }, [window.location.href]);
+
+  return null;
+};
+
+export default SimplyHiredJob;

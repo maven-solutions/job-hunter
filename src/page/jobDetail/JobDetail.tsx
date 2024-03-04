@@ -14,6 +14,7 @@ import InputBox from "../../component/InputBox";
 import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { RootStore, useAppSelector } from "../../store/store";
+import { SHOW_PAGE } from "../../utils/constant";
 
 const JobDetail = (props: any) => {
   const {
@@ -81,7 +82,13 @@ const JobDetail = (props: any) => {
       </WhiteCard>
       <Height height="15" />
       <div className="ci_job_detail_button_section">
-        <PrimaryButton buttonWidth="105" loading={false} outline text="Back" />
+        <PrimaryButton
+          buttonWidth="105"
+          loading={false}
+          outline
+          text="Back"
+          onclick={() => setShowPage(SHOW_PAGE.summaryPage)}
+        />
         <div style={{ margin: "0 5px" }} />
         <PrimaryButton buttonWidth="140" loading={false} text="Save Job" />{" "}
       </div>

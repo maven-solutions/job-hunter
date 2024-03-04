@@ -12,6 +12,15 @@ const CompanySourceLogo = (props: any) => {
       />
     );
   }
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.simplyhired) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("simplyhired.svg")}
+        alt="company-icon"
+      />
+    );
+  }
   return null;
 };
 

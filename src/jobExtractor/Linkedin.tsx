@@ -103,7 +103,6 @@ const Linkedin = (props: any) => {
   const dispatch = useAppDispatch();
   useEffect(() => {
     setTimeout(() => {
-      console.log("fire----");
       getContentFromLinkedInJobs(dispatch);
     }, 3000);
     setShowPage("");
