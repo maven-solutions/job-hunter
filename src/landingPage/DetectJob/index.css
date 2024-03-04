@@ -29,6 +29,10 @@
   background-color: linear-gradient(270deg, #22d1ee, #3d5af1);
   /* position: relative; */
 }
+.job_circle_button:hover + .ci_menu_outer_continer,
+.ci_menu_outer_continer:hover {
+  display: block !important;
+}
 .job__post__detected {
   position: absolute;
   top: -2px;

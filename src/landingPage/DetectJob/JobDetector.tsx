@@ -15,6 +15,7 @@ import SignupForm from "../../auth/signup/Signup";
 import DisplayJob from "../../page/displayJob/DisplayJob";
 import Profile from "../../page/profile/Profile";
 import JobDetail from "../../page/jobDetail/JobDetail";
+import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 
 const JobDetector = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
@@ -66,7 +67,8 @@ const JobDetector = () => {
       {/* <SignupForm setShowForm={setShowFrom} /> */}
       {/* <DisplayJob setShowForm={setShowFrom} /> */}
       {/* <Profile setShowForm={setShowFrom} /> */}
-      <JobDetail setShowForm={setShowFrom} />
+      {/* <JobDetail setShowForm={setShowFrom} /> */}
+      <MenuPopUp />
     </div>
   );
 };

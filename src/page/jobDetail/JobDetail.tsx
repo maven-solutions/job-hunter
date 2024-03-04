@@ -1,4 +1,12 @@
 import React from "react";
+import {
+  BtnBold,
+  BtnItalic,
+  Editor,
+  EditorProvider,
+  Toolbar,
+  BtnUnderline,
+} from "react-simple-wysiwyg";
 import "./index.css";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -15,6 +23,8 @@ const JobDetail = (props: any) => {
     setJobstitle,
     location,
     setLocation,
+    jobDescription,
+    setDescValue,
   } = props;
   return (
     <Layout setShowForm={setShowForm}>
@@ -42,6 +52,24 @@ const JobDetail = (props: any) => {
           valueSetter={setLocation}
           name="location"
         />
+        <Height height="10" />
+
+        <div className="label-top">Additional Info</div>
+        <EditorProvider>
+          <Editor
+            value={jobDescription ?? ""}
+            onChange={setDescValue}
+            // onBlur={() => console.log("Editor lost focus")}
+            // onFocus={() => console.log("Editor gained focus")}
+          >
+            {/* <Toolbar /> */}
+            <Toolbar>
+              <BtnBold />
+              <BtnItalic />
+              <BtnUnderline />
+            </Toolbar>
+          </Editor>
+        </EditorProvider>
       </WhiteCard>
       <Height height="15" />
       <div className="ci_job_detail_button_section">
