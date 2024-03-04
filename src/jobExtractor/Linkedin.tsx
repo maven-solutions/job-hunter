@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { RootStore, useAppDispatch, useAppSelector } from "../store/store";
+import { useEffect } from "react";
+import { useAppDispatch } from "../store/store";
 import {
   setJobCompany,
   setJobDesc,
@@ -53,17 +53,12 @@ const getContentFromLinkedInJobs = (dispatch): void => {
       "job-details-jobs-unified-top-card__job-title"
     );
     if (jobsBody[0]) {
-      // setJobstitle(jobsBody[0]?.textContent.trim());
-      // console.log("title----", jobsBody[0]?.textContent.trim());
       dispatch(setJobTitle(jobsBody[0]?.textContent.trim()));
     }
 
     setTimeout(() => {
       let jobDetailsElement = document?.getElementById("job-details");
       const about = jobDetailsElement?.querySelector("span");
-      // setJobDescription(about?.innerHTML);
-      // console.log("setJobDesc----", about?.innerHTML);
-
       dispatch(setJobDesc(about?.innerHTML));
     }, 500);
 
@@ -76,24 +71,17 @@ const getContentFromLinkedInJobs = (dispatch): void => {
       ?.split("·")[1]
       .trim();
     if (locationText) {
-      // setLocation(locationText);
-      // console.log("locationText----", locationText);
-
       dispatch(setJobLocation(locationText));
     }
 
     getAddationalInfo(dispatch);
 
-    // setSource("linkedin");
     dispatch(setJobSource("linkedin"));
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
       const domElement = document?.querySelector(".jobs-unified-top-card.t-14");
       const aTag = domElement?.querySelector("a.app-aware-link");
       const companyName = aTag?.textContent;
-      // setCompanyName(companyName?.trim());
-      // console.log("companyName----", companyName?.trim());
-
       dispatch(setJobCompany(companyName?.trim()));
     }, 500);
   } catch (error) {
@@ -101,15 +89,17 @@ const getContentFromLinkedInJobs = (dispatch): void => {
   }
 };
 
-const Linkedin = () => {
+const Linkedin = (props: any) => {
+  const { setShowPage } = props;
   const dispatch = useAppDispatch();
-
   useEffect(() => {
     setTimeout(() => {
       console.log("fire----");
       getContentFromLinkedInJobs(dispatch);
     }, 3000);
-  }, []);
+    setShowPage("");
+    dispatch(setJobFoundStatus(false));
+  }, [window.location.href]);
 
   return null;
 };

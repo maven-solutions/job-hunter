@@ -19,6 +19,7 @@ import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import Linkedin from "../../jobExtractor/Linkedin";
 import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
+import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -51,20 +52,22 @@ const JobDetector = () => {
 
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
-      // setPostUrl() b
-      // <Linkedin />;
-      // getContentFromLinkedInJobs(
-      //   setPostUrl,
-      //   setJobstitle,
-      //   setJobDescription,
-      //   setLocation,
-      //   setSource,
-      //   setCompanyName,
-      //   setAddationalInfo
-      // );
       setWebsite(SUPPORTED_WEBSITE.linkedin);
     }
   }, [postUrl]);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const url = window.location.href;
+      // chrome.runtime.sendMessage({ action: "urlChange", url });
+      if (url !== postUrl) {
+        setPostUrl(url);
+      }
+    });
+
+    // Observe changes in the DOM
+    observer.observe(document, { childList: true, subtree: true });
+  }, []);
 
   useEffect(() => {
     let intervalId: any = "";
@@ -94,13 +97,14 @@ const JobDetector = () => {
           jobFound={jobDetailState?.jobFound || false}
         />
       ) : null}
-      {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
+
       {/* <LoginFrom setShowForm={setShowFrom} /> */}
       {/* <SignupForm setShowForm={setShowFrom} /> */}
-      {/* <Profile setShowForm={setShowFrom} /> */}
 
       <MenuPopUp setShowPage={setShowPage} />
-      {website === SUPPORTED_WEBSITE.linkedin && <Linkedin />}
+      {website === SUPPORTED_WEBSITE.linkedin && (
+        <Linkedin setShowPage={setShowPage} />
+      )}
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
       )}
