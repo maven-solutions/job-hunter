@@ -6,7 +6,6 @@ import JobListTable from "./JobListTable";
 import { checkJobStatus, saveJobs } from "./api";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
-import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
 import { getJobsFromIndeed } from "../jobExtractor/indeed";
 import { getJobsFromDice } from "../jobExtractor/dice";
 import { getJobFromSimplyhired } from "../jobExtractor/simplyhired";
@@ -74,15 +73,15 @@ const JobFrom = (props: any) => {
   useEffect(() => {
     SetAlreadySavedInfo(false);
     if (window.location.href.includes("linkedin.")) {
-      getContentFromLinkedInJobs(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
+      // getContentFromLinkedInJobs(
+      //   setPostUrl,
+      //   setJobstitle,
+      //   setJobDescription,
+      //   setLocation,
+      //   setSource,
+      //   setCompanyName,
+      //   setAddationalInfo
+      // );
     }
     if (window.location.href.includes("indeed.")) {
       getJobsFromIndeed(

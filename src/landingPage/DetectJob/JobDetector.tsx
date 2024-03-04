@@ -16,11 +16,21 @@ import DisplayJob from "../../page/displayJob/DisplayJob";
 import Profile from "../../page/profile/Profile";
 import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
+import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
+import Linkedin from "../../jobExtractor/Linkedin";
 
 const JobDetector = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
+  const [website, setWebsite] = useState<string>("");
+
+  const dispatch = useAppDispatch();
+  const jobDetailState: any = useAppSelector((store: RootStore) => {
+    return store.JobDetailSlice;
+  });
+
+  console.log("jobDetailState---", jobDetailState);
 
   useEffect(() => {
     if (
@@ -40,6 +50,8 @@ const JobDetector = () => {
 
   useEffect(() => {
     if (window.location.href.includes("linkedin.")) {
+      // setPostUrl() b
+      // <Linkedin />;
       // getContentFromLinkedInJobs(
       //   setPostUrl,
       //   setJobstitle,
@@ -49,6 +61,7 @@ const JobDetector = () => {
       //   setCompanyName,
       //   setAddationalInfo
       // );
+      setWebsite("linkedin");
     }
   }, [postUrl]);
 
@@ -75,7 +88,11 @@ const JobDetector = () => {
   return (
     <div className="content__script__section">
       {showIcon ? (
-        <Logo showFrom={showFrom} setShowFrom={setShowFrom} jobFound />
+        <Logo
+          showFrom={showFrom}
+          setShowFrom={setShowFrom}
+          jobFound={jobDetailState?.jobFound || false}
+        />
       ) : null}
       {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
       {/* <LoginFrom setShowForm={setShowFrom} /> */}
@@ -84,6 +101,7 @@ const JobDetector = () => {
       {/* <Profile setShowForm={setShowFrom} /> */}
       {/* <JobDetail setShowForm={setShowFrom} /> */}
       {/* <MenuPopUp /> */}
+      {website === "linkedin" && <Linkedin />}
     </div>
   );
 };

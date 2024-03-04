@@ -1,4 +1,17 @@
-const getAddationalInfo = (setAddationalInfo) => {
+import React, { useEffect } from "react";
+import { RootStore, useAppDispatch, useAppSelector } from "../store/store";
+import {
+  setJobCompany,
+  setJobDesc,
+  setJobFoundStatus,
+  setJobLocation,
+  setJobPostUrl,
+  setJobSource,
+  setJobSummary,
+  setJobTitle,
+} from "../store/features/JobDetail/JobDetailSlice";
+
+const getAddationalInfo = (dispatch) => {
   let workplacetype: any = document
     .querySelector(".ui-label.ui-label--accent-3.text-body-small")
     .textContent.trim()
@@ -26,59 +39,79 @@ const getAddationalInfo = (setAddationalInfo) => {
   const firstEle =
     `${workplacetype.trim()} . ${worktype.trim()} . ${position.trim()}` ?? "";
 
-  setAddationalInfo([firstEle, secondLiText]);
+  dispatch(setJobSummary([firstEle, secondLiText]));
+  dispatch(setJobFoundStatus(true));
 };
-export const getContentFromLinkedInJobs = (
-  setPostUrl,
-  setJobstitle,
-  setJobDescription,
-  setLocation,
-  setSource,
-  setCompanyName,
-  setAddationalInfo
-): void => {
+const getContentFromLinkedInJobs = (dispatch): void => {
   try {
     if (!document.querySelector(".jobs-search__job-details--wrapper")) {
       return;
     }
 
-    setPostUrl(window.location.href);
+    dispatch(setJobPostUrl(window.location.href));
     const jobsBody = document?.getElementsByClassName(
       "job-details-jobs-unified-top-card__job-title"
     );
     if (jobsBody[0]) {
-      setJobstitle(jobsBody[0]?.textContent.trim());
+      // setJobstitle(jobsBody[0]?.textContent.trim());
+      // console.log("title----", jobsBody[0]?.textContent.trim());
+      dispatch(setJobTitle(jobsBody[0]?.textContent.trim()));
     }
 
     setTimeout(() => {
       let jobDetailsElement = document?.getElementById("job-details");
       const about = jobDetailsElement?.querySelector("span");
-      setJobDescription(about?.innerHTML);
+      // setJobDescription(about?.innerHTML);
+      // console.log("setJobDesc----", about?.innerHTML);
+
+      dispatch(setJobDesc(about?.innerHTML));
     }, 500);
 
     // find posted date
     const locationText = document
       .querySelector(
-        ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+        ".job-details-jobs-unified-top-card__primary-description-without-tagline "
       )
-      .textContent.trim()
-      .split("·")[1]
+      ?.textContent?.trim()
+      ?.split("·")[1]
       .trim();
     if (locationText) {
-      setLocation(locationText);
+      // setLocation(locationText);
+      // console.log("locationText----", locationText);
+
+      dispatch(setJobLocation(locationText));
     }
 
-    getAddationalInfo(setAddationalInfo);
+    getAddationalInfo(dispatch);
 
-    setSource("linkedin");
+    // setSource("linkedin");
+    dispatch(setJobSource("linkedin"));
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
       const domElement = document?.querySelector(".jobs-unified-top-card.t-14");
       const aTag = domElement?.querySelector("a.app-aware-link");
       const companyName = aTag?.textContent;
-      setCompanyName(companyName?.trim());
+      // setCompanyName(companyName?.trim());
+      // console.log("companyName----", companyName?.trim());
+
+      dispatch(setJobCompany(companyName?.trim()));
     }, 500);
   } catch (error) {
     console.log(error);
   }
 };
+
+const Linkedin = () => {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("fire----");
+      getContentFromLinkedInJobs(dispatch);
+    }, 3000);
+  }, []);
+
+  return null;
+};
+
+export default Linkedin;

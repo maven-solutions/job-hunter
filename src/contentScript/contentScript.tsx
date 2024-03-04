@@ -1,10 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
 
 import JobDetector from "../landingPage/DetectJob/JobDetector";
+import Store from "../store/store";
 
 const App: React.FC<{}> = () => {
-  return <JobDetector />;
+  return (
+    <Provider store={Store}>
+      <JobDetector />
+    </Provider>
+  );
 };
 
 const root = document.createElement("div");
