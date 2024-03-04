@@ -107,6 +107,10 @@ const JobDetector = () => {
       {showPage === SHOW_PAGE.summaryPage && (
         <DisplayJob setShowPage={setShowPage} />
       )}
+
+      {showPage === SHOW_PAGE.profilePage && (
+        <Profile setShowPage={setShowPage} />
+      )}
     </div>
   );
 };

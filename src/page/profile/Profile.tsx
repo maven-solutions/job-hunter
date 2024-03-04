@@ -4,9 +4,9 @@ import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 
 const Profile = (props: any) => {
-  const { setShowForm } = props;
+  const { setShowPage } = props;
   return (
-    <Layout setShowForm={setShowForm} firstBgWidth="30" secondBgWidth="30">
+    <Layout setShowPage={setShowPage} firstBgWidth="30" secondBgWidth="30">
       <h3 className="ci_profile_titile">Profile </h3>
       <WhiteCard>
         <div className="ci_profile_section">

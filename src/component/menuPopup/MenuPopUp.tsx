@@ -23,7 +23,11 @@ const MenuPopUp = (props: any) => {
           <span>View Job Board </span>
         </div>
         <Height height="20" />
-        <div className="ci_menu_list_item" role="button">
+        <div
+          className="ci_menu_list_item"
+          role="button"
+          onClick={() => setShowPage(SHOW_PAGE.profilePage)}
+        >
           <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
           <span>Profile </span>
         </div>
