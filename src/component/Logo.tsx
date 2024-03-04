@@ -4,7 +4,7 @@ const Logo = (props: any) => {
   const { showFrom, setShowFrom, jobFound } = props;
   return (
     <div
-      className="job_circle_button"
+      className="job_circle_button ci-shake-logo"
       role="button"
       onClick={() => setShowFrom(!showFrom)}
     >

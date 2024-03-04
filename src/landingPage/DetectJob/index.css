@@ -33,6 +33,31 @@
 .ci_menu_outer_continer:hover {
   display: block !important;
 }
+.ci-shake-logo {
+  animation: shake 1s forwards;
+}
+@keyframes shake {
+  0% {
+    transform: rotate(0deg); /* Rotate left slightly */
+  }
+  20% {
+    transform: rotate(-10deg); /* Rotate left slightly */
+  }
+  40% {
+    transform: rotate(10deg); /* Rotate left slightly */
+  }
+  60% {
+    transform: rotate(-10deg); /* Rotate left slightly */
+  }
+  80% {
+    transform: rotate(10deg); /* Rotate left slightly */
+  }
+
+  100% {
+    transform: rotate(0); /* Rotate left slightly */
+  }
+}
+
 .job__post__detected {
   position: absolute;
   top: -2px;
