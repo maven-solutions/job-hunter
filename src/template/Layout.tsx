@@ -4,11 +4,11 @@ import AllSvg from "../contentScript/AllSvg";
 import "./layout.css";
 
 const Layout = (props: any) => {
-  const { children, setShowForm, firstBgWidth, secondBgWidth } = props;
+  const { children, setShowPage, firstBgWidth, secondBgWidth } = props;
   return (
     <div className="job__detail__container">
       <div className="jd-inner">
-        <div className="jobs__collapse" onClick={() => setShowForm(false)}>
+        <div className="jobs__collapse" onClick={() => setShowPage("")}>
           <CloseIcon />
         </div>
         <AllSvg firstBgWidth={firstBgWidth} secondBgWidth={secondBgWidth} />

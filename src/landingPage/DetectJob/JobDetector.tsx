@@ -18,12 +18,13 @@ import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import Linkedin from "../../jobExtractor/Linkedin";
+import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
 
 const JobDetector = () => {
-  const [showFrom, setShowFrom] = useState<boolean>(false);
   const [showIcon, setShowIcon] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
+  const [showPage, setShowPage] = useState<string>("");
 
   const dispatch = useAppDispatch();
   const jobDetailState: any = useAppSelector((store: RootStore) => {
@@ -61,7 +62,7 @@ const JobDetector = () => {
       //   setCompanyName,
       //   setAddationalInfo
       // );
-      setWebsite("linkedin");
+      setWebsite(SUPPORTED_WEBSITE.linkedin);
     }
   }, [postUrl]);
 
@@ -89,19 +90,23 @@ const JobDetector = () => {
     <div className="content__script__section">
       {showIcon ? (
         <Logo
-          showFrom={showFrom}
-          setShowFrom={setShowFrom}
+          setShowPage={setShowPage}
           jobFound={jobDetailState?.jobFound || false}
         />
       ) : null}
       {/* {showFrom && <JobFrom setShowForm={setShowFrom} />} */}
       {/* <LoginFrom setShowForm={setShowFrom} /> */}
       {/* <SignupForm setShowForm={setShowFrom} /> */}
-      {/* <DisplayJob setShowForm={setShowFrom} /> */}
       {/* <Profile setShowForm={setShowFrom} /> */}
-      {/* <JobDetail setShowForm={setShowFrom} /> */}
-      {/* <MenuPopUp /> */}
-      {website === "linkedin" && <Linkedin />}
+
+      <MenuPopUp setShowPage={setShowPage} />
+      {website === SUPPORTED_WEBSITE.linkedin && <Linkedin />}
+      {showPage === SHOW_PAGE.jobDetailPage && (
+        <JobDetail setShowPage={setShowPage} />
+      )}
+      {showPage === SHOW_PAGE.summaryPage && (
+        <DisplayJob setShowPage={setShowPage} />
+      )}
     </div>
   );
 };

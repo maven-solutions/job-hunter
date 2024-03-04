@@ -13,10 +13,11 @@ import WhiteCard from "../../component/card/WhiteCard";
 import InputBox from "../../component/InputBox";
 import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
+import { RootStore, useAppSelector } from "../../store/store";
 
 const JobDetail = (props: any) => {
   const {
-    setShowForm,
+    setShowPage,
     companyName,
     setCompanyName,
     jobsTitle,
@@ -26,21 +27,25 @@ const JobDetail = (props: any) => {
     jobDescription,
     setDescValue,
   } = props;
+  const jobDetailState: any = useAppSelector((store: RootStore) => {
+    return store.JobDetailSlice;
+  });
   return (
-    <Layout setShowForm={setShowForm}>
+    <Layout setShowPage={setShowPage}>
       <h3 className="ci_job_detail_title">Job Listing Details</h3>
-
       <WhiteCard>
+        <Height height="-15" />
+
         <InputBox
           title="Job title"
-          value={jobsTitle}
+          value={jobDetailState.title}
           valueSetter={setJobstitle}
           name="jobtitle"
         />
         <Height height="10" />
         <InputBox
           title="Company"
-          value={companyName}
+          value={jobDetailState.comapny}
           valueSetter={setCompanyName}
           name="company"
         />
@@ -48,28 +53,31 @@ const JobDetail = (props: any) => {
 
         <InputBox
           title="Location"
-          value={location}
+          value={jobDetailState.location}
           valueSetter={setLocation}
           name="location"
         />
         <Height height="10" />
-
-        <div className="label-top">Additional Info</div>
-        <EditorProvider>
-          <Editor
-            value={jobDescription ?? ""}
-            onChange={setDescValue}
-            // onBlur={() => console.log("Editor lost focus")}
-            // onFocus={() => console.log("Editor gained focus")}
-          >
-            {/* <Toolbar /> */}
-            <Toolbar>
-              <BtnBold />
-              <BtnItalic />
-              <BtnUnderline />
-            </Toolbar>
-          </Editor>
-        </EditorProvider>
+        <div className="ci_job_desc">
+          <label className="job_box_title">Additional Info</label>
+          {/* 
+          <div className="label-top">Additional Info</div> */}
+          <EditorProvider>
+            <Editor
+              value={jobDetailState.description ?? ""}
+              onChange={setDescValue}
+              // onBlur={() => console.log("Editor lost focus")}
+              // onFocus={() => console.log("Editor gained focus")}
+            >
+              {/* <Toolbar /> */}
+              <Toolbar>
+                <BtnBold />
+                <BtnItalic />
+                <BtnUnderline />
+              </Toolbar>
+            </Editor>
+          </EditorProvider>
+        </div>
       </WhiteCard>
       <Height height="15" />
       <div className="ci_job_detail_button_section">

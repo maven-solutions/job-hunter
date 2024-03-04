@@ -10,3 +10,27 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.ci_job_desc .rsw-ce {
+  height: 100px;
+  background-color: #fff;
+  overflow: auto;
+}
+.ci_job_desc .rsw-ce::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.ci_job_desc .rsw-ce::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.ci_job_desc .rsw-ce::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+.ci_job_desc .rsw-ce::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

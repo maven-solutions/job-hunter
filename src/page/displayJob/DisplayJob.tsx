@@ -8,7 +8,7 @@ import Layout from "../../template/Layout";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 
 const DisplayJob = (props: any) => {
-  const { setShowFrom } = props;
+  const { setShowPage } = props;
   const [state, setStage] = useState<any>("");
   const stageOptions: any = [
     { value: "Wishlist", label: "Wishlist" },
@@ -17,7 +17,7 @@ const DisplayJob = (props: any) => {
     { value: "Interview", label: "Interview" },
   ];
   return (
-    <Layout setShowFrom={setShowFrom}>
+    <Layout setShowPage={setShowPage}>
       <WhiteCard>
         <JobSummary />
       </WhiteCard>
