@@ -10,11 +10,13 @@ const JobSummary = () => {
   return (
     <div className="ci_job_summary_section">
       <div className="ci_job_summary_heading_section">
-        <img
-          className="ci_job_comapny_icon"
-          src={chrome.runtime.getURL("linkedin.svg")}
-          alt="company-icon"
-        />
+        {jobDetailState.companyLogo && (
+          <img
+            className="ci_job_comapny_icon"
+            src={jobDetailState.companyLogo}
+            alt="company-icon"
+          />
+        )}
         <div className="ci_job_company_detail_section">
           <h3 className="ci_company_job_title"> {jobDetailState?.title}</h3>
           <div className="ci_job_company_detail_row">

@@ -10,6 +10,7 @@
   height: 37px;
   object-fit: cover;
   margin-right: 10px;
+  border-radius: 5px;
 }
 .ci_job_company_detail_section {
 }

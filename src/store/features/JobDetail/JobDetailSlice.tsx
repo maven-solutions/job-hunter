@@ -10,6 +10,7 @@ const initialState: any = {
   description: "",
   addationlIfo: [],
   jobFound: false,
+  companyLogo: "",
   source: "",
 };
 
@@ -38,6 +39,9 @@ const JobDetails = createSlice({
     setJobFoundStatus: (state: any, { payload }: PayloadAction<any>) => {
       state.jobFound = payload;
     },
+    setJobCompanyLogo: (state: any, { payload }: PayloadAction<any>) => {
+      state.companyLogo = payload;
+    },
     setJobSource: (state: any, { payload }: PayloadAction<any>) => {
       state.source = payload;
     },
@@ -50,6 +54,7 @@ const JobDetails = createSlice({
       state.addationlIfo = [];
       state.jobFound = false;
       state.source = "";
+      state.companyLogo = "";
     },
   },
 });
@@ -64,6 +69,7 @@ export const {
   setJobFoundStatus,
   setJobSource,
   clearJobState,
+  setJobCompanyLogo,
 } = JobDetails.actions;
 
 export default JobDetails.reducer;

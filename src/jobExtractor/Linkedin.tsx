@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
   setJobCompany,
+  setJobCompanyLogo,
   setJobDesc,
   setJobFoundStatus,
   setJobLocation,
@@ -38,6 +39,14 @@ const getAddationalInfo = (dispatch) => {
 
   const firstEle =
     `${workplacetype.trim()} . ${worktype.trim()} . ${position.trim()}` ?? "";
+
+  const imgEle = document.querySelector(
+    ".jobs-search-results-list__list-item--active"
+  );
+  if (imgEle) {
+    const img = imgEle.querySelector("img");
+    dispatch(setJobCompanyLogo(img?.src));
+  }
 
   dispatch(setJobSummary([firstEle, secondLiText]));
   dispatch(setJobFoundStatus(true));
