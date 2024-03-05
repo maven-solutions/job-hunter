@@ -1,5 +1,6 @@
 .ci_heading_title {
   all: unset;
+  font-family: "Inter";
   display: block;
   font-weight: 600;
   font-size: 18px;
