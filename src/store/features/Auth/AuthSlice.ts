@@ -33,20 +33,29 @@ const AuthSlice = createSlice({
     builder.addCase(
       userSignIn.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
+        state.loading.login = false;
+        state.req_success.login = true;
         console.log("payload---", payload);
         state.ci_user = payload.user;
         state.ci_token = payload.token;
-        chrome.storage.local.set({ ci_user: state.ci_user });
-        chrome.storage.local.set({ ci_token: state.ci_token });
+        chrome.storage.local
+          .set({ ci_user: JSON.stringify(state.ci_user) })
+          .then(() => {
+            console.log("user is set");
+            chrome.storage.local.get(["ci_user"]).then((result) => {
+              console.log("ci_user is ", JSON.parse(result.ci_user));
+            });
+          });
+        chrome.storage.local
+          .set({ ci_token: JSON.stringify(state.ci_token) })
+          .then(() => {
+            console.log("token is set");
+
+            chrome.storage.local.get(["ci_token"]).then((result) => {
+              console.log("ci_token is ", JSON.parse(result.ci_token));
+            });
+          });
         // localStorage.setItem("dashboardType", "individual");
-
-        chrome.storage.local.get(["ci_user"]).then((result) => {
-          console.log("ci_user is " + result.key);
-        });
-
-        chrome.storage.local.get(["ci_token"]).then((result) => {
-          console.log("ci_token is " + result.key);
-        });
       }
     );
     builder.addCase(userSignIn.rejected, (state) => {

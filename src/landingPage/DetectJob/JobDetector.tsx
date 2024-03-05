@@ -130,7 +130,7 @@ const JobDetector = () => {
         />
       ) : null}
 
-      <LoginFrom setShowPage={setShowPage} />
+      {/* <LoginFrom setShowPage={setShowPage} /> */}
       {/* <SignupForm setShowForm={setShowFrom} /> */}
 
       <MenuPopUp setShowPage={setShowPage} />
