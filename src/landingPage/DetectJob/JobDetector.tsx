@@ -24,6 +24,7 @@ import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
 import Indeed from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
+import Builtin from "../../jobExtractor/Builtin";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -73,6 +74,9 @@ const JobDetector = () => {
     }
     if (window.location.href.includes("ziprecruiter.")) {
       setWebsite(SUPPORTED_WEBSITE.ziprecruiter);
+    }
+    if (window.location.href.includes("builtin.")) {
+      setWebsite(SUPPORTED_WEBSITE.builtin);
     }
   }, [postUrl]);
 
@@ -135,6 +139,10 @@ const JobDetector = () => {
       )}
       {website === SUPPORTED_WEBSITE.ziprecruiter && (
         <Ziprecruiter setShowPage={setShowPage} />
+      )}
+
+      {website === SUPPORTED_WEBSITE.ziprecruiter && (
+        <Builtin setShowPage={setShowPage} />
       )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
