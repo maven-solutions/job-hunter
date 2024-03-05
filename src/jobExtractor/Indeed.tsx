@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
+  clearJobState,
   setJobCompany,
   setJobDesc,
   setJobFoundStatus,
@@ -65,7 +66,8 @@ const Indeed = (props: any) => {
       getJobsFromIndeed(dispatch);
     }, 3000);
     setShowPage("");
-    dispatch(setJobFoundStatus(false));
+    setShowPage("");
+    dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;

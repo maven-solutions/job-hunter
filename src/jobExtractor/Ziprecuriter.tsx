@@ -1,5 +1,6 @@
 import { useAppDispatch } from "../store/store";
 import {
+  clearJobState,
   setJobCompany,
   setJobCompanyLogo,
   setJobDesc,
@@ -100,7 +101,8 @@ const Ziprecruiter = (props: any) => {
       getJobFromZipRecruiter(dispatch);
     }, 3000);
     setShowPage("");
-    dispatch(setJobFoundStatus(false));
+    setShowPage("");
+    dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;

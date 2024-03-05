@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
+  clearJobState,
   setJobCompany,
   setJobCompanyLogo,
   setJobDesc,
@@ -102,14 +103,14 @@ const Builtin = (props: any) => {
   const { setShowPage } = props;
   const dispatch = useAppDispatch();
   useEffect(() => {
-    console.log("builtin---");
     const dom = document?.querySelector(".block-region-middle");
     const dom2 = document?.querySelector(".block-content");
     setTimeout(() => {
       getJobFromBuiltin(dispatch, dom, dom2);
     }, 3000);
     setShowPage("");
-    dispatch(setJobFoundStatus(false));
+    setShowPage("");
+    dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;

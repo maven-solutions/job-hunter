@@ -50,7 +50,7 @@ const JobDetails = createSlice({
     setJobType: (state: any, { payload }: PayloadAction<any>) => {
       state.jobtype = payload;
     },
-    clearJobState: (state: any, { payload }: PayloadAction<any>) => {
+    clearJobState: (state: any) => {
       state.title = "";
       state.location = "";
       state.company = "";

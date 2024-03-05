@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
+  clearJobState,
   setJobCompany,
   setJobCompanyLogo,
   setJobDesc,
@@ -107,7 +108,7 @@ const Linkedin = (props: any) => {
       getContentFromLinkedInJobs(dispatch);
     }, 3000);
     setShowPage("");
-    dispatch(setJobFoundStatus(false));
+    dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;
