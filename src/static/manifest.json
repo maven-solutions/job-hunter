@@ -46,7 +46,8 @@
         "user.svg",
         "jobboard.svg",
         "simplyhired.svg",
-        "indeed.svg"
+        "indeed.svg",
+        "ziprecruiter.svg"
       ],
       "matches": ["<all_urls>"]
     }

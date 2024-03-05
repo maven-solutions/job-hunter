@@ -23,6 +23,7 @@ import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
 import Indeed from "../../jobExtractor/Indeed";
+import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -69,6 +70,9 @@ const JobDetector = () => {
     }
     if (window.location.href.includes("indeed.")) {
       setWebsite(SUPPORTED_WEBSITE.indeed);
+    }
+    if (window.location.href.includes("ziprecruiter.")) {
+      setWebsite(SUPPORTED_WEBSITE.ziprecruiter);
     }
   }, [postUrl]);
 
@@ -128,6 +132,9 @@ const JobDetector = () => {
       {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
       {website === SUPPORTED_WEBSITE.indeed && (
         <Indeed setShowPage={setShowPage} />
+      )}
+      {website === SUPPORTED_WEBSITE.ziprecruiter && (
+        <Ziprecruiter setShowPage={setShowPage} />
       )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (

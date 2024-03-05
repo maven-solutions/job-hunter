@@ -30,6 +30,16 @@ const CompanySourceLogo = (props: any) => {
       />
     );
   }
+
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.ziprecruiter) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("ziprecruiter.svg")}
+        alt="ziprecruiter-icon"
+      />
+    );
+  }
   return null;
 };
 
