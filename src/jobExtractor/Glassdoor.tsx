@@ -1,3 +1,19 @@
+import { useEffect } from "react";
+import { useAppDispatch } from "../store/store";
+import {
+  clearJobState,
+  setJobCompany,
+  setJobCompanyLogo,
+  setJobDesc,
+  setJobFoundStatus,
+  setJobLocation,
+  setJobPostUrl,
+  setJobSource,
+  setJobSummary,
+  setJobTitle,
+  setJobType,
+} from "../store/features/JobDetail/JobDetailSlice";
+
 const removeRatingFromEnd = (inputString) => {
   // Remove the rating at the end of the string
   let stringWithoutRating = inputString.replace(/\d+(\.\d+)?★$/, "");
@@ -6,16 +22,8 @@ const removeRatingFromEnd = (inputString) => {
   return finalString;
 };
 
-export const getJobFromGlassdoor = (
-  setPostUrl,
-  setJobstitle,
-  setJobDescription,
-  setLocation,
-  setSource,
-  setCompanyName,
-  setAddationalInfo
-): void => {
-  setPostUrl(window.location.href);
+const getJobFromGlassdoor = (dispatch): void => {
+  dispatch(setJobPostUrl(window.location.href));
 
   const glassDom = document.querySelector('[data-test="job-details-header"]');
 
@@ -25,7 +33,7 @@ export const getJobFromGlassdoor = (
   if (titleElement) {
     // Get the text content from the element
     const title = titleElement?.textContent?.trim();
-    setJobstitle(title);
+    dispatch(setJobTitle(title));
   }
 
   const companyNameEle = glassDom.querySelector("span");
@@ -34,19 +42,18 @@ export const getJobFromGlassdoor = (
     // Get the text content from the element
     const inputString = companyNameEle?.textContent?.trim();
     const companyName = removeRatingFromEnd(inputString);
-    setCompanyName(companyName);
+    dispatch(setJobCompany(companyName));
   }
 
   const locationText =
     glassDom.querySelector('[data-test="location"]')?.textContent?.trim() ?? "";
-  setLocation(locationText);
+  dispatch(setJobLocation(locationText));
 
   const salary = document
     .querySelector(`[class*="SalaryEstimate_averageEstimate"]`)
     .textContent.trim();
 
-  setAddationalInfo(["Average base salary estimate", salary]);
-
+  dispatch(setJobSummary(["Average base salary estimate", salary]));
   // for description
   const sibling = glassDom.nextElementSibling;
   if (sibling) {
@@ -57,7 +64,7 @@ export const getJobFromGlassdoor = (
         const innderDesc = desc.children[0];
         // Get the text content from the element
         const description = innderDesc?.innerHTML;
-        setJobDescription(description);
+        dispatch(setJobDesc(description));
       }
     }
   }
@@ -72,7 +79,7 @@ export const getJobFromGlassdoor = (
     // Get the text content from the element
     const title = titleElement2?.textContent?.trim();
     if (title) {
-      setJobstitle(title);
+      dispatch(setJobTitle(title));
     }
   }
 
@@ -84,7 +91,7 @@ export const getJobFromGlassdoor = (
     // Get the text content from the element
     const companyName = companyNameEle2?.textContent?.trim();
     if (companyName) {
-      setCompanyName(companyName);
+      dispatch(setJobCompany(companyName));
     }
   }
 
@@ -94,8 +101,25 @@ export const getJobFromGlassdoor = (
   if (jobDescriptionEle2) {
     // Get the text content from the element
     const description = jobDescriptionEle2?.innerHTML;
-    setJobDescription(description);
+    dispatch(setJobDesc(description));
   }
 
-  setSource("Glassdoor");
+  dispatch(setJobSource("Glassdoor"));
+  dispatch(setJobFoundStatus(true));
 };
+
+const Glassdoor = (props: any) => {
+  const { setShowPage } = props;
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    setTimeout(() => {
+      getJobFromGlassdoor(dispatch);
+    }, 3000);
+    setShowPage("");
+    dispatch(clearJobState());
+  }, [window.location.href]);
+
+  return null;
+};
+
+export default Glassdoor;

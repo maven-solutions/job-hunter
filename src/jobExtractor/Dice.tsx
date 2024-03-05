@@ -66,8 +66,6 @@ const getJobsFromDice = (dispatch): void => {
       .querySelector('[data-cy="employmentDetails"]')
       ?.textContent?.trim() ?? "";
 
-  console.log("employmentDetailsText---", employmentDetailsText);
-
   const willingToSponsorText =
     document
       .querySelector('[data-cy="willingToSponsor"]')

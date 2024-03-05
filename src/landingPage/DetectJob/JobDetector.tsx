@@ -25,6 +25,7 @@ import Dice from "../../jobExtractor/Dice";
 import Indeed from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 import Builtin from "../../jobExtractor/Builtin";
+import Glassdoor from "../../jobExtractor/Glassdoor";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -77,6 +78,13 @@ const JobDetector = () => {
     }
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
+    }
+
+    if (
+      window.location.href.includes("glassdoor.") &&
+      window.location.href.includes("job-listing")
+    ) {
+      setWebsite(SUPPORTED_WEBSITE.glasdoor);
     }
   }, [postUrl]);
 
@@ -143,6 +151,10 @@ const JobDetector = () => {
 
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
+      )}
+
+      {website === SUPPORTED_WEBSITE.glasdoor && (
+        <Glassdoor setShowPage={setShowPage} />
       )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
