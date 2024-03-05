@@ -23,6 +23,7 @@ const getJobsFromDice = (dispatch): void => {
     const title = titleElement?.textContent?.trim();
     dispatch(setJobTitle(title));
   }
+
   const companyNameEle = document.querySelector('[data-cy="companyNameLink"]');
   const companyNameWithNoLinkEle = document.querySelector(
     '[data-cy="companyNameNoLink"]'
@@ -35,11 +36,6 @@ const getJobsFromDice = (dispatch): void => {
     const companyNameWithNoLink = companyNameWithNoLinkEle?.textContent?.trim();
     dispatch(setJobCompany(companyNameWithNoLink));
   }
-
-  // Get the HTML element by its data-testid attribute
-  const locationElement = document.querySelector(
-    ".job-header_jobDetail__ZGjiQ"
-  );
 
   // Get the HTML element by its data-testid attribute
   const locationText = document
@@ -80,6 +76,7 @@ const getJobsFromDice = (dispatch): void => {
   dispatch(
     setJobSummary([payDetailText, employmentDetailsText, willingToSponsorText])
   );
+
   dispatch(setJobSource("Dice"));
   dispatch(setJobFoundStatus(true));
 };

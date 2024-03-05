@@ -21,6 +21,15 @@ const CompanySourceLogo = (props: any) => {
       />
     );
   }
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.indeed) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("indeed.svg")}
+        alt="indeed-icon"
+      />
+    );
+  }
   return null;
 };
 

@@ -22,6 +22,7 @@ import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
 import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
+import Indeed from "../../jobExtractor/Indeed";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -65,6 +66,9 @@ const JobDetector = () => {
       window.location.href.includes("job-detail")
     ) {
       setWebsite(SUPPORTED_WEBSITE.dice);
+    }
+    if (window.location.href.includes("indeed.")) {
+      setWebsite(SUPPORTED_WEBSITE.indeed);
     }
   }, [postUrl]);
 
@@ -122,6 +126,9 @@ const JobDetector = () => {
         <SimplyHiredJob setShowPage={setShowPage} />
       )}
       {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
+      {website === SUPPORTED_WEBSITE.indeed && (
+        <Indeed setShowPage={setShowPage} />
+      )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
