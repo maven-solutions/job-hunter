@@ -10,6 +10,7 @@ import {
   setJobSource,
   setJobSummary,
   setJobTitle,
+  setJobType,
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getAddationalInfo = (dispatch) => {
@@ -47,8 +48,8 @@ const getAddationalInfo = (dispatch) => {
     const img = imgEle.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
   }
-
-  dispatch(setJobSummary([firstEle, secondLiText]));
+  dispatch(setJobType(firstEle));
+  dispatch(setJobSummary([secondLiText]));
   dispatch(setJobFoundStatus(true));
 };
 const getContentFromLinkedInJobs = (dispatch): void => {
@@ -85,7 +86,7 @@ const getContentFromLinkedInJobs = (dispatch): void => {
 
     getAddationalInfo(dispatch);
 
-    dispatch(setJobSource("linkedin"));
+    dispatch(setJobSource("Linkedin"));
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
       const domElement = document?.querySelector(".jobs-unified-top-card.t-14");

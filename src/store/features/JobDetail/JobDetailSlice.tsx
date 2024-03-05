@@ -5,6 +5,7 @@ const initialState: any = {
   res_success: false,
   title: "",
   location: "",
+  jobtype: "",
   company: "",
   postUrl: "",
   description: "",
@@ -31,7 +32,8 @@ const JobDetails = createSlice({
       state.postUrl = payload;
     },
     setJobSummary: (state: any, { payload }: PayloadAction<any>) => {
-      state.addationlIfo = payload;
+      let filteredArray = payload.filter((item) => item !== "");
+      state.addationlIfo = filteredArray;
     },
     setJobDesc: (state: any, { payload }: PayloadAction<any>) => {
       state.description = payload;
@@ -45,10 +47,14 @@ const JobDetails = createSlice({
     setJobSource: (state: any, { payload }: PayloadAction<any>) => {
       state.source = payload;
     },
+    setJobType: (state: any, { payload }: PayloadAction<any>) => {
+      state.jobtype = payload;
+    },
     clearJobState: (state: any, { payload }: PayloadAction<any>) => {
       state.title = "";
       state.location = "";
       state.company = "";
+      state.jobtype = "";
       state.postUrl = "";
       state.description = "";
       state.addationlIfo = [];
@@ -62,6 +68,7 @@ const JobDetails = createSlice({
 export const {
   setJobTitle,
   setJobCompany,
+  setJobType,
   setJobLocation,
   setJobPostUrl,
   setJobSummary,

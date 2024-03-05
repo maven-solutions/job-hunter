@@ -8,6 +8,7 @@ const JobSummary = () => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
+  ("•");
   return (
     <div className="ci_job_summary_section">
       <div className="ci_job_summary_heading_section">
@@ -35,25 +36,29 @@ const JobSummary = () => {
       </div>
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
-        {jobDetailState.addationlIfo.length > 0 && (
+        {jobDetailState.jobtype && (
           <div className="ci_job_worktype_section">
             <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
-            <span>{jobDetailState.addationlIfo[0]}</span>
+            <span>{jobDetailState.jobtype}</span>
           </div>
         )}
-
-        {jobDetailState.addationlIfo.length > 1 && (
-          <>
-            <Height height="10" />
-            <div className="ci_job_more_info">
-              <img
-                src={chrome.runtime.getURL("company.svg")}
-                alt="company-icon"
-              />
-              <span>{jobDetailState.addationlIfo[1]}</span>
-            </div>
-          </>
-        )}
+        <Height height="10" />
+        <div className="ci_job_more_info">
+          <img src={chrome.runtime.getURL("company.svg")} alt="company-icon" />
+          <p>
+            {jobDetailState.addationlIfo.map((e, i) => {
+              return (
+                <span key={i}>
+                  {" "}
+                  {e}{" "}
+                  {jobDetailState.addationlIfo.length > i + 1 && (
+                    <span className="ci_dot_seperator"> •</span>
+                  )}
+                </span>
+              );
+            })}
+          </p>
+        </div>{" "}
       </div>{" "}
     </div>
   );

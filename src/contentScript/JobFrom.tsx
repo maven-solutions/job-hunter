@@ -5,12 +5,7 @@ import Notification from "./Notification";
 import JobListTable from "./JobListTable";
 import { checkJobStatus, saveJobs } from "./api";
 import SaveButton from "../component/SaveButton";
-import { getJobFromBuiltin } from "../jobExtractor/builtin";
-import { getJobsFromIndeed } from "../jobExtractor/indeed";
-import { getJobsFromDice } from "../jobExtractor/dice";
 
-import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
-import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
 import Layout from "../template/Layout";
 
 const JobFrom = (props: any) => {
@@ -58,16 +53,16 @@ const JobFrom = (props: any) => {
     const dom = document?.querySelector(".block-region-middle");
     const dom2 = document?.querySelector(".block-content");
 
-    getJobFromBuiltin(
-      setPostUrl,
-      setJobstitle,
-      setCompanyName,
-      setLocation,
-      setJobDescription,
-      setSource,
-      dom,
-      dom2
-    );
+    // getJobFromBuiltin(
+    //   setPostUrl,
+    //   setJobstitle,
+    //   setCompanyName,
+    //   setLocation,
+    //   setJobDescription,
+    //   setSource,
+    //   dom,
+    //   dom2
+    // );
   };
 
   useEffect(() => {
@@ -83,53 +78,53 @@ const JobFrom = (props: any) => {
       //   setAddationalInfo
       // );
     }
-    if (window.location.href.includes("indeed.")) {
-      getJobsFromIndeed(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
-    }
-    if (window.location.href.includes("dice.")) {
-      getJobsFromDice(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
-    }
-    if (window.location.href.includes("ziprecruiter.")) {
-      getJobFromZipRecruiter(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
-    }
-    if (
-      window.location.href.includes("glassdoor.") &&
-      window.location.href.includes("job-listing")
-    ) {
-      getJobFromGlassdoor(
-        setPostUrl,
-        setJobstitle,
-        setJobDescription,
-        setLocation,
-        setSource,
-        setCompanyName,
-        setAddationalInfo
-      );
-    }
+    // if (window.location.href.includes("indeed.")) {
+    //   getJobsFromIndeed(
+    //     setPostUrl,
+    //     setJobstitle,
+    //     setJobDescription,
+    //     setLocation,
+    //     setSource,
+    //     setCompanyName,
+    //     setAddationalInfo
+    //   );
+    // }
+    // if (window.location.href.includes("dice.")) {
+    //   getJobsFromDice(
+    //     setPostUrl,
+    //     setJobstitle,
+    //     setJobDescription,
+    //     setLocation,
+    //     setSource,
+    //     setCompanyName,
+    //     setAddationalInfo
+    //   );
+    // }
+    // if (window.location.href.includes("ziprecruiter.")) {
+    //   getJobFromZipRecruiter(
+    //     setPostUrl,
+    //     setJobstitle,
+    //     setJobDescription,
+    //     setLocation,
+    //     setSource,
+    //     setCompanyName,
+    //     setAddationalInfo
+    //   );
+    // }
+    // if (
+    //   window.location.href.includes("glassdoor.") &&
+    //   window.location.href.includes("job-listing")
+    // ) {
+    //   getJobFromGlassdoor(
+    //     setPostUrl,
+    //     setJobstitle,
+    //     setJobDescription,
+    //     setLocation,
+    //     setSource,
+    //     setCompanyName,
+    //     setAddationalInfo
+    //   );
+    // }
 
     // if (
     //   window.location.href.toLowerCase.toString() !==
@@ -154,9 +149,9 @@ const JobFrom = (props: any) => {
     //   getJobFromSimplyhiredLandingPage();
     // }
 
-    if (window.location.href.includes("builtin.")) {
-      getBuiltinDomForJobs();
-    }
+    // if (window.location.href.includes("builtin.")) {
+    //   getBuiltinDomForJobs();
+    // }
   }, [debounceValue]);
 
   useEffect(() => {

@@ -21,6 +21,7 @@ import Linkedin from "../../jobExtractor/Linkedin";
 import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
 import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
+import Dice from "../../jobExtractor/Dice";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -57,6 +58,13 @@ const JobDetector = () => {
     }
     if (window.location.href.includes("simplyhired.")) {
       setWebsite(SUPPORTED_WEBSITE.simplyhired);
+    }
+
+    if (
+      window.location.href.includes("dice.") &&
+      window.location.href.includes("job-detail")
+    ) {
+      setWebsite(SUPPORTED_WEBSITE.dice);
     }
   }, [postUrl]);
 
@@ -113,6 +121,7 @@ const JobDetector = () => {
       {website === SUPPORTED_WEBSITE.simplyhired && (
         <SimplyHiredJob setShowPage={setShowPage} />
       )}
+      {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />

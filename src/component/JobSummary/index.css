@@ -58,7 +58,8 @@
 .ci_job_more_info img {
   margin-right: 10px;
 }
-.ci_job_more_info span {
+.ci_job_more_info p {
+  all: unset;
   color: #000000;
   font-weight: 400;
   font-size: 14px;
@@ -66,4 +67,7 @@
 }
 .ci_job_more_info {
   display: flex;
+}
+.ci_dot_seperator {
+  font-weight: bold;
 }

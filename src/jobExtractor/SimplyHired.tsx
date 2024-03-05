@@ -9,6 +9,7 @@ import {
   setJobSource,
   setJobSummary,
   setJobTitle,
+  setJobType,
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getJobFromSimplyhired = (dispatch): void => {
@@ -49,7 +50,8 @@ const getJobFromSimplyhired = (dispatch): void => {
       .querySelector('[data-testid="viewJobBodyJobCompensation"]')
       ?.textContent?.trim() ?? "";
 
-  dispatch(setJobSummary([workType, payment]));
+  dispatch(setJobType(workType));
+  dispatch(setJobSummary([payment]));
   dispatch(setJobFoundStatus(true));
 
   const jobDescriptionEle = document.querySelector(
