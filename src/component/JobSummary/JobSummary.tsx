@@ -42,23 +42,30 @@ const JobSummary = () => {
             <span>{jobDetailState.jobtype}</span>
           </div>
         )}
-        <Height height="10" />
-        <div className="ci_job_more_info">
-          <img src={chrome.runtime.getURL("company.svg")} alt="company-icon" />
-          <p>
-            {jobDetailState.addationlIfo.map((e, i) => {
-              return (
-                <span key={i}>
-                  {" "}
-                  {e}{" "}
-                  {jobDetailState.addationlIfo.length > i + 1 && (
-                    <span className="ci_dot_seperator"> •</span>
-                  )}
-                </span>
-              );
-            })}
-          </p>
-        </div>{" "}
+        {jobDetailState.addationlIfo.length > 0 && (
+          <>
+            <Height height="10" />
+            <div className="ci_job_more_info">
+              <img
+                src={chrome.runtime.getURL("company.svg")}
+                alt="company-icon"
+              />
+              <p>
+                {jobDetailState.addationlIfo.map((e, i) => {
+                  return (
+                    <span key={i}>
+                      {" "}
+                      {e}{" "}
+                      {jobDetailState.addationlIfo.length > i + 1 && (
+                        <span className="ci_dot_seperator"> •</span>
+                      )}
+                    </span>
+                  );
+                })}
+              </p>
+            </div>{" "}
+          </>
+        )}
       </div>{" "}
     </div>
   );

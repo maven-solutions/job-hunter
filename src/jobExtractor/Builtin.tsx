@@ -14,12 +14,46 @@ import {
 } from "../store/features/JobDetail/JobDetailSlice";
 const getJobFromBuiltin = (dispatch, dom?: any, dom2?: any) => {
   dispatch(setJobPostUrl(window.location.href));
-
   const titleElement = dom?.querySelector(".field--name-title");
   if (titleElement) {
     // Get the text content from the element
     const title = titleElement?.textContent?.trim();
     dispatch(setJobTitle(title));
+  }
+
+  const locationEle = dom?.querySelector(".company-address");
+  if (locationEle) {
+    // Get the text content from the element
+    const location = locationEle?.textContent?.trim();
+    dispatch(setJobLocation(location));
+  }
+
+  const locationEle2 = dom2?.querySelector(".icon-description");
+  if (locationEle2) {
+    // Get the text content from the element
+    const location = locationEle2?.textContent?.trim();
+    dispatch(setJobLocation(location));
+  }
+
+  const remoteWorkType = dom?.querySelector(".remote");
+  if (remoteWorkType) {
+    // Get the text content from the element
+    const jobtype = remoteWorkType?.textContent?.trim();
+    dispatch(setJobType(jobtype));
+  }
+
+  const hybridWorkType = dom?.querySelector(".hybrid-text");
+  if (hybridWorkType) {
+    // Get the text content from the element
+    const jobtype = hybridWorkType?.textContent?.trim();
+    dispatch(setJobType(jobtype));
+  }
+
+  const hybridWorkType2 = dom2?.querySelector(".job-hybrid");
+  if (hybridWorkType2) {
+    // Get the text content from the element
+    const jobtype = hybridWorkType2?.textContent?.trim();
+    dispatch(setJobType(jobtype));
   }
 
   const jobInfoEle = dom?.querySelector(".job-info");
@@ -45,6 +79,21 @@ const getJobFromBuiltin = (dispatch, dom?: any, dom2?: any) => {
     const description = jobDescriptionEle?.innerHTML;
     dispatch(setJobDesc(description));
   }
+
+  const sallaryEle = dom?.querySelector(".provided-salary");
+  if (sallaryEle) {
+    // Get the text content from the element
+    const sallary = sallaryEle?.textContent?.trim();
+    dispatch(setJobSummary([sallary]));
+  }
+
+  const sallaryEle2 = dom2?.querySelector(".provided-salary");
+  if (sallaryEle2) {
+    // Get the text content from the element
+    const sallary = sallaryEle2?.textContent?.trim();
+    dispatch(setJobSummary([sallary]));
+  }
+
   dispatch(setJobSource("Builtin"));
   dispatch(setJobFoundStatus(true));
 };
@@ -53,6 +102,7 @@ const Builtin = (props: any) => {
   const { setShowPage } = props;
   const dispatch = useAppDispatch();
   useEffect(() => {
+    console.log("builtin---");
     const dom = document?.querySelector(".block-region-middle");
     const dom2 = document?.querySelector(".block-content");
     setTimeout(() => {

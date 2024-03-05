@@ -141,7 +141,7 @@ const JobDetector = () => {
         <Ziprecruiter setShowPage={setShowPage} />
       )}
 
-      {website === SUPPORTED_WEBSITE.ziprecruiter && (
+      {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
       )}
 
