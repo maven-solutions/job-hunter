@@ -47,7 +47,10 @@
         "jobboard.svg",
         "simplyhired.svg",
         "indeed.svg",
-        "ziprecruiter.svg"
+        "ziprecruiter.svg",
+        "dice.svg",
+        "builtin.svg",
+        "glassdoor.svg"
       ],
       "matches": ["<all_urls>"]
     }

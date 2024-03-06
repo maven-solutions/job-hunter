@@ -101,7 +101,7 @@ const JobDetector = () => {
       window.location.href.includes("glassdoor.") &&
       window.location.href.includes("job-listing")
     ) {
-      setWebsite(SUPPORTED_WEBSITE.glasdoor);
+      setWebsite(SUPPORTED_WEBSITE.glassdoor);
     }
 
     loadUser();
@@ -181,7 +181,7 @@ const JobDetector = () => {
         <Builtin setShowPage={setShowPage} />
       )}
 
-      {website === SUPPORTED_WEBSITE.glasdoor && (
+      {website === SUPPORTED_WEBSITE.glassdoor && (
         <Glassdoor setShowPage={setShowPage} />
       )}
 

@@ -3,7 +3,7 @@ export const SUPPORTED_WEBSITE = {
   dice: "dice",
   ziprecruiter: "ziprecruiter",
   indeed: "indeed",
-  glasdoor: "glasdoor",
+  glassdoor: "glassdoor",
   simplyhired: "simplyhired",
   builtin: "builtin",
 };

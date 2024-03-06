@@ -15,7 +15,7 @@ const DisplayJob = (props: any) => {
     { value: "Wishlist", label: "Wishlist" },
     { value: "Applied", label: "Applied" },
     { value: "Interview", label: "Interview" },
-    { value: "Interview", label: "Interview" },
+    { value: "Negotiate", label: "Negotiate" },
   ];
   return (
     <Layout setShowPage={setShowPage}>

@@ -40,6 +40,33 @@ const CompanySourceLogo = (props: any) => {
       />
     );
   }
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.dice) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("dice.svg")}
+        alt="dice-icon"
+      />
+    );
+  }
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.builtin) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("builtin.svg")}
+        alt="builtin-icon"
+      />
+    );
+  }
+  if (source.toLowerCase() === SUPPORTED_WEBSITE.glassdoor) {
+    return (
+      <img
+        className="ci_job_website_icon"
+        src={chrome.runtime.getURL("glassdoor.svg")}
+        alt="glassdoor-icon"
+      />
+    );
+  }
   return null;
 };
 
