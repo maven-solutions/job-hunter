@@ -76,7 +76,7 @@ const LoginFrom = (props: any) => {
           Don’t have an account? &nbsp;
           <span
             className="ci_signup_link"
-            onClick={setShowPage(SHOW_PAGE.singupPage)}
+            onClick={() => setShowPage(SHOW_PAGE.singupPage)}
           >
             {" "}
             Sign up

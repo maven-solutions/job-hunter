@@ -20,15 +20,19 @@ const AuthSlice = createSlice({
   name: "userSignUp",
   initialState,
   reducers: {
-    setRecentSignupEmail: (state: any, { payload }: PayloadAction<string>) => {
-      state.recent_signup_email = payload;
-    },
     setUser: (state: any, { payload }: PayloadAction<string>) => {
       state.ci_user = payload;
     },
     setToken: (state: any, { payload }: PayloadAction<string>) => {
-      state.token = payload;
+      state.ci_token = payload;
       state.authenticated = payload ? true : false;
+    },
+    logoutUser: (state: any, { payload }: PayloadAction<string>) => {
+      chrome.storage.local.set({ ci_user: "" });
+      chrome.storage.local.set({ ci_token: "" });
+      state.ci_token = null;
+      state.ci_user = null;
+      state.authenticated = false;
     },
   },
   extraReducers: (builder) => {
@@ -55,6 +59,6 @@ const AuthSlice = createSlice({
   },
 });
 
-export const { setRecentSignupEmail, setUser, setToken } = AuthSlice.actions;
+export const { setUser, setToken, logoutUser } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

@@ -14,8 +14,9 @@ const SignupForm = (props: any) => {
   const [password, setPassword] = useState("");
   return (
     <Layout setShowPage={setShowPage}>
+      <Height height="-15" />
       <div>
-        <HeadingTitle title="Singup" />
+        <HeadingTitle title="Sing Up" />
         <Height height="10" />
         <WhiteCard>
           <InputBox
@@ -42,7 +43,7 @@ const SignupForm = (props: any) => {
             Don’t have an account? &nbsp;
             <span
               className="ci_signup_link"
-              onClick={setShowPage(SHOW_PAGE.loginPage)}
+              onClick={() => setShowPage(SHOW_PAGE.loginPage)}
             >
               Sing In
             </span>

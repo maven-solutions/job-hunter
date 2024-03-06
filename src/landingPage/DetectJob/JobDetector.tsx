@@ -41,7 +41,7 @@ const JobDetector = () => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
-
+  console.log("auth---", authState);
   const loadUser = () => {
     chrome.storage.local.get(["ci_user"]).then((result) => {
       dispatch(setUser(JSON.parse(result.ci_user)));
@@ -50,6 +50,12 @@ const JobDetector = () => {
       dispatch(setToken(JSON.parse(result.ci_token)));
     });
   };
+
+  useEffect(() => {
+    if (authState.authenticated) {
+      setShowPage("");
+    }
+  }, [authState.authenticated]);
 
   useEffect(() => {
     if (
