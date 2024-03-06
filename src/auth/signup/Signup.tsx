@@ -6,13 +6,14 @@ import InputBox from "../../component/InputBox";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
+import { SHOW_PAGE } from "../../utils/constant";
 
 const SignupForm = (props: any) => {
-  const { setShowFrom } = props;
+  const { setShowPage } = props;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   return (
-    <Layout setShowFrom={setShowFrom}>
+    <Layout setShowPage={setShowPage}>
       <div>
         <HeadingTitle title="Singup" />
         <Height height="10" />
@@ -37,10 +38,14 @@ const SignupForm = (props: any) => {
 
           <PrimaryButton loading={false} text="Sing Up" />
           <span className="ci_auth_form_or">OR</span>
-
           <span className="ci_auth_desc">
             Don’t have an account? &nbsp;
-            <span className="ci_signup_link">Sing In</span>
+            <span
+              className="ci_signup_link"
+              onClick={setShowPage(SHOW_PAGE.loginPage)}
+            >
+              Sing In
+            </span>
           </span>
         </WhiteCard>
       </div>

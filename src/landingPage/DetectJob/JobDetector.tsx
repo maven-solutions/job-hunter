@@ -26,6 +26,7 @@ import Indeed from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 import Builtin from "../../jobExtractor/Builtin";
 import Glassdoor from "../../jobExtractor/Glassdoor";
+import { setToken, setUser } from "../../store/features/Auth/AuthSlice";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -34,11 +35,21 @@ const JobDetector = () => {
   const [showPage, setShowPage] = useState<string>("");
 
   const dispatch = useAppDispatch();
+  const authState: any = useAppSelector((store: RootStore) => {
+    return store.AuthSlice;
+  });
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
 
-  console.log("jobDetailState---", jobDetailState);
+  const loadUser = () => {
+    chrome.storage.local.get(["ci_user"]).then((result) => {
+      dispatch(setUser(JSON.parse(result.ci_user)));
+    });
+    chrome.storage.local.get(["ci_token"]).then((result) => {
+      dispatch(setToken(JSON.parse(result.ci_token)));
+    });
+  };
 
   useEffect(() => {
     if (
@@ -86,6 +97,8 @@ const JobDetector = () => {
     ) {
       setWebsite(SUPPORTED_WEBSITE.glasdoor);
     }
+
+    loadUser();
   }, [postUrl]);
 
   useEffect(() => {
@@ -131,7 +144,16 @@ const JobDetector = () => {
       ) : null}
 
       {/* <LoginFrom setShowPage={setShowPage} /> */}
+
       {/* <SignupForm setShowForm={setShowFrom} /> */}
+
+      {showPage === SHOW_PAGE.loginPage && (
+        <LoginFrom setShowPage={setShowPage} />
+      )}
+
+      {showPage === SHOW_PAGE.singupPage && (
+        <SignupForm setShowPage={setShowPage} />
+      )}
 
       <MenuPopUp setShowPage={setShowPage} />
       {website === SUPPORTED_WEBSITE.linkedin && (

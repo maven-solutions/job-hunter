@@ -23,6 +23,13 @@ const AuthSlice = createSlice({
     setRecentSignupEmail: (state: any, { payload }: PayloadAction<string>) => {
       state.recent_signup_email = payload;
     },
+    setUser: (state: any, { payload }: PayloadAction<string>) => {
+      state.ci_user = payload;
+    },
+    setToken: (state: any, { payload }: PayloadAction<string>) => {
+      state.token = payload;
+      state.authenticated = payload ? true : false;
+    },
   },
   extraReducers: (builder) => {
     // SIGNIN
@@ -35,27 +42,11 @@ const AuthSlice = createSlice({
       (state, { payload }: PayloadAction<any>) => {
         state.loading.login = false;
         state.req_success.login = true;
-        console.log("payload---", payload);
         state.ci_user = payload.user;
         state.ci_token = payload.token;
-        chrome.storage.local
-          .set({ ci_user: JSON.stringify(state.ci_user) })
-          .then(() => {
-            console.log("user is set");
-            chrome.storage.local.get(["ci_user"]).then((result) => {
-              console.log("ci_user is ", JSON.parse(result.ci_user));
-            });
-          });
-        chrome.storage.local
-          .set({ ci_token: JSON.stringify(state.ci_token) })
-          .then(() => {
-            console.log("token is set");
-
-            chrome.storage.local.get(["ci_token"]).then((result) => {
-              console.log("ci_token is ", JSON.parse(result.ci_token));
-            });
-          });
-        // localStorage.setItem("dashboardType", "individual");
+        state.authenticated = true;
+        chrome.storage.local.set({ ci_user: JSON.stringify(state.ci_user) });
+        chrome.storage.local.set({ ci_token: JSON.stringify(state.ci_token) });
       }
     );
     builder.addCase(userSignIn.rejected, (state) => {
@@ -64,6 +55,6 @@ const AuthSlice = createSlice({
   },
 });
 
-export const { setRecentSignupEmail } = AuthSlice.actions;
+export const { setRecentSignupEmail, setUser, setToken } = AuthSlice.actions;
 
 export default AuthSlice.reducer;

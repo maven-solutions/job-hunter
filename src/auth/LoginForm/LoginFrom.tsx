@@ -8,6 +8,7 @@ import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import { userSignIn } from "../../store/features/Auth/AuthApi";
+import { SHOW_PAGE } from "../../utils/constant";
 
 const LoginFrom = (props: any) => {
   const { setShowPage } = props;
@@ -73,7 +74,13 @@ const LoginFrom = (props: any) => {
         <span className="ci_auth_form_or">OR</span>
         <span className="ci_auth_desc">
           Don’t have an account? &nbsp;
-          <span className="ci_signup_link"> Sign up</span>
+          <span
+            className="ci_signup_link"
+            onClick={setShowPage(SHOW_PAGE.singupPage)}
+          >
+            {" "}
+            Sign up
+          </span>
         </span>
       </WhiteCard>
     </Layout>
