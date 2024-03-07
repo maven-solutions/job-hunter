@@ -15,3 +15,8 @@ export const SHOW_PAGE = {
   loginPage: "login",
   singupPage: "singup",
 };
+
+export const EXTENSION_ACTION = {
+  LOGIN_TO_CI_EXTENSION: "LOGIN_TO_CI_EXTENSION",
+  LOGOUT_TO_CI_EXTENSION: "LOGOUT_TO_CI_EXTENSION",
+};

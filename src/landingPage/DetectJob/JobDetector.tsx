@@ -18,7 +18,11 @@ import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import Linkedin from "../../jobExtractor/Linkedin";
-import { SHOW_PAGE, SUPPORTED_WEBSITE } from "../../utils/constant";
+import {
+  EXTENSION_ACTION,
+  SHOW_PAGE,
+  SUPPORTED_WEBSITE,
+} from "../../utils/constant";
 import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
@@ -26,7 +30,11 @@ import Indeed from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 import Builtin from "../../jobExtractor/Builtin";
 import Glassdoor from "../../jobExtractor/Glassdoor";
-import { setToken, setUser } from "../../store/features/Auth/AuthSlice";
+import {
+  logoutUser,
+  setToken,
+  setUser,
+} from "../../store/features/Auth/AuthSlice";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -42,20 +50,6 @@ const JobDetector = () => {
     return store.JobDetailSlice;
   });
   console.log("auth---", authState);
-  const loadUser = () => {
-    chrome.storage.local.get(["ci_user"]).then((result) => {
-      dispatch(setUser(JSON.parse(result.ci_user)));
-    });
-    chrome.storage.local.get(["ci_token"]).then((result) => {
-      dispatch(setToken(JSON.parse(result.ci_token)));
-    });
-  };
-
-  useEffect(() => {
-    if (authState.authenticated) {
-      setShowPage("");
-    }
-  }, [authState.authenticated]);
 
   useEffect(() => {
     if (
@@ -67,6 +61,7 @@ const JobDetector = () => {
         "glassdoor",
         "simplyhired",
         "builtin",
+        "localhost",
       ].some((domain) => window.location.href.includes(domain))
     ) {
       setShowIcon(true);
@@ -119,10 +114,53 @@ const JobDetector = () => {
     // Observe changes in the DOM
     observer.observe(document, { childList: true, subtree: true });
   }, []);
+  const loadUser = () => {
+    chrome.storage.local.get(["ci_user"]).then((result) => {
+      const data = result.ci_user;
+      dispatch(setUser(data));
+    });
+    chrome.storage.local.get(["ci_token"]).then((result: any) => {
+      const data = result.ci_token;
+      dispatch(setToken(data));
+    });
+  };
+  const loadUser1 = () => {
+    chrome.storage.local.get(["ci_user"]).then((result) => {
+      dispatch(setUser(JSON.parse(result.ci_user)));
+    });
+    chrome.storage.local.get(["ci_token"]).then((result) => {
+      dispatch(setToken(JSON.parse(result.ci_token)));
+    });
+  };
 
   useEffect(() => {
-    let intervalId: any = "";
+    if (authState.authenticated) {
+      setShowPage("");
+    }
+  }, [authState.authenticated]);
 
+  const handleLogOut = () => {
+    dispatch(logoutUser());
+    setShowPage("");
+  };
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log("date message::", message);
+      if (message.action === EXTENSION_ACTION.LOGIN_TO_CI_EXTENSION) {
+        loadUser();
+      }
+      if (message.action === EXTENSION_ACTION.LOGOUT_TO_CI_EXTENSION) {
+        handleLogOut();
+      }
+      // return true;
+    });
+
+    // setTimeout(() => {
+    //   chrome.storage.sync.get(["maven_resume_token"]).then((result) => {
+    //     console.log("Value is " + result.maven_resume_token);
+    //   });
+    // }, 5000);
+    // let intervalId: any = "";
     // if (
     //   window.location.href.includes("glassdoor") &&
     //   !window.location.href.includes("job-listing")
@@ -131,7 +169,6 @@ const JobDetector = () => {
     //   // Clear any existing intervals before setting a new one
     //   intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
     // }
-
     // if (window.location.href === "https://www.simplyhired.com/") {
     //   simplyHiredNotiification();
     //   intervalId = setInterval(addButtonToSimplyHired, 3000);

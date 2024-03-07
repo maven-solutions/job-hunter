@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@atlaskit/select": "^17.0.4",
-    "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.1",
     "@types/chrome": "^0.0.250",
     "@types/react": "^18.2.31",
