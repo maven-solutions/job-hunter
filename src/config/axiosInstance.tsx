@@ -26,13 +26,13 @@ axiosInstance.interceptors.request.use(
     Promise.reject(error);
   }
 );
-
-async function getToken() {
-  return new Promise<string | null>((resolve) => {
-    const token = localStorage.getItem("access_token");
-    resolve(token);
-  });
-}
+const getToken = async () => {
+  console.log("fired::");
+  const result = await chrome.storage.local.get(["ci_token"]);
+  console.log("res::", result);
+  const token = result.ci_token;
+  return token;
+};
 
 axiosInstance.interceptors.response.use(
   (response) => {

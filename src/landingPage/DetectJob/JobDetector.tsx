@@ -49,7 +49,6 @@ const JobDetector = () => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
-  console.log("auth---", authState);
 
   useEffect(() => {
     if (
@@ -198,6 +197,16 @@ const JobDetector = () => {
         <SignupForm setShowPage={setShowPage} />
       )}
 
+      {showPage === SHOW_PAGE.jobDetailPage && (
+        <JobDetail setShowPage={setShowPage} />
+      )}
+      {showPage === SHOW_PAGE.summaryPage && (
+        <DisplayJob setShowPage={setShowPage} />
+      )}
+
+      {showPage === SHOW_PAGE.profilePage && (
+        <Profile setShowPage={setShowPage} />
+      )}
       <MenuPopUp setShowPage={setShowPage} />
       {website === SUPPORTED_WEBSITE.linkedin && (
         <Linkedin setShowPage={setShowPage} />
@@ -220,17 +229,6 @@ const JobDetector = () => {
 
       {website === SUPPORTED_WEBSITE.glassdoor && (
         <Glassdoor setShowPage={setShowPage} />
-      )}
-
-      {showPage === SHOW_PAGE.jobDetailPage && (
-        <JobDetail setShowPage={setShowPage} />
-      )}
-      {showPage === SHOW_PAGE.summaryPage && (
-        <DisplayJob setShowPage={setShowPage} />
-      )}
-
-      {showPage === SHOW_PAGE.profilePage && (
-        <Profile setShowPage={setShowPage} />
       )}
     </div>
   );

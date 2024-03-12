@@ -21,12 +21,9 @@ const AuthSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state: any, { payload }: PayloadAction<string>) => {
-      console.log("user dispatched---", payload);
-
       state.ci_user = payload;
     },
     setToken: (state: any, { payload }: PayloadAction<string>) => {
-      console.log("token dispatched---", payload);
       state.ci_token = payload;
       state.authenticated = payload ? true : false;
     },

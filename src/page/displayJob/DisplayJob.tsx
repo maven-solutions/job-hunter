@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import "./index.css";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -7,16 +7,49 @@ import JobSummary from "../../component/JobSummary/JobSummary";
 import Layout from "../../template/Layout";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { SHOW_PAGE } from "../../utils/constant";
+import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
+import {
+  getApplicationStageData,
+  saveJobCareerAI,
+} from "../../store/features/JobDetail/JobApi";
+import { setSelectedStage } from "../../store/features/JobDetail/JobDetailSlice";
+import { saveJobs } from "../../contentScript/api";
 
 const DisplayJob = (props: any) => {
   const { setShowPage } = props;
-  const [state, setStage] = useState<any>("");
-  const stageOptions: any = [
-    { value: "Wishlist", label: "Wishlist" },
-    { value: "Applied", label: "Applied" },
-    { value: "Interview", label: "Interview" },
-    { value: "Negotiate", label: "Negotiate" },
-  ];
+  const jobSlice: any = useAppSelector((store: RootStore) => {
+    return store.JobDetailSlice;
+  });
+
+  const dispatch = useAppDispatch();
+  // console.log("jobSlice::", jobSlice);
+
+  useEffect(() => {
+    if (!jobSlice.stage_data_success) {
+      dispatch(getApplicationStageData());
+    }
+  }, []);
+
+  const savejobs = () => {
+    console.log("data::11");
+
+    const data: any = {
+      individualApplicationStageId: jobSlice.selectedStage.value,
+      jobTitle: jobSlice.title,
+      companyName: jobSlice.company,
+      jobType: jobSlice.jobtype,
+      companyLogo: jobSlice.companyLogo,
+      jobDescription: jobSlice.description,
+      jobOverview: jobSlice.addationlIfo,
+      jobLink: jobSlice.postUrl,
+      jobPortal: jobSlice.source,
+      location: jobSlice.location,
+    };
+    dispatch(saveJobCareerAI(data));
+
+    console.log("data::", data);
+    //
+  };
   return (
     <Layout setShowPage={setShowPage}>
       <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
@@ -30,7 +63,7 @@ const DisplayJob = (props: any) => {
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
-            options={stageOptions}
+            options={jobSlice.stage_data}
             styles={{
               control: (baseStyles, state) => ({
                 ...baseStyles,
@@ -48,10 +81,10 @@ const DisplayJob = (props: any) => {
                 cursor: "pointer",
               }),
             }}
-            value={state}
+            value={jobSlice.selectedStage}
             placeholder="Select Application Stage"
             onChange={(option) => {
-              setStage(option);
+              dispatch(setSelectedStage(option));
             }}
           />
         </div>
@@ -65,7 +98,13 @@ const DisplayJob = (props: any) => {
           text="View Job Board"
         />
         <div style={{ margin: "0 5px" }} />
-        <PrimaryButton buttonWidth="140" loading={false} text="Save Job" />{" "}
+        <PrimaryButton
+          buttonWidth="140"
+          loading={jobSlice.loading}
+          text="Save Job"
+          loadingText="Saving..."
+          onclick={savejobs}
+        />{" "}
       </div>
     </Layout>
   );
