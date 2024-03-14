@@ -356,24 +356,22 @@ const AllInputField = (props: any) => {
             />
           </div>
           <div className="full">
-            <label>
-              <div className="label-top">Description</div>
-              <EditorProvider>
-                <Editor
-                  value={jobDescription ?? ""}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  // onBlur={() => console.log("Editor lost focus")}
-                  // onFocus={() => console.log("Editor gained focus")}
-                >
-                  {/* <Toolbar /> */}
-                  <Toolbar>
-                    <BtnBold />
-                    <BtnItalic />
-                    <BtnUnderline />
-                  </Toolbar>
-                </Editor>
-              </EditorProvider>
-            </label>
+            <div className="label-top">Description</div>
+            <EditorProvider>
+              <Editor
+                value={jobDescription ?? ""}
+                onChange={(e) => setJobDescription(e.target.value)}
+                // onBlur={() => console.log("Editor lost focus")}
+                // onFocus={() => console.log("Editor gained focus")}
+              >
+                {/* <Toolbar /> */}
+                <Toolbar>
+                  <BtnBold />
+                  <BtnItalic />
+                  <BtnUnderline />
+                </Toolbar>
+              </Editor>
+            </EditorProvider>
           </div>
         </div>
       </div>
