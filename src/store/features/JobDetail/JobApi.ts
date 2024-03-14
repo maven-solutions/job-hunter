@@ -26,7 +26,7 @@ export const saveJobCareerAI = createAsyncThunk(
   async (data: { data: any }, { dispatch, rejectWithValue }) => {
     try {
       const res = await axiosInstance.post(
-        `${BASE_URL}/applicants/job-board/stages`,
+        `${BASE_URL}/applicants/job-board/jobs`,
         data
       );
       //   successToastMessage("Sign in successful.");
