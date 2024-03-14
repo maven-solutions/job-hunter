@@ -46,11 +46,6 @@ const AllInputField = (props: any) => {
     setEasyApply,
   } = props;
 
-  const setDescValue = (e: any) => {
-    if (e.target.value) {
-      setJobDescription(e.target.value);
-    }
-  };
   const options = [
     { value: "Product Owner", label: "Product Owner" },
     { value: "Scrum Master", label: "Scrum Master" },
@@ -62,16 +57,7 @@ const AllInputField = (props: any) => {
     { value: "full-time", label: "Full-time" },
     { value: "contract", label: "Contract" },
   ];
-  const stateOptions = [
-    { value: "Omaha", label: "Omaha" },
-    { value: "Naperville", label: "Naperville" },
-    { value: "New York", label: "New York" },
-  ];
-  const cityOptions = [
-    { value: "Milbury", label: "Milbury" },
-    { value: "Newville", label: "Newville" },
-    { value: "Huntsville", label: "Huntsville" },
-  ];
+
   const jobTypeOptions = [
     { value: "remote", label: "Remote" },
     { value: "on-site", label: "On-site" },
@@ -375,7 +361,7 @@ const AllInputField = (props: any) => {
               <EditorProvider>
                 <Editor
                   value={jobDescription ?? ""}
-                  onChange={setDescValue}
+                  onChange={(e) => setJobDescription(e.target.value)}
                   // onBlur={() => console.log("Editor lost focus")}
                   // onFocus={() => console.log("Editor gained focus")}
                 >
