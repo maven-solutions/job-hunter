@@ -47,10 +47,12 @@ const AllInputField = (props: any) => {
   } = props;
 
   const options = [
-    { value: "Product Owner", label: "Product Owner" },
-    { value: "Scrum Master", label: "Scrum Master" },
-    { value: "Project Manager", label: "Project Manager" },
-    { value: "Business Analyst", label: "Business Analyst" },
+    { label: "Product Owner", value: "product owner" },
+    { label: "Scrum Master", value: "scrum master" },
+    { label: "Project Manager", value: "project manager" },
+    { label: "Business Analyst", value: "business analyst" },
+    { label: "Agile Coach", value: "agile coach" },
+    { label: "Product Manager", value: "product manager" },
   ];
   const employmentOptions = [
     { value: "part-time", label: "Part-time" },
