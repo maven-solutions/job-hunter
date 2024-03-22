@@ -6,6 +6,7 @@ export const SUPPORTED_WEBSITE = {
   glassdoor: "glassdoor",
   simplyhired: "simplyhired",
   builtin: "builtin",
+  openai: "openai",
 };
 
 export const SHOW_PAGE = {
