@@ -44,9 +44,11 @@ import {
   formatDateWhileUploading,
   parseJsonArrayOrObject,
 } from "./helper";
+import { getToken } from "../../config/axiosInstance";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [showPage, setShowPage] = useState<string>("");
@@ -157,7 +159,7 @@ const JobDetector = () => {
   };
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("date message::", message);
+      // console.log("date message::", message);
       if (message.action === EXTENSION_ACTION.LOGIN_TO_CI_EXTENSION) {
         loadUser();
       }
@@ -189,26 +191,48 @@ const JobDetector = () => {
     // return () => clearInterval(intervalId);
   }, []);
 
-  function MyImageComponent() {
-    return (
-      <div>
-        <img
-          src="https://lh6.googleusercontent.com/HW6PxLdAfMbKPpLpP-lIVhna5QnbskPTz_pLydSL5b7qrJ6X_3Vzq5bot8ad7GBZNbwy6eyBzxtjuWeUkeHdqgC9C36cuTC-2wGmVVNOs-peP5hfgjlQr4SAV-b04eXJ5SluB7b6"
-          alt="Your Image"
-        />
-      </div>
-    );
-  }
-
   useEffect(() => {
+    console.log("entered");
     const divToEmbedInto = document.querySelector(".stretch");
     let imgElement; // Declare imgElement variable outside the if block
 
     const handleClick = async (event) => {
-      // Find the div with the specified data-testid attribute
-      const parentDiv = document.querySelector(
-        '[data-testid="conversation-turn-5"]'
+      // Find all elements with data-testid attribute matching the pattern
+      const divsWithTestId = document.querySelectorAll(
+        '[data-testid^="conversation-turn-"]'
       );
+
+      // let maxNumber = -Infinity;
+      // let parentDivv = null;
+      let lastId = null;
+
+      // Iterate through each element and find the one with the highest number
+      divsWithTestId.forEach((div) => {
+        const id = div.getAttribute("data-testid");
+        lastId = id;
+        console.log({ id });
+        // const number = parseInt(id.split("-")[1]);
+
+        // if (!isNaN(number) && number > maxNumber) {
+        //   maxNumber = number;
+        //   parentDivv = div;
+        // }
+      });
+      console.log("this is CONTENT", `[data-testid="${lastId}"]`);
+      // if (parentDivv) {
+      //   // Rest of your code remains the same
+      //   // ...
+      // }
+
+      // Find the div with the specified data-testid attribute
+      const parentDiv = document.querySelector(`[data-testid="${lastId}"]`);
+
+      if (parentDiv) {
+        const textContent: any = parentDiv.textContent
+          .replace(/<\/?[^>]+(>|$)/g, "")
+          .trim();
+        console.log("Text content:", textContent);
+      }
 
       if (parentDiv) {
         const textContent: any = parentDiv.textContent
@@ -216,726 +240,851 @@ const JobDetector = () => {
           .trim();
         console.log("Text content:", textContent);
 
-        if (textContent?.length) {
-          (async () => {
-            function isInTheExtractedData(passedItem: any) {
-              const temp = textContent?.replaceAll("\n", " ");
-              console.log("check, ", temp, passedItem);
-              return temp.includes(passedItem);
-            }
+        const token = await getToken();
 
-            function isMultipleInTheExtractedData(passedItems: any) {
-              const temp = textContent?.replaceAll("\n", " ")?.toLowerCase();
-              console.log("check, ", temp, passedItems);
-              return passedItems.some((item: any) =>
-                temp.includes(item?.toLowerCase())
-              );
-            }
+        console.log({ token });
 
-            const allPrompts: any = uploadPDFPromptCollection(
-              textContent?.replaceAll("\n \n", "")
-            );
-
-            const headers = {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            };
-
-            try {
-              const urls = [
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-                `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write/gpt3.5/upload-pdf`,
-              ];
-
-              const requests = urls.map((url: string, index: number) =>
-                fetch(url, {
-                  method: "POST",
-                  headers,
-                  // body: JSON.stringify({ prompt: allPrompts[index]?.prompt }),
-                  body: JSON.stringify({
-                    key: allPrompts[index]?.key,
-                    data: textContent?.replaceAll("\n \n", ""),
-                  }),
-                })
-              );
-
-              const responses = await Promise.all(requests);
-              const jsons = await Promise.all(
-                responses.map((response) => response.json())
-              );
-              console.log({ jsons });
-              console.log(
-                "datax 0",
-
-                jsons[0]?.data
-              );
-              console.log(
-                "datax 1",
-
-                jsons[1]?.data
-              );
-              console.log(
-                "datax 2",
-
-                jsons[2]?.data
-              );
-              console.log(
-                "datax 3",
-
-                jsons[3]?.data
-              );
-              console.log(
-                "datax 4",
-
-                jsons[4]?.data
-              );
-              console.log(
-                "datax 5",
-
-                jsons[5]?.data
-              );
-              console.log(
-                "datax 6",
-
-                jsons[6]?.data
-              );
-
-              const personalinforesponse = JSON.parse(jsons[0]?.data);
-              const professionalSummaryResponse = jsons[1]?.data;
-              const skillsResponse =
-                (await parseJsonArrayOrObject(jsons[2]?.data)) || [];
-              const employmentResponse =
-                (await parseJsonArrayOrObject(jsons[3]?.data)) || [];
-              const educationResponse =
-                (await parseJsonArrayOrObject(jsons[4]?.data)) || [];
-              const certificationResponse =
-                (await parseJsonArrayOrObject(jsons[5]?.data)) || [];
-              const languageResponse =
-                (await parseJsonArrayOrObject(jsons[6]?.data)) || [];
-              const internshipResponse =
-                (await parseJsonArrayOrObject(jsons[7]?.data)) || [];
-              const volunteeringResponse =
-                (await parseJsonArrayOrObject(jsons[8]?.data)) || [];
-              const courseResponse =
-                (await parseJsonArrayOrObject(jsons[10]?.data)) || [];
-              const referenceResponse =
-                (await parseJsonArrayOrObject(jsons[9]?.data)) || [];
-              const achievementResponse =
-                (await parseJsonArrayOrObject(jsons[11]?.data)) || [];
-              const hobbiesResponse =
-                (await parseJsonArrayOrObject(jsons[12]?.data)) || [];
-
-              console.log(
-                "dataxx 0",
-
-                personalinforesponse,
-                typeof personalinforesponse
-              );
-              console.log(
-                "dataxx 1",
-
-                professionalSummaryResponse,
-                typeof professionalSummaryResponse
-              );
-              console.log(
-                "dataxx 2",
-
-                skillsResponse,
-                typeof skillsResponse
-              );
-              console.log(
-                "dataxx 3",
-
-                employmentResponse,
-                typeof employmentResponse
-              );
-
-              console.log(
-                "dataxx 4",
-
-                certificationResponse,
-                typeof certificationResponse
-              );
-
-              console.log(
-                "dataxx 5",
-
-                languageResponse,
-                typeof languageResponse
-              );
-
-              console.log(
-                "dataxx 6",
-
-                internshipResponse,
-                typeof internshipResponse
-              );
-
-              console.log(
-                "dataxx 7",
-
-                volunteeringResponse,
-                typeof volunteeringResponse
-              );
-
-              console.log(
-                "dataxx 8",
-
-                courseResponse,
-                typeof courseResponse
-              );
-
-              console.log(
-                "dataxx 9",
-
-                referenceResponse,
-                typeof referenceResponse
-              );
-              console.log(
-                "dataxx 10",
-
-                achievementResponse,
-                typeof achievementResponse
-              );
-              console.log(
-                "dataxx 11",
-
-                hobbiesResponse,
-                typeof hobbiesResponse
-              );
-
-              const personalInfo = {
-                user: uuidv4(),
-                country:
-                  createSelectOption(personalinforesponse?.country) || null,
-                state: createSelectOption(personalinforesponse?.state) || null,
-                city: createSelectOption(personalinforesponse?.city) || null,
-                customPreferredRole:
-                  createSelectOption(
-                    personalinforesponse?.customPreferredRole
-                  ) || null,
-                name: personalinforesponse?.name || "",
-                phoneNumber: personalinforesponse?.phoneNumber || "",
-                emailAddress: personalinforesponse?.email || "",
-                zipCode: personalinforesponse?.zipCode || "",
-                templateName: "kathmandu",
-                fontFamily: "PlusJakartaSans",
-                title: null,
-                isStudent: 0,
-                isAiCreated: null,
-                color: "#000000",
-              };
-
-              const professionalInfo = {
-                title: "Professional Summary",
-                order: 512,
-                section: "professional-summary",
-                canBeDeleted: 1,
-                data: {
-                  description:
-                    extractSummary(professionalSummaryResponse) || "",
+        if (token) {
+          setIsGenerating(true);
+          try {
+            const listResponse = await fetch(
+              "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Access-Control-Allow-Origin": "*",
+                  Authorization: `Bearer ${token}`,
                 },
-              };
+              }
+            );
+            // console.log({ listResponse });
+            if (listResponse.ok) {
+              const responseData = await listResponse.json();
+              console.log({ responseData }, responseData?.data?.length);
 
-              const skillsField = {
-                title: "Skills",
-                order: 1536,
-                section: "skills",
-                canBeDeleted: 1,
-                data:
-                  skillsResponse?.length > 0
-                    ? skillsResponse
-                        .slice(0, 11)
-                        ?.filter((skill: any) => {
-                          const isHobby = hobbiesResponse?.some(
-                            (hobby: any) =>
-                              hobby?.hobbyName?.trim() ===
-                              skill?.skillTitle?.trim()
-                          );
-                          return !isHobby;
-                        })
-                        ?.map((el: any) => {
-                          if (el?.skillTitle?.trim()) {
-                            return {
-                              id: uuidv4(),
-                              skillTitle: el?.skillTitle?.trim() || "",
-                              skillDescription: "",
-                              skillExpertise: "",
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const employmentField = {
-                title: "Employment History",
-                order: 5731,
-                section: "employment-history",
-                canBeDeleted: 1,
-                data:
-                  employmentResponse?.length > 0
-                    ? employmentResponse
-                        ?.map((el: any) => {
-                          if (Object.values(el).some((value) => value)) {
-                            if (
-                              isInTheExtractedData(
-                                el.employer || el.employeer
-                              ) &&
-                              !el.jobTitle?.toLowerCase()?.includes("intern")
-                            ) {
-                              return {
-                                id: uuidv4(),
-                                employeer: el.employeer || el.employer || "",
-                                jobTitle: el.jobTitle || "",
-                                description:
-                                  convertDescriptionToBulletPoints(
-                                    el.description
-                                  ) || "",
-                                startDate: formatDateWhileUploading(
-                                  el?.startDate || ""
-                                ),
-                                endDate: formatDateWhileUploading(
-                                  el?.endDate || ""
-                                ),
-                                country: createSelectOption(el?.country),
-                                state: createSelectOption(el?.state),
-                                city: createSelectOption(el?.city),
-                                zipcode: el.zipcode || "",
-                                isWorking: false,
-                              };
-                            }
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const educationField = {
-                title: "Education",
-                order: 6322,
-                section: "education",
-                canBeDeleted: 1,
-                data:
-                  educationResponse?.length > 0
-                    ? educationResponse
-                        ?.map((el: any) => {
-                          if (Object.values(el).some((value) => value)) {
-                            return {
-                              id: uuidv4(),
-                              field: el.fieldOfStudy || "",
-                              school: el.schoolName || "",
-                              description:
-                                convertDescriptionToBulletPoints(
-                                  el.description
-                                ) || "",
-                              startDate: formatDateWhileUploading(
-                                el?.startDate || ""
-                              ),
-                              endDate: formatDateWhileUploading(
-                                el?.endDate || ""
-                              ),
-                              country: createSelectOption(el?.country),
-                              state: createSelectOption(el?.state),
-                              city: createSelectOption(el?.city),
-                              zipcode: el.zipcode || "",
-                              isStudy: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const certificationField = {
-                title: "Certification",
-                order: 1024,
-                section: "certification",
-                canBeDeleted: 1,
-                data:
-                  certificationResponse?.length > 0
-                    ? certificationResponse
-                        ?.map((el: any) => {
-                          if (Object.values(el).some((value) => value)) {
-                            return {
-                              id: uuidv4(),
-                              certificateName: el.certificateName || "",
-                              certificateID: el.certificateID || "",
-                              issueOrg: el.issueOrg || "",
-                              issueDate: formatDateWhileUploading(
-                                el?.issueDate || ""
-                              ),
-                              expiryDate: formatDateWhileUploading(
-                                el?.expiryDate || ""
-                              ),
-                              isExpiry: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const languageField = {
-                title: "Language",
-                order: 6400,
-                section: "language",
-                canBeDeleted: 1,
-                data:
-                  languageResponse?.length > 0
-                    ? languageResponse
-                        ?.map((el: any) => {
-                          if (el?.languageName?.trim()) {
-                            return {
-                              id: uuidv4(),
-                              title: el?.languageName?.trim() || "",
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const employmentResponseFields = employmentResponse || [];
-
-              const fieldsToCheck = ["employeer", "jobTitle"];
-
-              const shouldIgnoreInternship = (internshipEntry: any) => {
-                for (const empEntry of employmentResponseFields) {
-                  let match = true;
-                  for (const field of fieldsToCheck) {
-                    if (
-                      internshipEntry.title?.trim() !== empEntry[field]?.trim()
-                    ) {
-                      match = false;
-                      break;
+              if (responseData?.data?.length === 6) {
+                alert(
+                  "You aleady have a 6 resumes. So delete some of the existing resume to generate new one."
+                );
+                setIsGenerating(false);
+              } else {
+                if (textContent?.length) {
+                  (async () => {
+                    function isInTheExtractedData(passedItem: any) {
+                      const temp = textContent?.replaceAll("\n", " ");
+                      console.log("check, ", temp, passedItem);
+                      return temp.includes(passedItem);
                     }
-                  }
-                  if (match) {
-                    return true;
-                  }
-                }
-                return false;
-              };
 
-              const internshipField = {
-                title: "Internship",
-                order: 6500,
-                section: "internship",
-                canBeDeleted: 1,
-                data:
-                  internshipResponse?.length > 0
-                    ? internshipResponse
-                        ?.map((el: any) => {
-                          if (
-                            Object.values(el).some((value) => value) &&
-                            !shouldIgnoreInternship(el) &&
-                            !["institution_name", "title"].some((key) =>
-                              ["not mentioned", "n/a"].includes(
-                                el[key]?.toLowerCase()
-                              )
-                            )
-                          ) {
-                            return {
-                              id: uuidv4(),
-                              institution_name: el.institutionName || "",
-                              title: el.internshipTitle || "",
-                              description:
-                                convertDescriptionToBulletPoints(
-                                  el.description
-                                ) || "",
-                              startDate: formatDateWhileUploading(
-                                el?.startDate || ""
-                              ),
-                              endDate: formatDateWhileUploading(
-                                el?.endDate || ""
-                              ),
-                              country: createSelectOption(el?.country),
-                              state: createSelectOption(el?.state),
-                              city: createSelectOption(el?.city),
-                              zipcode: el.zipcode || "",
-                              isPresent: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-              const volunteeringField = {
-                title: "Volunteering",
-                order: 6600,
-                section: "volunteering",
-                canBeDeleted: 1,
-                data:
-                  volunteeringResponse?.length > 0
-                    ? volunteeringResponse
-                        ?.map((el: any) => {
-                          if (
-                            Object.values(el).some((value) => value) &&
-                            textContent
-                              ?.replaceAll("\n", " ")
-                              ?.toLowerCase()
-                              ?.includes(el.institutionName?.toLowerCase())
-                          ) {
-                            return {
-                              id: uuidv4(),
-                              institution_name: el.institutionName || "",
-                              role: el.role || "",
-                              description:
-                                convertDescriptionToBulletPoints(
-                                  el.description
-                                ) || "",
-                              startDate: formatDateWhileUploading(
-                                el?.startDate || ""
-                              ),
-                              endDate: formatDateWhileUploading(
-                                el?.endDate || ""
-                              ),
-                              country: createSelectOption(el?.country),
-                              state: createSelectOption(el?.state),
-                              city: createSelectOption(el?.city),
-                              zipcode: el.zipcode || "",
-                              isPresent: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
-
-              const educationResponseFields = educationResponse || [];
-
-              const fieldsToCheck1 = ["field", "school"];
-
-              const shouldIgnoreCourse = (courseEntry: any) => {
-                for (const empEntry of educationResponseFields) {
-                  let match = true;
-                  for (const field of fieldsToCheck1) {
-                    if (courseEntry.course_name !== empEntry[field]) {
-                      match = false;
-                      break;
+                    function isMultipleInTheExtractedData(passedItems: any) {
+                      const temp = textContent
+                        ?.replaceAll("\n", " ")
+                        ?.toLowerCase();
+                      console.log("check, ", temp, passedItems);
+                      return passedItems.some((item: any) =>
+                        temp.includes(item?.toLowerCase())
+                      );
                     }
-                  }
-                  if (match) {
-                    return true;
-                  }
-                }
-                return false;
-              };
 
-              const courseField = {
-                title: "Course",
-                order: 6700,
-                section: "course",
-                canBeDeleted: 1,
-                data:
-                  courseResponse?.length > 0
-                    ? courseResponse
-                        ?.map((el: any) => {
-                          if (
-                            Object.values(el).some((value) => value) &&
-                            !shouldIgnoreCourse(el)
-                          ) {
-                            return {
-                              id: uuidv4(),
-                              institution_name: el.institutionName || "",
-                              course_name: el.courseName || "",
-                              description:
-                                convertDescriptionToBulletPoints(
-                                  el.description
-                                ) || "",
-                              startDate: formatDateWhileUploading(
-                                el?.startDate || ""
-                              ),
-                              endDate: formatDateWhileUploading(
-                                el?.endDate || ""
-                              ),
-                              country: createSelectOption(el?.country),
-                              state: createSelectOption(el?.state),
-                              city: createSelectOption(el?.city),
-                              zipcode: el.zipcode || "",
-                              isPresent: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
+                    var inputString = "";
 
-              const referenceField = {
-                title: "Reference",
-                order: 6800,
-                section: "reference",
-                canBeDeleted: 1,
-                data:
-                  referenceResponse?.length > 0
-                    ? referenceResponse
-                        ?.map((el: any) => {
-                          if (el.phone_number || el.email) {
-                            return {
-                              id: uuidv4(),
-                              name: el.name || "",
-                              company: el.company || "",
-                              phone_number: el.phoneNumber || "",
-                              email: el.email || "",
-                              expanded: false,
-                            };
-                          }
-                        })
-                        .filter(Boolean)
-                    : [],
-              };
+                    // var replacedString = replaceBrackets(inputString);
+                    // console.log(replacedString);
 
-              const hobbiesField = {
-                title: "Hobbies",
-                order: 6900,
-                section: "custom-section",
-                canBeDeleted: 1,
-                data: isMultipleInTheExtractedData(["hobb", "interest"])
-                  ? hobbiesResponse?.length > 0
-                    ? hobbiesResponse?.map((el: any) => {
-                        // if (isInTheExtractedData(el?.trim())) {
-                        return {
-                          id: uuidv4(),
-                          field1: el?.hobbyName?.trim(),
-                          field2: "",
-                          country: "",
-                          state: el.email || "",
-                          zipcode: "",
-                          startDate: "",
-                          endDate: "",
-                          expanded: false,
-                        };
-                        // }
-                      })
-                    : []
-                  : [],
-              };
+                    const allPrompts: any = uploadPDFPromptCollection(
+                      textContent
+                        ?.replaceAll("\n \n", "")
+                        ?.replaceAll("[", "STARTBRACKET")
+                        ?.replaceAll("]", "ENDBRACKET")
+                    );
 
-              const achievementsField = {
-                title: "Achievement",
-                order: 7000,
-                section: "custom-section",
-                canBeDeleted: 1,
-                data: isMultipleInTheExtractedData(["award", "achievement"])
-                  ? achievementResponse?.length > 0
-                    ? achievementResponse
-                        ?.map((el: any) => {
-                          if (el?.achievementOrAwardTitleOrDescription) {
-                            // if (
-                            //   isInTheExtractedData(
-                            //     el.achievementOrAwardTileOrDescription,
-                            //   )
-                            // ) {
-                            return {
-                              id: uuidv4(),
-                              field1:
-                                el?.achievementOrAwardTitleOrDescription?.trim() ||
-                                "",
-                              field2: "",
-                              startDate: formatDateWhileUploading(
-                                el?.startDate || ""
-                              ),
-                              endDate: formatDateWhileUploading(
-                                el?.endDate || ""
-                              ),
-                              country: createSelectOption(el?.country),
-                              state: createSelectOption(el?.state),
-                              city: createSelectOption(el?.city),
-                              zipcode: el.zipcode || "",
-                              expanded: false,
-                            };
-                            // }
-                          } else {
-                            return null;
-                          }
-                        })
-                        .filter(Boolean)
-                    : []
-                  : [],
-              };
-
-              const finalData = {
-                ...personalInfo,
-                fields: [
-                  professionalInfo,
-                  skillsField,
-                  employmentField,
-                  certificationField,
-                  educationField,
-                  languageField,
-                  internshipField,
-                  volunteeringField,
-                  courseField,
-                  referenceField,
-                  hobbiesField,
-                  achievementsField,
-                ],
-              };
-              console.log({ finalData });
-
-              try {
-                const uniqueID = uuidv4();
-                const response = await fetch(
-                  "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
-                  {
-                    method: "POST",
-                    headers: {
+                    const headers = {
                       "Content-Type": "application/json",
                       "Access-Control-Allow-Origin": "*",
-                      Authorization:
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYyLCJuYW1lIjoiTWFub2ogQWNoYXJ5YSIsImVtYWlsIjoibWFub2ouYWNoYXJ5YUBqb2lubWF2ZW5zLmNvbSIsImlhdCI6MTcxMTAxNzcxMn0.OuxBgu0wCEUngk3h1UrNLjh2S6hevMXSQ9GxlbS_G2c",
-                    },
-                    body: JSON.stringify(finalData),
-                  }
-                );
+                    };
 
-                if (response.ok) {
-                  const responseData = await response.json();
-                  console.log({ responseData });
-                  window.open(
-                    `https://resumebuilder.joinswiftly.com/editor/${responseData?.data?.id}`,
-                    "_blank"
-                  );
-                } else {
-                  console.error("API request failed");
+                    console.log({ token });
+
+                    try {
+                      const urls = [
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                        `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
+                      ];
+
+                      const requests = urls.map((url: string, index: number) =>
+                        fetch(url, {
+                          method: "POST",
+                          headers,
+                          body: JSON.stringify({
+                            prompt: allPrompts[index]?.prompt,
+                          }),
+                          // body: JSON.stringify({
+                          //   key: allPrompts[index]?.key,
+                          //   data: textContent?.replaceAll("\n \n", ""),
+                          // }),
+                        })
+                      );
+
+                      const responses = await Promise.all(requests);
+                      const jsons = await Promise.all(
+                        responses.map((response) => response.json())
+                      );
+                      console.log({ jsons });
+                      console.log(
+                        "datax 0",
+
+                        jsons[0]?.data
+                      );
+                      console.log(
+                        "datax 1",
+
+                        jsons[1]?.data
+                      );
+                      console.log(
+                        "datax 2",
+
+                        jsons[2]?.data
+                      );
+                      console.log(
+                        "datax 3",
+
+                        jsons[3]?.data
+                      );
+                      console.log(
+                        "datax 4",
+
+                        jsons[4]?.data
+                      );
+                      console.log(
+                        "datax 5",
+
+                        jsons[5]?.data
+                      );
+                      console.log(
+                        "datax 6",
+
+                        jsons[6]?.data
+                      );
+
+                      const personalinforesponse = JSON.parse(jsons[0]?.data);
+                      const professionalSummaryResponse = jsons[1]?.data;
+                      const skillsResponse =
+                        (await parseJsonArrayOrObject(
+                          jsons[2]?.data?.replaceAll(":", "--")
+                        )) || [];
+                      const employmentResponse =
+                        (await parseJsonArrayOrObject(jsons[3]?.data)) || [];
+                      const educationResponse =
+                        (await parseJsonArrayOrObject(jsons[4]?.data)) || [];
+                      const certificationResponse =
+                        (await parseJsonArrayOrObject(jsons[5]?.data)) || [];
+                      const languageResponse =
+                        (await parseJsonArrayOrObject(jsons[6]?.data)) || [];
+                      const internshipResponse =
+                        (await parseJsonArrayOrObject(jsons[7]?.data)) || [];
+                      const volunteeringResponse =
+                        (await parseJsonArrayOrObject(jsons[8]?.data)) || [];
+                      const courseResponse =
+                        (await parseJsonArrayOrObject(jsons[10]?.data)) || [];
+                      const referenceResponse =
+                        (await parseJsonArrayOrObject(jsons[9]?.data)) || [];
+                      const achievementResponse =
+                        (await parseJsonArrayOrObject(jsons[11]?.data)) || [];
+                      const hobbiesResponse =
+                        (await parseJsonArrayOrObject(jsons[12]?.data)) || [];
+
+                      console.log(
+                        "dataxx 0",
+
+                        personalinforesponse,
+                        typeof personalinforesponse
+                      );
+                      console.log(
+                        "dataxx 1",
+
+                        professionalSummaryResponse,
+                        typeof professionalSummaryResponse
+                      );
+                      console.log(
+                        "dataxx 2",
+
+                        skillsResponse,
+                        typeof skillsResponse
+                      );
+                      console.log(
+                        "dataxx 3",
+
+                        employmentResponse,
+                        typeof employmentResponse
+                      );
+
+                      console.log(
+                        "dataxx 4",
+
+                        certificationResponse,
+                        typeof certificationResponse
+                      );
+
+                      console.log(
+                        "dataxx 5",
+
+                        languageResponse,
+                        typeof languageResponse
+                      );
+
+                      console.log(
+                        "dataxx 6",
+
+                        internshipResponse,
+                        typeof internshipResponse
+                      );
+
+                      console.log(
+                        "dataxx 7",
+
+                        volunteeringResponse,
+                        typeof volunteeringResponse
+                      );
+
+                      console.log(
+                        "dataxx 8",
+
+                        courseResponse,
+                        typeof courseResponse
+                      );
+
+                      console.log(
+                        "dataxx 9",
+
+                        referenceResponse,
+                        typeof referenceResponse
+                      );
+                      console.log(
+                        "dataxx 10",
+
+                        achievementResponse,
+                        typeof achievementResponse
+                      );
+                      console.log(
+                        "dataxx 11",
+
+                        hobbiesResponse,
+                        typeof hobbiesResponse
+                      );
+
+                      const personalInfo = {
+                        user: uuidv4(),
+                        country:
+                          createSelectOption(personalinforesponse?.country) ||
+                          null,
+                        state:
+                          createSelectOption(personalinforesponse?.state) ||
+                          null,
+                        city:
+                          createSelectOption(personalinforesponse?.city) ||
+                          null,
+                        customPreferredRole:
+                          createSelectOption(
+                            personalinforesponse?.customPreferredRole
+                          ) || null,
+                        name: personalinforesponse?.name || "",
+                        phoneNumber: personalinforesponse?.phoneNumber || "",
+                        emailAddress: personalinforesponse?.email || "",
+                        zipCode: personalinforesponse?.zipCode || "",
+                        templateName: "kathmandu",
+                        fontFamily: "PlusJakartaSans",
+                        title: null,
+                        isStudent: 0,
+                        isAiCreated: null,
+                        color: "#000000",
+                      };
+
+                      const professionalInfo = {
+                        title: "Professional Summary",
+                        order: 512,
+                        section: "professional-summary",
+                        canBeDeleted: 1,
+                        data: {
+                          description:
+                            extractSummary(professionalSummaryResponse)
+                              ?.replaceAll("STARTBRACKET", "[")
+                              ?.replaceAll("ENDBRACKET", "]") || "",
+                        },
+                      };
+
+                      const skillsField = {
+                        title: "Skills",
+                        order: 1536,
+                        section: "skills",
+                        canBeDeleted: 1,
+                        data:
+                          skillsResponse?.length > 0
+                            ? skillsResponse
+                                .slice(0, 11)
+                                ?.filter((skill: any) => {
+                                  const isHobby = hobbiesResponse?.some(
+                                    (hobby: any) =>
+                                      hobby?.hobbyName?.trim() ===
+                                      skill?.skillItem?.trim()
+                                  );
+                                  return !isHobby;
+                                })
+                                ?.map((el: any) => {
+                                  if (el?.trim()) {
+                                    return {
+                                      id: uuidv4(),
+                                      skillTitle:
+                                        el?.trim()?.replaceAll("--", ":") || "",
+                                      skillDescription: "",
+                                      skillExpertise: "",
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const employmentField = {
+                        title: "Employment History",
+                        order: 5731,
+                        section: "employment-history",
+                        canBeDeleted: 1,
+                        data:
+                          employmentResponse?.length > 0
+                            ? employmentResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value)
+                                  ) {
+                                    if (
+                                      isInTheExtractedData(
+                                        el.employer || el.employeer
+                                      ) &&
+                                      !el.jobTitle
+                                        ?.toLowerCase()
+                                        ?.includes("intern")
+                                    ) {
+                                      return {
+                                        id: uuidv4(),
+                                        employeer:
+                                          el.employeer || el.employer || "",
+                                        jobTitle: el.jobTitle || "",
+                                        description:
+                                          convertDescriptionToBulletPoints(
+                                            el.description
+                                          ) || "",
+                                        startDate: formatDateWhileUploading(
+                                          el?.startDate || ""
+                                        ),
+                                        endDate: formatDateWhileUploading(
+                                          el?.endDate || ""
+                                        ),
+                                        country: createSelectOption(
+                                          el?.country
+                                        ),
+                                        state: createSelectOption(el?.state),
+                                        city: createSelectOption(el?.city),
+                                        zipcode: el.zipcode || "",
+                                        isWorking: false,
+                                      };
+                                    }
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const educationField = {
+                        title: "Education",
+                        order: 6322,
+                        section: "education",
+                        canBeDeleted: 1,
+                        data:
+                          educationResponse?.length > 0
+                            ? educationResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value)
+                                  ) {
+                                    return {
+                                      id: uuidv4(),
+                                      field: el.fieldOfStudy || "",
+                                      school: el.schoolName || "",
+                                      description:
+                                        convertDescriptionToBulletPoints(
+                                          el.description
+                                        ) || "",
+                                      startDate: formatDateWhileUploading(
+                                        el?.startDate || ""
+                                      ),
+                                      endDate: formatDateWhileUploading(
+                                        el?.endDate || ""
+                                      ),
+                                      country: createSelectOption(el?.country),
+                                      state: createSelectOption(el?.state),
+                                      city: createSelectOption(el?.city),
+                                      zipcode: el.zipcode || "",
+                                      isStudy: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const certificationField = {
+                        title: "Certification",
+                        order: 1024,
+                        section: "certification",
+                        canBeDeleted: 1,
+                        data:
+                          certificationResponse?.length > 0
+                            ? certificationResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value)
+                                  ) {
+                                    return {
+                                      id: uuidv4(),
+                                      certificateName: el.certificateName || "",
+                                      certificateID: el.certificateID || "",
+                                      issueOrg: el.issueOrg || "",
+                                      issueDate: formatDateWhileUploading(
+                                        el?.issueDate || ""
+                                      ),
+                                      expiryDate: formatDateWhileUploading(
+                                        el?.expiryDate || ""
+                                      ),
+                                      isExpiry: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const languageField = {
+                        title: "Language",
+                        order: 6400,
+                        section: "language",
+                        canBeDeleted: 1,
+                        data:
+                          languageResponse?.length > 0
+                            ? languageResponse
+                                ?.map((el: any) => {
+                                  if (el?.languageName?.trim()) {
+                                    return {
+                                      id: uuidv4(),
+                                      title: el?.languageName?.trim() || "",
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const employmentResponseFields = employmentResponse || [];
+
+                      const fieldsToCheck = ["employeer", "jobTitle"];
+
+                      const shouldIgnoreInternship = (internshipEntry: any) => {
+                        for (const empEntry of employmentResponseFields) {
+                          let match = true;
+                          for (const field of fieldsToCheck) {
+                            if (
+                              internshipEntry.title?.trim() !==
+                              empEntry[field]?.trim()
+                            ) {
+                              match = false;
+                              break;
+                            }
+                          }
+                          if (match) {
+                            return true;
+                          }
+                        }
+                        return false;
+                      };
+
+                      const internshipField = {
+                        title: "Internship",
+                        order: 6500,
+                        section: "internship",
+                        canBeDeleted: 1,
+                        data:
+                          internshipResponse?.length > 0
+                            ? internshipResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value) &&
+                                    !shouldIgnoreInternship(el) &&
+                                    !["institution_name", "title"].some((key) =>
+                                      ["not mentioned", "n/a"].includes(
+                                        el[key]?.toLowerCase()
+                                      )
+                                    )
+                                  ) {
+                                    return {
+                                      id: uuidv4(),
+                                      institution_name:
+                                        el.institutionName || "",
+                                      title: el.internshipTitle || "",
+                                      description:
+                                        convertDescriptionToBulletPoints(
+                                          el.description
+                                        ) || "",
+                                      startDate: formatDateWhileUploading(
+                                        el?.startDate || ""
+                                      ),
+                                      endDate: formatDateWhileUploading(
+                                        el?.endDate || ""
+                                      ),
+                                      country: createSelectOption(el?.country),
+                                      state: createSelectOption(el?.state),
+                                      city: createSelectOption(el?.city),
+                                      zipcode: el.zipcode || "",
+                                      isPresent: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+                      const volunteeringField = {
+                        title: "Volunteering",
+                        order: 6600,
+                        section: "volunteering",
+                        canBeDeleted: 1,
+                        data:
+                          volunteeringResponse?.length > 0
+                            ? volunteeringResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value) &&
+                                    textContent
+                                      ?.replaceAll("\n", " ")
+                                      ?.toLowerCase()
+                                      ?.includes(
+                                        el.institutionName?.toLowerCase()
+                                      )
+                                  ) {
+                                    return {
+                                      id: uuidv4(),
+                                      institution_name:
+                                        el.institutionName || "",
+                                      role: el.role || "",
+                                      description:
+                                        convertDescriptionToBulletPoints(
+                                          el.description
+                                        ) || "",
+                                      startDate: formatDateWhileUploading(
+                                        el?.startDate || ""
+                                      ),
+                                      endDate: formatDateWhileUploading(
+                                        el?.endDate || ""
+                                      ),
+                                      country: createSelectOption(el?.country),
+                                      state: createSelectOption(el?.state),
+                                      city: createSelectOption(el?.city),
+                                      zipcode: el.zipcode || "",
+                                      isPresent: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const educationResponseFields = educationResponse || [];
+
+                      const fieldsToCheck1 = ["field", "school"];
+
+                      const shouldIgnoreCourse = (courseEntry: any) => {
+                        for (const empEntry of educationResponseFields) {
+                          let match = true;
+                          for (const field of fieldsToCheck1) {
+                            if (courseEntry.course_name !== empEntry[field]) {
+                              match = false;
+                              break;
+                            }
+                          }
+                          if (match) {
+                            return true;
+                          }
+                        }
+                        return false;
+                      };
+
+                      const courseField = {
+                        title: "Course",
+                        order: 6700,
+                        section: "course",
+                        canBeDeleted: 1,
+                        data:
+                          courseResponse?.length > 0
+                            ? courseResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    Object.values(el).some((value) => value) &&
+                                    !shouldIgnoreCourse(el)
+                                  ) {
+                                    return {
+                                      id: uuidv4(),
+                                      institution_name:
+                                        el.institutionName || "",
+                                      course_name: el.courseName || "",
+                                      description:
+                                        convertDescriptionToBulletPoints(
+                                          el.description
+                                        ) || "",
+                                      startDate: formatDateWhileUploading(
+                                        el?.startDate || ""
+                                      ),
+                                      endDate: formatDateWhileUploading(
+                                        el?.endDate || ""
+                                      ),
+                                      country: createSelectOption(el?.country),
+                                      state: createSelectOption(el?.state),
+                                      city: createSelectOption(el?.city),
+                                      zipcode: el.zipcode || "",
+                                      isPresent: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const referenceField = {
+                        title: "Reference",
+                        order: 6800,
+                        section: "reference",
+                        canBeDeleted: 1,
+                        data:
+                          referenceResponse?.length > 0
+                            ? referenceResponse
+                                ?.map((el: any) => {
+                                  if (el.phone_number || el.email) {
+                                    return {
+                                      id: uuidv4(),
+                                      name: el.name || "",
+                                      company: el.company || "",
+                                      phone_number: el.phoneNumber || "",
+                                      email: el.email || "",
+                                      expanded: false,
+                                    };
+                                  }
+                                })
+                                .filter(Boolean)
+                            : [],
+                      };
+
+                      const hobbiesField = {
+                        title: "Hobbies",
+                        order: 6900,
+                        section: "custom-section",
+                        canBeDeleted: 1,
+                        data: isMultipleInTheExtractedData(["hobb", "interest"])
+                          ? hobbiesResponse?.length > 0
+                            ? hobbiesResponse?.map((el: any) => {
+                                // if (isInTheExtractedData(el?.trim())) {
+                                return {
+                                  id: uuidv4(),
+                                  field1: el?.hobbyName?.trim(),
+                                  field2: "",
+                                  country: "",
+                                  state: el.email || "",
+                                  zipcode: "",
+                                  startDate: "",
+                                  endDate: "",
+                                  expanded: false,
+                                };
+                                // }
+                              })
+                            : []
+                          : [],
+                      };
+
+                      const achievementsField = {
+                        title: "Achievement",
+                        order: 7000,
+                        section: "custom-section",
+                        canBeDeleted: 1,
+                        data: isMultipleInTheExtractedData([
+                          "award",
+                          "achievement",
+                        ])
+                          ? achievementResponse?.length > 0
+                            ? achievementResponse
+                                ?.map((el: any) => {
+                                  if (
+                                    el?.achievementOrAwardTitleOrDescription
+                                  ) {
+                                    // if (
+                                    //   isInTheExtractedData(
+                                    //     el.achievementOrAwardTileOrDescription,
+                                    //   )
+                                    // ) {
+                                    return {
+                                      id: uuidv4(),
+                                      field1:
+                                        el?.achievementOrAwardTitleOrDescription?.trim() ||
+                                        "",
+                                      field2: "",
+                                      startDate: formatDateWhileUploading(
+                                        el?.startDate || ""
+                                      ),
+                                      endDate: formatDateWhileUploading(
+                                        el?.endDate || ""
+                                      ),
+                                      country: createSelectOption(el?.country),
+                                      state: createSelectOption(el?.state),
+                                      city: createSelectOption(el?.city),
+                                      zipcode: el.zipcode || "",
+                                      expanded: false,
+                                    };
+                                    // }
+                                  } else {
+                                    return null;
+                                  }
+                                })
+                                .filter(Boolean)
+                            : []
+                          : [],
+                      };
+
+                      const finalData = {
+                        ...personalInfo,
+                        fields: [
+                          professionalInfo,
+                          skillsField,
+                          employmentField,
+                          certificationField,
+                          educationField,
+                          languageField,
+                          internshipField,
+                          volunteeringField,
+                          courseField,
+                          referenceField,
+                          hobbiesField,
+                          achievementsField,
+                        ],
+                      };
+                      console.log({ finalData });
+
+                      try {
+                        const uniqueID = uuidv4();
+                        const response = await fetch(
+                          "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+                          {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "Access-Control-Allow-Origin": "*",
+                              Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(finalData),
+                          }
+                        );
+                        setIsGenerating(false);
+                        if (response.ok) {
+                          const responseData = await response.json();
+                          console.log({ responseData });
+                          setIsGenerating(false);
+                          window.open(
+                            `https://resumebuilder.joinswiftly.com/editor/${responseData?.data?.id}`,
+                            "_blank"
+                          );
+                        } else {
+                          setIsGenerating(false);
+                          console.error("API request failed");
+                          alert("API request failed!");
+                        }
+                      } catch (error) {
+                        setIsGenerating(false);
+                        alert("Something error occured!");
+
+                        console.error("An error occurred:", error);
+                      }
+                    } catch (error) {
+                      console.log(error);
+                    }
+                  })();
                 }
-              } catch (error) {
-                console.error("An error occurred:", error);
               }
-            } catch (error) {
-              console.log(error);
+            } else {
+              setIsGenerating(false);
+              alert("API request failed!");
             }
-          })();
+          } catch (error) {
+            setIsGenerating(false);
+            alert("Something error occured!");
+            console.error("An error occurred:", error);
+          }
+        } else {
+          alert("You have to login first");
+          setIsGenerating(false);
+          window.open(`https://resumebuilder.joinswiftly.com`, "_blank");
         }
       }
     };
 
     if (divToEmbedInto) {
-      console.log("entered");
-      const buttonElement = document.createElement("button");
-      buttonElement.textContent = "Generate Resume";
-      buttonElement.style.width = "100px";
-      buttonElement.style.height = "55px";
-      buttonElement.style.border = "2px solid white";
-      buttonElement.style.borderRadius = "6px";
+      // Check if a button with class "custom-button" exists
+      const existingButton = divToEmbedInto.querySelector(
+        ".generate-resume-button"
+      );
 
-      buttonElement.addEventListener("click", handleClick);
+      if (existingButton) {
+        // If button exists, update its text content
+        existingButton.textContent = ""; // Clear existing text content
 
-      const newDivElement = document.createElement("div");
-      newDivElement.appendChild(buttonElement);
-      divToEmbedInto.appendChild(newDivElement);
+        // Text content
+        const buttonText = isGenerating ? "" : "Generate Resume";
+        existingButton.textContent = buttonText;
+
+        if (isGenerating) {
+          // Create img element for the GIF
+          const gifImg = document.createElement("img");
+          gifImg.src = chrome.runtime.getURL("light-loader.svg"); // Replace 'your_gif_url_here.gif' with the actual URL of your GIF
+          gifImg.style.verticalAlign = "middle"; // Align the GIF vertically to the middle
+          // Add padding left to the image
+          gifImg.style.paddingLeft = "25px"; // Adjust the padding value as needed
+          // Append img element to button
+          existingButton.appendChild(gifImg);
+        }
+      } else {
+        console.log("entered");
+        const buttonElement = document.createElement("button");
+        const buttonText = "Generate Resume";
+        buttonElement.textContent = buttonText;
+        buttonElement.style.width = "100px";
+        buttonElement.style.height = "55px";
+        buttonElement.style.border = "2px solid white";
+        buttonElement.style.borderRadius = "6px";
+        buttonElement.style.paddingLeft = "4px";
+        buttonElement.style.paddingRight = "4px";
+
+        buttonElement.classList.add("generate-resume-button");
+
+        buttonElement.addEventListener("click", handleClick);
+
+        const newDivElement = document.createElement("div");
+        newDivElement.appendChild(buttonElement);
+        divToEmbedInto.appendChild(newDivElement);
+      }
     } else {
       console.error("Div not found!");
     }
@@ -946,11 +1095,11 @@ const JobDetector = () => {
         imgElement.removeEventListener("click", handleClick);
       }
     };
-  }, []);
+  }, [window.location.href, isGenerating]);
 
   chrome.storage.local.get(["ci_token"]).then((result: any) => {
     const myToken = result.ci_token;
-    console.log({ myToken });
+    // console.log({ myToken });
   });
 
   return (

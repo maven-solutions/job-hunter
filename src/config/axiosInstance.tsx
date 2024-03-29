@@ -26,7 +26,7 @@ axiosInstance.interceptors.request.use(
     Promise.reject(error);
   }
 );
-const getToken = async () => {
+export const getToken = async () => {
   console.log("fired::");
   const result = await chrome.storage.local.get(["ci_token"]);
   console.log("res::", result);

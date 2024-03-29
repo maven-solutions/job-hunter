@@ -10,7 +10,7 @@ export const uploadPDFPromptCollection = (data: string) => {
     zipCode: "",
   };
 
-  const skillSample = [{ skillTitle: "" }, { skillTitle: "" }];
+  const skillSample = [{ skillItem: "" }, { skillItem: "" }];
 
   const hobbiesSample = [{ hobbyName: "" }, { hobbyName: "" }];
 
@@ -190,93 +190,168 @@ export const uploadPDFPromptCollection = (data: string) => {
   return [
     {
       key: "personalInfo",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Utilizing this information, please populate the ${JSON.stringify(
+      prompt: `The resume string is ${data}. Utilizing this information, please populate the ${JSON.stringify(
         personalInfoSample
       )} object and respond with the updated object exclusively.
-        `,
+      `,
     },
     {
       key: "professionalSummary",
-      prompt: `Following the extraction of the PDF content, the obtained string is ${data}. Subsequently, extract the professional summary from the provided PDF content string. In case the professional summary is not mentioned, provide an empty string as the response.`,
+      prompt: `This is my resume content: ${data}.\n
+      From this resume content, Find the professional summary mentioned section and return that section in response. If there is not mentioned any professional summary as such, just return empty string.`,
     },
     {
       key: "skills",
-      prompt: `Upon acquiring the string through PDF content extraction, denoted as ${data}, identify and extract only explicitly mentioned core skills from the PDF content's skills section. Furnish the extracted skills as the response. Furthermore, revise the skills within the ${JSON.stringify(
-        skillSample
-      )} array, offering the modified array exclusively containing the skills as the answer. The result should be in array with the presence of escape characters`,
+      prompt: `This is my resume content: ${data}.\n
+      From this resume content, Find the skills mentioned section and return that whole section in valid RFC8259 compliant array of exact form string as a response.\n
+      If there is no skills mentioned section, then return empty array
+      `,
     },
     {
       key: "employment",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if respective job role experience OR professional experience OR employment/work experience/history is mentioned, extract only respective job role experience OR professional experience OR employment/work experience/history data from the employment section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        employmentSample
-      )} array and respond accordingly. Also extract the respective job role experience OR professional experience OR employment/work experience/history description if present and Ensure that the response should contain exactly one final array as per the structure of the ${employmentSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any respective job role experience OR professional experience OR employment/work experience/history mentioned, just give empty array ([]) as an result.
-        While giving answer dont add any quote(") in the description value and make sure description value is dot and well-space seprated.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the work experience mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        employeer: "",
+        jobTitle: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no work experience mentioned section, then return empty array
+      `,
     },
     {
       key: "education",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if education is mentioned, extract only education/academic data from the education/academic section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        educationSample
-      )} array and respond accordingly. Also extract the respective education/academic deescription if present and  Ensure that the response should contain exactly one final array as per the structure of the ${educationSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no education mentioned, just give empty array ([]) as an result.
-        White giving answer dont add any quote(") in the description value and make sure description is dot and well-space seprated.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the mentioned education section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        fieldOfStudy: "",
+        schoolName: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no education mentioned section, then return empty array
+      `,
     },
     {
       key: "certification",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if certification/certificates is mentioned, extract only certification/certificates data from the certification section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        certificationData
-      )} array and respond accordingly. Ensure that the response should contain exactly one final array as per the structure of the ${certificationData} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any certification/certificates mentioned, just give empty array ([]) as an result.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the mentioned certifications or training section. If either actual data or sample data is present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        certificateName: "",
+        certificateID: "",
+        issueOrg: "",
+        issueDate: "",
+        expiryDate: "",
+        isExpiry: "",
+      },\n
+      If there is no certification / training mentioned section, then return empty array
+      `,
     },
     {
       key: "language",
-      prompt: `Upon acquiring the string through PDF content extraction, denoted as ${data}, identify and extract only explictly mentioned speaking language in the language section from the PDF content's speaking language section. Furthermore, revise the language within the ${JSON.stringify(
-        languageData
-      )} array, offering the modified array exclusively containing the speaking language as the answer. The result should be an iterable RFC8259 compliant valid array of objects.`,
+      prompt: `This is my resume content: ${data}.\n
+      From this resume content, Find the language mentioned section and return that whole section in valid RFC8259 compliant array of string as a response.\n
+      If there is no language mentioned section, then return empty array`,
     },
     {
       key: "internship",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if explictly internship is mentioned, then only extract the mentioned internship / trainee data from the internship / trainee section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        internshipSample
-      )} array and respond accordingly. Also extract the respective internship deescription if present and  Ensure that the response should contain exactly one final array as per the structure of the ${internshipSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any internship / trainee section is present, just give empty array ([]) as an result.
-        White giving answer dont add any quote(") in the description value and make sure description is dot and well-space seprated.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the internship or trainee mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        institutionName: "",
+        internshipTitle: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no internship or trainee mentioned section, then return empty array
+      `,
     },
     {
       key: "volunteering",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if volunteering activities is mentioned, extract only volunteering data from the volunteering section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        volunteeringSample
-      )} array and respond accordingly. Also extract the respective volunteering deescription if present and  Ensure that the response should contain exactly one final array as per the structure of the ${volunteeringSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any volunteering activities mentioned, just give empty array ([]) as an result.
-        White giving answer dont add any quote(") in the description value and make sure description is dot and well-space seprated.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the volunteering mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        institutionName: "",
+        role: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no volunteering mentioned section, then return empty array
+      `,
     },
     {
       key: "reference",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if reference is mentioned, if reference section is mentioned, extract only reference data from the reference section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        referenceSample
-      )} array and respond accordingly. Also extract the respective reference deescription if present and  Ensure that the response should contain exactly one final array as per the structure of the ${referenceSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any reference section present, just give empty array ([]) as an result.
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the references mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        name: "",
+        company: "",
+        phoneNumber: "",
+        email: "",
+      },\n
+      If there is no references mentioned section, then return empty array
+      `,
     },
     {
       key: "course",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if course is mentioned, extract only course data from the course section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        courseSample
-      )} array and respond accordingly. Also extract the respective course deescription if present and  Ensure that the response should contain exactly one final array as per the structure of the ${courseSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any course mentioned, just give empty array as an aswer
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the courses / trainings mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        achievementOrAwardTitleOrDescription: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no courses / trainings mentioned section, then return empty array
+      `,
     },
     {
       key: "achievements",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if any award OR achievement OR rank OR nomination is mentioned, extract only award OR achievement OR rank OR nomination data from the award OR achievement OR rank OR nomination section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        achievementSample
-      )} array and respond accordingly. Ensure that the response should contain exactly one final array as per the structure of the ${achievementSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any award OR acheievement OR rank OR nomination mentioned, just give empty array as an aswer
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the awards or achievements explictly mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      {
+        achievementOrAwardTitleOrDescription: "",
+        startDate: "",
+        endDate: "",
+        country: "",
+        state: "",
+        city: "",
+        zipcode: "",
+      },\n
+      If there is no awards or achievements mentioned section, then return empty array
+      `,
     },
     {
       key: "hobbies",
-      prompt: `After extracting the content from the PDF, the resulting string is ${data}. Using this information, if hobbies section is explictly mentioned, extract only hobbies or interest data from the hobbies or interest section of the PDF content string and provide the answer. Subsequently, update the key:value pair in the ${JSON.stringify(
-        hobbiesSample
-      )} array and respond accordingly. Ensure that the response should contain exactly one final array as per the structure of the ${hobbiesSample} array. The result should be an iterable RFC8259 compliant valid array of objects. If there is no any hobbies  or interest mentioned, just give empty array as an aswer
-        `,
+      prompt: `This is my resume content:${data}.\n
+      From this resume content, Find the hobbies or interest mentioned section. If either actual data or sample data present, return that whole section in valid RFC8259 compliant array of object following this:\n
+      { hobbyName: "" },\n
+      If there is no hobbies / interest mentioned section, then return empty array
+      `,
     },
   ];
 };
