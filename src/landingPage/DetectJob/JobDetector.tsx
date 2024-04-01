@@ -217,13 +217,16 @@ const JobDetector = () => {
     const lightDiv = document.querySelector(".light");
     const darkDiv = document.querySelector(".dark");
 
-    if (lightDiv) {
-      buttonElement.style.border = "1.5px solid #bfbfbf";
-      buttonElement.style.color = "#7f7f7f";
-    } else if (darkDiv) {
-      buttonElement.style.border = "1.5px solid #383838";
-      buttonElement.style.color = "#908f8f";
-    }
+    // buttonElement.style.backgroundColor = "blue";
+    // buttonElement.style.color = "white";
+
+    // if (lightDiv) {
+    //   buttonElement.style.backgroundColor = "blue";
+    //   buttonElement.style.color = "white";
+    // } else if (darkDiv) {
+    //   buttonElement.style.backgroundColor = "blue";
+    //   buttonElement.style.color = "white";
+    // }
   }
 
   // Create a new instance of MutationObserver
@@ -1018,10 +1021,18 @@ const JobDetector = () => {
       if (existingButton) {
         existingButton.textContent = "";
 
-        const buttonText = isGenerating ? "" : "Generate Resume";
+        const buttonText = isGenerating ? "Generating..." : "Generate Resume";
         existingButton.textContent = buttonText;
 
         if (isGenerating) {
+          const buttonElement: any = document.querySelector(
+            ".generate-resume-button"
+          );
+
+          if (buttonElement) {
+            buttonElement.style.backgroundColor = "#ffb400";
+            buttonElement.style.color = "white";
+          }
           const gifImg = document.createElement("img");
 
           const lightDiv = document.querySelector(".light");
@@ -1035,19 +1046,31 @@ const JobDetector = () => {
           // }
 
           gifImg.style.verticalAlign = "middle";
-          gifImg.style.paddingLeft = "25px";
+          // gifImg.style.paddingLeft = "25px";
           existingButton.appendChild(gifImg);
+        } else {
+          const buttonElement: any = document.querySelector(
+            ".generate-resume-button"
+          );
+
+          if (buttonElement) {
+            buttonElement.style.backgroundColor = "#4339f2";
+            buttonElement.style.color = "white";
+          }
         }
       } else {
         console.log("entered");
         const buttonElement = document.createElement("button");
         const buttonText = "Generate Resume";
         buttonElement.textContent = buttonText;
-        buttonElement.style.width = "100px";
-        buttonElement.style.height = "55px";
+        buttonElement.style.width = "170px";
+        buttonElement.style.height = "52px";
         buttonElement.style.borderRadius = "8px";
         buttonElement.style.paddingLeft = "4px";
         buttonElement.style.paddingRight = "4px";
+
+        buttonElement.style.backgroundColor = "#4339f2";
+        buttonElement.style.color = "white";
 
         // if (lightDiv) {
         //   buttonElement.style.border = "2px solid black";

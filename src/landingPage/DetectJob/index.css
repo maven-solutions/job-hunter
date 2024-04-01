@@ -600,3 +600,13 @@ textarea {
 .landingpage-careerai-button-glassdoor {
   margin-bottom: 20px;
 }
+
+/* RESUME GPT STYLING */
+button.generate-resume-button {
+  display: flex;
+  justify-content: center;
+  gap: 0px;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 10px;
+}
