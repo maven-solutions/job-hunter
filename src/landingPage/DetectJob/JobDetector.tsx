@@ -191,6 +191,53 @@ const JobDetector = () => {
     // return () => clearInterval(intervalId);
   }, []);
 
+  // const lightDiv = document.querySelector(".light");
+
+  // Function to handle changes in the DOM
+  function handleDomChanges(mutationsList, observer) {
+    mutationsList.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const div = node.closest(".light, .dark");
+          if (div) {
+            adjustButtonStyle();
+          }
+        }
+      });
+    });
+  }
+
+  // Function to adjust button style based on the presence of .light or .dark div
+  function adjustButtonStyle() {
+    const buttonElement: any = document.querySelector(
+      ".generate-resume-button"
+    );
+    if (!buttonElement) return;
+
+    const lightDiv = document.querySelector(".light");
+    const darkDiv = document.querySelector(".dark");
+
+    if (lightDiv) {
+      buttonElement.style.border = "1.5px solid #bfbfbf";
+      buttonElement.style.color = "#7f7f7f";
+    } else if (darkDiv) {
+      buttonElement.style.border = "1.5px solid #383838";
+      buttonElement.style.color = "#908f8f";
+    }
+  }
+
+  // Create a new instance of MutationObserver
+  const observer = new MutationObserver(handleDomChanges);
+
+  // Configure and start observing the target node
+  const observerConfig = { childList: true, subtree: true };
+  observer.observe(document.body, observerConfig);
+
+  // Listen for click events on the document body to adjust the button style
+  document.body.addEventListener("click", (event) => {
+    adjustButtonStyle();
+  });
+
   useEffect(() => {
     console.log("entered");
     const divToEmbedInto = document.querySelector(".stretch");
@@ -276,7 +323,6 @@ const JobDetector = () => {
                       console.log("check, ", temp, passedItem);
                       return temp.includes(passedItem);
                     }
-
                     function isMultipleInTheExtractedData(passedItems: any) {
                       const temp = textContent
                         ?.replaceAll("\n", " ")
@@ -286,26 +332,20 @@ const JobDetector = () => {
                         temp.includes(item?.toLowerCase())
                       );
                     }
-
                     var inputString = "";
-
                     // var replacedString = replaceBrackets(inputString);
                     // console.log(replacedString);
-
                     const allPrompts: any = uploadPDFPromptCollection(
                       textContent
                         ?.replaceAll("\n \n", "")
                         ?.replaceAll("[", "STARTBRACKET")
                         ?.replaceAll("]", "ENDBRACKET")
                     );
-
                     const headers = {
                       "Content-Type": "application/json",
                       "Access-Control-Allow-Origin": "*",
                     };
-
                     console.log({ token });
-
                     try {
                       const urls = [
                         `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
@@ -322,7 +362,6 @@ const JobDetector = () => {
                         `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
                         `https://d2fa6tipx2eq6v.cloudfront.net/api/v1/gpt/write`,
                       ];
-
                       const requests = urls.map((url: string, index: number) =>
                         fetch(url, {
                           method: "POST",
@@ -336,48 +375,18 @@ const JobDetector = () => {
                           // }),
                         })
                       );
-
                       const responses = await Promise.all(requests);
                       const jsons = await Promise.all(
                         responses.map((response) => response.json())
                       );
                       console.log({ jsons });
-                      console.log(
-                        "datax 0",
-
-                        jsons[0]?.data
-                      );
-                      console.log(
-                        "datax 1",
-
-                        jsons[1]?.data
-                      );
-                      console.log(
-                        "datax 2",
-
-                        jsons[2]?.data
-                      );
-                      console.log(
-                        "datax 3",
-
-                        jsons[3]?.data
-                      );
-                      console.log(
-                        "datax 4",
-
-                        jsons[4]?.data
-                      );
-                      console.log(
-                        "datax 5",
-
-                        jsons[5]?.data
-                      );
-                      console.log(
-                        "datax 6",
-
-                        jsons[6]?.data
-                      );
-
+                      console.log("datax 0", jsons[0]?.data);
+                      console.log("datax 1", jsons[1]?.data);
+                      console.log("datax 2", jsons[2]?.data);
+                      console.log("datax 3", jsons[3]?.data);
+                      console.log("datax 4", jsons[4]?.data);
+                      console.log("datax 5", jsons[5]?.data);
+                      console.log("datax 6", jsons[6]?.data);
                       const personalinforesponse = JSON.parse(jsons[0]?.data);
                       const professionalSummaryResponse = jsons[1]?.data;
                       const skillsResponse =
@@ -404,86 +413,66 @@ const JobDetector = () => {
                         (await parseJsonArrayOrObject(jsons[11]?.data)) || [];
                       const hobbiesResponse =
                         (await parseJsonArrayOrObject(jsons[12]?.data)) || [];
-
                       console.log(
                         "dataxx 0",
-
                         personalinforesponse,
                         typeof personalinforesponse
                       );
                       console.log(
                         "dataxx 1",
-
                         professionalSummaryResponse,
                         typeof professionalSummaryResponse
                       );
                       console.log(
                         "dataxx 2",
-
                         skillsResponse,
                         typeof skillsResponse
                       );
                       console.log(
                         "dataxx 3",
-
                         employmentResponse,
                         typeof employmentResponse
                       );
-
                       console.log(
                         "dataxx 4",
-
                         certificationResponse,
                         typeof certificationResponse
                       );
-
                       console.log(
                         "dataxx 5",
-
                         languageResponse,
                         typeof languageResponse
                       );
-
                       console.log(
                         "dataxx 6",
-
                         internshipResponse,
                         typeof internshipResponse
                       );
-
                       console.log(
                         "dataxx 7",
-
                         volunteeringResponse,
                         typeof volunteeringResponse
                       );
-
                       console.log(
                         "dataxx 8",
-
                         courseResponse,
                         typeof courseResponse
                       );
-
                       console.log(
                         "dataxx 9",
-
                         referenceResponse,
                         typeof referenceResponse
                       );
                       console.log(
                         "dataxx 10",
-
                         achievementResponse,
                         typeof achievementResponse
                       );
                       console.log(
                         "dataxx 11",
-
                         hobbiesResponse,
                         typeof hobbiesResponse
                       );
-
                       const personalInfo = {
                         user: uuidv4(),
                         country:
@@ -510,7 +499,6 @@ const JobDetector = () => {
                         isAiCreated: null,
                         color: "#000000",
                       };
-
                       const professionalInfo = {
                         title: "Professional Summary",
                         order: 512,
@@ -523,7 +511,6 @@ const JobDetector = () => {
                               ?.replaceAll("ENDBRACKET", "]") || "",
                         },
                       };
-
                       const skillsField = {
                         title: "Skills",
                         order: 1536,
@@ -555,7 +542,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const employmentField = {
                         title: "Employment History",
                         order: 5731,
@@ -605,7 +591,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const educationField = {
                         title: "Education",
                         order: 6322,
@@ -643,7 +628,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const certificationField = {
                         title: "Certification",
                         order: 1024,
@@ -674,7 +658,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const languageField = {
                         title: "Language",
                         order: 6400,
@@ -694,11 +677,8 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const employmentResponseFields = employmentResponse || [];
-
                       const fieldsToCheck = ["employeer", "jobTitle"];
-
                       const shouldIgnoreInternship = (internshipEntry: any) => {
                         for (const empEntry of employmentResponseFields) {
                           let match = true;
@@ -717,7 +697,6 @@ const JobDetector = () => {
                         }
                         return false;
                       };
-
                       const internshipField = {
                         title: "Internship",
                         order: 6500,
@@ -806,11 +785,8 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const educationResponseFields = educationResponse || [];
-
                       const fieldsToCheck1 = ["field", "school"];
-
                       const shouldIgnoreCourse = (courseEntry: any) => {
                         for (const empEntry of educationResponseFields) {
                           let match = true;
@@ -826,7 +802,6 @@ const JobDetector = () => {
                         }
                         return false;
                       };
-
                       const courseField = {
                         title: "Course",
                         order: 6700,
@@ -866,7 +841,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const referenceField = {
                         title: "Reference",
                         order: 6800,
@@ -890,7 +864,6 @@ const JobDetector = () => {
                                 .filter(Boolean)
                             : [],
                       };
-
                       const hobbiesField = {
                         title: "Hobbies",
                         order: 6900,
@@ -916,7 +889,6 @@ const JobDetector = () => {
                             : []
                           : [],
                       };
-
                       const achievementsField = {
                         title: "Achievement",
                         order: 7000,
@@ -964,7 +936,6 @@ const JobDetector = () => {
                             : []
                           : [],
                       };
-
                       const finalData = {
                         ...personalInfo,
                         fields: [
@@ -983,7 +954,6 @@ const JobDetector = () => {
                         ],
                       };
                       console.log({ finalData });
-
                       try {
                         const uniqueID = uuidv4();
                         const response = await fetch(
@@ -1015,7 +985,6 @@ const JobDetector = () => {
                       } catch (error) {
                         setIsGenerating(false);
                         alert("Something error occured!");
-
                         console.error("An error occurred:", error);
                       }
                     } catch (error) {
@@ -1042,27 +1011,31 @@ const JobDetector = () => {
     };
 
     if (divToEmbedInto) {
-      // Check if a button with class "custom-button" exists
       const existingButton = divToEmbedInto.querySelector(
         ".generate-resume-button"
       );
 
       if (existingButton) {
-        // If button exists, update its text content
-        existingButton.textContent = ""; // Clear existing text content
+        existingButton.textContent = "";
 
-        // Text content
         const buttonText = isGenerating ? "" : "Generate Resume";
         existingButton.textContent = buttonText;
 
         if (isGenerating) {
-          // Create img element for the GIF
           const gifImg = document.createElement("img");
-          gifImg.src = chrome.runtime.getURL("light-loader.svg"); // Replace 'your_gif_url_here.gif' with the actual URL of your GIF
-          gifImg.style.verticalAlign = "middle"; // Align the GIF vertically to the middle
-          // Add padding left to the image
-          gifImg.style.paddingLeft = "25px"; // Adjust the padding value as needed
-          // Append img element to button
+
+          const lightDiv = document.querySelector(".light");
+          const darkDiv = document.querySelector(".dark");
+
+          // if (lightDiv) {
+          //   gifImg.src = chrome.runtime.getURL("dark-loader.svg");
+          // }
+          // if (darkDiv) {
+          gifImg.src = chrome.runtime.getURL("dark-loader.svg");
+          // }
+
+          gifImg.style.verticalAlign = "middle";
+          gifImg.style.paddingLeft = "25px";
           existingButton.appendChild(gifImg);
         }
       } else {
@@ -1072,10 +1045,17 @@ const JobDetector = () => {
         buttonElement.textContent = buttonText;
         buttonElement.style.width = "100px";
         buttonElement.style.height = "55px";
-        buttonElement.style.border = "2px solid white";
-        buttonElement.style.borderRadius = "6px";
+        buttonElement.style.borderRadius = "8px";
         buttonElement.style.paddingLeft = "4px";
         buttonElement.style.paddingRight = "4px";
+
+        // if (lightDiv) {
+        //   buttonElement.style.border = "2px solid black";
+        //   buttonElement.style.color = "black";
+        // } else {
+        // buttonElement.style.border = "2px solid white";
+        // buttonElement.style.color = "white";
+        // }
 
         buttonElement.classList.add("generate-resume-button");
 

@@ -69,7 +69,8 @@
         "builtin.svg",
         "glassdoor.svg",
         "login.svg",
-        "light-loader.svg"
+        "light-loader.svg",
+        "dark-loader.svg"
       ],
       "matches": ["<all_urls>"]
     }
