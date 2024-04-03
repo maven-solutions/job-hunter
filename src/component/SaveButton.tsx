@@ -23,7 +23,11 @@ const SaveButton = (props: any) => {
             Saved
           </button>
         ) : (
-          <button className="job_save_button" onClick={handleSaveClick}>
+          <button
+            className="job_save_button"
+            onClick={handleSaveClick}
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <div id="jhloading"></div>Saving

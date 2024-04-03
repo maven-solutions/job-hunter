@@ -58,7 +58,7 @@ export const saveJobs = async (
 ) => {
   // const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
   const url = "https://backend.careerai.io/public/jobs";
-  ("http://localhost:8000/public/jobs");
+
   const settings = {
     method: "POST",
     headers: {
