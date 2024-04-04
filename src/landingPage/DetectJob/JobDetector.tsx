@@ -35,6 +35,7 @@ import {
   setToken,
   setUser,
 } from "../../store/features/Auth/AuthSlice";
+import ResumeList from "../../page/resumeList/ResumeList";
 
 const JobDetector = () => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
@@ -62,6 +63,18 @@ const JobDetector = () => {
         "builtin",
         "localhost",
       ].some((domain) => window.location.href.includes(domain))
+    ) {
+      setShowIcon(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
+      window.location.href.toLowerCase().includes("job") ||
+      window.location.href.toLowerCase().includes("apply") ||
+      window.location.href.toLowerCase().includes("career") ||
+      window.location.href.toLowerCase().includes("work") ||
+      window.location.href.toLowerCase().includes("placement")
     ) {
       setShowIcon(true);
     }
@@ -137,7 +150,7 @@ const JobDetector = () => {
       setShowPage("");
     }
   }, [authState.authenticated]);
-
+  // console.log("authState::", authState);
   const handleLogOut = () => {
     dispatch(logoutUser());
     setShowPage("");
@@ -206,6 +219,9 @@ const JobDetector = () => {
 
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} />
+      )}
+      {showPage === SHOW_PAGE.resumeListPage && (
+        <ResumeList setShowPage={setShowPage} />
       )}
       <MenuPopUp setShowPage={setShowPage} />
       {website === SUPPORTED_WEBSITE.linkedin && (

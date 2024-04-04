@@ -1,0 +1,119 @@
+import React, { useEffect, useState } from "react";
+
+import {
+  clearLocalStorageData,
+  detectInputAndFillData,
+} from "../../autofill/helper";
+import "./index.css";
+import { RootStore, useAppSelector } from "../../store/store";
+
+const extractInfo = (resumeData) => {
+  const {
+    name,
+    emailAddress,
+    phoneNumber,
+    city,
+    state,
+    country,
+    webLinks,
+    zipCode,
+    pdfUrl,
+    fields,
+  } = resumeData;
+
+  // Extracting full name, first name, and last name
+  const [first_name, last_name] =
+    name && typeof name === "string" && name.includes(" ")
+      ? name.split(" ")
+      : [name, ""];
+
+  const full_name = name;
+
+  // Extracting website and LinkedIn URL
+  const linkedin_url =
+    webLinks?.find((link) => link.name.includes("linkedin"))?.name || "";
+
+  // Extracting address
+  const address = `${city?.label}, ${state?.label}`;
+  const education = fields?.find((sec) => sec.section === "education");
+  const summary = fields?.find((sec) => sec.section === "professional-summary");
+  const employment_history = fields?.find(
+    (sec) => sec.section === "employment-history"
+  );
+  // Returning the extracted information
+  return {
+    full_name,
+    first_name,
+    last_name,
+    email_address: emailAddress,
+    phone_number: phoneNumber,
+    address,
+    city: city?.label,
+    state: state?.label,
+    country: country?.label,
+    linkedin_url,
+    zip_code: zipCode,
+    pdf_url: pdfUrl,
+    education: education.data ?? null,
+    employment_history: employment_history.data ?? null,
+    professional_summary: summary?.data?.description ?? null,
+  };
+};
+
+const AutofillFields = (props: any) => {
+  const { selectedResume, content } = props;
+  const resumeList: any = useAppSelector((store: RootStore) => {
+    return store.ResumeListSlice;
+  });
+
+  const autofillByPopUp = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      const activeTab = tabs[0];
+      chrome.tabs.sendMessage(activeTab.id, {
+        message: "updateFields",
+        data: extractInfo(resumeList.applicantData[selectedResume].applicant),
+      });
+    });
+  };
+
+  const logoutUser = () => {
+    clearLocalStorageData("login_token");
+    // updateUserLoginState(false);
+  };
+
+  const autofillByContentScript = () => {
+    const applicantData = extractInfo(
+      resumeList.applicantData[selectedResume].applicant
+    );
+    console.log("applicantData---", applicantData);
+    detectInputAndFillData(applicantData);
+  };
+
+  const handleAutofill = () => {
+    if (content) {
+      autofillByContentScript();
+    } else {
+      autofillByPopUp();
+    }
+  };
+
+  return (
+    <div className={`ext__autofill__fields__wrapper `}>
+      <div className={`autofill__btn__wrapper  `}>
+        <button
+          className={`autofill__btn ${resumeList.res_success ? "" : "disable"}`}
+          // onClick={handleAutoFill}
+          onClick={() => handleAutofill()}
+          disabled={resumeList.res_success ? false : true}
+        >
+          Auto Fill
+        </button>
+        {/* <button className="logout__btn" onClick={logoutUser}>
+          <LogOut /> Logout
+        </button> */}
+      </div>
+    </div>
+  );
+};
+
+export default AutofillFields;

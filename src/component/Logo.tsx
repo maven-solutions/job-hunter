@@ -49,7 +49,8 @@ const Logo = (props: any) => {
   const handlePage = () => {
     loadUser();
     if (authState.authenticated) {
-      setShowPage(SHOW_PAGE.summaryPage);
+      // setShowPage(SHOW_PAGE.summaryPage);
+      setShowPage(SHOW_PAGE.resumeListPage);
     } else {
       setShowPage(SHOW_PAGE.loginPage);
     }

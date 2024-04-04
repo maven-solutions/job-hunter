@@ -14,6 +14,7 @@ export const SHOW_PAGE = {
   profilePage: "profile",
   loginPage: "login",
   singupPage: "singup",
+  resumeListPage: "resumelist",
 };
 
 export const EXTENSION_ACTION = {
