@@ -8,6 +8,7 @@ const Logo = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+
   const dispatch = useAppDispatch();
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startY, setStartY] = useState<number>(0);
@@ -49,8 +50,11 @@ const Logo = (props: any) => {
   const handlePage = () => {
     loadUser();
     if (authState.authenticated) {
-      // setShowPage(SHOW_PAGE.summaryPage);
-      setShowPage(SHOW_PAGE.resumeListPage);
+      if (authState.ci_user.userType === "va") {
+        setShowPage(SHOW_PAGE.resumeListPage);
+      } else {
+        setShowPage(SHOW_PAGE.summaryPage);
+      }
     } else {
       setShowPage(SHOW_PAGE.loginPage);
     }

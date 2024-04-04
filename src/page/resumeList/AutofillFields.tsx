@@ -102,7 +102,6 @@ const AutofillFields = (props: any) => {
       <div className={`autofill__btn__wrapper  `}>
         <button
           className={`autofill__btn ${resumeList.res_success ? "" : "disable"}`}
-          // onClick={handleAutoFill}
           onClick={() => handleAutofill()}
           disabled={resumeList.res_success ? false : true}
         >

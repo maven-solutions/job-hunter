@@ -10,7 +10,7 @@ import AutofillFields from "./AutofillFields";
 import "./index.css";
 
 const ResumeList = (props: any) => {
-  const { setShowPage } = props;
+  const { setShowPage, content } = props;
 
   const [showdropDown, setShowDropdown] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,7 +18,6 @@ const ResumeList = (props: any) => {
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
-  const content = true;
 
   console.log("resume::", resumeList);
 
@@ -37,7 +36,7 @@ const ResumeList = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage}>
+    <Layout setShowPage={setShowPage} firstBgWidth="10">
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />

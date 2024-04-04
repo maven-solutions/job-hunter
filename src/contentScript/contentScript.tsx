@@ -49,7 +49,7 @@ const App: React.FC<{}> = () => {
   // });
   return (
     <Provider store={Store}>
-      <JobDetector />
+      <JobDetector content={true} />
     </Provider>
   );
 };

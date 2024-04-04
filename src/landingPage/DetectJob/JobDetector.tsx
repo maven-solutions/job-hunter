@@ -36,8 +36,10 @@ import {
   setUser,
 } from "../../store/features/Auth/AuthSlice";
 import ResumeList from "../../page/resumeList/ResumeList";
+import { detectInputAndFillData } from "../../autofill/helper";
 
-const JobDetector = () => {
+const JobDetector = (props: any) => {
+  const { content, popup } = props;
   const [showIcon, setShowIcon] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
@@ -51,6 +53,12 @@ const JobDetector = () => {
     return store.JobDetailSlice;
   });
 
+  // useEffect(() => {
+  //   if (popup) {
+  //     console.log("popupfired2::");
+  //     setShowIcon(true);
+  //   }
+  // }, [popup]);
   useEffect(() => {
     if (
       [
@@ -136,14 +144,6 @@ const JobDetector = () => {
       dispatch(setToken(data));
     });
   };
-  const loadUser1 = () => {
-    chrome.storage.local.get(["ci_user"]).then((result) => {
-      dispatch(setUser(JSON.parse(result.ci_user)));
-    });
-    chrome.storage.local.get(["ci_token"]).then((result) => {
-      dispatch(setToken(JSON.parse(result.ci_token)));
-    });
-  };
 
   useEffect(() => {
     if (authState.authenticated) {
@@ -188,6 +188,17 @@ const JobDetector = () => {
     // // Clear the interval when the component unmounts
     // return () => clearInterval(intervalId);
   }, []);
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(async function (
+      request,
+      sender,
+      sendResponse
+    ) {
+      if (request.message === "updateFields") {
+        detectInputAndFillData(request.data);
+      }
+    });
+  }, []);
 
   return (
     <div className="content__script__section">
@@ -197,10 +208,6 @@ const JobDetector = () => {
           jobFound={jobDetailState?.jobFound || false}
         />
       ) : null}
-
-      {/* <LoginFrom setShowPage={setShowPage} /> */}
-
-      {/* <SignupForm setShowForm={setShowFrom} /> */}
 
       {showPage === SHOW_PAGE.loginPage && (
         <LoginFrom setShowPage={setShowPage} />
@@ -221,7 +228,7 @@ const JobDetector = () => {
         <Profile setShowPage={setShowPage} />
       )}
       {showPage === SHOW_PAGE.resumeListPage && (
-        <ResumeList setShowPage={setShowPage} />
+        <ResumeList setShowPage={setShowPage} content={content} />
       )}
       <MenuPopUp setShowPage={setShowPage} />
       {website === SUPPORTED_WEBSITE.linkedin && (
