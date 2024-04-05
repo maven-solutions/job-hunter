@@ -58,7 +58,7 @@ export const selectDataExtract = (
 
   //   const selectInputFields = iframeForm.querySelectorAll("select");
   const selectInputFields = tempDiv.querySelectorAll("select");
-  console.log("selectInputFields::", selectInputFields);
+  // console.log("selectInputFields::", selectInputFields);
   if (!selectInputFields || selectInputFields.length === 0) {
     return;
   }

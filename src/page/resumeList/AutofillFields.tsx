@@ -7,7 +7,7 @@ import {
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 
-const extractInfo = (resumeData) => {
+const extractInfo = (resumeData, applicationForm) => {
   const {
     name,
     emailAddress,
@@ -20,6 +20,19 @@ const extractInfo = (resumeData) => {
     pdfUrl,
     fields,
   } = resumeData;
+
+  const {
+    gender,
+    dob,
+    citizenshipStatus,
+    race,
+    languages,
+    veteranStatus,
+    covidVaccinationStatus,
+    disabilityStatus,
+  } = applicationForm;
+
+  // console.log("applicationForm::", applicationForm);
 
   // Extracting full name, first name, and last name
   const [first_name, last_name] =
@@ -57,6 +70,14 @@ const extractInfo = (resumeData) => {
     education: education.data ?? null,
     employment_history: employment_history.data ?? null,
     professional_summary: summary?.data?.description ?? null,
+    gender,
+    dob,
+    citizenship_status: citizenshipStatus,
+    race,
+    languages,
+    veteran_status: veteranStatus,
+    covid_vaccination_status: covidVaccinationStatus,
+    disability_status: disabilityStatus,
   };
 };
 
@@ -71,7 +92,10 @@ const AutofillFields = (props: any) => {
       const activeTab = tabs[0];
       chrome.tabs.sendMessage(activeTab.id, {
         message: "updateFields",
-        data: extractInfo(resumeList.applicantData[selectedResume].applicant),
+        data: extractInfo(
+          resumeList.applicantData[selectedResume].applicant,
+          resumeList.applicantData[selectedResume].applicationForm
+        ),
       });
     });
   };
@@ -83,7 +107,8 @@ const AutofillFields = (props: any) => {
 
   const autofillByContentScript = () => {
     const applicantData = extractInfo(
-      resumeList.applicantData[selectedResume].applicant
+      resumeList.applicantData[selectedResume].applicant,
+      resumeList.applicantData[selectedResume].applicationForm
     );
     console.log("applicantData---", applicantData);
     detectInputAndFillData(applicantData);
