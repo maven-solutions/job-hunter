@@ -53,6 +53,21 @@ const extractInfo = (resumeData, applicationForm) => {
   const employment_history = fields?.find(
     (sec) => sec.section === "employment-history"
   );
+
+  const isAdult = (dateOfBirth: string): boolean => {
+    const dob: Date = new Date(dateOfBirth);
+    const today: Date = new Date();
+    const age: number = today.getFullYear() - dob.getFullYear();
+    const monthDiff: number = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      return age - 1 >= 18;
+    }
+
+    return age >= 18;
+  };
+
+  const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
   return {
     full_name,
@@ -78,6 +93,7 @@ const extractInfo = (resumeData, applicationForm) => {
     veteran_status: veteranStatus,
     covid_vaccination_status: covidVaccinationStatus,
     disability_status: disabilityStatus,
+    is_over_18: isOver18,
   };
 };
 

@@ -14,4 +14,13 @@ export interface Applicant {
   education?: [] | null | undefined | any;
   employment_history?: [] | null;
   professional_summary?: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  citizenship_status?: string | null;
+  race?: string | null;
+  languages?: string | null;
+  veteran_status?: boolean | null;
+  covid_vaccination_status?: boolean | null;
+  disability_status?: string | null;
+  is_over_18?: boolean | null;
 }
