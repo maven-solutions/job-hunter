@@ -79,4 +79,8 @@ export const fieldNames = {
   started_date: [""],
   month: ["month"],
   year: ["year"],
+  is_over_18: ["age"],
+  gender: ["gender"],
+  disability_status: ["disabilitystatus", "disability"],
+  veteran_status: [" veteranstatus", " veteran"],
 };

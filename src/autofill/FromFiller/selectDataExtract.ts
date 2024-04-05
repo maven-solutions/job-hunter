@@ -52,6 +52,8 @@ export const selectDataExtract = (
   let state = false;
   let degree = false;
   let collage = false;
+  let gender = false;
+  let isOver18 = false;
   // Extract input fields of type "select"
 
   // Replace 'form_id' with the actual ID of the form inside the iframe
@@ -145,6 +147,37 @@ export const selectDataExtract = (
         });
       }
     }
+  });
+
+  selectInputFields.forEach((select) => {
+    const selectid = select.getAttribute("id");
+    const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
+    if (!labelElement) {
+      return;
+    }
+    const labelText = labelElement.textContent.trim();
+    // console.log("got::--", labelText);
+
+    const attributes: any = Array.from(select.attributes);
+    attributes.some((attribute) => {
+      if (
+        checkIfExist(labelText, fieldNames.gender) ||
+        checkIfExist(attribute.value, fieldNames.gender)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+              fromatStirngInLowerCase(applicantData.gender) &&
+            !gender
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
+      }
+    });
   });
 };
 
