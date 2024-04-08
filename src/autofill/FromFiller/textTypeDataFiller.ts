@@ -134,6 +134,32 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         address = true;
         return true; // Stop iterating
       }
+
+      if (
+        checkIfExist(labelText, fieldNames.country) ||
+        checkIfExist(attribute.value, fieldNames.country)
+      ) {
+        input.value = applicantData.country;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
+
+      // for state
+      if (
+        checkIfExist(labelText, fieldNames.state) ||
+        checkIfExist(attribute.value, fieldNames.state)
+      ) {
+        input.value = applicantData.state;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
+
       if (
         (checkIfExist(labelText, fieldNames.linkedin_url) ||
           checkIfExist(attribute.value, fieldNames.linkedin_url)) &&

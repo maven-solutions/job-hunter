@@ -61,28 +61,10 @@ export function delay(ms) {
 export const detectInputAndFillData = async (applicantData: any) => {
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
-  // console.log("iframe:92:", iframeList);
 
-  iframeList.forEach((element) => {
-    const attributes: any = Array.from(element.attributes);
-
-    // Log all attributes
-    attributes.some((attribute) => {
-      if (
-        checkIfExist(attribute.value, ["icims"]) &&
-        applicantData.email_address
-      ) {
-        console.log("element:2:", element);
-
-        iframe = element;
-        return true; // Stop iterating
-      }
-      return false; // Continue iterating
-    });
-  });
-  // iframe = iframeList[3];
+  // for icims  = [0]
+  iframe = iframeList[0];
   if (iframe) {
-    // console.log("iframe:2:", iframe);
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
     // console.log("iframeDocument::", iframeDocument);
