@@ -70,6 +70,7 @@ export const fieldNames = {
   file: ["file"],
   education_button: ["education", "school", "collage", "college", "university"],
   work_experience: ["experience", "work", "employment", "working"],
+  role_description: ["roledescription", "description", "role"],
   job_title: ["jobtitle", "title", "job"],
   company: ["company", "employer"],
   company_location: ["location"],

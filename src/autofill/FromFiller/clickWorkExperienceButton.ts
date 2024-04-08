@@ -322,7 +322,7 @@ const workExperienceDatafiller = async (
 ) => {
   const textInputFields =
     tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
-  console.log("index::", index, "::", data);
+  // console.log("index::", index, "::", data);
 
   for (const [inputIndex, input] of textInputFields.entries()) {
     const attributes: any = Array.from(input.attributes);
@@ -396,5 +396,40 @@ const workExperienceDatafiller = async (
       checkobxFiller();
     }
   }
+
+  ///
+  const textareaFields = tempDiv.querySelectorAll<HTMLInputElement>("textarea");
+  console.log("data::", index, "::", data);
+  // console.log("inputid", localStorage.getItem("ci_inputid"));
+  for (const [inputIndex, input] of textareaFields.entries()) {
+    const attributes: any = Array.from(input.attributes);
+    const inputId = input?.getAttribute("id") ?? "";
+    const labelElement: Element = tempDiv.querySelector(`[for="${inputId}"]`);
+    const labelText = labelElement?.textContent?.trim() ?? "";
+    // console.log("input::", input);
+    for (const attribute of attributes) {
+      if (
+        checkIfExist(labelText, fieldNames.role_description) ||
+        (checkIfExist(attribute.value, fieldNames.role_description) &&
+          input.value === "")
+      ) {
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          setIdToLocalstorage(id);
+          input.focus(); // Autofocus on the input field
+          input.click();
+          input.select();
+          let htmlContent = data.description;
+          input.value = htmlContent;
+          await delay(100);
+          handleValueChanges(input);
+          // await delay(100);
+          break;
+        }
+      }
+    }
+  }
+
   dateFiller(data, index);
 };

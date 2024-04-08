@@ -63,7 +63,9 @@ export const detectInputAndFillData = async (applicantData: any) => {
   let iframe: any = "";
 
   // for icims  = [0]
-  iframe = iframeList[0];
+  if (iframeList.length > 0 && window.location.href.includes("icims")) {
+    iframe = iframeList[0];
+  }
   if (iframe) {
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
@@ -83,7 +85,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     fileTypeDataFiller(tempDiv, applicantData, true);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, true);
   } else {
-    console.log("no-iframe::");
+    // console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
     const tempDiv = document.querySelector("form");
