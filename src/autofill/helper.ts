@@ -1,3 +1,4 @@
+import { checkboxTypeDataFiller } from "./FromFiller/checkboxFiller";
 import { clickEducationButton } from "./FromFiller/clickEducationButton";
 import { clickWorkExperienceButton } from "./FromFiller/clickWorkExperienceButton";
 import { customSelectFiller } from "./FromFiller/customSelectFiller";
@@ -38,7 +39,7 @@ export const checkIfExist = (attribute, valueOfArr): boolean => {
     // attribute = .replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
     attribute = fromatStirngInLowerCase(attribute);
     if (attribute?.includes(element)) {
-      // console.log("att::", attribute, "::--::", "val::", element);
+      console.log("att::", attribute, "::--::", "val::", element);
       res = true;
     }
   });
@@ -95,6 +96,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+
     fileTypeDataFiller(tempDiv, applicantData, true);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, true);
   } else {
@@ -110,6 +113,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);

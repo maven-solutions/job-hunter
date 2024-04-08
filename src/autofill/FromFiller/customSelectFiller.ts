@@ -56,6 +56,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
       return;
     }
     const labelText = labelElement.textContent.trim();
+    console.log("labelText::", labelText);
 
     // for country or nation
     if (!window.location.href.includes("myworkdayjobs")) {
@@ -92,6 +93,41 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
           fromatStirngInLowerCase(applicantData.state)
         ) {
           state = true;
+          element.click();
+          return true;
+        }
+      }
+    }
+
+    // for gender
+    if (checkIfExist(labelText, fieldNames.gender)) {
+      select.click();
+      await delay(200);
+      // console.log("state::gender");
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const [index, element] of selectOptions.entries()) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()) ===
+          fromatStirngInLowerCase(applicantData.gender)
+        ) {
+          element.click();
+          // return true;
+        }
+      }
+      await delay(1000);
+    }
+
+    // for race
+    if (checkIfExist(labelText, fieldNames.race)) {
+      select.click();
+      await delay(200);
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const [index, element] of selectOptions.entries()) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            fromatStirngInLowerCase(applicantData.race)
+          )
+        ) {
           element.click();
           return true;
         }

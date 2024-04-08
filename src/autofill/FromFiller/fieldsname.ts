@@ -83,4 +83,5 @@ export const fieldNames = {
   gender: ["gender"],
   disability_status: ["disabilitystatus", "disability"],
   veteran_status: [" veteranstatus", " veteran"],
+  race: ["race"],
 };
