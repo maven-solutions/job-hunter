@@ -23,7 +23,9 @@ const ResumeList = (props: any) => {
 
   const dispatch = useAppDispatch();
   useEffect(() => {
-    dispatch(getApplicantsData());
+    if (!resumeList.res_success || resumeList.applicantData.length === 0) {
+      dispatch(getApplicantsData());
+    }
   }, []);
 
   const showActionMenu = (index: any) => {
