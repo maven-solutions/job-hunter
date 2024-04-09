@@ -2,6 +2,7 @@ import { Applicant } from "../data";
 import {
   checkIfExist,
   checkNationForWorkDays,
+  fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
 import { fieldNames } from "./fieldsname";
@@ -63,6 +64,15 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.full_name) ||
         checkIfExist(attribute.value, fieldNames.full_name)
       ) {
+        input.value = applicantData.full_name;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
+
+      if (fromatStirngInLowerCase(labelText) === fieldNames.name[0]) {
         input.value = applicantData.full_name;
         input.focus(); // Autofocus on the input field
         input.click();

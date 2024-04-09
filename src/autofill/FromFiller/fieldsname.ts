@@ -1,5 +1,6 @@
 export const fieldNames = {
   full_name: ["fullname"],
+  name: ["name"],
   first_name: [
     "firstname",
     "givenname",
@@ -85,4 +86,11 @@ export const fieldNames = {
   disability_status: ["disabilitystatus", "disability"],
   veteran_status: [" veteranstatus", " veteran"],
   race: ["race"],
+  terms_and_condation: [
+    "agreementCheckbox",
+    "termsandconditions",
+    "terms",
+    "conditions",
+  ],
+  gpa: ["gpa", "result"],
 };

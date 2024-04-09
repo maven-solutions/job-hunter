@@ -49,6 +49,18 @@ export const checkboxTypeDataFiller = (
         handleValueChanges(input);
         return true; // Stop iterating
       }
+      // for terms and condations or agreement
+
+      if (
+        checkIfExist(labelText, fieldNames.terms_and_condation) ||
+        checkIfExist(attribute.value, fieldNames.terms_and_condation)
+      ) {
+        input.focus(); // Autofocus on the input field
+        input.checked = true;
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
+
       return false; // Continue iterating
     });
     // You can do whatever you want with each input field here

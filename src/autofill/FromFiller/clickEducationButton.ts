@@ -76,11 +76,16 @@ const educationDatafiller = async (
 ) => {
   const textInputFields =
     tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
-  // console.log("data::", index, "::", data);
+  console.log("data::", index, "::", data);
   // console.log("inputid", localStorage.getItem("ci_inputid"));
   for (const [inputIndex, input] of textInputFields.entries()) {
     const attributes: any = Array.from(input.attributes);
     // console.log("input::", input);
+    // Log all attributes
+    const inputId = input?.getAttribute("id") ?? "";
+    const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
+    const labelText = labelElement?.textContent?.trim() ?? "";
+
     for (const attribute of attributes) {
       if (
         checkIfExist(attribute.value, fieldNames.collage) &&
@@ -94,6 +99,26 @@ const educationDatafiller = async (
           input.click();
           input.select();
           input.value = data.school;
+          await delay(100);
+          handleValueChanges(input);
+          // await delay(100);
+          break;
+        }
+      }
+
+      //
+      if (
+        checkIfExist(labelText, fieldNames.gpa) ||
+        (checkIfExist(attribute.value, fieldNames.gpa) && input.value === "")
+      ) {
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          setIdToLocalstorage(id);
+          input.focus(); // Autofocus on the input field
+          input.click();
+          input.select();
+          input.value = data.gpa;
           await delay(100);
           handleValueChanges(input);
           // await delay(100);
