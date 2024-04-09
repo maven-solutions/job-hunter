@@ -88,7 +88,7 @@ const educationDatafiller = async (
 
     for (const attribute of attributes) {
       if (
-        (checkIfExist(labelText, fieldNames.gpa) ||
+        (checkIfExist(labelText, fieldNames.collage) ||
           checkIfExist(attribute.value, fieldNames.collage)) &&
         input.value === ""
       ) {
