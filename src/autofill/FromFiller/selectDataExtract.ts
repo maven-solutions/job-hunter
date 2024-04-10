@@ -70,9 +70,6 @@ export const selectDataExtract = (
     // filling country data
     Array.from(input.options).find((option: any) => {
       if (countryHandler(option, applicantData, country)) {
-        // console.log("options--", option);
-        // console.log("text--", option.text);
-        // console.log("value--", option.value);
         option.selected = true;
         handleValueChanges(option);
         country = true;
@@ -87,9 +84,6 @@ export const selectDataExtract = (
           fromatStirngInLowerCase(applicantData.state) &&
         !state
       ) {
-        // console.log("options--", option);
-        // console.log("text--", option.text);
-        // console.log("value--", option.value);
         option.selected = true;
         handleValueChanges(option);
         state = true;
@@ -116,10 +110,6 @@ export const selectDataExtract = (
               fromatStirngInLowerCase(educationField) &&
             !degree
           ) {
-            // console.log("options::--", option);
-            // console.log("text--", option.text);
-            // console.log("value--", option.value);
-            // console.log("educationField::--", educationField);
             option.selected = true;
             handleValueChanges(option);
             degree = true;
@@ -156,7 +146,7 @@ export const selectDataExtract = (
       return;
     }
     const labelText = labelElement.textContent.trim();
-    console.log("got::--", labelText);
+    // console.log("got::--", labelText);
 
     const attributes: any = Array.from(select.attributes);
     attributes.some((attribute) => {
