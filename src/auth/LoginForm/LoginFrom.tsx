@@ -9,6 +9,13 @@ import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import { userSignIn } from "../../store/features/Auth/AuthApi";
 import { SHOW_PAGE } from "../../utils/constant";
+import {
+  EXTENSION_IN_LIVE,
+  EXTENSION_IN_LOCAL,
+  EXTENSION_IN_STAGING,
+  LIVE_WEBSITE_URL,
+  STAGING_WEBSITE_URL,
+} from "../../config/urlconfig";
 
 const LoginFrom = (props: any) => {
   const { setShowPage } = props;
@@ -19,7 +26,15 @@ const LoginFrom = (props: any) => {
   });
 
   const userLogin = () => {
-    window.open("http://localhost:3000", "_blank");
+    if (EXTENSION_IN_LOCAL) {
+      window.open("http://localhost:3000", "_blank");
+    }
+    if (EXTENSION_IN_STAGING) {
+      window.open(STAGING_WEBSITE_URL, "_blank");
+    }
+    if (EXTENSION_IN_LIVE) {
+      window.open(LIVE_WEBSITE_URL, "_blank");
+    }
   };
   return (
     <Layout setShowPage={setShowPage}>

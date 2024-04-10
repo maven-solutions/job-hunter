@@ -29,7 +29,11 @@ const extractInfo = (resumeData, applicationForm) => {
     languages,
     veteranStatus,
     covidVaccinationStatus,
-    disabilityStatus,
+    disabilityStatusForExtension,
+    workAuthorizationStatus,
+    phoneType,
+    degree,
+    fieldOfStudy,
   } = applicationForm;
 
   // console.log("applicationForm::", applicationForm);
@@ -92,8 +96,9 @@ const extractInfo = (resumeData, applicationForm) => {
     languages,
     veteran_status: veteranStatus,
     covid_vaccination_status: covidVaccinationStatus,
-    disability_status: disabilityStatus,
+    disability_status: disabilityStatusForExtension,
     is_over_18: isOver18,
+    us_work_authoriztaion: workAuthorizationStatus,
   };
 };
 

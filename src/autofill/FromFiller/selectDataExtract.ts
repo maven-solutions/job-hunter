@@ -156,7 +156,7 @@ export const selectDataExtract = (
       return;
     }
     const labelText = labelElement.textContent.trim();
-    // console.log("got::--", labelText);
+    console.log("got::--", labelText);
 
     const attributes: any = Array.from(select.attributes);
     attributes.some((attribute) => {
@@ -169,6 +169,32 @@ export const selectDataExtract = (
             fromatStirngInLowerCase(option?.text) ===
               fromatStirngInLowerCase(applicantData.gender) &&
             !gender
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
+      }
+
+      if (
+        checkIfExist(labelText, fieldNames.disability_status) ||
+        checkIfExist(attribute.value, fieldNames.disability_status)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text).includes("yes") &&
+            applicantData.disability_status
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
+
+          if (
+            fromatStirngInLowerCase(option?.text).includes("no") &&
+            !applicantData.disability_status
           ) {
             option.selected = true;
             handleValueChanges(option);
