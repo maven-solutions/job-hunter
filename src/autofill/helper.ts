@@ -2,6 +2,7 @@ import { checkboxTypeDataFiller } from "./FromFiller/checkboxFiller";
 import { clickEducationButton } from "./FromFiller/clickEducationButton";
 import { clickWorkExperienceButton } from "./FromFiller/clickWorkExperienceButton";
 import { customSelectFiller } from "./FromFiller/customSelectFiller";
+import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
 import { emailTypeDataFiller } from "./FromFiller/emailTypeDataFiller";
 import { fileTypeDataFiller } from "./FromFiller/fileTypeDataFiller";
 import { numberTypeDataFiller } from "./FromFiller/numberTypeDataFiller";
@@ -80,8 +81,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-
     fileTypeDataFiller(tempDiv, applicantData, true);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, true);
   } else {
@@ -97,6 +98,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);

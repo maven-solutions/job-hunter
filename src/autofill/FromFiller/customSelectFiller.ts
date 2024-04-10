@@ -39,15 +39,41 @@ const countryHandler = (option, applicantData, country) => {
   }
 };
 
+const fillDeviceType = async (applicantData) => {
+  console.log("phonefiring:;");
+
+  const phoneElement: any = document.querySelector(
+    '[data-automation-id="phone-device-type"]'
+  );
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  phoneElement.click();
+  console.log("phonefired:;");
+
+  await delay(1000);
+  for (const [index, element] of selectOptions.entries()) {
+    console.log("opt:;", element.textContent.trim());
+
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(applicantData.phone_type)
+      )
+    ) {
+      element.click();
+    }
+  }
+};
+
 export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
   let country = false;
   let state = false;
   let degree = false;
   let collage = false;
   const tempDiv = document.querySelector("body");
-  const selectButtonFields: any = tempDiv.querySelectorAll(
+  const selectButtonFields: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
+
+  fillDeviceType(applicantData);
 
   for (const [selectIndex, select] of selectButtonFields.entries()) {
     const selectid = select.getAttribute("id");
@@ -57,6 +83,34 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     }
     const labelText = labelElement.textContent.trim();
     console.log("labelText::", labelText);
+
+    // // for phone type
+    // if (checkIfExist(labelText, fieldNames.phone_type)) {
+    //   console.log("phone::fired");
+    //   select.click();
+    //   await delay(200);
+
+    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
+    //   for (const [index, element] of selectOptions.entries()) {
+    //     if (
+    //       fromatStirngInLowerCase(element.textContent.trim()).includes(
+    //         fromatStirngInLowerCase(applicantData.phone_type)
+    //       )
+    //     ) {
+    //       console.log(
+    //         "opt::",
+    //         fromatStirngInLowerCase(element.textContent.trim())
+    //       );
+    //       console.log(
+    //         "val::",
+    //         fromatStirngInLowerCase(applicantData.phone_type)
+    //       );
+    //       element.click();
+    //       // return true;
+    //     }
+    //   }
+    //   await delay(1000);
+    // }
 
     // for country or nation
     if (!window.location.href.includes("myworkdayjobs")) {
@@ -129,9 +183,13 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
           )
         ) {
           element.click();
-          return true;
+          // return true;
         }
       }
     }
   }
+  // await delay(300);
+  // console.log("phonefiring:;");
+  // // for phone device
+  // fillDeviceType(applicantData);
 };

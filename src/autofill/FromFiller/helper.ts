@@ -9,3 +9,8 @@ export const getYearFromDate = (dateString: string): string => {
   const year = date.getFullYear(); // Get year in YYYY format
   return year.toString();
 };
+export const formatDateInDDMMYY = (inputDate: string): string => {
+  const [year, month, day] = inputDate.split("-");
+
+  return `${day}-${month}-${year}`;
+};
