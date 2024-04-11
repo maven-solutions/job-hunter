@@ -73,7 +73,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     'button[aria-haspopup="listbox"]'
   );
 
-  fillDeviceType(applicantData);
+  // fillDeviceType(applicantData);
 
   for (const [selectIndex, select] of selectButtonFields.entries()) {
     const selectid = select.getAttribute("id");

@@ -34,6 +34,7 @@ const extractInfo = (resumeData, applicationForm) => {
     phoneType,
     degree,
     fieldOfStudy,
+    expectedSalaryRange,
   } = applicationForm;
 
   // console.log("applicationForm::", applicationForm);
@@ -100,6 +101,7 @@ const extractInfo = (resumeData, applicationForm) => {
     is_over_18: isOver18,
     us_work_authoriztaion: workAuthorizationStatus,
     phone_type: phoneType,
+    salary: expectedSalaryRange,
   };
 };
 

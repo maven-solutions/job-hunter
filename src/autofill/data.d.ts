@@ -23,4 +23,8 @@ export interface Applicant {
   covid_vaccination_status?: boolean | null;
   disability_status?: string | null;
   is_over_18?: boolean | null;
+  terms_and_condation?: boolean | null;
+  gpa?: string | number | null;
+  phone_type?: string | number | null;
+  salary?: string | number | null;
 }

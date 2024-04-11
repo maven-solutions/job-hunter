@@ -2,6 +2,7 @@ import { checkboxTypeDataFiller } from "./FromFiller/checkboxFiller";
 import { clickEducationButton } from "./FromFiller/clickEducationButton";
 import { clickWorkExperienceButton } from "./FromFiller/clickWorkExperienceButton";
 import { customSelectFiller } from "./FromFiller/customSelectFiller";
+import { customSelectFiller2 } from "./FromFiller/customSelectFiller2";
 import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
 import { emailTypeDataFiller } from "./FromFiller/emailTypeDataFiller";
 import { fileTypeDataFiller } from "./FromFiller/fileTypeDataFiller";
@@ -102,7 +103,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
-    customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    // customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
     if (window.location.href.includes("smartrecruiters")) {

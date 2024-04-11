@@ -95,4 +95,5 @@ export const fieldNames = {
   gpa: ["gpa", "result"],
   dob: ["dateofbirth", "dob", "birthdate", "birth"],
   phone_type: ["phonetype", "devicetype", "phone", "device"],
+  salary: ["salary"],
 };
