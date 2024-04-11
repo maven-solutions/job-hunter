@@ -29,7 +29,12 @@ export const fileTypeDataFiller = async (
   }
 
   try {
-    if (applicantData.pdf_url && !file) {
+    if (
+      applicantData.pdf_url &&
+      !file &&
+      !textInputField.hasAttribute("ci-aria-file-uploaded")
+    ) {
+      textInputField.setAttribute("ci-aria-file-uploaded", "true");
       // Create file asynchronously
       const designFile = await createFile(applicantData.pdf_url);
       // Set file to input field only for the first file input field found

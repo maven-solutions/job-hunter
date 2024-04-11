@@ -7,6 +7,7 @@ import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
 import { emailTypeDataFiller } from "./FromFiller/emailTypeDataFiller";
 import { fileTypeDataFiller } from "./FromFiller/fileTypeDataFiller";
 import { numberTypeDataFiller } from "./FromFiller/numberTypeDataFiller";
+import { radioTypeDataFiller } from "./FromFiller/radiotypefiller";
 import { selectDataExtract } from "./FromFiller/selectDataExtract";
 import { telTypeDataFiller } from "./FromFiller/telTypeDataFiller";
 import { textTypeDataFiller } from "./FromFiller/textTypeDataFiller";
@@ -99,6 +100,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);

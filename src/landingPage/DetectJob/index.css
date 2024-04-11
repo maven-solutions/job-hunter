@@ -20,7 +20,7 @@
   /* max-width: 240px;
   max-height: 240px; */
   /* background-color: #4339f2 !important; */
-  z-index: 99999;
+  z-index: 999999999 !important;
   cursor: pointer;
   display: flex;
   align-items: center;

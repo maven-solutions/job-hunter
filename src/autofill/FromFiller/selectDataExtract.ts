@@ -60,7 +60,6 @@ export const selectDataExtract = (
 
   //   const selectInputFields = iframeForm.querySelectorAll("select");
   const selectInputFields = tempDiv.querySelectorAll("select");
-  // console.log("selectInputFields::", selectInputFields);
   if (!selectInputFields || selectInputFields.length === 0) {
     return;
   }
@@ -139,17 +138,14 @@ export const selectDataExtract = (
     }
   });
 
-  selectInputFields.forEach((select) => {
+  for (const select of selectInputFields) {
     const selectid = select.getAttribute("id");
     const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
-    if (!labelElement) {
-      return;
-    }
-    const labelText = labelElement.textContent.trim();
-    // console.log("got::--", labelText);
 
+    const labelText = labelElement?.textContent?.trim();
     const attributes: any = Array.from(select.attributes);
     attributes.some((attribute) => {
+      // for gender
       if (
         checkIfExist(labelText, fieldNames.gender) ||
         checkIfExist(attribute.value, fieldNames.gender)
@@ -168,6 +164,24 @@ export const selectDataExtract = (
         });
       }
 
+      // for phone type
+      if (
+        checkIfExist(labelText, fieldNames.phone_type) ||
+        checkIfExist(attribute.value, fieldNames.phone_type)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+            fromatStirngInLowerCase(applicantData.phone_type)
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
+        });
+      }
+
+      // for disability
       if (
         checkIfExist(labelText, fieldNames.disability_status) ||
         checkIfExist(attribute.value, fieldNames.disability_status)
@@ -193,28 +207,25 @@ export const selectDataExtract = (
           }
         });
       }
-    });
-  });
-};
 
-const customSelectFiller = (tempDiv1, applicantData, iframe) => {
-  const tempDiv = document.querySelector("body");
-  const selectButtonFields2: any = tempDiv.querySelector(
-    'button[aria-haspopup="listbox"'
-  );
-  selectButtonFields2.click();
-
-  setTimeout(() => {
-    const buttonOption: any = document.querySelectorAll('[role="option"]');
-    buttonOption.forEach((element) => {
+      // for race
       if (
-        fromatStirngInLowerCase(element.textContent.trim()) ===
-        fromatStirngInLowerCase("Master")
+        checkIfExist(labelText, fieldNames.race) ||
+        checkIfExist(attribute.value, fieldNames.race)
       ) {
-        console.log("Master::");
-        element.click();
-        return true;
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text).includes(
+              fromatStirngInLowerCase(applicantData.race)
+            )
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
       }
     });
-  }, 1000);
+  }
 };
