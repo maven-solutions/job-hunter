@@ -226,6 +226,58 @@ export const selectDataExtract = (
           }
         });
       }
+
+      // for veteran
+      if (
+        checkIfExist(labelText, fieldNames.veteran) ||
+        checkIfExist(attribute.value, fieldNames.veteran)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          //for yes
+          if (
+            fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
+            fromatStirngInLowerCase(option?.text).includes("amveteran") ||
+            fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+
+          //for one or more
+          // if (
+          //   fromatStirngInLowerCase(option?.text).includes(
+          //     "identifyasoneormore"
+          //   )
+          // ) {
+          //   option.selected = true;
+          //   handleValueChanges(option);
+          //   gender = true;
+          //   return true;
+          // }
+          // for no
+          // if (fromatStirngInLowerCase(option?.text).includes("iamnot")) {
+          //   option.selected = true;
+          //   handleValueChanges(option);
+          //   gender = true;
+          //   return true;
+          // }
+
+          //for decline
+          // if (
+          //   fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
+          //   fromatStirngInLowerCase(option?.text).includes("dontwish") ||
+          //   fromatStirngInLowerCase(option?.text).includes("decline") ||
+          //   fromatStirngInLowerCase(option?.text).includes("notwish")
+          // ) {
+          //   option.selected = true;
+          //   handleValueChanges(option);
+          //   gender = true;
+          //   return true;
+          // }
+        });
+      }
     });
   }
 };

@@ -94,7 +94,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     const tempDiv = document.querySelector("form");
     const tempDivForFile = document.querySelector("body");
     localStorage.removeItem("ci_inputid");
-    // localStorage.removeItem("times");
+    localStorage.removeItem("times");
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -105,14 +105,14 @@ export const detectInputAndFillData = async (applicantData: any) => {
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
-    // customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
-    if (window.location.href.includes("smartrecruiters")) {
-      launchWork = false;
-      launcEducation = false;
-    }
+    // if (window.location.href.includes("smartrecruiters")) {
+    //   launchWork = false;
+    //   launcEducation = false;
+    // }
 
     if (launchWork) {
       await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);

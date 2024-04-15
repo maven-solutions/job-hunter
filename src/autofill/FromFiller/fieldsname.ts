@@ -96,4 +96,5 @@ export const fieldNames = {
   dob: ["dateofbirth", "dob", "birthdate", "birth"],
   phone_type: ["phonetype", "devicetype", "phone", "device"],
   salary: ["salary"],
+  veteran: ["veteran"],
 };

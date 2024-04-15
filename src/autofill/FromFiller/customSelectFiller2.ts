@@ -6,6 +6,54 @@ export const customSelectFiller2 = async (tempDiv1, applicantData, iframe) => {
   let gender = false;
   let disability = false;
 
+  // console.log("selctfiring---::");
+
+  // const inputEle: any = document.querySelector("#input-30");
+  // // const inputEle: any = document.querySelector("#input-37");
+  // // console.log("selct::", inputEle);
+  // inputEle.click();
+  // await delay(2000);
+  // inputEle.focus();
+  // inputEle.value = "biology";
+  // await delay(2000);
+  // inputEle.focus();
+  // inputEle.click();
+  // //-----
+  // const event = new KeyboardEvent("keydown", {
+  //   key: "Enter",
+  //   code: "Enter",
+  //   which: 13,
+  //   keyCode: 13,
+  // });
+  // document.getElementById("input-30").dispatchEvent(event);
+  // await delay(3000);
+
+  // const selectOptions: any = document.querySelectorAll('[role="option"]');
+
+  // for (const [index, element] of selectOptions.entries()) {
+  //   // console.log(element);
+  //   if (index == 1) {
+  //     const input = element.querySelector("input");
+  //     console.log(input);
+  //     input.focus();
+  //     input.click();
+  //     input.checked = true;
+  //     return true;
+  //   }
+  //   // if (
+  //   //   fromatStirngInLowerCase(element.textContent.trim()) ===
+  //   //   fromatStirngInLowerCase("biology")
+  //   // ) {
+  //   //   const input = element.querySelector("input");
+  //   //   console.log(input);
+  //   //   input.focus();
+  //   //   input.click();
+  //   //   input.checked = true;
+  //   //   return true;
+  //   // }
+  // }
+  // await delay(1000);
+  // return;
   const tempDiv = document.querySelector("body");
   const selectButtonFields: any =
     document.querySelectorAll('[role="combobox"]');
