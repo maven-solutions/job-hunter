@@ -159,7 +159,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
       // salary
       if (
-        // checkIfExist(labelText, fieldNames.salary) ||
+        checkIfExist(labelText, fieldNames.salary) ||
         checkIfExist(attribute.value, fieldNames.salary)
       ) {
         console.log("sallary", applicantData.salary);

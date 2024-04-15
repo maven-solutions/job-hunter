@@ -234,16 +234,16 @@ export const selectDataExtract = (
       ) {
         Array.from(select.options).find((option: any) => {
           //for yes
-          if (
-            fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-            fromatStirngInLowerCase(option?.text).includes("amveteran") ||
-            fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
-          ) {
-            option.selected = true;
-            handleValueChanges(option);
-            gender = true;
-            return true;
-          }
+          // if (
+          //   fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
+          //   fromatStirngInLowerCase(option?.text).includes("amveteran") ||
+          //   fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+          // ) {
+          //   option.selected = true;
+          //   handleValueChanges(option);
+          //   gender = true;
+          //   return true;
+          // }
 
           //for one or more
           // if (
@@ -257,12 +257,12 @@ export const selectDataExtract = (
           //   return true;
           // }
           // for no
-          // if (fromatStirngInLowerCase(option?.text).includes("iamnot")) {
-          //   option.selected = true;
-          //   handleValueChanges(option);
-          //   gender = true;
-          //   return true;
-          // }
+          if (fromatStirngInLowerCase(option?.text).includes("iamnot")) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
 
           //for decline
           // if (

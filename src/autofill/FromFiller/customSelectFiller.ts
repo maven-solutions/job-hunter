@@ -186,6 +186,66 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
           // return true;
         }
       }
+      await delay(1000);
+    }
+
+    // for veteran
+    if (checkIfExist(labelText, fieldNames.veteran)) {
+      select.click();
+      await delay(200);
+      // console.log("state::gender");
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const [index, element] of selectOptions.entries()) {
+        // for yes
+        // if (
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "amaveteran"
+        //   ) ||
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "amveteran"
+        //   ) ||
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "identifyasaveteran"
+        //   )
+        // ) {
+        //   element.click();
+        // }
+
+        //for one or more
+        // if (
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "identifyasoneormore"
+        //   )
+        // ) {
+        //   element.click();
+        // }
+
+        // for no
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
+        ) {
+          element.click();
+        }
+
+        // for decline
+        // if (
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "selfidentify"
+        //   ) ||
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "dontwish"
+        //   ) ||
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "decline"
+        //   ) ||
+        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
+        //     "notwish"
+        //   )
+        // ) {
+        //   element.click();
+        // }
+      }
+      await delay(1000);
     }
   }
   // await delay(300);
