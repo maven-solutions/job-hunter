@@ -145,85 +145,83 @@ export const selectDataExtract = (
     const attributes: any = Array.from(select.attributes);
     attributes.some((attribute) => {
       // for gender
-      // if (
-      //   checkIfExist(labelText, fieldNames.gender) ||
-      //   checkIfExist(attribute.value, fieldNames.gender)
-      // ) {
-      //   Array.from(select.options).find((option: any) => {
-      //     if (
-      //       fromatStirngInLowerCase(option?.text) ===
-      //         fromatStirngInLowerCase(applicantData.gender) &&
-      //       !gender
-      //     ) {
-      //       option.selected = true;
-      //       handleValueChanges(option);
-      //       gender = true;
-      //       return true;
-      //     }
-      //   });
-      // }
+      if (
+        checkIfExist(labelText, fieldNames.gender) ||
+        checkIfExist(attribute.value, fieldNames.gender)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+              fromatStirngInLowerCase(applicantData.gender) &&
+            !gender
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
+      }
 
       // for phone type
-
-      // for phone type
-      // if (
-      //   checkIfExist(labelText, fieldNames.is_over_18) ||
-      //   checkIfExist(attribute.value, fieldNames.is_over_18)
-      // ) {
-      //   Array.from(select.options).find((option: any) => {
-      //     if (fromatStirngInLowerCase(option?.text) === "yes") {
-      //       option.selected = true;
-      //       handleValueChanges(option);
-      //       return true;
-      //     }
-      //   });
-      // }
+      if (
+        checkIfExist(labelText, fieldNames.is_over_18) ||
+        checkIfExist(attribute.value, fieldNames.is_over_18)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (fromatStirngInLowerCase(option?.text) === "yes") {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
+        });
+      }
 
       // for disability
-      // if (
-      //   checkIfExist(labelText, fieldNames.disability_status) ||
-      //   checkIfExist(attribute.value, fieldNames.disability_status)
-      // ) {
-      //   Array.from(select.options).find((option: any) => {
-      //     if (
-      //       fromatStirngInLowerCase(option?.text).includes("yes") &&
-      //       applicantData.disability_status
-      //     ) {
-      //       option.selected = true;
-      //       handleValueChanges(option);
-      //       return true;
-      //     }
+      if (
+        checkIfExist(labelText, fieldNames.disability_status) ||
+        checkIfExist(attribute.value, fieldNames.disability_status)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text).includes("yes") &&
+            applicantData.disability_status
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
 
-      //     if (
-      //       fromatStirngInLowerCase(option?.text).includes("no") &&
-      //       !applicantData.disability_status
-      //     ) {
-      //       option.selected = true;
-      //       handleValueChanges(option);
-      //       gender = true;
-      //       return true;
-      //     }
-      //   });
-      // }
+          if (
+            fromatStirngInLowerCase(option?.text).includes("no") &&
+            !applicantData.disability_status
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
+      }
 
       // for race
-      // if (
-      //   checkIfExist(labelText, fieldNames.race) ||
-      //   checkIfExist(attribute.value, fieldNames.race)
-      // ) {
-      //   Array.from(select.options).find((option: any) => {
-      //     if (
-      //       fromatStirngInLowerCase(option?.text).includes(
-      //         fromatStirngInLowerCase(applicantData.race)
-      //       )
-      //     ) {
-      //       option.selected = true;
-      //       handleValueChanges(option);
-      //       gender = true;
-      //       return true;
-      //     }
-      //   });
-      // }
+      if (
+        checkIfExist(labelText, fieldNames.race) ||
+        checkIfExist(attribute.value, fieldNames.race)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text).includes(
+              fromatStirngInLowerCase(applicantData.race)
+            )
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            gender = true;
+            return true;
+          }
+        });
+      }
 
       // for veteran
       if (

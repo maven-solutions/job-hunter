@@ -81,6 +81,14 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         return true; // Stop iterating
       }
 
+      if (fromatStirngInLowerCase(labelText) === "name") {
+        input.value = applicantData.full_name;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
       if (
         checkIfExist(labelText, fieldNames.email_address) ||
         checkIfExist(attribute.value, fieldNames.email_address)

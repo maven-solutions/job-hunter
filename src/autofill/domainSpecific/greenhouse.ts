@@ -7,6 +7,9 @@ const checkAdultAge = (applicantData: Applicant) => {
   const select: any = document.querySelector(
     "#job_application_answers_attributes_3_boolean_value"
   );
+  if (!select) {
+    return;
+  }
   Array.from(select.options).find((option: any) => {
     if (
       applicantData.is_over_18 &&
@@ -36,7 +39,9 @@ const usWorkAuthorization = (applicantData: Applicant) => {
   const select: any = document.querySelector(
     "#job_application_answers_attributes_4_boolean_value"
   );
-
+  if (!select) {
+    return;
+  }
   Array.from(select.options).find((option: any) => {
     if (
       applicantData.us_work_authoriztaion &&
