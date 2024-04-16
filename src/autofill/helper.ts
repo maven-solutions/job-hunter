@@ -12,6 +12,7 @@ import { selectDataExtract } from "./FromFiller/selectDataExtract";
 import { telTypeDataFiller } from "./FromFiller/telTypeDataFiller";
 import { textTypeDataFiller } from "./FromFiller/textTypeDataFiller";
 import { urlTypeDataFiller } from "./FromFiller/urlTypeDataFiller";
+import { greenHouse } from "./domainSpecific/greenhouse";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -42,7 +43,7 @@ export const checkIfExist = (attribute, valueOfArr): boolean => {
     // attribute = .replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
     attribute = fromatStirngInLowerCase(attribute);
     if (attribute?.includes(element)) {
-      // console.log("att::", attribute, "::--::", "val::", element);
+      console.log("att::", attribute, "::--::", "val::", element);
       res = true;
     }
   });
@@ -95,18 +96,18 @@ export const detectInputAndFillData = async (applicantData: any) => {
     const tempDivForFile = document.querySelector("body");
     localStorage.removeItem("ci_inputid");
     localStorage.removeItem("times");
-    textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fileTypeDataFiller(tempDivForFile, applicantData, false);
+    // textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
-    customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
-    customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
+    // customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    // customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
     // if (window.location.href.includes("smartrecruiters")) {
@@ -120,6 +121,9 @@ export const detectInputAndFillData = async (applicantData: any) => {
     if (launcEducation) {
       await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    // for domain specific
+    greenHouse(tempDiv ?? tempDivForFile, applicantData);
   }
 };
 
