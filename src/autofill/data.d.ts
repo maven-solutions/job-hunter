@@ -20,7 +20,7 @@ export interface Applicant {
 
   last_name?: string;
   linkedin_url?: string;
-  languages?: string | null;
+  language?: string | null;
   pdf_url?: string;
   phone_number?: string;
   professional_summary?: string | null;

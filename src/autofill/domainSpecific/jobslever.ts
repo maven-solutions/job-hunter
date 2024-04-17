@@ -1,5 +1,9 @@
 import { Applicant } from "../data";
-import { handleValueChanges } from "../helper";
+import {
+  checkIfExist,
+  fromatStirngInLowerCase,
+  handleValueChanges,
+} from "../helper";
 
 const fillName = (applicantData: Applicant) => {
   const nameEle: any = document.querySelector(
@@ -37,7 +41,27 @@ const fillDate = (applicantData: Applicant) => {
   nameEle.value = formattedDate;
   handleValueChanges(nameEle);
 };
+
+const fillRace = (applicantData: Applicant) => {
+  const textInputFields = document.querySelectorAll('input[type="radio"]');
+
+  textInputFields.forEach((input) => {
+    const labelElement = input.nextElementSibling;
+    const labelText = labelElement?.textContent?.trim() ?? "";
+
+    if (
+      fromatStirngInLowerCase(labelText).includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      input.parentElement.click();
+      handleValueChanges(input);
+      return;
+    }
+  });
+};
 export const jobsLever = (tempDiv: any, applicantData: Applicant) => {
   fillName(applicantData);
   fillDate(applicantData);
+  fillRace(applicantData);
 };

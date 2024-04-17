@@ -170,7 +170,6 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.salary) ||
         checkIfExist(attribute.value, fieldNames.salary)
       ) {
-        console.log("sallary", applicantData.salary);
         input.value = applicantData.salary;
         input.focus(); // Autofocus on the input field
         input.click();

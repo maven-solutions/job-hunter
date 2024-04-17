@@ -6,6 +6,7 @@ import { customSelectFiller } from "./FromFiller/customSelectFiller";
 import { customSelectFiller2 } from "./FromFiller/customSelectFiller2";
 import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
 import { emailTypeDataFiller } from "./FromFiller/emailTypeDataFiller";
+import { fancyRadiotypeFiller } from "./FromFiller/fancyRadiotypeFiller";
 import { fileTypeDataFiller } from "./FromFiller/fileTypeDataFiller";
 import { numberTypeDataFiller } from "./FromFiller/numberTypeDataFiller";
 import { radioTypeDataFiller } from "./FromFiller/radiotypefiller";
@@ -13,6 +14,7 @@ import { selectDataExtract } from "./FromFiller/selectDataExtract";
 import { telTypeDataFiller } from "./FromFiller/telTypeDataFiller";
 import { textTypeDataFiller } from "./FromFiller/textTypeDataFiller";
 import { urlTypeDataFiller } from "./FromFiller/urlTypeDataFiller";
+import { brassing } from "./domainSpecific/brassing";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
 
@@ -105,6 +107,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
@@ -132,6 +135,10 @@ export const detectInputAndFillData = async (applicantData: any) => {
     // for domain specific
     if (window.location.href.includes(".lever.")) {
       jobsLever(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".brassring.")) {
+      brassing(tempDiv ?? tempDivForFile, applicantData);
     }
   }
 };

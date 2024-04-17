@@ -51,6 +51,7 @@ export const fieldNames = {
   is_over_18: ["age"],
   job_title: ["jobtitle", "title", "job"],
   last_name: ["lastname", "familyname", "lname"],
+  language: ["language"],
   middle_name: ["middlename", "mname"],
   month: ["month"],
   name: ["name"],
@@ -85,7 +86,7 @@ export const fieldNames = {
     "telephone",
   ],
   phone_type: ["phonetype", "devicetype", "phone", "device"],
-  race: ["race"],
+  race: ["race", "ethnicity"],
   role_description: ["roledescription", "description", "role"],
 
   salary: ["salary"],

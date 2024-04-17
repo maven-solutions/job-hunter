@@ -6,10 +6,11 @@ import {
 } from "../helper";
 import { fieldNames } from "./fieldsname";
 
-export const radioTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
-  // Extract input fields of type "text"
-  // console.log("email::::");
-
+export const fancyRadiotypeFiller = (
+  tempDiv: any,
+  applicantData: Applicant
+) => {
+  // for lever
   const textInputFields = tempDiv.querySelectorAll('input[type="radio"]');
   // console.log("textInputFields::::", textInputFields);
 

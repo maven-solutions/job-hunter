@@ -40,27 +40,33 @@ const countryHandler = (option, applicantData, country) => {
 };
 
 const fillDeviceType = async (applicantData) => {
-  console.log("phonefiring:;");
-
+  let phonetype = false;
   const phoneElement: any = document.querySelector(
     '[data-automation-id="phone-device-type"]'
   );
-  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  if (!phoneElement) {
+    return;
+  }
   phoneElement.click();
-  console.log("phonefired:;");
-
   await delay(1000);
-  for (const [index, element] of selectOptions.entries()) {
-    console.log("opt:;", element.textContent.trim());
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  if (phonetype) {
+    return;
+  }
 
+  for (const [index, element] of selectOptions.entries()) {
     if (
       fromatStirngInLowerCase(element.textContent.trim()).includes(
         fromatStirngInLowerCase(applicantData.phone_type)
-      )
+      ) &&
+      !phonetype
     ) {
+      phonetype = true;
       element.click();
+      return;
     }
   }
+  await delay(1000);
 };
 
 export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
@@ -68,55 +74,32 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
   let state = false;
   let degree = false;
   let collage = false;
+  let phonetype = false;
   const tempDiv = document.querySelector("body");
   const selectButtonFields: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
-
-  // fillDeviceType(applicantData);
+  if (window.location.href.includes(".myworkdayjobs.")) {
+    fillDeviceType(applicantData);
+    await delay(1000);
+  }
 
   for (const [selectIndex, select] of selectButtonFields.entries()) {
+    // console.log("select::", select);
+
     const selectid = select.getAttribute("id");
-    const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
-    if (!labelElement) {
-      return;
-    }
-    const labelText = labelElement.textContent.trim();
+
+    const labelElement = document?.querySelector(`[for="${selectid}"]`);
+    // console.log("labelElement::", labelElement);
+
+    const labelText = labelElement?.textContent?.trim() ?? "";
     console.log("labelText::", labelText);
-
-    // // for phone type
-    // if (checkIfExist(labelText, fieldNames.phone_type)) {
-    //   console.log("phone::fired");
-    //   select.click();
-    //   await delay(200);
-
-    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
-    //   for (const [index, element] of selectOptions.entries()) {
-    //     if (
-    //       fromatStirngInLowerCase(element.textContent.trim()).includes(
-    //         fromatStirngInLowerCase(applicantData.phone_type)
-    //       )
-    //     ) {
-    //       console.log(
-    //         "opt::",
-    //         fromatStirngInLowerCase(element.textContent.trim())
-    //       );
-    //       console.log(
-    //         "val::",
-    //         fromatStirngInLowerCase(applicantData.phone_type)
-    //       );
-    //       element.click();
-    //       // return true;
-    //     }
-    //   }
-    //   await delay(1000);
-    // }
 
     // for country or nation
     if (!window.location.href.includes("myworkdayjobs")) {
       if (checkIfExist(labelText, fieldNames.country) && !country) {
         select.click();
-        await delay(300);
+        await delay(500);
         const selectOptions: any = document.querySelectorAll('[role="option"]');
         for (const [index, element] of selectOptions.entries()) {
           if (
@@ -128,7 +111,6 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
             element.click();
             await delay(300);
             // console.log("country::fired2");
-            return true;
           }
         }
         //   await delay(5000);
@@ -138,7 +120,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     // for state
     if (checkIfExist(labelText, fieldNames.state) && !state) {
       select.click();
-      await delay(200);
+      await delay(500);
       console.log("state::fired");
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
@@ -151,12 +133,34 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
           return true;
         }
       }
+      await delay(1000);
     }
+
+    // // for phone type
+    // if (checkIfExist(labelText, fieldNames.phone_type) && !phonetype) {
+    //   console.log("phone::fired");
+    //   select.click();
+    //   await delay(1000);
+    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
+    //   for (const [index, element] of selectOptions.entries()) {
+    //     if (
+    //       fromatStirngInLowerCase(element.textContent.trim()).includes(
+    //         "mobile"
+    //         // fromatStirngInLowerCase(applicantData.phone_type)
+    //       )
+    //     ) {
+    //       phonetype = true;
+    //       element.click();
+    //       // return true;
+    //     }
+    //   }
+    //   await delay(1000);
+    // }
 
     // for gender
     if (checkIfExist(labelText, fieldNames.gender)) {
       select.click();
-      await delay(200);
+      await delay(500);
       // console.log("state::gender");
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
@@ -171,10 +175,28 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
       await delay(1000);
     }
 
+    // for language
+    if (checkIfExist(labelText, fieldNames.language)) {
+      select.click();
+      await delay(500);
+      // console.log("state::language");
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const [index, element] of selectOptions.entries()) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()) ===
+          fromatStirngInLowerCase(applicantData.language)
+        ) {
+          element.click();
+          // return true;
+        }
+      }
+      await delay(1000);
+    }
+
     // for race
     if (checkIfExist(labelText, fieldNames.race)) {
       select.click();
-      await delay(200);
+      await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
         if (
@@ -192,7 +214,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     // for veteran
     if (checkIfExist(labelText, fieldNames.veteran)) {
       select.click();
-      await delay(200);
+      await delay(500);
       // console.log("state::gender");
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {

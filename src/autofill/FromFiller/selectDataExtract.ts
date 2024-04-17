@@ -232,7 +232,17 @@ export const selectDataExtract = (
           //for yes
           // if (
           //   fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-          //   fromatStirngInLowerCase(option?.text).includes("amveteran") ||
+          //   fromatStirngInLowerCase(option?.text).includes("amveteran")
+
+          // ) {
+          //   option.selected = true;
+          //   handleValueChanges(option);
+          //   gender = true;
+          //   return true;
+          // }
+
+          //for yes
+          // if (
           //   fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
           // ) {
           //   option.selected = true;
