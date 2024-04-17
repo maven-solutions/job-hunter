@@ -94,11 +94,11 @@ const JobFrom = (props: any) => {
       }
 
       setTimeout(() => {
-        let jobDetailsElement = document?.getElementById("job-details");
+        let jobDetailsElement: any = document?.querySelector(
+          ".jobs-description__container"
+        );
 
-        const about = jobDetailsElement?.querySelector("span");
-
-        setJobDescription(about?.innerHTML);
+        setJobDescription(jobDetailsElement?.innerHTML);
       }, 500);
 
       // find posted date
@@ -135,11 +135,12 @@ const JobFrom = (props: any) => {
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
         const domElement = document?.querySelector(
-          ".jobs-unified-top-card.t-14"
+          ".job-details-jobs-unified-top-card__primary-description-without-tagline"
         );
 
         const aTag = domElement?.querySelector("a.app-aware-link");
         const companyName = aTag?.textContent;
+
         setCompanyName(companyName?.trim());
       }, 500);
     } catch (error) {
