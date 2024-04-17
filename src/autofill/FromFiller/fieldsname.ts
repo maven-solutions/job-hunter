@@ -91,7 +91,7 @@ export const fieldNames = {
 
   salary: ["salary"],
   started_date: [""],
-  state: ["state"],
+  state: ["state", "province", "territory"],
   salary_expectations: ["salary_expectation", "salary_expectations"],
 
   terms_and_condation: [

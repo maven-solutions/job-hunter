@@ -53,6 +53,7 @@ export const selectDataExtract = (
   let degree = false;
   let collage = false;
   let gender = false;
+  let veteran = false;
   // Extract input fields of type "select"
 
   // Replace 'form_id' with the actual ID of the form inside the iframe
@@ -230,58 +231,90 @@ export const selectDataExtract = (
       ) {
         Array.from(select.options).find((option: any) => {
           //for yes
-          // if (
-          //   fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-          //   fromatStirngInLowerCase(option?.text).includes("amveteran")
-
-          // ) {
-          //   option.selected = true;
-          //   handleValueChanges(option);
-          //   gender = true;
-          //   return true;
-          // }
-
-          //for yes
-          // if (
-          //   fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
-          // ) {
-          //   option.selected = true;
-          //   handleValueChanges(option);
-          //   gender = true;
-          //   return true;
-          // }
-
-          //for one or more
-          // if (
-          //   fromatStirngInLowerCase(option?.text).includes(
-          //     "identifyasoneormore"
-          //   )
-          // ) {
-          //   option.selected = true;
-          //   handleValueChanges(option);
-          //   gender = true;
-          //   return true;
-          // }
-          // for no
-          if (fromatStirngInLowerCase(option?.text).includes("iamnot")) {
+          if (
+            applicantData.veteran_status === 1 &&
+            !veteran &&
+            (fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
+              fromatStirngInLowerCase(option?.text).includes("amveteran"))
+          ) {
             option.selected = true;
             handleValueChanges(option);
-            gender = true;
-            return true;
+            veteran = true;
+          }
+
+          if (
+            applicantData.veteran_status === 2 &&
+            !veteran &&
+            fromatStirngInLowerCase(option?.text).includes("iamnot")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
+          }
+
+          // for yes
+          if (
+            applicantData.veteran_status === 3 &&
+            !veteran &&
+            fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
+          }
+
+          // for yes
+          if (
+            applicantData.veteran_status === 3 &&
+            !veteran &&
+            fromatStirngInLowerCase(option?.text).includes(
+              "identifyasoneormore"
+            )
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
+          }
+
+          //for one or more
+          if (
+            applicantData.veteran_status === 4 &&
+            !veteran &&
+            fromatStirngInLowerCase(option?.text).includes(
+              "identifyasoneormore"
+            )
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
+          }
+          // for yes
+
+          if (
+            applicantData.veteran_status === 1 &&
+            !veteran &&
+            fromatStirngInLowerCase(option?.text).includes(
+              "identifyasoneormore"
+            )
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
           }
 
           //for decline
-          // if (
-          //   fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
-          //   fromatStirngInLowerCase(option?.text).includes("dontwish") ||
-          //   fromatStirngInLowerCase(option?.text).includes("decline") ||
-          //   fromatStirngInLowerCase(option?.text).includes("notwish")
-          // ) {
-          //   option.selected = true;
-          //   handleValueChanges(option);
-          //   gender = true;
-          //   return true;
-          // }
+          if (
+            applicantData.veteran_status === 5 &&
+            !veteran &&
+            (fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
+              fromatStirngInLowerCase(option?.text).includes("dontwish") ||
+              fromatStirngInLowerCase(option?.text).includes("decline") ||
+              fromatStirngInLowerCase(option?.text).includes("notwish"))
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            veteran = true;
+          }
         });
       }
     });

@@ -32,6 +32,6 @@ export interface Applicant {
 
   terms_and_condation?: boolean | null;
   us_work_authoriztaion?: boolean | null;
-  veteran_status?: boolean | null;
+  veteran_status?: number | null;
   zip_code?: number | null;
 }

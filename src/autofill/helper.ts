@@ -14,7 +14,7 @@ import { selectDataExtract } from "./FromFiller/selectDataExtract";
 import { telTypeDataFiller } from "./FromFiller/telTypeDataFiller";
 import { textTypeDataFiller } from "./FromFiller/textTypeDataFiller";
 import { urlTypeDataFiller } from "./FromFiller/urlTypeDataFiller";
-import { brassing } from "./domainSpecific/brassing";
+import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
 
@@ -77,7 +77,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
   if (iframe) {
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
-    // console.log("iframeDocument::", iframeDocument);
+    console.log("iframeDocument::");
 
     const tempDiv = iframeDocument.querySelector("form");
     // console.log("tempDiv::", tempDiv);
@@ -93,7 +93,7 @@ export const detectInputAndFillData = async (applicantData: any) => {
     fileTypeDataFiller(tempDiv, applicantData, true);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, true);
   } else {
-    // console.log("no-iframe::");
+    console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
     const tempDiv = document.querySelector("form");
@@ -137,8 +137,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
       jobsLever(tempDiv ?? tempDivForFile, applicantData);
     }
 
-    if (window.location.href.includes(".brassring.")) {
-      brassing(tempDiv ?? tempDivForFile, applicantData);
+    if (window.location.href.includes(".eightfold.")) {
+      eightFold(tempDiv ?? tempDivForFile, applicantData);
     }
   }
 };
