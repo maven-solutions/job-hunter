@@ -34,6 +34,7 @@ const extractInfo = (resumeData, applicationForm) => {
     phoneType,
     degree,
     fieldOfStudy,
+    education,
     expectedSalaryRange,
   } = applicationForm;
 
@@ -53,7 +54,7 @@ const extractInfo = (resumeData, applicationForm) => {
 
   // Extracting address
   const address = `${city?.label}, ${state?.label}`;
-  const education = fields?.find((sec) => sec.section === "education");
+  // const education = fields?.find((sec) => sec.section === "education");
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
     (sec) => sec.section === "employment-history"
@@ -87,7 +88,7 @@ const extractInfo = (resumeData, applicationForm) => {
     linkedin_url,
     zip_code: zipCode,
     pdf_url: pdfUrl,
-    education: education.data ?? null,
+    education: education,
     employment_history: employment_history.data ?? null,
     professional_summary: summary?.data?.description ?? null,
     gender,

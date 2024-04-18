@@ -92,50 +92,50 @@ export const selectDataExtract = (
 
     // filling  degree data
     // Ensure applicantData is defined
-    if (
-      applicantData &&
-      applicantData.education &&
-      applicantData.education.length > 0
-    ) {
-      // Ensure education array has at least one item
-      const maxEducation = applicantData.education[0];
-      const school = applicantData.education[0]?.school;
-      if (maxEducation) {
-        const educationField = maxEducation.field;
-        Array.from(input.options).find((option: any) => {
-          if (
-            option &&
-            fromatStirngInLowerCase(option.text) ===
-              fromatStirngInLowerCase(educationField) &&
-            !degree
-          ) {
-            option.selected = true;
-            handleValueChanges(option);
-            degree = true;
-            return true;
-          }
-        });
-      }
+    // if (
+    //   applicantData &&
+    //   applicantData.education &&
+    //   applicantData.education.length > 0
+    // ) {
+    //   // Ensure education array has at least one item
+    //   const maxEducation = applicantData.education[0];
+    //   const school = applicantData.education[0]?.school;
+    //   if (maxEducation) {
+    //     const educationField = maxEducation.field;
+    //     Array.from(input.options).find((option: any) => {
+    //       if (
+    //         option &&
+    //         fromatStirngInLowerCase(option.text) ===
+    //           fromatStirngInLowerCase(educationField) &&
+    //         !degree
+    //       ) {
+    //         option.selected = true;
+    //         handleValueChanges(option);
+    //         degree = true;
+    //         return true;
+    //       }
+    //     });
+    //   }
 
-      if (school) {
-        Array.from(input.options).find((option: any) => {
-          if (
-            option &&
-            fromatStirngInLowerCase(option.text) ===
-              fromatStirngInLowerCase(school) &&
-            !collage
-          ) {
-            // console.log("options--", option);
-            // console.log("text--", option.text);
-            // console.log("value--", option.value);
-            option.selected = true;
-            handleValueChanges(option);
-            collage = true;
-            return true;
-          }
-        });
-      }
-    }
+    //   if (school) {
+    //     Array.from(input.options).find((option: any) => {
+    //       if (
+    //         option &&
+    //         fromatStirngInLowerCase(option.text) ===
+    //           fromatStirngInLowerCase(school) &&
+    //         !collage
+    //       ) {
+    //         // console.log("options--", option);
+    //         // console.log("text--", option.text);
+    //         // console.log("value--", option.value);
+    //         option.selected = true;
+    //         handleValueChanges(option);
+    //         collage = true;
+    //         return true;
+    //       }
+    //     });
+    //   }
+    // }
   });
 
   for (const select of selectInputFields) {

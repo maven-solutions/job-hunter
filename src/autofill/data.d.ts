@@ -1,3 +1,13 @@
+export interface Education {
+  id: string;
+  school: string;
+  major?: string;
+  degree?: string;
+  gpa?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface Applicant {
   address?: string;
   city?: string;
@@ -10,7 +20,7 @@ export interface Applicant {
 
   email_address?: string;
   employment_history?: [] | null;
-  education?: [] | null | undefined | any;
+  education?: Education[];
 
   first_name?: string;
   full_name?: string;
