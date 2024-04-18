@@ -288,7 +288,7 @@ export const selectDataExtract = (
             handleValueChanges(option);
             veteran = true;
           }
-          // for yes
+          // for yes---
 
           if (
             applicantData.veteran_status === 1 &&

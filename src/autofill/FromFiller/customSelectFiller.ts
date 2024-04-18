@@ -63,7 +63,6 @@ const fillDeviceType = async (applicantData) => {
     ) {
       phonetype = true;
       element.click();
-      return;
     }
   }
   await delay(1000);
@@ -75,6 +74,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
   let degree = false;
   let collage = false;
   let phonetype = false;
+  let veteran = false;
   const tempDiv = document.querySelector("body");
   const selectButtonFields: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
@@ -135,27 +135,6 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
       }
       await delay(1000);
     }
-
-    // // for phone type
-    // if (checkIfExist(labelText, fieldNames.phone_type) && !phonetype) {
-    //   console.log("phone::fired");
-    //   select.click();
-    //   await delay(1000);
-    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
-    //   for (const [index, element] of selectOptions.entries()) {
-    //     if (
-    //       fromatStirngInLowerCase(element.textContent.trim()).includes(
-    //         "mobile"
-    //         // fromatStirngInLowerCase(applicantData.phone_type)
-    //       )
-    //     ) {
-    //       phonetype = true;
-    //       element.click();
-    //       // return true;
-    //     }
-    //   }
-    //   await delay(1000);
-    // }
 
     // for gender
     if (checkIfExist(labelText, fieldNames.gender)) {
@@ -219,53 +198,98 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
         // for yes
-        // if (
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "amaveteran"
-        //   ) ||
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "amveteran"
-        //   ) ||
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "identifyasaveteran"
-        //   )
-        // ) {
-        //   element.click();
-        // }
-
-        //for one or more
-        // if (
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "identifyasoneormore"
-        //   )
-        // ) {
-        //   element.click();
-        // }
+        if (
+          applicantData.veteran_status === 1 &&
+          !veteran &&
+          (fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "amaveteran"
+          ) ||
+            fromatStirngInLowerCase(element.textContent.trim()).includes(
+              "amveteran"
+            ))
+        ) {
+          veteran = true;
+          element.click();
+        }
 
         // for no
         if (
+          applicantData.veteran_status === 2 &&
+          !veteran &&
           fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
         ) {
+          veteran = true;
+          element.click();
+        }
+
+        if (
+          applicantData.veteran_status === 3 &&
+          !veteran &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "identifyasaveteran"
+          )
+        ) {
+          veteran = true;
+
+          element.click();
+        }
+
+        //for one or more
+        if (
+          applicantData.veteran_status === 3 &&
+          !veteran &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "identifyasoneormore"
+          )
+        ) {
+          veteran = true;
+          element.click();
+        }
+
+        //for one or more
+        if (
+          applicantData.veteran_status === 4 &&
+          !veteran &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "identifyasoneormore"
+          )
+        ) {
+          veteran = true;
+          element.click();
+        }
+
+        //   for one or more
+        if (
+          applicantData.veteran_status === 1 &&
+          !veteran &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "identifyasoneormore"
+          )
+        ) {
+          veteran = true;
           element.click();
         }
 
         // for decline
-        // if (
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "selfidentify"
-        //   ) ||
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "dontwish"
-        //   ) ||
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "decline"
-        //   ) ||
-        //   fromatStirngInLowerCase(element.textContent.trim()).includes(
-        //     "notwish"
-        //   )
-        // ) {
-        //   element.click();
-        // }
+        if (
+          applicantData.veteran_status === 5 &&
+          !veteran &&
+          (fromatStirngInLowerCase(element.textContent.trim()).includes(
+            "selfidentify"
+          ) ||
+            fromatStirngInLowerCase(element.textContent.trim()).includes(
+              "dontwish"
+            ) ||
+            fromatStirngInLowerCase(element.textContent.trim()).includes(
+              "decline"
+            ) ||
+            fromatStirngInLowerCase(element.textContent.trim()).includes(
+              "notwish"
+            ))
+        ) {
+          veteran = true;
+          element.click();
+        }
       }
       await delay(1000);
     }
