@@ -14,14 +14,7 @@
     "default_title": "Job Hunter",
     "default_icon": "icon.png"
   },
-  "permissions": [
-    "storage",
-    "identity",
-    "tabs",
-    "activeTab",
-    "scripting",
-    "alarms"
-  ],
+  "permissions": ["storage", "tabs", "activeTab"],
   "homepage_url": "https://resumebuilder.joinswiftly.com",
   "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
 

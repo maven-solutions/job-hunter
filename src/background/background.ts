@@ -71,7 +71,7 @@ chrome.runtime.onMessageExternal.addListener(function (
 ) {
   // if (sender.url === blocklistedWebsite) return; // don't allow this web page access
   // if (request.openUrlInEditor) openUrl(request.openUrlInEditor);
-  console.log("reciver---::", request);
+  // console.log("reciver---::", request);
 
   // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
   //   chrome.tabs.sendMessage(
@@ -102,7 +102,7 @@ chrome.runtime.onMessageExternal.addListener(function (
     });
   }
   if (request?.logOutRequestFromCareerAi) {
-    console.log("logout fired:::");
+    // console.log("logout fired:::");
     chrome.storage.local.set({
       ci_token: null,
     });
