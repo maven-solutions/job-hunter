@@ -4,6 +4,7 @@ const initialState: any = {
   loading: false,
   res_success: false,
   stage_data_success: false,
+  stage_data_loading: false,
   title: "",
   location: "",
   jobtype: "",
@@ -74,6 +75,7 @@ const JobDetails = createSlice({
     // getStages
     builder.addCase(getApplicationStageData.pending, (state) => {
       state.stage_data_success = false;
+      state.stage_data_loading = true;
     });
     builder.addCase(
       getApplicationStageData.fulfilled,
@@ -83,10 +85,13 @@ const JobDetails = createSlice({
           return { value: data.id, label: data.name };
         });
         state.stage_data = filteredArray;
+        state.selectedStage = filteredArray?.length > 0 ? filteredArray[0] : "";
+        state.stage_data_loading = false;
       }
     );
     builder.addCase(getApplicationStageData.rejected, (state) => {
       state.stage_data_success = true;
+      state.stage_data_loading = false;
     });
 
     // ADD JOBS

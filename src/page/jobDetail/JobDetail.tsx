@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BtnBold,
   BtnItalic,
@@ -13,8 +13,13 @@ import WhiteCard from "../../component/card/WhiteCard";
 import InputBox from "../../component/InputBox";
 import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
-import { RootStore, useAppSelector } from "../../store/store";
+import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import { SHOW_PAGE } from "../../utils/constant";
+import {
+  getApplicationStageData,
+  saveJobCareerAI,
+} from "../../store/features/JobDetail/JobApi";
+import Notification from "../../contentScript/Notification";
 
 const JobDetail = (props: any) => {
   const {
@@ -28,12 +33,73 @@ const JobDetail = (props: any) => {
 
     setDescValue,
   } = props;
+
+  const [saveLoading, setSaveLoading] = useState<Boolean>(false);
+  const [savedNotification, setSavedNotification] = useState(false);
+  const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
+
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
+
+  const jobSlice: any = useAppSelector((store: RootStore) => {
+    return store.JobDetailSlice;
+  });
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (!jobSlice.stage_data_success) {
+      dispatch(getApplicationStageData());
+    }
+  }, []);
+
+  const savejobs = () => {
+    setSaveLoading(true);
+
+    const data: any = {
+      individualApplicationStageId: jobSlice.selectedStage.value,
+      jobTitle: jobSlice.title,
+      companyName: jobSlice.company,
+      jobType: jobSlice.jobtype,
+      companyLogo: jobSlice.companyLogo,
+      jobDescription: jobSlice.description,
+      jobOverview: jobSlice.addationlIfo,
+      jobLink: jobSlice.postUrl,
+      jobPortal: jobSlice.source,
+      location: jobSlice.location,
+    };
+    try {
+      dispatch(
+        saveJobCareerAI({
+          data,
+          onSuccess: () => {
+            setSavedNotification(true);
+            SetAlreadySavedInfo(false);
+            setSaveLoading(false);
+          },
+          onFail: () => {
+            setSavedNotification(false);
+            SetAlreadySavedInfo(true);
+            setSaveLoading(false);
+          },
+        })
+      );
+    } catch (error) {
+      setSaveLoading(false);
+      console.log("catched err", error);
+    }
+  };
+
   return (
     <Layout setShowPage={setShowPage}>
       <h3 className="ci_job_detail_title">Job Listing Details</h3>
+      <Notification
+        savedNotification={savedNotification}
+        setSavedNotification={setSavedNotification}
+        SetAlreadySavedInfo={SetAlreadySavedInfo}
+        alreadySavedInfo={alreadySavedInfo}
+      />
       <WhiteCard>
         <Height height="-15" />
 
@@ -90,7 +156,13 @@ const JobDetail = (props: any) => {
           onclick={() => setShowPage(SHOW_PAGE.summaryPage)}
         />
         <div style={{ margin: "0 5px" }} />
-        <PrimaryButton buttonWidth="140" loading={false} text="Save Job" />{" "}
+        <PrimaryButton
+          buttonWidth="140"
+          loading={saveLoading}
+          text="Save Job"
+          loadingText="Saving..."
+          onclick={savejobs}
+        />
       </div>
     </Layout>
   );

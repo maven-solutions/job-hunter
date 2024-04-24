@@ -23,15 +23,19 @@ export const getApplicationStageData = createAsyncThunk(
 
 export const saveJobCareerAI = createAsyncThunk(
   "saveJobCareerAI",
-  async (data: { data: any }, { dispatch, rejectWithValue }) => {
+  async (post_data: any, { dispatch, rejectWithValue }) => {
+    const { data, onSuccess } = post_data;
     try {
       const res = await axiosInstance.post(
         `${BASE_URL}/applicants/job-board/jobs`,
         data
       );
+      console.log("success", res);
       //   successToastMessage("Sign in successful.");
+      onSuccess && onSuccess();
       return res.data;
     } catch (error: any) {
+      console.log("error", error);
       //   errorToastMessage(error.response?.data?.message);
       if (!error.response) {
         throw error;

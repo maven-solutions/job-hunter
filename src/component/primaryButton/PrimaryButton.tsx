@@ -18,6 +18,8 @@ export const LogoutButton = (props: any) => {
 
 const PrimaryButton = (props: any) => {
   const { loading, onclick, text, loadingText, outline, buttonWidth } = props;
+  console.log({ loading });
+
   return (
     <button
       type="button"
