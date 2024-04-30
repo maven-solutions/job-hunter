@@ -33,6 +33,10 @@ const DisplayJob = (props: any) => {
     return store.JobDetailSlice;
   });
 
+  const authState: any = useAppSelector((store: RootStore) => {
+    return store.AuthSlice;
+  });
+
   const dispatch = useAppDispatch();
   // console.log("jobSlice::", jobSlice);
 
@@ -89,6 +93,8 @@ const DisplayJob = (props: any) => {
       window.open(`${LIVE_WEBSITE_URL}/job-tracker/v2`, "_blank");
     }
   };
+
+  console.log("test", authState.ci_user);
 
   return (
     <Layout setShowPage={setShowPage}>
@@ -155,9 +161,10 @@ const DisplayJob = (props: any) => {
         <PrimaryButton
           buttonWidth="140"
           loading={saveLoading}
-          text="Save Job"
+          text={jobSlice?.res_success ? "Saved" : "Save Job"}
           loadingText="Saving..."
           onclick={savejobs}
+          disabled={jobSlice?.res_success}
         />{" "}
       </div>
     </Layout>

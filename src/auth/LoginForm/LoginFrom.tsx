@@ -56,6 +56,7 @@ const LoginFrom = (props: any) => {
           onclick={userLogin}
           loading={authState.loading.login}
           loadingText="please wait..."
+          disabled={authState.loading.login}
         />
       </WhiteCard>
     </Layout>
