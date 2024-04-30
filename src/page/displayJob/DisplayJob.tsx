@@ -34,7 +34,6 @@ const DisplayJob = (props: any) => {
   });
 
   const dispatch = useAppDispatch();
-  // console.log("jobSlice::", jobSlice);
 
   useEffect(() => {
     // if (!jobSlice.stage_data_success) {
@@ -44,6 +43,7 @@ const DisplayJob = (props: any) => {
 
   const savejobs = () => {
     setSaveLoading(true);
+
     const data: any = {
       individualApplicationStageId: jobSlice.selectedStage.value,
       jobTitle: jobSlice.title,

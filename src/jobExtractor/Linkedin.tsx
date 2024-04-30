@@ -68,9 +68,10 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     }
 
     setTimeout(() => {
-      let jobDetailsElement = document?.getElementById("job-details");
-      const about = jobDetailsElement?.querySelector("span");
-      dispatch(setJobDesc(about?.innerHTML));
+      let jobDetailsElement: any = document?.querySelector(
+        ".jobs-description__container"
+      );
+      dispatch(setJobDesc(jobDetailsElement?.innerHTML));
     }, 500);
 
     // find posted date
@@ -84,13 +85,14 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     if (locationText) {
       dispatch(setJobLocation(locationText));
     }
-
     getAddationalInfo(dispatch);
-
     dispatch(setJobSource("Linkedin"));
+
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
-      const domElement = document?.querySelector(".jobs-unified-top-card.t-14");
+      const domElement = document?.querySelector(
+        ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+      );
       const aTag = domElement?.querySelector("a.app-aware-link");
       const companyName = aTag?.textContent;
       dispatch(setJobCompany(companyName?.trim()));
