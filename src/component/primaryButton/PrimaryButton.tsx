@@ -17,7 +17,15 @@ export const LogoutButton = (props: any) => {
 };
 
 const PrimaryButton = (props: any) => {
-  const { loading, onclick, text, loadingText, outline, buttonWidth } = props;
+  const {
+    loading,
+    onclick,
+    text,
+    loadingText,
+    outline,
+    buttonWidth,
+    disabled,
+  } = props;
   console.log({ loading });
 
   return (
@@ -28,7 +36,7 @@ const PrimaryButton = (props: any) => {
       }`}
       style={{ width: `${buttonWidth ? buttonWidth + "px" : ""}` }}
       onClick={onclick}
-      disabled={loading}
+      disabled={disabled}
     >
       {loading ? loadingText : text}
     </button>

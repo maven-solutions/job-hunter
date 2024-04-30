@@ -77,6 +77,7 @@ const JobDetail = (props: any) => {
             setSavedNotification(true);
             SetAlreadySavedInfo(false);
             setSaveLoading(false);
+            setShowPage(SHOW_PAGE.summaryPage);
           },
           onFail: () => {
             setSavedNotification(false);
@@ -162,6 +163,7 @@ const JobDetail = (props: any) => {
           text="Save Job"
           loadingText="Saving..."
           onclick={savejobs}
+          disabled={saveLoading || savedNotification}
         />
       </div>
     </Layout>

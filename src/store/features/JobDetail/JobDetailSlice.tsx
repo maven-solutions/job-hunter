@@ -104,6 +104,7 @@ const JobDetails = createSlice({
       (state, { payload }: PayloadAction<any>) => {
         state.loading = false;
         state.res_success = true;
+        console.log("ENTERED");
         const filteredArray = payload.data.map((data) => {
           return { value: data.id, label: data.name };
         });

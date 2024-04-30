@@ -108,11 +108,10 @@ const Linkedin = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getContentFromLinkedInJobs(dispatch);
-    }, 3000);
-    setShowPage("");
-    dispatch(clearJobState());
+    }, 2000);
+    // setShowPage("");
+    // dispatch(clearJobState());
   }, [window.location.href]);
-
   return null;
 };
 
