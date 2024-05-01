@@ -83,18 +83,32 @@ const DisplayJob = (props: any) => {
   };
 
   const viewJobBoard = () => {
-    if (EXTENSION_IN_LOCAL) {
-      window.open("http://localhost:3000/job-tracker/v2", "_blank");
+    // for induvidual
+    if (EXTENSION_IN_LOCAL && authState?.ci_user?.organizations?.length === 0) {
+      window.open("http://localhost:3000/v2/job-tracker", "_blank");
     }
-    if (EXTENSION_IN_STAGING) {
-      window.open(`${STAGING_WEBSITE_URL}/job-tracker/v2`, "_blank");
+    if (
+      EXTENSION_IN_STAGING &&
+      authState?.ci_user?.organizations?.length === 0
+    ) {
+      window.open(`${STAGING_WEBSITE_URL}/v2/job-tracker`, "_blank");
     }
-    if (EXTENSION_IN_LIVE) {
-      window.open(`${LIVE_WEBSITE_URL}/job-tracker/v2`, "_blank");
+    if (EXTENSION_IN_LIVE && authState?.ci_user?.organizations?.length === 0) {
+      window.open(`${LIVE_WEBSITE_URL}/v2/job-tracker`, "_blank");
+    }
+
+    // for org user
+
+    if (EXTENSION_IN_LOCAL && authState?.ci_user?.organizations?.length > 0) {
+      window.open("http://localhost:3000/dashboard/job-tracker", "_blank");
+    }
+    if (EXTENSION_IN_STAGING && authState?.ci_user?.organizations?.length > 0) {
+      window.open(`${STAGING_WEBSITE_URL}/dashboard/job-tracker`, "_blank");
+    }
+    if (EXTENSION_IN_LIVE && authState?.ci_user?.organizations?.length > 0) {
+      window.open(`${LIVE_WEBSITE_URL}/dashboard/job-tracker`, "_blank");
     }
   };
-
-  console.log("test", authState.ci_user);
 
   return (
     <Layout setShowPage={setShowPage}>

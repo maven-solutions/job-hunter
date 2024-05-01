@@ -8,6 +8,7 @@ chrome.runtime.onMessageExternal.addListener(function (
   sendResponse
 ) {
   if (request?.loginRequestFromCareerAi) {
+    console.log("fired");
     const data = request.loginRequestFromCareerAi;
     const token = request.loginRequestFromCareerAi.token;
     chrome.storage.local.set({
