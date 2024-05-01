@@ -57,6 +57,9 @@ const JobDetails = createSlice({
     setSelectedStage: (state: any, { payload }: PayloadAction<any>) => {
       state.selectedStage = payload;
     },
+    setButtonDisabledFalse: (state: any, { payload }: PayloadAction<any>) => {
+      state.res_success = false;
+    },
     clearJobState: (state: any) => {
       state.title = "";
       state.location = "";
@@ -104,11 +107,11 @@ const JobDetails = createSlice({
       (state, { payload }: PayloadAction<any>) => {
         state.loading = false;
         state.res_success = true;
-        console.log("ENTERED");
-        const filteredArray = payload.data.map((data) => {
-          return { value: data.id, label: data.name };
-        });
-        state.stage_data = filteredArray;
+        // const filteredArray = payload.data.map((data) => {
+        //   return { value: data.id, label: data.name };
+        // });
+        // state.stage_data = filteredArray;
+        // console.log("stage_data::", state.stage_data);
       }
     );
     builder.addCase(saveJobCareerAI.rejected, (state) => {
@@ -131,6 +134,7 @@ export const {
   clearJobState,
   setJobCompanyLogo,
   setSelectedStage,
+  setButtonDisabledFalse,
 } = JobDetails.actions;
 
 export default JobDetails.reducer;

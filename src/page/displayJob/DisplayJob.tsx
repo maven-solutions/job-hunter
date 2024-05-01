@@ -178,7 +178,7 @@ const DisplayJob = (props: any) => {
           text={jobSlice?.res_success ? "Saved" : "Save Job"}
           loadingText="Saving..."
           onclick={savejobs}
-          disabled={jobSlice?.res_success}
+          disabled={jobSlice?.res_success || jobSlice?.loading}
         />{" "}
       </div>
     </Layout>

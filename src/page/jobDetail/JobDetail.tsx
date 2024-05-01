@@ -160,10 +160,10 @@ const JobDetail = (props: any) => {
         <PrimaryButton
           buttonWidth="140"
           loading={saveLoading}
-          text="Save Job"
+          text={jobSlice?.res_success ? "Saved" : "Save Job"}
           loadingText="Saving..."
           onclick={savejobs}
-          disabled={saveLoading || savedNotification}
+          disabled={jobSlice?.res_success || jobSlice?.loading}
         />
       </div>
     </Layout>
