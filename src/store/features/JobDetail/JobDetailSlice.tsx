@@ -57,7 +57,7 @@ const JobDetails = createSlice({
     setSelectedStage: (state: any, { payload }: PayloadAction<any>) => {
       state.selectedStage = payload;
     },
-    setButtonDisabledFalse: (state: any, { payload }: PayloadAction<any>) => {
+    setButtonDisabledFalse: (state: any) => {
       state.res_success = false;
     },
     clearJobState: (state: any) => {

@@ -23,7 +23,10 @@ import {
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
-import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
+import {
+  setButtonDisabledFalse,
+  setJobFoundStatus,
+} from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
 import Indeed from "../../jobExtractor/Indeed";
@@ -122,6 +125,7 @@ const JobDetector = (props: any) => {
     }
 
     loadUser();
+    dispatch(setButtonDisabledFalse());
   }, [postUrl]);
 
   useEffect(() => {
@@ -159,7 +163,7 @@ const JobDetector = (props: any) => {
   };
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("date message::", message);
+      // console.log("date message::", message);
       if (message.action === EXTENSION_ACTION.LOGIN_TO_CI_EXTENSION) {
         loadUser();
       }
