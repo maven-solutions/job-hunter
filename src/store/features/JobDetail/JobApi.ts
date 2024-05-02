@@ -44,3 +44,23 @@ export const saveJobCareerAI = createAsyncThunk(
     }
   }
 );
+
+export const chekJobExists = createAsyncThunk(
+  "chekJobExists",
+  async (jobLink: { jobLink: any }, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post(
+        `${BASE_URL}/applicants/job-board/jobs/check-exists`,
+        jobLink
+      );
+
+      return res.data;
+    } catch (error: any) {
+      //   errorToastMessage(error.response?.data?.message);
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);

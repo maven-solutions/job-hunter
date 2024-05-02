@@ -24,9 +24,14 @@ import {
 import Spinner from "../shared/Spinner";
 
 const DisplayJob = (props: any) => {
-  const { setShowPage } = props;
-  const [savedNotification, setSavedNotification] = useState(false);
-  const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
+  const {
+    setShowPage,
+    savedNotification,
+    setSavedNotification,
+    alreadySavedInfo,
+    SetAlreadySavedInfo,
+  } = props;
+
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
 
   const jobSlice: any = useAppSelector((store: RootStore) => {
@@ -66,12 +71,10 @@ const DisplayJob = (props: any) => {
           data,
           onSuccess: () => {
             setSavedNotification(true);
-            SetAlreadySavedInfo(false);
             setSaveLoading(false);
           },
           onFail: () => {
             setSavedNotification(false);
-            SetAlreadySavedInfo(true);
             setSaveLoading(false);
           },
         })
@@ -172,14 +175,30 @@ const DisplayJob = (props: any) => {
           onclick={viewJobBoard}
         />
         <div style={{ margin: "0 5px" }} />
-        <PrimaryButton
-          buttonWidth="140"
-          loading={saveLoading}
-          text={jobSlice?.res_success ? "Saved" : "Save Job"}
-          loadingText="Saving..."
-          onclick={savejobs}
-          disabled={jobSlice?.res_success || jobSlice?.loading}
-        />{" "}
+        {!jobSlice.check_job_res_success && (
+          <PrimaryButton
+            buttonWidth="140"
+            loading={saveLoading}
+            text={jobSlice?.res_success ? "Saved" : "Save Job"}
+            loadingText="Saving..."
+            onclick={savejobs}
+            disabled={
+              jobSlice?.res_success ||
+              jobSlice?.loading ||
+              jobSlice.check_job_res_success
+            }
+          />
+        )}
+        {jobSlice.check_job_res_success && (
+          <PrimaryButton
+            buttonWidth="140"
+            loading={saveLoading}
+            text={"Already Saved"}
+            loadingText="Saving..."
+            onclick={savejobs}
+            disabled={true}
+          />
+        )}
       </div>
     </Layout>
   );

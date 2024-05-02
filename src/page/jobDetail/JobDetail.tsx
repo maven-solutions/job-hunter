@@ -157,14 +157,31 @@ const JobDetail = (props: any) => {
           onclick={() => setShowPage(SHOW_PAGE.summaryPage)}
         />
         <div style={{ margin: "0 5px" }} />
-        <PrimaryButton
-          buttonWidth="140"
-          loading={saveLoading}
-          text={jobSlice?.res_success ? "Saved" : "Save Job"}
-          loadingText="Saving..."
-          onclick={savejobs}
-          disabled={jobSlice?.res_success || jobSlice?.loading}
-        />
+
+        {!jobSlice.check_job_res_success && (
+          <PrimaryButton
+            buttonWidth="140"
+            loading={saveLoading}
+            text={jobSlice?.res_success ? "Saved" : "Save Job"}
+            loadingText="Saving..."
+            onclick={savejobs}
+            disabled={
+              jobSlice?.res_success ||
+              jobSlice?.loading ||
+              jobSlice.check_job_res_success
+            }
+          />
+        )}
+        {jobSlice.check_job_res_success && (
+          <PrimaryButton
+            buttonWidth="140"
+            loading={saveLoading}
+            text={"Already Saved"}
+            loadingText="Saving..."
+            onclick={savejobs}
+            disabled={true}
+          />
+        )}
       </div>
     </Layout>
   );

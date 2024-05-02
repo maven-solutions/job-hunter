@@ -26,6 +26,7 @@ import {
 import {
   setButtonDisabledFalse,
   setJobFoundStatus,
+  setJobReqSucccessFalse,
 } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
@@ -40,6 +41,7 @@ import {
 } from "../../store/features/Auth/AuthSlice";
 import ResumeList from "../../page/resumeList/ResumeList";
 import { detectInputAndFillData } from "../../autofill/helper";
+import { chekJobExists } from "../../store/features/JobDetail/JobApi";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -47,6 +49,8 @@ const JobDetector = (props: any) => {
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [showPage, setShowPage] = useState<string>("");
+  const [savedNotification, setSavedNotification] = useState(false);
+  const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -126,7 +130,17 @@ const JobDetector = (props: any) => {
 
     loadUser();
     dispatch(setButtonDisabledFalse());
+    setSavedNotification(false);
+    SetAlreadySavedInfo(false);
+    dispatch(setJobReqSucccessFalse());
+    dispatch(chekJobExists({ jobLink: window.location.href }));
   }, [postUrl]);
+
+  useEffect(() => {
+    if (jobDetailState.check_job_res_success) {
+      SetAlreadySavedInfo(true);
+    }
+  }, [jobDetailState.check_job_res_success]);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -227,7 +241,13 @@ const JobDetector = (props: any) => {
         <JobDetail setShowPage={setShowPage} />
       )}
       {showPage === SHOW_PAGE.summaryPage && (
-        <DisplayJob setShowPage={setShowPage} />
+        <DisplayJob
+          setShowPage={setShowPage}
+          savedNotification={savedNotification}
+          setSavedNotification={setSavedNotification}
+          SetAlreadySavedInfo={SetAlreadySavedInfo}
+          alreadySavedInfo={alreadySavedInfo}
+        />
       )}
 
       {showPage === SHOW_PAGE.profilePage && (
