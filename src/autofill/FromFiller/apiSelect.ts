@@ -12,8 +12,8 @@ export const apiSelect = async (tempDiv: any, applicantData: Applicant) => {
     const inputElement = tempDiv.querySelector(`[id="${labelId}"]`) ?? "";
 
     if (checkIfExist(label?.textContent?.trim(), fieldNames.collage)) {
-      console.log("inputElement::", inputElement);
-      console.log("label::", label);
+      // console.log("inputElement::", inputElement);
+      // console.log("label::", label);
       //   labelss = true;
       inputElement.value = "Uva Wellassa University";
       inputElement.focus();
@@ -29,7 +29,7 @@ export const apiSelect = async (tempDiv: any, applicantData: Applicant) => {
       //   );
       //   inputElement.select();
 
-      console.log("fired--::");
+      // console.log("fired--::");
 
       // Create a new keyboard event for 'Enter' key
       //   const enterKeyEvent = new KeyboardEvent("keypress", {
@@ -42,7 +42,7 @@ export const apiSelect = async (tempDiv: any, applicantData: Applicant) => {
       //   console.log("fired--::1");
 
       //   await delay(3000);
-      console.log("fired--::2");
+      // console.log("fired--::2");
 
       //
     }

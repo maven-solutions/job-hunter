@@ -60,7 +60,7 @@ const JobDetector = (props: any) => {
     return store.JobDetailSlice;
   });
 
-  console.log("authstate::", authState);
+  // console.log("authstate::", authState);
 
   // useEffect(() => {
   //   if (popup) {

@@ -76,7 +76,7 @@ const educationDatafiller = async (
 ) => {
   const textInputFields =
     tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
-  console.log("data::", index, "::", data);
+  // console.log("data::", index, "::", data);
   // console.log("inputid", localStorage.getItem("ci_inputid"));
   for (const [inputIndex, input] of textInputFields.entries()) {
     const attributes: any = Array.from(input.attributes);
@@ -135,7 +135,7 @@ const educationDatafiller = async (
 
 const checkobxFiller = () => {
   const textInputFields = document.querySelectorAll('input[type="checkbox"]');
-  console.log("text::", textInputFields);
+  // console.log("text::", textInputFields);
   textInputFields.forEach((input: any) => {
     // console.log(input);
     // Extract all attributes

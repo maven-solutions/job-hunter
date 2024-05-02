@@ -135,7 +135,7 @@ const AutofillFields = (props: any) => {
       resumeList.applicantData[selectedResume].applicant,
       resumeList.applicantData[selectedResume].applicationForm
     );
-    console.log("applicantData---", applicantData);
+    // console.log("applicantData---", applicantData);
     detectInputAndFillData(applicantData);
   };
 

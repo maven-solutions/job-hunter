@@ -6,7 +6,7 @@ import JobDetector from "../landingPage/DetectJob/JobDetector";
 import "./index.css";
 
 const App: React.FC<{}> = () => {
-  console.log("popupfired::");
+  // console.log("popupfired::");
 
   return (
     // <Provider store={Store}>

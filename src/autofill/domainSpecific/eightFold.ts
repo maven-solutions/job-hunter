@@ -8,11 +8,11 @@ const profileImport = async (applicantData: Applicant) => {
   await delay(5000);
 
   const uploadButton: any = document.getElementById("file");
-  console.log("uploadButton::", uploadButton);
+  // console.log("uploadButton::", uploadButton);
   uploadButton.click();
 };
 const fillCountry = async (applicantData: Applicant) => {
-  console.log("fired::eight--");
+  // console.log("fired::eight--");
 
   const countryEle = document.getElementById(
     "0-0-additional-questions-dropdown"
@@ -23,7 +23,7 @@ const fillCountry = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll(
     ".menu-item_iojSa2k.wrap_p5SU8dV.medium_tsF_D4y.neutral_POVTfdT"
   );
-  console.log("selectOptions::", selectOptions);
+  // console.log("selectOptions::", selectOptions);
   for (const [index, element] of selectOptions.entries()) {
     if (
       fromatStirngInLowerCase(element.textContent.trim()).includes(

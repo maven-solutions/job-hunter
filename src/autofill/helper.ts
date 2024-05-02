@@ -47,7 +47,6 @@ export const checkIfExist = (attribute, valueOfArr): boolean => {
     // attribute = .replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
     attribute = fromatStirngInLowerCase(attribute);
     if (attribute?.includes(element)) {
-      // console.log("att::", attribute, "::--::", "val::", element);
       res = true;
     }
   });

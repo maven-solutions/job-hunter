@@ -3,14 +3,23 @@ import {
   getApplicationStageData,
   saveJobCareerAI,
   chekJobExists,
+  getApplicantResume,
 } from "./JobApi";
 const initialState: any = {
-  loading: false,
+  loading: {
+    add_job: false,
+    applicant_resume: false,
+  },
+  res_success: {
+    add_job: false,
+    applicant_resume: false,
+  },
   check_job_loading: false,
   check_job_res_success: false,
-  res_success: false,
+
   stage_data_success: false,
   stage_data_loading: false,
+
   title: "",
   location: "",
   jobtype: "",
@@ -64,7 +73,7 @@ const JobDetails = createSlice({
       state.selectedStage = payload;
     },
     setButtonDisabledFalse: (state: any) => {
-      state.res_success = false;
+      state.res_success.add_job = false;
     },
     setJobReqSucccessFalse: (state: any) => {
       state.check_job_res_success = false;
@@ -123,16 +132,34 @@ const JobDetails = createSlice({
       state.check_job_res_success = false;
     });
 
+    // GET ALL APPLICANT RESUME
+    builder.addCase(getApplicantResume.pending, (state) => {
+      state.loading.applicant_resume = true;
+      state.res_success.applicant_resume = false;
+    });
+    builder.addCase(
+      getApplicantResume.fulfilled,
+      (state, { payload }: PayloadAction<any>) => {
+        state.loading.applicant_resume = false;
+        console.log("data::", payload);
+        state.res_success.applicant_resume = payload?.data;
+      }
+    );
+    builder.addCase(getApplicantResume.rejected, (state) => {
+      state.loading.applicant_resume = false;
+      state.res_success.applicant_resume = false;
+    });
+
     // ADD JOBS
     builder.addCase(saveJobCareerAI.pending, (state) => {
-      state.loading = true;
-      state.res_success = false;
+      state.loading.add_job = true;
+      state.res_success.add_job = false;
     });
     builder.addCase(
       saveJobCareerAI.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
-        state.loading = false;
-        state.res_success = true;
+        state.loading.add_job = false;
+        state.res_success.add_job = true;
         // const filteredArray = payload.data.map((data) => {
         //   return { value: data.id, label: data.name };
         // });
@@ -141,8 +168,8 @@ const JobDetails = createSlice({
       }
     );
     builder.addCase(saveJobCareerAI.rejected, (state) => {
-      state.loading = false;
-      state.res_success = false;
+      state.loading.add_job = false;
+      state.res_success.add_job = false;
     });
   },
 });

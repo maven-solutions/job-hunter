@@ -30,7 +30,7 @@ export const saveJobCareerAI = createAsyncThunk(
         `${BASE_URL}/applicants/job-board/jobs`,
         data
       );
-      console.log("success", res);
+      // console.log("success", res);
       //   successToastMessage("Sign in successful.");
       onSuccess && onSuccess();
       return res.data;
@@ -54,6 +54,25 @@ export const chekJobExists = createAsyncThunk(
         jobLink
       );
 
+      return res.data;
+    } catch (error: any) {
+      //   errorToastMessage(error.response?.data?.message);
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getApplicantResume = createAsyncThunk(
+  "getApplicantResume",
+  async (data: undefined, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `${BASE_URL}/applicants/resumes`,
+        data
+      );
       return res.data;
     } catch (error: any) {
       //   errorToastMessage(error.response?.data?.message);

@@ -27,9 +27,9 @@ axiosInstance.interceptors.request.use(
   }
 );
 const getToken = async () => {
-  console.log("fired::");
+  // console.log("fired::");
   const result = await chrome.storage.local.get(["ci_token"]);
-  console.log("res::", result);
+  // console.log("res::", result);
   const token = result.ci_token;
   return token;
 };

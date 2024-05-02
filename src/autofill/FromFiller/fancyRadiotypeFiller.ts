@@ -31,7 +31,7 @@ export const fancyRadiotypeFiller = (
         (checkIfExist(attribute.value, ["male"]) &&
           fromatStirngInLowerCase(applicantData.gender)) === "male"
       ) {
-        console.log("male");
+        // console.log("male");
         input.focus(); // Autofocus on the input field
         input.click();
         input.checked = true;
@@ -45,7 +45,7 @@ export const fancyRadiotypeFiller = (
         (checkIfExist(attribute.value, ["female"]) &&
           fromatStirngInLowerCase(applicantData.gender)) === "female"
       ) {
-        console.log("female");
+        // console.log("female");
 
         input.focus(); // Autofocus on the input field
         input.click();
