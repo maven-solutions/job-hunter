@@ -15,6 +15,7 @@ export const SHOW_PAGE = {
   loginPage: "login",
   singupPage: "singup",
   resumeListPage: "resumelist",
+  applicantAutofillPage: "applicantAutofillPage",
 };
 
 export const EXTENSION_ACTION = {

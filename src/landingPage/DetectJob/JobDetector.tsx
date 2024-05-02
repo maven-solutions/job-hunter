@@ -46,6 +46,7 @@ import { chekJobExists } from "../../store/features/JobDetail/JobApi";
 const JobDetector = (props: any) => {
   const { content, popup } = props;
   const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [showAutofillPage, setShowAutofillPage] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [showPage, setShowPage] = useState<string>("");
@@ -94,6 +95,7 @@ const JobDetector = (props: any) => {
       window.location.href.toLowerCase().includes("placement")
     ) {
       setShowIcon(true);
+      // setShowAutofillPage(true);
     }
   }, []);
 
@@ -224,19 +226,17 @@ const JobDetector = (props: any) => {
     <div className="content__script__section">
       {showIcon ? (
         <Logo
+          showAutofillPage={showAutofillPage}
           setShowPage={setShowPage}
           jobFound={jobDetailState?.jobFound || false}
         />
       ) : null}
-
       {showPage === SHOW_PAGE.loginPage && (
         <LoginFrom setShowPage={setShowPage} />
       )}
-
       {showPage === SHOW_PAGE.singupPage && (
         <SignupForm setShowPage={setShowPage} />
       )}
-
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
       )}
@@ -249,7 +249,7 @@ const JobDetector = (props: any) => {
           alreadySavedInfo={alreadySavedInfo}
         />
       )}
-
+      {/* applicantAutofillPage */}
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} />
       )}
@@ -260,7 +260,6 @@ const JobDetector = (props: any) => {
       {website === SUPPORTED_WEBSITE.linkedin && (
         <Linkedin setShowPage={setShowPage} />
       )}
-
       {website === SUPPORTED_WEBSITE.simplyhired && (
         <SimplyHiredJob setShowPage={setShowPage} />
       )}
@@ -271,11 +270,9 @@ const JobDetector = (props: any) => {
       {website === SUPPORTED_WEBSITE.ziprecruiter && (
         <Ziprecruiter setShowPage={setShowPage} />
       )}
-
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
       )}
-
       {website === SUPPORTED_WEBSITE.glassdoor && (
         <Glassdoor setShowPage={setShowPage} />
       )}

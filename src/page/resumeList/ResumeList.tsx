@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Check, Eye } from "react-feather";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import { getApplicantsData } from "../../store/features/ResumeList/ResumeListApi";
+import {
+  getApplicantResume,
+  getApplicantsData,
+} from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
@@ -23,9 +26,10 @@ const ResumeList = (props: any) => {
 
   const dispatch = useAppDispatch();
   useEffect(() => {
-    if (!resumeList.res_success || resumeList.applicantData.length === 0) {
-      dispatch(getApplicantsData());
-    }
+    // if (!resumeList.res_success || resumeList.applicantData.length === 0) {
+    //   dispatch(getApplicantsData());
+    // }
+    dispatch(getApplicantResume());
   }, []);
 
   const showActionMenu = (index: any) => {
