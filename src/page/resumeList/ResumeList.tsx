@@ -29,7 +29,7 @@ const ResumeList = (props: any) => {
     // if (!resumeList.res_success || resumeList.applicantData.length === 0) {
     //   dispatch(getApplicantsData());
     // }
-    //  dispatch(getApplicantResume());
+    dispatch(getApplicantResume());
   }, []);
 
   const showActionMenu = (index: any) => {

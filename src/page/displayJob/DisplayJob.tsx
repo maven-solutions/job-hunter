@@ -45,9 +45,9 @@ const DisplayJob = (props: any) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // if (!jobSlice.stage_data_success) {
-    dispatch(getApplicationStageData());
-    // }
+    if (!jobSlice.stage_data_success) {
+      dispatch(getApplicationStageData());
+    }
   }, []);
 
   const savejobs = () => {
@@ -120,6 +120,7 @@ const DisplayJob = (props: any) => {
         setSavedNotification={setSavedNotification}
         SetAlreadySavedInfo={SetAlreadySavedInfo}
         alreadySavedInfo={alreadySavedInfo}
+        foruser
       />
       <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
         <JobSummary />
@@ -128,11 +129,11 @@ const DisplayJob = (props: any) => {
       <WhiteCard>
         <span className="ci_job_stage_title_new">
           <div>Application Stage</div>
-          {jobSlice?.stage_data_loading && (
+          {/* {jobSlice?.stage_data_loading && (
             <div style={{ paddingTop: "-8px" }}>
               <Spinner size={25} />
             </div>
-          )}
+          )} */}
         </span>
         <div className="aaaaaaaaaa">
           {" "}

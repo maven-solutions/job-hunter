@@ -386,6 +386,9 @@
 .jobs-notification {
   padding: 15px;
 }
+.jobs-notification-padding-top-0 {
+  padding-top: 0 !important;
+}
 .jobs-notification-inner {
   border-radius: 4px;
   background-color: #f1f6fd;
