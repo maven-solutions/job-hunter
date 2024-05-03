@@ -162,7 +162,7 @@ const JobDetail = (props: any) => {
           <PrimaryButton
             buttonWidth="140"
             loading={saveLoading}
-            text={jobSlice?.res_success ? "Saved" : "Save Job"}
+            text={jobSlice?.res_success.add_job ? "Saved" : "Save Job"}
             loadingText="Saving..."
             onclick={savejobs}
             disabled={
