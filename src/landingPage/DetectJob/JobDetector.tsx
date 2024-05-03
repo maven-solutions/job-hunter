@@ -135,7 +135,9 @@ const JobDetector = (props: any) => {
     setSavedNotification(false);
     SetAlreadySavedInfo(false);
     dispatch(setJobReqSucccessFalse());
-    dispatch(chekJobExists({ jobLink: window.location.href }));
+    if (authState.authenticated) {
+      dispatch(chekJobExists({ jobLink: window.location.href }));
+    }
   }, [postUrl]);
 
   useEffect(() => {
@@ -188,27 +190,6 @@ const JobDetector = (props: any) => {
       }
       // return true;
     });
-
-    // setTimeout(() => {
-    //   chrome.storage.sync.get(["maven_resume_token"]).then((result) => {
-    //     console.log("Value is " + result.maven_resume_token);
-    //   });
-    // }, 5000);
-    // let intervalId: any = "";
-    // if (
-    //   window.location.href.includes("glassdoor") &&
-    //   !window.location.href.includes("job-listing")
-    // ) {
-    //   glassDoorNotiification();
-    //   // Clear any existing intervals before setting a new one
-    //   intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
-    // }
-    // if (window.location.href === "https://www.simplyhired.com/") {
-    //   simplyHiredNotiification();
-    //   intervalId = setInterval(addButtonToSimplyHired, 3000);
-    // }
-    // // Clear the interval when the component unmounts
-    // return () => clearInterval(intervalId);
   }, []);
   useEffect(() => {
     chrome.runtime.onMessage.addListener(async function (
@@ -249,7 +230,7 @@ const JobDetector = (props: any) => {
           alreadySavedInfo={alreadySavedInfo}
         />
       )}
-      {/* applicantAutofillPage */}
+
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} />
       )}
