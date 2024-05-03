@@ -16,11 +16,12 @@
   border-radius: 10px;
   position: fixed;
   right: 10px;
-  bottom: 50px;
+  bottom: 60px;
   /* max-width: 240px;
   max-height: 240px; */
   /* background-color: #4339f2 !important; */
-  z-index: 999999999 !important;
+  /* z-index: 99 !important; */
+  z-index: 2147483647 !important;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -32,6 +33,10 @@
 .job_circle_button:hover + .ci_menu_outer_continer,
 .ci_menu_outer_continer:hover {
   display: block !important;
+}
+
+.ci_menu_outer_continer {
+  padding-bottom: 40px !important;
 }
 .ci-shake-logo {
   animation: shake 1s forwards;

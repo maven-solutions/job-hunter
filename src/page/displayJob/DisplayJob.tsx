@@ -150,6 +150,25 @@ const DisplayJob = (props: any) => {
                 width: "100%",
                 cursor: "pointer",
               }),
+              menu: (provided, state) => ({
+                ...provided,
+                height: "150px",
+                overflowY: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "10px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  borderRadius: "10px",
+                  width: "5px",
+                  background: "#e2e2e2", // Adjust as needed
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: "#f8f8f8", // Adjust as needed
+                  borderRadius: "10px",
+                  width: "7px",
+                },
+              }),
+
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,

@@ -83,8 +83,12 @@ const JobDetector = (props: any) => {
       ].some((domain) => window.location.href.includes(domain))
     ) {
       setShowIcon(true);
+    } else {
+      setShowAutofillPage(true);
     }
   }, []);
+
+  // setShowAutofillPage(true);
 
   useEffect(() => {
     if (
@@ -95,7 +99,6 @@ const JobDetector = (props: any) => {
       window.location.href.toLowerCase().includes("placement")
     ) {
       setShowIcon(true);
-      // setShowAutofillPage(true);
     }
   }, []);
 
@@ -205,13 +208,13 @@ const JobDetector = (props: any) => {
 
   return (
     <div className="content__script__section">
-      {showIcon ? (
+      {showIcon && showPage === "" && (
         <Logo
           showAutofillPage={showAutofillPage}
           setShowPage={setShowPage}
           jobFound={jobDetailState?.jobFound || false}
         />
-      ) : null}
+      )}
       {showPage === SHOW_PAGE.loginPage && (
         <LoginFrom setShowPage={setShowPage} />
       )}

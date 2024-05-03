@@ -21,15 +21,21 @@ const ResumeList = (props: any) => {
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
+  const authState: any = useAppSelector((store: RootStore) => {
+    return store.AuthSlice;
+  });
 
   console.log("resume::", resumeList);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
-    // if (!resumeList.res_success || resumeList.applicantData.length === 0) {
-    //   dispatch(getApplicantsData());
-    // }
-    dispatch(getApplicantResume());
+    if (authState.authenticated && authState?.ci_user?.userType === "va") {
+      if (!resumeList.res_success || resumeList.applicantData.length === 0) {
+        dispatch(getApplicantsData());
+      }
+    } else {
+      dispatch(getApplicantResume());
+    }
   }, []);
 
   const showActionMenu = (index: any) => {
