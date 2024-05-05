@@ -13,6 +13,25 @@ import {
   setJobTitle,
   setJobType,
 } from "../store/features/JobDetail/JobDetailSlice";
+import { glassDoorNotiification } from "../component/InfoNotification";
+import { addButtonToGlassdoorWebsite } from "../component/CareerAibutton";
+
+const getJobId = () => {
+  // Given URL
+  const url = window.location.href;
+
+  // Regular expression pattern to match the job listing ID
+  const regex = /jl=(\d+)/;
+  // Use regex to extract the job listing ID
+  const match = url.match(regex);
+  if (match && match[1]) {
+    const jobListingID = match[1];
+    return jobListingID;
+  } else {
+    console.log("Job Listing ID not found in the URL.");
+    return null;
+  }
+};
 
 const removeRatingFromEnd = (inputString) => {
   // Remove the rating at the end of the string
@@ -24,7 +43,7 @@ const removeRatingFromEnd = (inputString) => {
 
 const getJobFromGlassdoor = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
-
+  const jobId = getJobId();
   const glassDom = document.querySelector('[data-test="job-details-header"]');
 
   // this is for the desing where there is tab section in that page
@@ -36,13 +55,13 @@ const getJobFromGlassdoor = (dispatch): void => {
     dispatch(setJobTitle(title));
   }
 
-  const companyNameEle = glassDom.querySelector("span");
+  const companyNameEle = glassDom.querySelector("h4");
 
   if (companyNameEle) {
     // Get the text content from the element
     const inputString = companyNameEle?.textContent?.trim();
-    const companyName = removeRatingFromEnd(inputString);
-    dispatch(setJobCompany(companyName));
+    // const companyName = removeRatingFromEnd(inputString);
+    dispatch(setJobCompany(inputString));
   }
 
   const locationText =
@@ -51,22 +70,30 @@ const getJobFromGlassdoor = (dispatch): void => {
 
   const salary = document
     .querySelector(`[class*="SalaryEstimate_averageEstimate"]`)
-    .textContent.trim();
+    ?.textContent?.trim();
 
   dispatch(setJobSummary(["Average base salary estimate", salary]));
   // for description
-  const sibling = glassDom.nextElementSibling;
-  if (sibling) {
-    const descDom = sibling.nextElementSibling;
-    if (descDom) {
-      const desc = descDom.children[0];
-      if (desc) {
-        const innderDesc = desc.children[0];
-        // Get the text content from the element
-        const description = innderDesc?.innerHTML;
-        dispatch(setJobDesc(description));
-      }
-    }
+  // const sibling = glassDom.nextElementSibling;
+  // if (sibling) {
+  //   const descDom = sibling.nextElementSibling;
+  //   if (descDom) {
+  //     const desc = descDom.children[0];
+  //     if (desc) {
+  //       const innderDesc = desc.children[0];
+  //       // Get the text content from the element
+  //       const description = innderDesc?.innerHTML;
+  //       dispatch(setJobDesc(description));
+  //     }
+  //   }
+  // }
+
+  const descSibling = document.querySelector(`#job-viewed-waypoint-${jobId}`);
+  const descParent: any = descSibling?.nextSibling?.childNodes[0];
+  const desc = descParent?.innerHTML ?? "";
+  if (desc) {
+    dispatch(setJobDesc(desc));
+    // setJobDescription(desc);
   }
 
   // end of   desing where there is tab section in that page
@@ -111,6 +138,7 @@ const getJobFromGlassdoor = (dispatch): void => {
 const Glassdoor = (props: any) => {
   const { setShowPage } = props;
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     setTimeout(() => {
       getJobFromGlassdoor(dispatch);

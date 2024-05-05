@@ -206,6 +206,23 @@ const JobDetector = (props: any) => {
     });
   }, []);
 
+  useEffect(() => {
+    let intervalId: any = "";
+    if (
+      window.location.href.includes("glassdoor") &&
+      !window.location.href.includes("job-listing")
+    ) {
+      glassDoorNotiification();
+      // Clear any existing intervals before setting a new one
+      intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
+    }
+    if (window.location.href === "https://www.simplyhired.com/") {
+      simplyHiredNotiification();
+      intervalId = setInterval(addButtonToSimplyHired, 3000);
+    }
+    // Clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
   return (
     <div className="content__script__section">
       {showIcon && showPage === "" && (

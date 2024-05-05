@@ -43,6 +43,7 @@ export const glassDoorNotiification = () => {
   const containerChild = document.querySelector(
     '[data-test="job-details-header"]'
   );
+  console.log("containerChild::", containerChild);
   const parentElement = containerChild.parentElement;
   infoNotification(parentElement, "glassdoor");
 };
