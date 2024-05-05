@@ -37,7 +37,6 @@ const infoNotification = (container: any, website) => {
 
 export const simplyHiredNotiification = () => {
   const container = document.querySelector(".css-imseer");
-  console.log("container::", container);
   infoNotification(container, "simplyhired");
 };
 export const glassDoorNotiification = () => {
