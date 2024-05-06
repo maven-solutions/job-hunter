@@ -135,7 +135,7 @@ const fillEducation = async (educationData: Education[]) => {
 };
 
 export const greenHouse = (tempDiv: any, applicantData: Applicant) => {
-  // checkAdultAge(applicantData);
-  // usWorkAuthorization(applicantData);
+  checkAdultAge(applicantData);
+  usWorkAuthorization(applicantData);
   fillEducation(applicantData.education);
 };
