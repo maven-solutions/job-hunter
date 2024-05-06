@@ -1,4 +1,4 @@
-import sanitizeHtml from "sanitize-html";
+// import sanitizeHtml from "sanitize-html";
 
 import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
@@ -422,10 +422,10 @@ const workExperienceDatafiller = async (
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          const cleanedHtml = sanitizeHtml(data.description, {
-            allowedTags: ["p"],
-          });
-          input.value = cleanedHtml;
+          // const cleanedHtml = sanitizeHtml(data.description, {
+          //   allowedTags: ["p"],
+          // });
+          // input.value = cleanedHtml;
           await delay(100);
           handleValueChanges(input);
           // await delay(100);
