@@ -38,8 +38,6 @@ const DisplayJob = (props: any) => {
     return store.JobDetailSlice;
   });
 
-  console.log("jobSlice::", jobSlice);
-
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
@@ -140,7 +138,6 @@ const DisplayJob = (props: any) => {
           )} */}
         </span>
         <div className="aaaaaaaaaa">
-          {" "}
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
@@ -156,7 +153,11 @@ const DisplayJob = (props: any) => {
               }),
               menu: (provided, state) => ({
                 ...provided,
-                height: "150px",
+                zIndex: 9999, // Increase the z-index if necessary
+              }),
+              menuList: (provided, state) => ({
+                ...provided,
+                maxHeight: "150px", // Adjust the maximum height as needed
                 overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "10px",
@@ -172,11 +173,10 @@ const DisplayJob = (props: any) => {
                   width: "7px",
                 },
               }),
-
               option: (provided, state) => ({
                 ...provided,
                 fontSize: 14,
-                background: state.isSelected ? "#4339f2" : "#white",
+                background: state.isSelected ? "#4339f2" : "white",
                 border: "none",
                 cursor: "pointer",
               }),
