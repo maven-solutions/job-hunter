@@ -169,7 +169,8 @@ const JobDetail = (props: any) => {
             disabled={
               jobSlice?.res_success.add_job ||
               jobSlice?.loading.add_job ||
-              jobSlice.check_job_res_success
+              jobSlice.check_job_res_success ||
+              !jobSlice.title
             }
           />
         )}

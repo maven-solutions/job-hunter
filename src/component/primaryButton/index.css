@@ -39,4 +39,5 @@
 }
 .ci_job__button__disabled {
   background: #363538 !important;
+  cursor: no-drop;
 }
