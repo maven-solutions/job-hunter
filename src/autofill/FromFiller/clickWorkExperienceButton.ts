@@ -4,6 +4,15 @@ import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
 import { fieldNames } from "./fieldsname";
 import { getMonthFromDate, getYearFromDate } from "./helper";
+function sanitizeHTML(htmlString) {
+  // Remove inline styles
+  htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
+
+  // Remove all tags except 'p'
+  htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
+
+  return htmlString;
+}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -422,10 +431,8 @@ const workExperienceDatafiller = async (
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          // const cleanedHtml = sanitizeHtml(data.description, {
-          //   allowedTags: ["p"],
-          // });
-          // input.value = cleanedHtml;
+          const cleanedHtml = sanitizeHTML(data.description);
+          input.value = cleanedHtml;
           await delay(100);
           handleValueChanges(input);
           // await delay(100);

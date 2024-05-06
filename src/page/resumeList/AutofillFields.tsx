@@ -11,7 +11,7 @@ const extractInfo = (resumeData, applicationForm) => {
   const {
     name,
     emailAddress,
-    phoneNumber,
+    // phoneNumber,
     city,
     state,
     country,
@@ -24,6 +24,7 @@ const extractInfo = (resumeData, applicationForm) => {
   const {
     gender,
     dob,
+    phoneNumber,
     citizenshipStatus,
     race,
     language,
