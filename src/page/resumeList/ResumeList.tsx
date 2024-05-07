@@ -25,7 +25,7 @@ const ResumeList = (props: any) => {
     return store.AuthSlice;
   });
 
-  console.log("resume::", resumeList);
+  // console.log("resume::", resumeList);
 
   const dispatch = useAppDispatch();
   useEffect(() => {

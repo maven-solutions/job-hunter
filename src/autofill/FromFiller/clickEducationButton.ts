@@ -129,7 +129,7 @@ const educationDatafiller = async (
     }
   }
 
-  // degreeFiller(data, index);
+  degreeFiller(data, index);
   dateFiller(data, index);
 };
 
@@ -195,7 +195,7 @@ const degreeFiller = async (data, index) => {
         for (const [index, element] of selectOptions.entries()) {
           if (
             fromatStirngInLowerCase(element.textContent.trim()) ===
-            fromatStirngInLowerCase(data.field)
+            fromatStirngInLowerCase(data.degree)
           ) {
             // console.log("options::--", element);
             // console.log("text--", element.textContent.trim());
