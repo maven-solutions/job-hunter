@@ -15,38 +15,114 @@ import {
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getAddationalInfo = (dispatch) => {
-  let workplacetype: any = document
-    .querySelector(".ui-label.ui-label--accent-3.text-body-small")
-    .textContent.trim()
-    .split(" ");
-  workplacetype = workplacetype[workplacetype.length - 1];
-  workplacetype = workplacetype.replace(".", " ");
+  // let workplacetype: any =
+  //   document
+  //     .querySelector(".ui-label.ui-label--accent-3.text-body-small")
+  //     ?.textContent?.trim()
+  //     ?.split(" ") ?? "";
+
+  // if (workplacetype) {
+  //   workplacetype = workplacetype[workplacetype?.length - 1];
+  //   workplacetype = workplacetype?.replace(".", " ");
+  // }
+
+  // const jobInsightElement = document.querySelector(
+  //   ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
+  // );
 
   const jobInsightElement = document.querySelector(
     ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
   );
-  // Get the text content
-  const jobInsightText = jobInsightElement.textContent.trim();
-  // Extract "worktype position"
-  const positionText = jobInsightText.split(".").pop().trim();
-  // Split "worktype position" to extract "worktype"
-  const positionSplit = positionText.split(" ");
-  const worktype = positionSplit.shift(); // Remove and return the first element of the array
-  const position = positionSplit.join(" ");
+  const jobInsightText =
+    jobInsightElement?.querySelector("span")?.textContent?.trim() ?? "";
+
+  let workplacetype: string | null = null;
+  let worktype: string | null = null;
+  let position: string | null = null;
+  // for workplace
+
+  if (jobInsightText.toLocaleLowerCase().includes("remote")) {
+    workplacetype = "Remote";
+  } else if (jobInsightText.toLocaleLowerCase().includes("hybrid")) {
+    workplacetype = "Hybrid";
+  } else if (jobInsightText.toLocaleLowerCase().includes("on-site")) {
+    workplacetype = "On-site";
+  }
+
+  // for jobtype
+  if (jobInsightText.toLocaleLowerCase().includes("full-time")) {
+    worktype = "Full-time";
+  } else if (jobInsightText.toLocaleLowerCase().includes("part-time")) {
+    worktype = "Part-time";
+  } else if (jobInsightText.toLocaleLowerCase().includes("contract")) {
+    worktype = "Contract";
+  } else if (jobInsightText.toLocaleLowerCase().includes("temporary")) {
+    worktype = "Temporary";
+  } else if (jobInsightText.toLocaleLowerCase().includes("volunteer")) {
+    worktype = "Volunteer";
+  } else if (jobInsightText.toLocaleLowerCase().includes("internship")) {
+    worktype = "Internship";
+  } else if (jobInsightText.toLocaleLowerCase().includes("other")) {
+    worktype = "Other";
+  }
+  // for experience
+
+  if (jobInsightText.toLocaleLowerCase().includes("internship")) {
+    position = "Internship";
+  } else if (jobInsightText.toLocaleLowerCase().includes("entry level")) {
+    position = "Entry level";
+  } else if (jobInsightText.toLocaleLowerCase().includes("associate")) {
+    position = "Associate";
+  } else if (jobInsightText.toLocaleLowerCase().includes("mid-senior")) {
+    position = "Mid-Senior level";
+  } else if (jobInsightText.toLocaleLowerCase().includes("director")) {
+    position = "Director";
+  } else if (jobInsightText.toLocaleLowerCase().includes("executive")) {
+    position = "Executive";
+  }
+
+  // // Get the text content
+  // const jobInsightText = jobInsightElement?.textContent?.trim();
+  // // Extract "worktype position"
+  // const positionText = jobInsightText?.split(".")?.pop()?.trim();
+  // // Split "worktype position" to extract "worktype"
+  // const positionSplit = positionText?.split(" ");
+  // const worktype = positionSplit?.shift(); // Remove and return the first element of the array
+  // const position = positionSplit?.join(" ");
+  // let firstEle = "";
+  // if (workplacetype && worktype) {
+  //   firstEle = `${workplacetype?.trim()} . ${worktype?.trim()}`;
+  // }
+
+  // if (workplacetype && worktype && position) {
+  //   firstEle = `${workplacetype?.trim()} . ${worktype?.trim()} . ${position?.trim()}`;
+  // }
+  let elements: string[] = [];
+
+  if (workplacetype) {
+    elements.push(workplacetype.trim());
+  }
+
+  if (worktype) {
+    elements.push(worktype.trim());
+  }
+
+  if (position) {
+    elements.push(position.trim());
+  }
+
+  let firstEle = elements.join(" . ");
 
   const secondLiElement = document?.querySelectorAll(
     ".job-details-jobs-unified-top-card__job-insight"
   )[1];
   const secondLiText = secondLiElement?.textContent?.trim() ?? "";
 
-  const firstEle =
-    `${workplacetype.trim()} . ${worktype.trim()} . ${position.trim()}` ?? "";
-
   const imgEle = document.querySelector(
     ".jobs-search-results-list__list-item--active"
   );
   if (imgEle) {
-    const img = imgEle.querySelector("img");
+    const img = imgEle?.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
   }
   dispatch(setJobType(firstEle));
@@ -85,6 +161,15 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     if (locationText) {
       dispatch(setJobLocation(locationText));
     }
+
+    const location2 = document.querySelector(
+      ".job-details-jobs-unified-top-card__tertiary-description"
+    );
+    const locationtext2: any = location2?.childNodes[1] ?? "";
+    if (locationtext2?.textContent?.trim()) {
+      dispatch(setJobLocation(locationtext2?.textContent?.trim()));
+    }
+
     getAddationalInfo(dispatch);
     dispatch(setJobSource("Linkedin"));
 
@@ -95,8 +180,23 @@ const getContentFromLinkedInJobs = (dispatch): void => {
       );
       const aTag = domElement?.querySelector("a.app-aware-link");
       const companyName = aTag?.textContent;
-      dispatch(setJobCompany(companyName?.trim()));
+      if (companyName?.trim()) {
+        dispatch(setJobCompany(companyName?.trim()));
+      }
     }, 500);
+
+    const company2 = document.querySelector(
+      ".job-details-jobs-unified-top-card__company-name"
+    );
+
+    const aTag2 = company2?.querySelector("a.app-aware-link");
+
+    const companyName2 = aTag2?.textContent;
+    if (companyName2?.trim()) {
+      dispatch(setJobCompany(companyName2?.trim()));
+    }
+
+    // job - details - jobs - unified - top - card__company - name;
   } catch (error) {
     console.log(error);
   }
