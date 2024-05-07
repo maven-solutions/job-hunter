@@ -64,7 +64,7 @@ const DisplayJob = (props: any) => {
       jobLink: jobSlice.postUrl,
       jobPortal: jobSlice.source,
       location: jobSlice.location,
-      fromExtenstion: true,
+      fromExtension: true,
     };
 
     try {
