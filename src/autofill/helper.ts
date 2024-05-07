@@ -120,7 +120,11 @@ export const detectInputAndFillData = async (applicantData: any) => {
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
-    if (window.location.href.includes("smartrecruiters")) {
+    if (
+      window.location.href.includes("smartrecruiters")
+      //  ||
+      // window.location.href.includes("wd5.myworkdayjobs")
+    ) {
       launchWork = false;
       launcEducation = false;
     }
@@ -128,9 +132,9 @@ export const detectInputAndFillData = async (applicantData: any) => {
     if (launchWork) {
       await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
     }
-    if (launcEducation) {
-      await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
-    }
+    // if (launcEducation) {
+    //   await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
+    // }
 
     // for domain specific
     if (window.location.href.includes(".greenhouse.")) {
@@ -144,6 +148,10 @@ export const detectInputAndFillData = async (applicantData: any) => {
     if (window.location.href.includes(".eightfold.")) {
       eightFold(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    // if (window.location.href.includes("wd5.myworkdayjobs")) {
+    //   eightFold(tempDiv ?? tempDivForFile, applicantData);
+    // }
   }
 };
 
