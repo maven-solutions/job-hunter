@@ -8,25 +8,18 @@ import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 
 const extractInfo = (resumeData, applicationForm) => {
-  const {
-    name,
-    emailAddress,
-    // phoneNumber,
-    city,
-    state,
-    country,
-    webLinks,
-    zipCode,
-    pdfUrl,
-    fields,
-  } = resumeData;
+  const { pdfUrl, fields } = resumeData;
 
   const {
+    firstName,
+    lastName,
+    email,
     gender,
     dob,
     phoneNumber,
     citizenshipStatus,
     race,
+    portfolio,
     language,
     veteranStatus,
     covidVaccinationStatus,
@@ -34,8 +27,10 @@ const extractInfo = (resumeData, applicationForm) => {
     userAuthorizationUsa,
     userAuthorizationCanada,
     phoneType,
-    degree,
-    fieldOfStudy,
+    zipCode,
+    city,
+    state,
+    country,
     education,
     expectedSalaryRange,
   } = applicationForm;
@@ -43,20 +38,11 @@ const extractInfo = (resumeData, applicationForm) => {
   // console.log("applicationForm::", applicationForm);
 
   // Extracting full name, first name, and last name
-  const [first_name, last_name] =
-    name && typeof name === "string" && name.includes(" ")
-      ? name.split(" ")
-      : [name, ""];
 
-  const full_name = name;
+  const fullName = firstName + lastName;
 
-  // Extracting website and LinkedIn URL
-  const linkedin_url =
-    webLinks?.find((link) => link.name.includes("linkedin"))?.name || "";
-
-  // Extracting address
   const address = `${city?.label}, ${state?.label}`;
-  // const education = fields?.find((sec) => sec.section === "education");
+
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
     (sec) => sec.section === "employment-history"
@@ -78,16 +64,17 @@ const extractInfo = (resumeData, applicationForm) => {
   const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
   return {
-    full_name,
-    first_name,
-    last_name,
-    email_address: emailAddress,
+    full_name: fullName,
+    first_name: firstName,
+    last_name: lastName,
+    email_address: email,
     phone_number: phoneNumber,
     address,
     city: city?.label,
     state: state?.label,
     country: country?.label,
-    linkedin_url,
+    linkedin_url: portfolio.linkedin_url ?? "",
+    github_url: portfolio.github_url ?? "",
     zip_code: zipCode,
     pdf_url: pdfUrl,
     education: education,
