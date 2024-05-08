@@ -97,7 +97,8 @@ const extractInfo = (resumeData, applicationForm) => {
 };
 
 const AutofillFields = (props: any) => {
-  const { selectedResume, content } = props;
+  const { selectedResume, content, setAutoFilling } = props;
+
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -126,7 +127,7 @@ const AutofillFields = (props: any) => {
       resumeList.applicantData[selectedResume].applicationForm
     );
     // console.log("applicantData---", applicantData);
-    detectInputAndFillData(applicantData);
+    detectInputAndFillData(applicantData, setAutoFilling);
   };
 
   const handleAutofill = () => {
@@ -147,9 +148,6 @@ const AutofillFields = (props: any) => {
         >
           Auto Fill
         </button>
-        {/* <button className="logout__btn" onClick={logoutUser}>
-          <LogOut /> Logout
-        </button> */}
       </div>
     </div>
   );

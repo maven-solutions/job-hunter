@@ -14,10 +14,10 @@ import "./index.css";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content } = props;
-
   const [showdropDown, setShowDropdown] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedResume, setSelectedResume] = useState(0);
+  const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -26,6 +26,23 @@ const ResumeList = (props: any) => {
   });
 
   // console.log("resume::", resumeList);
+  // useEffect(() => {
+  //   chrome.runtime.onMessage.addListener(function (
+  //     message,
+  //     sender,
+  //     sendResponse
+  //   ) {
+  //     if (message.action === "startAnimation") {
+  //       setAutoFilling(true);
+  //       // console.log("Start animation command received in background script");
+  //       // Code to start animation
+  //     } else if (message.action === "stopAnimation") {
+  //       // console.log("Stop animation command received in background script");
+  //       // Code to stop animation
+  //       setAutoFilling(false);
+  //     }
+  //   });
+  // }, []);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -54,46 +71,60 @@ const ResumeList = (props: any) => {
       <Height height="10" />
 
       <WhiteCard>
-        {resumeList.applicantData.map((item, index) => (
-          <div className="ci_resume_list_section" key={item.applicant.id}>
-            <div className="ci_resume_item_left_section">
-              <input
-                className="ci_resume_radio_button"
-                type="radio"
-                name="resume"
-                id={index}
-                onChange={() => setSelectedResume(index)}
-                checked={selectedResume === index}
-              />
-              <label htmlFor={index} className="ci_resume_radio_button_label">
-                {item.applicant.title ?? `Untitled - ${item.applicant.name}`}
-              </label>
-              {selectedResume === index && (
-                <div className="ci_radio_check_circle">
-                  <Check className="ci_check_icon" />
+        {!autoFilling && (
+          <>
+            {" "}
+            {resumeList.applicantData.map((item, index) => (
+              <div className="ci_resume_list_section" key={item.applicant.id}>
+                <div className="ci_resume_item_left_section">
+                  <input
+                    className="ci_resume_radio_button"
+                    type="radio"
+                    name="resume"
+                    id={index}
+                    onChange={() => setSelectedResume(index)}
+                    checked={selectedResume === index}
+                  />
+                  <label
+                    htmlFor={index}
+                    className="ci_resume_radio_button_label"
+                  >
+                    {item.applicant.title ??
+                      `Untitled - ${item.applicant.name}`}
+                  </label>
+                  {selectedResume === index && (
+                    <div className="ci_radio_check_circle">
+                      <Check className="ci_check_icon" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="ext__tooltip__wrapper">
-              <div className="ext__toolip__container">
-                <div
-                  className="ext__toolip"
-                  onClick={() => window.open(item.applicant.pdfUrl, "_blank")}
-                >
-                  <Eye size={16} />
-                  <p className="ext__tooltip__text">Preview</p>
-                </div>
-                {/* <div className="ext__toolip">
+                <div className="ext__tooltip__wrapper">
+                  <div className="ext__toolip__container">
+                    <div
+                      className="ext__toolip"
+                      onClick={() =>
+                        window.open(item.applicant.pdfUrl, "_blank")
+                      }
+                    >
+                      <Eye size={16} />
+                      <p className="ext__tooltip__text">Preview</p>
+                    </div>
+                    {/* <div className="ext__toolip">
                   <Trash2 size={16} />
                   <p className="ext__tooltip__text">Delete</p>
                 </div> */}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
-        <Height height="10" />
-
-        <AutofillFields selectedResume={selectedResume} content={content} />
+            ))}
+            <Height height="10" />
+            <AutofillFields
+              selectedResume={selectedResume}
+              content={content}
+              setAutoFilling={setAutoFilling}
+            />
+          </>
+        )}
       </WhiteCard>
     </Layout>
   );

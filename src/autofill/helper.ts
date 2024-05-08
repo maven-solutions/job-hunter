@@ -65,7 +65,10 @@ export const checkNationForWorkDays = (attribue, valueOfArr) => {
 export function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-export const detectInputAndFillData = async (applicantData: any) => {
+export const detectInputAndFillData = async (
+  applicantData: any,
+  setAutoFilling: any
+) => {
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
 
@@ -74,6 +77,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
     iframe = iframeList[0];
   }
   if (iframe) {
+    setAutoFilling(true);
+
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
     console.log("iframeDocument::");
@@ -96,7 +101,10 @@ export const detectInputAndFillData = async (applicantData: any) => {
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
+    setAutoFilling(false);
   } else {
+    setAutoFilling(true);
+    // chrome.runtime.sendMessage({ action: "startAnimation" });
     console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
@@ -144,6 +152,8 @@ export const detectInputAndFillData = async (applicantData: any) => {
     if (window.location.href.includes(".eightfold.")) {
       eightFold(tempDiv ?? tempDivForFile, applicantData);
     }
+    // chrome.runtime.sendMessage({ action: "stopAnimation" });
+    setAutoFilling(false);
   }
 };
 

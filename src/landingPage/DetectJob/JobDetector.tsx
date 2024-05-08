@@ -201,7 +201,7 @@ const JobDetector = (props: any) => {
       sendResponse
     ) {
       if (request.message === "updateFields") {
-        detectInputAndFillData(request.data);
+        // detectInputAndFillData(request.data);
       }
     });
   }, []);
