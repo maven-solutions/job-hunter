@@ -65,9 +65,8 @@ const Indeed = (props: any) => {
     setTimeout(() => {
       getJobsFromIndeed(dispatch);
     }, 3000);
-    setShowPage("");
-    setShowPage("");
-    dispatch(clearJobState());
+    // setShowPage("");
+    // dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;

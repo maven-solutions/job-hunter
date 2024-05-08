@@ -62,7 +62,9 @@ const MenuPopUp = (props: any) => {
     }
   };
 
-  const callAutoFill = () => {};
+  const callAutoFill = () => {
+    setShowPage(SHOW_PAGE.resumeListPage);
+  };
   // USER_ROLE_TYPE;
   return (
     <div className="ci_menu_outer_continer">

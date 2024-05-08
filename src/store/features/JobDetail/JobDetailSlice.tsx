@@ -89,7 +89,7 @@ const JobDetails = createSlice({
       state.jobFound = false;
       state.source = "";
       state.companyLogo = "";
-      state.selectedStage = "";
+      // state.selectedStage = "";
     },
   },
   extraReducers: (builder) => {
@@ -141,7 +141,7 @@ const JobDetails = createSlice({
       getApplicantResume.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
         state.loading.applicant_resume = false;
-        console.log("data::", payload);
+
         state.res_success.applicant_resume = payload?.data;
       }
     );

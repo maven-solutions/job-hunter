@@ -50,6 +50,12 @@ const DisplayJob = (props: any) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (jobSlice.stage_data_success) {
+      dispatch(setSelectedStage(jobSlice?.stage_data[0]));
+    }
+  }, []);
+
   const savejobs = () => {
     setSaveLoading(true);
 
@@ -182,6 +188,7 @@ const DisplayJob = (props: any) => {
               }),
             }}
             value={jobSlice.selectedStage}
+            // defaultValue={jobSlice?.stage_data[0]}
             placeholder="Select Application Stage"
             onChange={(option) => {
               dispatch(setSelectedStage(option));
