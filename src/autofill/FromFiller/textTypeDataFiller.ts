@@ -13,7 +13,10 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   let phone = false;
 
   // console.log("iframeForm::", iframeForm);
+  console.log("tempDiv::", tempDiv);
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
+
+  console.log("textInputFields::", textInputFields);
 
   textInputFields.forEach((input: any) => {
     // Extract all attributes
