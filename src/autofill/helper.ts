@@ -67,7 +67,9 @@ export function delay(ms) {
 }
 export const detectInputAndFillData = async (
   applicantData: any,
-  setAutoFilling: any
+
+  startLoading: any,
+  stopLoading: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
@@ -77,7 +79,7 @@ export const detectInputAndFillData = async (
     iframe = iframeList[0];
   }
   if (iframe) {
-    setAutoFilling(true);
+    startLoading();
 
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
@@ -101,10 +103,9 @@ export const detectInputAndFillData = async (
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
-    setAutoFilling(false);
+    stopLoading();
   } else {
-    setAutoFilling(true);
-    // chrome.runtime.sendMessage({ action: "startAnimation" });
+    startLoading();
     console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
@@ -152,8 +153,8 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".eightfold.")) {
       eightFold(tempDiv ?? tempDivForFile, applicantData);
     }
-    // chrome.runtime.sendMessage({ action: "stopAnimation" });
-    setAutoFilling(false);
+
+    stopLoading();
   }
 };
 
