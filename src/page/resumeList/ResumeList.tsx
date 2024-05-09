@@ -11,6 +11,7 @@ import Height from "../../component/height/Height";
 import HeadingTitle from "../../component/heading/HeadingTitle";
 import AutofillFields from "./AutofillFields";
 import "./index.css";
+import Spinner from "../shared/Spinner";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content } = props;
@@ -123,6 +124,18 @@ const ResumeList = (props: any) => {
               content={content}
               setAutoFilling={setAutoFilling}
             />
+          </>
+        )}
+
+        {autoFilling && (
+          <>
+            {" "}
+            <div style={{ padding: "10px", paddingTop: "0" }}>
+              <Spinner size={60} />
+            </div>
+            <span className="ci_form_filling_text">
+              Form Filling Please Wait...{" "}
+            </span>
           </>
         )}
       </WhiteCard>

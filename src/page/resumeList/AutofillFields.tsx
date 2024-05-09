@@ -103,6 +103,13 @@ const AutofillFields = (props: any) => {
     return store.ResumeListSlice;
   });
 
+  const startLoading = () => {
+    setAutoFilling(true);
+  };
+
+  const stopLoading = () => {
+    setAutoFilling(false);
+  };
   const autofillByPopUp = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const activeTab = tabs[0];
@@ -127,7 +134,7 @@ const AutofillFields = (props: any) => {
       resumeList.applicantData[selectedResume].applicationForm
     );
     // console.log("applicantData---", applicantData);
-    detectInputAndFillData(applicantData, setAutoFilling);
+    detectInputAndFillData(applicantData, startLoading, stopLoading);
   };
 
   const handleAutofill = () => {
