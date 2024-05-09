@@ -13,8 +13,6 @@ import {
   setJobTitle,
   setJobType,
 } from "../store/features/JobDetail/JobDetailSlice";
-import { glassDoorNotiification } from "../component/InfoNotification";
-import { addButtonToGlassdoorWebsite } from "../component/CareerAibutton";
 
 const getJobId = () => {
   // Given URL

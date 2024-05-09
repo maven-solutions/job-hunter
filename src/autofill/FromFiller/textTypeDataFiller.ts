@@ -14,7 +14,6 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
   // console.log("iframeForm::", iframeForm);
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
-
   textInputFields.forEach((input: any) => {
     // Extract all attributes
     const attributes: any = Array.from(input.attributes);
@@ -165,12 +164,25 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         return true; // Stop iterating
       }
 
-      // salary
+      // // salary
+      // if (
+      //   checkIfExist(labelText, fieldNames.salary) ||
+      //   checkIfExist(attribute.value, fieldNames.salary)
+      // ) {
+      //   input.value = applicantData.salary;
+      //   input.focus(); // Autofocus on the input field
+      //   input.click();
+      //   input.select();
+      //   handleValueChanges(input);
+      //   return true; // Stop iterating
+      // }
+
+      // portfolio
       if (
-        checkIfExist(labelText, fieldNames.salary) ||
-        checkIfExist(attribute.value, fieldNames.salary)
+        checkIfExist(labelText, fieldNames.portfolio) ||
+        checkIfExist(attribute.value, fieldNames.portfolio)
       ) {
-        input.value = applicantData.salary;
+        input.value = applicantData.portfolio_url;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();

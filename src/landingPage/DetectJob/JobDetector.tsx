@@ -63,12 +63,6 @@ const JobDetector = (props: any) => {
 
   // console.log("authstate::", authState);
 
-  // useEffect(() => {
-  //   if (popup) {
-  //     console.log("popupfired2::");
-  //     setShowIcon(true);
-  //   }
-  // }, [popup]);
   useEffect(() => {
     if (
       [
@@ -80,23 +74,37 @@ const JobDetector = (props: any) => {
         "simplyhired",
         "builtin",
         "localhost",
-      ].some((domain) => window.location.href.includes(domain))
+      ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowIcon(true);
     } else {
       setShowAutofillPage(true);
     }
+
+    if (
+      [".adp.", ".services.", "peoplehr", "job"].some((domain) =>
+        window.location.href.toLowerCase().includes(domain)
+      )
+    ) {
+      setShowAutofillPage(true);
+    }
   }, []);
 
-  // setShowAutofillPage(true);
+  // // setShowAutofillPage(true);
 
   useEffect(() => {
     if (
-      window.location.href.toLowerCase().includes("job") ||
-      window.location.href.toLowerCase().includes("apply") ||
-      window.location.href.toLowerCase().includes("career") ||
-      window.location.href.toLowerCase().includes("work") ||
-      window.location.href.toLowerCase().includes("placement")
+      [
+        "job",
+        "apply",
+        "career",
+        "carees",
+        "work",
+        "placement",
+        ".adp.",
+        "services",
+        "peoplehr",
+      ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowIcon(true);
     }

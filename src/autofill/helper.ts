@@ -14,6 +14,7 @@ import { selectDataExtract } from "./FromFiller/selectDataExtract";
 import { telTypeDataFiller } from "./FromFiller/telTypeDataFiller";
 import { textTypeDataFiller } from "./FromFiller/textTypeDataFiller";
 import { urlTypeDataFiller } from "./FromFiller/urlTypeDataFiller";
+import { adp } from "./domainSpecific/adp";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
@@ -109,8 +110,13 @@ export const detectInputAndFillData = async (
     console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
-    const tempDiv = document.querySelector("form");
-    const tempDivForFile = document.querySelector("body");
+    let tempDiv: any = document.querySelector("form");
+    let tempDivForFile = document.querySelector("body");
+
+    if (window.location.href.includes(".peoplehr.")) {
+      tempDiv = document.querySelector("body");
+    }
+
     localStorage.removeItem("ci_inputid");
     localStorage.removeItem("times");
     buttonFilder();
@@ -152,6 +158,9 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".eightfold.")) {
       eightFold(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".adp.")) {
+      adp(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();
