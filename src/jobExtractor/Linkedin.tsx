@@ -46,7 +46,7 @@ const getAddationalInfo = (dispatch) => {
   } else if (jobInsightText.toLocaleLowerCase().includes("hybrid")) {
     workplacetype = "Hybrid";
   } else if (jobInsightText.toLocaleLowerCase().includes("on-site")) {
-    workplacetype = "On-site";
+    workplacetype = "Onsite";
   }
 
   // for jobtype
@@ -99,10 +99,17 @@ const getAddationalInfo = (dispatch) => {
   // }
   let elements: string[] = [];
 
-  if (workplacetype) {
-    elements.push(workplacetype.trim());
-  }
+  // if (workplacetype) {
+  //   elements.push(workplacetype.trim());
+  // }
 
+  const secondLiElement = document?.querySelectorAll(
+    ".job-details-jobs-unified-top-card__job-insight"
+  )[1];
+  const secondLiText = secondLiElement?.textContent?.trim() ?? "";
+  if (secondLiText) {
+    elements.push(secondLiText.trim());
+  }
   if (worktype) {
     elements.push(worktype.trim());
   }
@@ -112,12 +119,6 @@ const getAddationalInfo = (dispatch) => {
   }
 
   let firstEle = elements.join(" . ");
-
-  const secondLiElement = document?.querySelectorAll(
-    ".job-details-jobs-unified-top-card__job-insight"
-  )[1];
-  const secondLiText = secondLiElement?.textContent?.trim() ?? "";
-
   const imgEle = document.querySelector(
     ".jobs-search-results-list__list-item--active"
   );
@@ -125,8 +126,9 @@ const getAddationalInfo = (dispatch) => {
     const img = imgEle?.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
   }
-  dispatch(setJobType(firstEle));
+  dispatch(setJobType(workplacetype));
   dispatch(setJobSummary([secondLiText]));
+  dispatch(setJobSummary([elements]));
   dispatch(setJobFoundStatus(true));
 };
 const getContentFromLinkedInJobs = (dispatch): void => {
