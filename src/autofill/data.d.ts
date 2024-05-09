@@ -26,6 +26,7 @@ export interface Applicant {
   full_name?: string;
   gpa?: string | number | null;
   gender?: string | null;
+  github_url?: string | null;
   is_over_18?: boolean | null;
 
   last_name?: string;
@@ -35,6 +36,7 @@ export interface Applicant {
   phone_number?: string;
   professional_summary?: string | null;
   phone_type?: string | number | null;
+  portfolio_url?: string | null;
 
   race?: string | null;
   state?: string | undefined;

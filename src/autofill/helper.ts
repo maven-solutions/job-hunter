@@ -110,8 +110,13 @@ export const detectInputAndFillData = async (
     console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
-    const tempDiv = document.querySelector("form");
-    const tempDivForFile = document.querySelector("body");
+    let tempDiv: any = document.querySelector("form");
+    let tempDivForFile = document.querySelector("body");
+
+    if (window.location.href.includes(".peoplehr.")) {
+      tempDiv = document.querySelector("body");
+    }
+
     localStorage.removeItem("ci_inputid");
     localStorage.removeItem("times");
     buttonFilder();

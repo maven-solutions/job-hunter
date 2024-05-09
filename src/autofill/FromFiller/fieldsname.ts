@@ -89,7 +89,7 @@ export const fieldNames = {
   race: ["race", "ethnicity"],
   role_description: ["roledescription", "description", "role"],
 
-  salary: ["salary"],
+  salary: ["salary", "pay"],
   started_date: [""],
   state: ["state", "province", "territory"],
   salary_expectations: ["salary_expectation", "salary_expectations"],
@@ -109,4 +109,5 @@ export const fieldNames = {
 
   year: ["year"],
   zip_code: ["zip", "zipcode", "postalcode", "postal", "postcode"],
+  portfolio: ["website", "portfolio"],
 };

@@ -75,6 +75,7 @@ const extractInfo = (resumeData, applicationForm) => {
     country: country?.label,
     linkedin_url: portfolio.linkedin_url ?? "",
     github_url: portfolio.github_url ?? "",
+    portfolio_url: portfolio.portfolio_url ?? "",
     zip_code: zipCode,
     pdf_url: pdfUrl,
     education: education,

@@ -82,7 +82,7 @@ const JobDetector = (props: any) => {
     }
 
     if (
-      [".adp.", ".services.", "peoplehr"].some((domain) =>
+      [".adp.", ".services.", "peoplehr", "job"].some((domain) =>
         window.location.href.toLowerCase().includes(domain)
       )
     ) {
