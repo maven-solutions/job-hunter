@@ -99,7 +99,7 @@ const getAddationalInfo = (dispatch) => {
       ".ivm-view-attr__img--centered.EntityPhoto-square-0.evi-image.lazy-image.ember-view"
     );
   }
-
+  console.log("imgEle::", imgEle);
   if (imgEle) {
     dispatch(setJobCompanyLogo(imgEle?.src));
   }
