@@ -14,6 +14,7 @@ import {
   setJobSummary,
   setJobTitle,
   setJobType,
+  setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getAddationalInfo = (dispatch) => {
@@ -26,8 +27,17 @@ const getAddationalInfo = (dispatch) => {
   let workplacetype: string | null = null;
   let worktype: string | null = null;
   let position: string | null = null;
-  // for workplace
+  let salary: string | null = null;
 
+  const regex =
+    /\$\d+(?:,\d+)*(?:\.\d+)?(?:K|k)?\/(?:yr|hr|m)?(?:\s*-\s*\$\d+(?:,\d+)*(?:\.\d+)?(?:K|k)?\/(?:yr|hr|m)?)?/;
+  const matches = jobInsightText.match(regex);
+  if (matches) {
+    salary = matches[0];
+    dispatch(setSalary(salary));
+  }
+  // for workplace
+  // console.log("jobInsightText::", jobInsightText);
   if (jobInsightText.toLocaleLowerCase().includes("remote")) {
     workplacetype = "Remote";
   } else if (jobInsightText.toLocaleLowerCase().includes("hybrid")) {

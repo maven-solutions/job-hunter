@@ -37,7 +37,7 @@ const DisplayJob = (props: any) => {
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
-  console.log("job:slice::", jobSlice);
+  // console.log("job:slice::", jobSlice);
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
