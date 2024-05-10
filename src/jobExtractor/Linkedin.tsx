@@ -72,15 +72,15 @@ const getAddationalInfo = (dispatch) => {
   let elements2: string[] = [];
 
   if (workplacetype) {
-    elements.push(workplacetype.trim());
+    elements.push(workplacetype);
   }
   if (worktype) {
-    elements.push(worktype.trim());
-    elements2.push(worktype.trim());
+    elements.push(worktype);
+    elements2.push(worktype);
   }
   if (position) {
-    elements.push(position.trim());
-    elements2.push(position.trim());
+    elements.push(position);
+    elements2.push(position);
   }
 
   let firstEle = elements.join(" . ");
@@ -90,17 +90,22 @@ const getAddationalInfo = (dispatch) => {
   )[1];
   const secondLiText = secondLiElement?.textContent?.trim() ?? "";
 
-  const imgEle = document.querySelector(
+  let imgEle: any = document.querySelector(
     ".jobs-search-results-list__list-item--active"
   );
-  console.log("imgEle::", imgEle);
+
+  if (!imgEle) {
+    imgEle = document.querySelector(
+      ".ivm-view-attr__img--centered.EntityPhoto-square-0.evi-image.lazy-image.ember-view"
+    );
+  }
+
   if (imgEle) {
-    const img = imgEle?.querySelector("img");
-    dispatch(setJobCompanyLogo(img?.src));
+    dispatch(setJobCompanyLogo(imgEle?.src));
   }
 
   dispatch(setJobCulture(jobCulture));
-  dispatch(setJobType(workplacetype.trim()));
+  dispatch(setJobType(workplacetype));
   dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobSummary([secondLiText]));
   dispatch(setJobFoundStatus(true));
