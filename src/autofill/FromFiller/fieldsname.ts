@@ -45,6 +45,7 @@ export const fieldNames = {
     "guestFirstName",
   ],
   file: ["file"],
+  field_of_study: ["study", "field"],
   gpa: ["gpa", "result"],
   gender: ["gender"],
 

@@ -214,4 +214,92 @@ const degreeFiller = async (data, index) => {
       }
     }
   }
+
+  const selectButtonFields2: any = tempDiv.querySelectorAll("select");
+  if (selectButtonFields || selectButtonFields.length > 0) {
+    ///
+  } else {
+    return;
+  }
+  for (const select of selectButtonFields2) {
+    const selectid = select.getAttribute("id");
+    const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
+
+    const labelText = labelElement?.textContent?.trim();
+    const attributes: any = Array.from(select.attributes);
+    // for degree
+    attributes.some((attribute) => {
+      if (
+        checkIfExist(labelText, fieldNames.degree) ||
+        (checkIfExist(attribute.value, fieldNames.degree) &&
+          !select.hasAttribute("ci_date_filled"))
+      ) {
+        const id = select.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (
+          !allInputId?.includes(id) &&
+          !select.hasAttribute("ci_date_filled")
+        ) {
+          Array.from(select.options).find((option: any) => {
+            if (
+              fromatStirngInLowerCase(option?.text) ===
+                fromatStirngInLowerCase(data.degree) ||
+              fromatStirngInLowerCase(option?.text).includes(
+                fromatStirngInLowerCase(data.degree)
+              ) ||
+              fromatStirngInLowerCase(data.degree).includes(
+                fromatStirngInLowerCase(option?.text)
+              )
+            ) {
+              option.focus(); // Autofocus on the option field
+              option.click();
+              option.selected = true;
+              select.setAttribute("ci_date_filled", index);
+              handleValueChanges(option);
+              // gender = true;
+              return true;
+            }
+          });
+        }
+      }
+    });
+
+    // for field of study
+    attributes.some((attribute) => {
+      if (
+        checkIfExist(labelText, fieldNames.field_of_study) ||
+        (checkIfExist(attribute.value, fieldNames.field_of_study) &&
+          !select.hasAttribute("ci_date_filled"))
+      ) {
+        const id = select.getAttribute("id");
+        const allInputId = getAllinputId();
+
+        if (
+          !allInputId?.includes(id) &&
+          !select.hasAttribute("ci_date_filled")
+        ) {
+          Array.from(select.options).find((option: any) => {
+            if (
+              fromatStirngInLowerCase(option?.text) ===
+                fromatStirngInLowerCase(data.major) ||
+              fromatStirngInLowerCase(option?.text).includes(
+                fromatStirngInLowerCase(data.major)
+              ) ||
+              fromatStirngInLowerCase(data.major).includes(
+                fromatStirngInLowerCase(option?.text)
+              )
+            ) {
+              option.focus(); // Autofocus on the option field
+              option.click();
+              option.selected = true;
+              select.setAttribute("ci_date_filled", index);
+              handleValueChanges(option);
+              // gender = true;
+              return true;
+            }
+          });
+        }
+      }
+    });
+  }
 };
