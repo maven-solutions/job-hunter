@@ -91,15 +91,19 @@ const getAddationalInfo = (dispatch) => {
   const secondLiText = secondLiElement?.textContent?.trim() ?? "";
 
   let imgEle: any = document.querySelector(
-    ".jobs-search-results-list__list-item--active"
+    ".jobs-search-results-list__list-item--active-v2"
   );
+  if (imgEle) {
+    const img = imgEle?.querySelector("img");
+    dispatch(setJobCompanyLogo(img?.src));
+  }
 
   if (!imgEle) {
     imgEle = document.querySelector(
       ".ivm-view-attr__img--centered.EntityPhoto-square-0.evi-image.lazy-image.ember-view"
     );
   }
-  console.log("imgEle::", imgEle);
+
   if (imgEle) {
     dispatch(setJobCompanyLogo(imgEle?.src));
   }
