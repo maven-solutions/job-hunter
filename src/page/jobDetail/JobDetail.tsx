@@ -68,6 +68,8 @@ const JobDetail = (props: any) => {
       jobLink: jobSlice.postUrl,
       jobPortal: jobSlice.source,
       location: jobSlice.location,
+      salary: jobSlice.salary,
+      jobCulture: jobSlice.job_culture,
       fromExtension: true,
     };
     try {

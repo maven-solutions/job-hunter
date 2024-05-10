@@ -4,10 +4,12 @@ import {
   clearJobState,
   setJobCompany,
   setJobCompanyLogo,
+  setJobCulture,
   setJobDesc,
   setJobFoundStatus,
   setJobLocation,
   setJobPostUrl,
+  setJobRelatedInfo,
   setJobSource,
   setJobSummary,
   setJobTitle,
@@ -15,21 +17,6 @@ import {
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getAddationalInfo = (dispatch) => {
-  // let workplacetype: any =
-  //   document
-  //     .querySelector(".ui-label.ui-label--accent-3.text-body-small")
-  //     ?.textContent?.trim()
-  //     ?.split(" ") ?? "";
-
-  // if (workplacetype) {
-  //   workplacetype = workplacetype[workplacetype?.length - 1];
-  //   workplacetype = workplacetype?.replace(".", " ");
-  // }
-
-  // const jobInsightElement = document.querySelector(
-  //   ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
-  // );
-
   const jobInsightElement = document.querySelector(
     ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
   );
@@ -81,54 +68,41 @@ const getAddationalInfo = (dispatch) => {
     position = "Executive";
   }
 
-  // // Get the text content
-  // const jobInsightText = jobInsightElement?.textContent?.trim();
-  // // Extract "worktype position"
-  // const positionText = jobInsightText?.split(".")?.pop()?.trim();
-  // // Split "worktype position" to extract "worktype"
-  // const positionSplit = positionText?.split(" ");
-  // const worktype = positionSplit?.shift(); // Remove and return the first element of the array
-  // const position = positionSplit?.join(" ");
-  // let firstEle = "";
-  // if (workplacetype && worktype) {
-  //   firstEle = `${workplacetype?.trim()} . ${worktype?.trim()}`;
-  // }
-
-  // if (workplacetype && worktype && position) {
-  //   firstEle = `${workplacetype?.trim()} . ${worktype?.trim()} . ${position?.trim()}`;
-  // }
   let elements: string[] = [];
+  let elements2: string[] = [];
 
-  // if (workplacetype) {
-  //   elements.push(workplacetype.trim());
-  // }
+  if (workplacetype) {
+    elements.push(workplacetype.trim());
+  }
+  if (worktype) {
+    elements.push(worktype.trim());
+    elements2.push(worktype.trim());
+  }
+  if (position) {
+    elements.push(position.trim());
+    elements2.push(position.trim());
+  }
 
+  let firstEle = elements.join(" . ");
+  let jobCulture = elements2.join(" . ");
   const secondLiElement = document?.querySelectorAll(
     ".job-details-jobs-unified-top-card__job-insight"
   )[1];
   const secondLiText = secondLiElement?.textContent?.trim() ?? "";
-  if (secondLiText) {
-    elements.push(secondLiText.trim());
-  }
-  if (worktype) {
-    elements.push(worktype.trim());
-  }
 
-  if (position) {
-    elements.push(position.trim());
-  }
-
-  let firstEle = elements.join(" . ");
   const imgEle = document.querySelector(
     ".jobs-search-results-list__list-item--active"
   );
+  console.log("imgEle::", imgEle);
   if (imgEle) {
     const img = imgEle?.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
   }
-  dispatch(setJobType(workplacetype));
+
+  dispatch(setJobCulture(jobCulture));
+  dispatch(setJobType(workplacetype.trim()));
+  dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobSummary([secondLiText]));
-  dispatch(setJobSummary([elements]));
   dispatch(setJobFoundStatus(true));
 };
 const getContentFromLinkedInJobs = (dispatch): void => {

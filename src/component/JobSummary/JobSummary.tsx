@@ -39,7 +39,7 @@ const JobSummary = () => {
         {jobDetailState.jobtype && (
           <div className="ci_job_worktype_section">
             <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
-            <span>{jobDetailState.jobtype}</span>
+            <span>{jobDetailState.job_related_info}</span>
           </div>
         )}
         {jobDetailState.addationlIfo.length > 0 && (

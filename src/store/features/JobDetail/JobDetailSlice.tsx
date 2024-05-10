@@ -30,6 +30,9 @@ const initialState: any = {
   jobFound: false,
   companyLogo: "",
   source: "",
+  salary: "",
+  job_culture: "",
+  job_related_info: "",
   selectedStage: "",
   stage_data: [],
 };
@@ -72,6 +75,16 @@ const JobDetails = createSlice({
     setSelectedStage: (state: any, { payload }: PayloadAction<any>) => {
       state.selectedStage = payload;
     },
+    setSalary: (state: any, { payload }: PayloadAction<any>) => {
+      state.salary = payload;
+    },
+
+    setJobCulture: (state: any, { payload }: PayloadAction<any>) => {
+      state.job_culture = payload;
+    },
+    setJobRelatedInfo: (state: any, { payload }: PayloadAction<any>) => {
+      state.job_related_info = payload;
+    },
     setButtonDisabledFalse: (state: any) => {
       state.res_success.add_job = false;
     },
@@ -89,6 +102,9 @@ const JobDetails = createSlice({
       state.jobFound = false;
       state.source = "";
       state.companyLogo = "";
+      state.job_related_info = "";
+      state.salary = "";
+      state.job_culture = "";
       // state.selectedStage = "";
     },
   },
@@ -189,6 +205,9 @@ export const {
   setSelectedStage,
   setButtonDisabledFalse,
   setJobReqSucccessFalse,
+  setSalary,
+  setJobRelatedInfo,
+  setJobCulture,
 } = JobDetails.actions;
 
 export default JobDetails.reducer;

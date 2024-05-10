@@ -37,7 +37,7 @@ const DisplayJob = (props: any) => {
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
-
+  // console.log("job:slice::", jobSlice);
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
@@ -70,6 +70,8 @@ const DisplayJob = (props: any) => {
       jobLink: jobSlice.postUrl,
       jobPortal: jobSlice.source,
       location: jobSlice.location,
+      salary: jobSlice.salary,
+      jobCulture: jobSlice.job_culture,
       fromExtension: true,
     };
 
