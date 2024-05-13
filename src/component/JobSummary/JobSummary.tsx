@@ -36,7 +36,7 @@ const JobSummary = () => {
       </div>
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
-        {jobDetailState.jobtype && (
+        {jobDetailState.job_related_info && (
           <div className="ci_job_worktype_section">
             <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
             <span>{jobDetailState.job_related_info}</span>

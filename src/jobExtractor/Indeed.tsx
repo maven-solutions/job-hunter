@@ -7,10 +7,12 @@ import {
   setJobFoundStatus,
   setJobLocation,
   setJobPostUrl,
+  setJobRelatedInfo,
   setJobSource,
   setJobSummary,
   setJobTitle,
   setJobType,
+  setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 const getJobsFromIndeed = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
@@ -40,16 +42,27 @@ const getJobsFromIndeed = (dispatch): void => {
     ?.textContent?.trim();
 
   if (locationEle) {
-    const locationText = locationEle.split("•")[0] ?? "";
+    let locationText = locationEle.split("•")[0] ?? "";
+    if (locationText.includes("Remote") || locationEle.includes("Remote")) {
+      dispatch(setJobType("Remote"));
+      dispatch(setJobRelatedInfo("Remote"));
+    }
     dispatch(setJobLocation(locationText));
   }
 
-  const sallaryInfo =
-    document.querySelector("#salaryInfoAndJobType")?.textContent?.trim() ?? "";
+  const sallaryAndJobTypeEle = document.querySelector("#salaryInfoAndJobType");
+  const sallaryAndJobTypeInfo = sallaryAndJobTypeEle?.textContent?.trim() ?? "";
+  const sallaryAndJobTypeEleChild = sallaryAndJobTypeEle?.children[0];
+  if (sallaryAndJobTypeEleChild) {
+    const salaryText = sallaryAndJobTypeEleChild?.textContent?.trim();
+    if (salaryText) {
+      dispatch(setSalary(salaryText));
+    }
+  }
 
   // setAddationalInfo([locationEle, sallaryInfo]);
-  dispatch(setJobType(locationEle));
-  dispatch(setJobSummary([sallaryInfo]));
+  // dispatch(setJobType(locationEle));
+  dispatch(setJobSummary([sallaryAndJobTypeInfo]));
 
   const about = document.getElementById("jobDescriptionText");
   dispatch(setJobDesc(about?.innerHTML));

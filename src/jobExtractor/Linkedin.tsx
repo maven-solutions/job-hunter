@@ -16,6 +16,7 @@ import {
   setJobType,
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
+import { extractSalaryFromString } from "../utils/helper";
 
 const getAddationalInfo = (dispatch) => {
   const jobInsightElement = document.querySelector(
@@ -29,12 +30,11 @@ const getAddationalInfo = (dispatch) => {
   let position: string | null = null;
   let salary: string | null = null;
 
-  const regex =
-    /\$\d+(?:,\d+)*(?:\.\d+)?(?:K|k)?\/(?:yr|hr|m)?(?:\s*-\s*\$\d+(?:,\d+)*(?:\.\d+)?(?:K|k)?\/(?:yr|hr|m)?)?/;
-  const matches = jobInsightText.match(regex);
+  // const matches = jobInsightText.match(regex);
+  const matches = extractSalaryFromString(jobInsightText);
   if (matches) {
-    salary = matches[0];
-    dispatch(setSalary(salary));
+    salary = matches;
+    dispatch(setSalary(matches));
   }
   // for workplace
   // console.log("jobInsightText::", jobInsightText);
