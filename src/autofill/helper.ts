@@ -18,6 +18,7 @@ import { adp } from "./domainSpecific/adp";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
+import { myworkDays } from "./domainSpecific/myworkdays";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -119,6 +120,9 @@ export const detectInputAndFillData = async (
 
     localStorage.removeItem("ci_inputid");
     localStorage.removeItem("times");
+    if (window.location.href.includes(".myworkdayjobs.")) {
+      await myworkDays(tempDiv ?? tempDivForFile, applicantData);
+    }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);

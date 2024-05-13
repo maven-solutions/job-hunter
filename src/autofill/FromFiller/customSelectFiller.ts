@@ -39,35 +39,6 @@ const countryHandler = (option, applicantData, country) => {
   }
 };
 
-const fillDeviceType = async (applicantData) => {
-  let phonetype = false;
-  const phoneElement: any = document.querySelector(
-    '[data-automation-id="phone-device-type"]'
-  );
-  if (!phoneElement) {
-    return;
-  }
-  phoneElement.click();
-  await delay(1000);
-  const selectOptions: any = document.querySelectorAll('[role="option"]');
-  if (phonetype) {
-    return;
-  }
-
-  for (const [index, element] of selectOptions.entries()) {
-    if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
-        fromatStirngInLowerCase(applicantData.phone_type)
-      ) &&
-      !phonetype
-    ) {
-      phonetype = true;
-      element.click();
-    }
-  }
-  await delay(1000);
-};
-
 export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
   let country = false;
   let state = false;
@@ -79,10 +50,6 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
   const selectButtonFields: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
-  if (window.location.href.includes(".myworkdayjobs.")) {
-    fillDeviceType(applicantData);
-    await delay(1000);
-  }
 
   for (const [selectIndex, select] of selectButtonFields.entries()) {
     // console.log("select::", select);
