@@ -61,7 +61,10 @@ const getJobFromGlassdoor = (dispatch): void => {
     // const companyName = removeRatingFromEnd(inputString);
     dispatch(setJobCompany(inputString));
   }
-
+  const comapnyLogoEle = glassDom.querySelector("img");
+  if (comapnyLogoEle) {
+    dispatch(setJobCompanyLogo(comapnyLogoEle?.src));
+  }
   const locationText =
     glassDom.querySelector('[data-test="location"]')?.textContent?.trim() ?? "";
   dispatch(setJobLocation(locationText));
@@ -69,8 +72,7 @@ const getJobFromGlassdoor = (dispatch): void => {
   const salary = document
     .querySelector(`[class*="SalaryEstimate_averageEstimate"]`)
     ?.textContent?.trim();
-
-  dispatch(setJobSummary(["Average base salary estimate", salary]));
+  // dispatch(setJobSummary([salary]));
   // for description
   // const sibling = glassDom.nextElementSibling;
   // if (sibling) {
