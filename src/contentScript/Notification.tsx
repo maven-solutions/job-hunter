@@ -44,7 +44,11 @@ const Notification = (props: any) => {
         </div>
       )}
       {!alreadySavedInfo && savedNotification && (
-        <div className="jobs-notification">
+        <div
+          className={`jobs-notification ${
+            foruser && "jobs-notification-padding-top-0"
+          }`}
+        >
           <div className="jobs-notification-inner jobs-notification-inner-saved">
             <img
               src={chrome.runtime.getURL("success.svg")}
