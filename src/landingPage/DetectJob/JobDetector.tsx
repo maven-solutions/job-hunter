@@ -80,14 +80,6 @@ const JobDetector = (props: any) => {
     } else {
       setShowAutofillPage(true);
     }
-
-    if (
-      [".adp.", ".services.", ".peoplehr.", ".ebayinc."].some((domain) =>
-        window.location.href.toLowerCase().includes(domain)
-      )
-    ) {
-      setShowAutofillPage(true);
-    }
   }, []);
 
   // // setShowAutofillPage(true);
@@ -107,6 +99,18 @@ const JobDetector = (props: any) => {
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowIcon(true);
+    }
+
+    if (
+      [
+        ".adp.",
+        ".services.",
+        ".peoplehr.",
+        ".ebayinc.",
+        ".myworkdayjobs.",
+      ].some((domain) => window.location.href.toLowerCase().includes(domain))
+    ) {
+      setShowAutofillPage(true);
     }
   }, []);
 

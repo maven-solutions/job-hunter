@@ -176,10 +176,9 @@ export const handleValueChanges = async (input) => {
     new Event("change", { bubbles: true, cancelable: false })
   );
   input.dispatchEvent(new Event("input", { bubbles: true, cancelable: false }));
-
   input.dispatchEvent(new Event("focus", { bubbles: true, cancelable: false }));
-
   input.dispatchEvent(new Event("click", { bubbles: true, cancelable: false }));
+  input.dispatchEvent(new Event("blur", { bubbles: true, cancelable: false }));
 
   input.scrollIntoView({
     behavior: "smooth",
