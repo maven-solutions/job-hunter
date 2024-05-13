@@ -3,14 +3,18 @@ import { useAppDispatch } from "../store/store";
 import {
   clearJobState,
   setJobCompany,
+  setJobCompanyLogo,
+  setJobCulture,
   setJobDesc,
   setJobFoundStatus,
   setJobLocation,
   setJobPostUrl,
+  setJobRelatedInfo,
   setJobSource,
   setJobSummary,
   setJobTitle,
   setJobType,
+  setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 
 const getJobFromSimplyhired = (dispatch): void => {
@@ -42,6 +46,12 @@ const getJobFromSimplyhired = (dispatch): void => {
 
   dispatch(setJobLocation(locationText));
 
+  const CompanylogoEle: any = document.querySelector(
+    '[data-testid="companyVJLogo"]'
+  );
+  if (CompanylogoEle) {
+    dispatch(setJobCompanyLogo(CompanylogoEle?.src));
+  }
   const workType =
     document
       .querySelector('[data-testid="viewJobBodyJobDetailsJobType"]')
@@ -51,8 +61,11 @@ const getJobFromSimplyhired = (dispatch): void => {
       .querySelector('[data-testid="viewJobBodyJobCompensation"]')
       ?.textContent?.trim() ?? "";
 
-  dispatch(setJobType(workType));
-  dispatch(setJobSummary([payment]));
+  dispatch(setJobType(""));
+  dispatch(setJobRelatedInfo(workType));
+  dispatch(setJobCulture(workType));
+  // dispatch(setJobSummary([payment]));
+  dispatch(setSalary(payment));
   dispatch(setJobFoundStatus(true));
 
   const jobDescriptionEle = document.querySelector(
