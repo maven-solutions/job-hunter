@@ -54,7 +54,7 @@ const DisplayJob = (props: any) => {
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));
     }
-  }, []);
+  }, [window.location.href]);
 
   const savejobs = () => {
     setSaveLoading(true);
