@@ -22,6 +22,7 @@ import {
   STAGING_WEBSITE_URL,
 } from "../../config/urlconfig";
 import Spinner from "../shared/Spinner";
+import Skleton from "../../component/skleton/Skleton";
 
 const DisplayJob = (props: any) => {
   const {
@@ -33,6 +34,7 @@ const DisplayJob = (props: any) => {
   } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
+  const [loadSkleton, setLoadSkleton] = useState<Boolean>(true);
 
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
@@ -51,9 +53,13 @@ const DisplayJob = (props: any) => {
   }, []);
 
   useEffect(() => {
+    setLoadSkleton(true);
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));
     }
+    setTimeout(() => {
+      setLoadSkleton(false);
+    }, 4000);
   }, [window.location.href]);
 
   const savejobs = () => {
@@ -132,9 +138,14 @@ const DisplayJob = (props: any) => {
         alreadySavedInfo={alreadySavedInfo}
         foruser
       />
-      <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
-        <JobSummary />
-      </WhiteCard>
+      {loadSkleton ? (
+        <Skleton />
+      ) : (
+        <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
+          <JobSummary />
+        </WhiteCard>
+      )}
+
       <Height height="15" />
       <WhiteCard>
         <span className="ci_job_stage_title_new">

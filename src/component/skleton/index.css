@@ -1,0 +1,29 @@
+.ci--skeleton--title {
+  width: 70%; /* Adjust as needed */
+  height: 30px; /* Adjust as needed */
+  margin-bottom: 20px;
+  background-color: #e0e0e0; /* Skeleton color */
+  animation: loading 1.5s infinite ease-in-out; /* Animation */
+  border-radius: 5px; /* Border radius */
+}
+
+.ci--skeleton--subtitle {
+  width: 100%; /* Adjust as needed */
+  height: 18px; /* Adjust as needed */
+  margin-bottom: 10px;
+  background-color: #e0e0e0; /* Skeleton color */
+  animation: loading 1.5s infinite ease-in-out; /* Animation */
+  border-radius: 5px; /* Border radius */
+}
+
+@keyframes loading {
+  0% {
+    background-color: #e0e0e0;
+  } /* Skeleton color */
+  50% {
+    background-color: #f0f0f0;
+  } /* Lighter skeleton color */
+  100% {
+    background-color: #e0e0e0;
+  } /* Skeleton color */
+}
