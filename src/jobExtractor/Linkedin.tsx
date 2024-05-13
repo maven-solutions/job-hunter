@@ -106,16 +106,12 @@ const getAddationalInfo = (dispatch) => {
   if (imgEle) {
     const img = imgEle?.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
-  }
-
-  if (!imgEle) {
-    imgEle = document.querySelector(
-      ".ivm-view-attr__img--centered.EntityPhoto-square-0.evi-image.lazy-image.ember-view"
-    );
-  }
-
-  if (imgEle) {
-    dispatch(setJobCompanyLogo(imgEle?.src));
+  } else {
+    imgEle = document.querySelector(".ivm-image-view-model");
+    if (imgEle) {
+      const img = imgEle?.querySelector("img");
+      dispatch(setJobCompanyLogo(img?.src));
+    }
   }
 
   dispatch(setJobCulture(jobCulture));
