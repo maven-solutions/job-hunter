@@ -3,14 +3,17 @@ import {
   clearJobState,
   setJobCompany,
   setJobCompanyLogo,
+  setJobCulture,
   setJobDesc,
   setJobFoundStatus,
   setJobLocation,
   setJobPostUrl,
+  setJobRelatedInfo,
   setJobSource,
   setJobSummary,
   setJobTitle,
   setJobType,
+  setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 import { useEffect } from "react";
 const getJobsFromZipRecuriter1 = (dispatch, zipDom: any) => {
@@ -66,8 +69,27 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   const compensation =
     jobCharacterstics.querySelector(".t_compensation")?.textContent?.trim() ??
     "";
+  if (compensation) {
+    dispatch(setSalary(compensation));
+  }
 
-  dispatch(setJobSummary([employmentType, benefits, compensation]));
+  let elements: string[] = [];
+  let elements2: string[] = [];
+
+  if (workType) {
+    elements.push(workType);
+  }
+  if (employmentType) {
+    elements.push(employmentType);
+    elements2.push(employmentType);
+  }
+  const firstEle = elements?.join(" • ");
+  // employmentType;
+
+  dispatch(setJobRelatedInfo(firstEle));
+
+  dispatch(setJobCulture(elements2?.join(" • ") ?? ""));
+  dispatch(setJobSummary([benefits, compensation]));
 
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {

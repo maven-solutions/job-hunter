@@ -93,8 +93,8 @@ const getAddationalInfo = (dispatch) => {
     elements2.push(position);
   }
 
-  let firstEle = elements.join(" . ");
-  let jobCulture = elements2.join(" . ");
+  let firstEle = elements.join(" • ");
+  let jobCulture = elements2.join(" • ");
   const secondLiElement = document?.querySelectorAll(
     ".job-details-jobs-unified-top-card__job-insight"
   )[1];
