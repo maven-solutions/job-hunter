@@ -77,9 +77,9 @@ const Indeed = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getJobsFromIndeed(dispatch);
-    }, 3000);
+    }, 4000);
     // setShowPage("");
-    // dispatch(clearJobState());
+    dispatch(clearJobState());
   }, [window.location.href]);
 
   return null;

@@ -86,9 +86,8 @@ const Dice = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getJobsFromDice(dispatch);
-    }, 3000);
-    setShowPage("");
-    setShowPage("");
+    }, 4000);
+    // setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
 

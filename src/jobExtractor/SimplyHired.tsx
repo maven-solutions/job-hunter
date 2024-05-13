@@ -86,9 +86,7 @@ const SimplyHiredJob = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getJobFromSimplyhired(dispatch);
-    }, 3000);
-    setShowPage("");
-    setShowPage("");
+    }, 4000);
     dispatch(clearJobState());
   }, [window.location.href]);
 

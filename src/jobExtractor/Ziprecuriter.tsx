@@ -121,9 +121,7 @@ const Ziprecruiter = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getJobFromZipRecruiter(dispatch);
-    }, 3000);
-    setShowPage("");
-    setShowPage("");
+    }, 4000);
     dispatch(clearJobState());
   }, [window.location.href]);
 

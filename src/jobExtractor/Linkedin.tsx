@@ -203,9 +203,9 @@ const Linkedin = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getContentFromLinkedInJobs(dispatch);
-    }, 2000);
+    }, 4000);
     // setShowPage("");
-    // dispatch(clearJobState());
+    dispatch(clearJobState());
   }, [window.location.href]);
   return null;
 };

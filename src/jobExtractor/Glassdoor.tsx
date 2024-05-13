@@ -142,8 +142,8 @@ const Glassdoor = (props: any) => {
   useEffect(() => {
     setTimeout(() => {
       getJobFromGlassdoor(dispatch);
-    }, 3000);
-    setShowPage("");
+    }, 4000);
+    // setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
 

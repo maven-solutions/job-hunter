@@ -142,9 +142,8 @@ const Builtin = (props: any) => {
     const dom2 = document?.querySelector(".block-content");
     setTimeout(() => {
       getJobFromBuiltin(dispatch, dom, dom2);
-    }, 3000);
-    setShowPage("");
-    setShowPage("");
+    }, 4000);
+    // setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
 
