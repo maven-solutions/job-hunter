@@ -178,67 +178,78 @@ const degreeFiller = async (data, index) => {
   let degree = false;
   const tempDiv = document.querySelector("body");
 
-  const selectButtonFields: any = tempDiv.querySelectorAll(
+  let selectButtonFields: any = tempDiv.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
-  // console.log("selectButtonFields::", selectButtonFields);
-  // console.log("selectButtonFields::", selectButtonFields);
-  for (const [selectIndex, select] of selectButtonFields.entries()) {
-    // console.log("select::", select);
+  if (window.location.href.includes("autodesk.wd1.myworkdayjobs.")) {
+    selectButtonFields = tempDiv.querySelectorAll(
+      'button[data-automation-id="degree"]'
+    );
+  }
+  if (selectButtonFields && selectButtonFields.length > 0) {
+    // console.log("selectButtonFields::", selectButtonFields);
+    // console.log("selectButtonFields::", selectButtonFields);
+    for (const [selectIndex, select] of selectButtonFields.entries()) {
+      // console.log("select::", select);
 
-    const selectid = select.getAttribute("id");
-    const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
-    if (!labelElement) {
-      return;
-    }
-    const labelText = labelElement.textContent.trim();
-    // console.log("labelText::", labelText);
+      const selectid = select.getAttribute("id");
+      const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
+      if (!labelElement) {
+        return;
+      }
+      const labelText = labelElement.textContent.trim();
+      console.log("labelText::", labelText);
 
-    // for degree
-    if (
-      checkIfExist(labelText, fieldNames.degree) &&
-      !select.hasAttribute("ci_date_filled")
-    ) {
-      const id = select.getAttribute("id");
-      const allInputId = getAllinputId();
+      // for degree
+      if (
+        checkIfExist(labelText, fieldNames.degree) &&
+        !select.hasAttribute("ci_date_filled")
+      ) {
+        const id = select.getAttribute("id");
+        const allInputId = getAllinputId();
 
-      // console.log("degree::fired");
+        // console.log("degree::fired");
 
-      if (!allInputId?.includes(id) && !select.hasAttribute("ci_date_filled")) {
-        select.click();
-        await delay(200);
-        // console.log("degree::fired22");
+        if (
+          !allInputId?.includes(id) &&
+          !select.hasAttribute("ci_date_filled")
+        ) {
+          select.click();
+          await delay(200);
+          // console.log("degree::fired22");
 
-        const selectOptions: any = document.querySelectorAll('[role="option"]');
-        for (const [index, element] of selectOptions.entries()) {
-          if (
-            fromatStirngInLowerCase(element.textContent.trim()) ===
-              fromatStirngInLowerCase(data.degree) ||
-            fromatStirngInLowerCase(element.textContent.trim()).includes(
-              fromatStirngInLowerCase(data.degree)
-            ) ||
-            fromatStirngInLowerCase(data.degree).includes(
-              fromatStirngInLowerCase(element.textContent.trim())
-            )
-          ) {
-            // console.log("options::--", element);
-            // console.log("text--", element.textContent.trim());
+          const selectOptions: any =
+            document.querySelectorAll('[role="option"]');
+          for (const [index, element] of selectOptions.entries()) {
+            // console.log("option--", element?.textContent?.trim());
+            if (
+              fromatStirngInLowerCase(element.textContent.trim()) ===
+                fromatStirngInLowerCase(data?.degree) ||
+              fromatStirngInLowerCase(element.textContent.trim()).includes(
+                fromatStirngInLowerCase(data?.degree)
+              ) ||
+              fromatStirngInLowerCase(data?.degree).includes(
+                fromatStirngInLowerCase(element.textContent.trim())
+              )
+            ) {
+              // console.log("options::--", element);
+              // console.log("text--", element?.textContent?.trim());
 
-            // console.log("educationField::--", data.field);
-            setIdToLocalstorage(id);
-            select.setAttribute("ci_date_filled", index);
-            degree = true;
-            element.focus();
-            element.click();
-            await delay(300);
-            await delay(200);
-            return true;
+              // console.log("educationField::--", data.field);
+              setIdToLocalstorage(id);
+              select.setAttribute("ci_date_filled", index);
+              degree = true;
+              element.focus();
+              element.click();
+              await delay(300);
+              await delay(200);
+              return true;
+            }
           }
         }
       }
     }
   }
-
   const selectButtonFields2: any = tempDiv.querySelectorAll("select");
   if (selectButtonFields || selectButtonFields.length > 0) {
     ///
