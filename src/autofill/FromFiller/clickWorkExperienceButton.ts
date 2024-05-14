@@ -305,8 +305,8 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
         button.click();
 
         if (
-          window.location.href.includes(".leidos.wd5.myworkdayjobs.") ||
-          window.location.href.includes(".autodesk.wd1.myworkdayjobs.")
+          window.location.href.includes("leidos.wd5.myworkdayjobs.") ||
+          window.location.href.includes("autodesk.wd1.myworkdayjobs.")
         ) {
           if (!delte) {
             await delay(2000);

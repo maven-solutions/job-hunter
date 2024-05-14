@@ -65,6 +65,11 @@ const getJobsFromDice = (dispatch): void => {
   ) {
     jobTypeText = "Onsite";
   }
+
+  const compalyLogoEle: any = document.querySelector(".companyLogo");
+  if (compalyLogoEle) {
+    dispatch(setJobCompanyLogo(compalyLogoEle?.src));
+  }
   const payDetailText =
     document.querySelector('[data-cy="payDetails"]')?.textContent?.trim() ?? "";
 
