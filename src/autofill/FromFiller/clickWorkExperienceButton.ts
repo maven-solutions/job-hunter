@@ -442,7 +442,7 @@ const workExperienceDatafiller = async (
 
   ///
   const textareaFields = tempDiv.querySelectorAll<HTMLInputElement>("textarea");
-  console.log("data::", index, "::", data);
+  // console.log("data::", index, "::", data);
   // console.log("inputid", localStorage.getItem("ci_inputid"));
   for (const [inputIndex, input] of textareaFields.entries()) {
     const attributes: any = Array.from(input.attributes);
