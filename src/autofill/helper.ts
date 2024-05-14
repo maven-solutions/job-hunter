@@ -18,7 +18,7 @@ import { adp } from "./domainSpecific/adp";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
-import { myworkDays } from "./domainSpecific/myworkdays";
+import { myworkDays, selectapi } from "./domainSpecific/myworkdays";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -121,7 +121,8 @@ export const detectInputAndFillData = async (
     localStorage.removeItem("ci_inputid");
     localStorage.removeItem("times");
     if (window.location.href.includes(".myworkdayjobs.")) {
-      await myworkDays(tempDiv ?? tempDivForFile, applicantData);
+      // await myworkDays(tempDiv ?? tempDivForFile, applicantData);
+      await selectapi();
     }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -148,12 +149,12 @@ export const detectInputAndFillData = async (
       launchWork = false;
     }
 
-    if (launchWork) {
-      await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
-    }
-    if (launcEducation) {
-      await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
-    }
+    // if (launchWork) {
+    //   await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
+    // }
+    // if (launcEducation) {
+    //   await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
+    // }
 
     // for domain specific
     if (window.location.href.includes(".greenhouse.")) {

@@ -70,3 +70,30 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   fillDeviceType(applicantData);
   await delay(2000);
 };
+
+export const selectapi = async () => {
+  const inputElement: any = document.getElementById("input-21");
+  console.log("inputElement::", inputElement);
+  inputElement.focus();
+  inputElement.click();
+  await delay(1000);
+  inputElement.value = "biology";
+  inputElement.dispatchEvent(
+    new Event("change", { bubbles: true, cancelable: false })
+  );
+  await delay(1000);
+  inputElement.value = "biology";
+  inputElement.dispatchEvent(
+    new Event("click", { bubbles: true, cancelable: false })
+  );
+  await delay(1000);
+  inputElement.value = "biology";
+  inputElement.dispatchEvent(
+    new Event("click", { bubbles: true, cancelable: false })
+  );
+  inputElement.dispatchEvent(new Event("search"), {
+    bubbles: true,
+    cancelable: false,
+  });
+  inputElement.blur();
+};
