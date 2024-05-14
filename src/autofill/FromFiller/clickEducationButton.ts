@@ -13,7 +13,7 @@ function delay(ms) {
 
 export const clickEducationButton = async (tempDiv, applicantData) => {
   let educationFound = false;
-
+  let delte = false;
   const buttonFields = tempDiv.querySelectorAll("button");
   for await (const button of buttonFields) {
     const attributes: any = Array.from(button.attributes);
@@ -35,6 +35,22 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
 
         await delay(500);
         button.click();
+        if (window.location.href.includes(".wd5.")) {
+          if (!delte) {
+            await delay(2000);
+            const delteButton: any = document.querySelector(
+              'button[aria-label="Delete Education 1"]'
+            );
+            if (!delteButton) {
+              return;
+            }
+
+            delteButton.click();
+            delte = true;
+            await delay(1000);
+          }
+        }
+
         // console.log("Button clicked");
         // Attach click event handler instead of directly invoking click()
         await new Promise((resolve) => {
@@ -156,7 +172,7 @@ const checkobxFiller = () => {
 
 const degreeFiller = async (data, index) => {
   // console.log("degree:", data);
-  const e = document.getElementById("input-27");
+
   // console.log("ee::", e);
 
   let degree = false;
@@ -165,9 +181,10 @@ const degreeFiller = async (data, index) => {
   const selectButtonFields: any = tempDiv.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
+  console.log("selectButtonFields::", selectButtonFields);
   // console.log("selectButtonFields::", selectButtonFields);
   for (const [selectIndex, select] of selectButtonFields.entries()) {
-    // console.log("select::", select);
+    console.log("select::", select);
 
     const selectid = select.getAttribute("id");
     const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
@@ -175,9 +192,9 @@ const degreeFiller = async (data, index) => {
       return;
     }
     const labelText = labelElement.textContent.trim();
-    // console.log("labelText::", labelText);
+    console.log("labelText::", labelText);
 
-    // for state
+    // for degree
     if (
       checkIfExist(labelText, fieldNames.degree) &&
       !select.hasAttribute("ci_date_filled")
@@ -185,17 +202,24 @@ const degreeFiller = async (data, index) => {
       const id = select.getAttribute("id");
       const allInputId = getAllinputId();
 
-      // console.log("degree::fired");
+      console.log("degree::fired");
 
       if (!allInputId?.includes(id) && !select.hasAttribute("ci_date_filled")) {
         select.click();
         await delay(200);
+        console.log("degree::fired22");
 
         const selectOptions: any = document.querySelectorAll('[role="option"]');
         for (const [index, element] of selectOptions.entries()) {
           if (
             fromatStirngInLowerCase(element.textContent.trim()) ===
-            fromatStirngInLowerCase(data.degree)
+              fromatStirngInLowerCase(data.degree) ||
+            fromatStirngInLowerCase(element.textContent.trim()).includes(
+              fromatStirngInLowerCase(data.degree)
+            ) ||
+            fromatStirngInLowerCase(data.degree).includes(
+              fromatStirngInLowerCase(element.textContent.trim())
+            )
           ) {
             // console.log("options::--", element);
             // console.log("text--", element.textContent.trim());

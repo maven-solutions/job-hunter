@@ -267,6 +267,7 @@ export const dateFiller = async (data, index) => {
 export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   const buttonFields = tempDiv.querySelectorAll("button");
   let workFound = false;
+  let delte = false;
   for (const button of buttonFields) {
     const attributes: any = Array.from(button.attributes);
     attributes.some((attribute) => {
@@ -301,6 +302,25 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
 
         await delay(500);
         button.click();
+
+        if (
+          window.location.href.includes(".wd5.") ||
+          window.location.href.includes(".wd1.")
+        ) {
+          if (!delte) {
+            await delay(2000);
+            const delteButton: any = document.querySelector(
+              'button[aria-label="Delete Work Experience 1"]'
+            );
+            if (!delteButton) {
+              return;
+            }
+            delteButton.click();
+            delte = true;
+            await delay(1000);
+          }
+        }
+
         // if (Number(educationNumber) == 0 && index == 1) {
         //   console.log("meet::");
         // } else {
