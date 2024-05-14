@@ -268,6 +268,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   const buttonFields = tempDiv.querySelectorAll("button");
   let workFound = false;
   let delte = false;
+  let ebayinc = false;
   for (const button of buttonFields) {
     const attributes: any = Array.from(button.attributes);
     attributes.some((attribute) => {
@@ -304,8 +305,8 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
         button.click();
 
         if (
-          window.location.href.includes(".wd5.") ||
-          window.location.href.includes(".wd1.")
+          window.location.href.includes(".leidos.wd5.myworkdayjobs.") ||
+          window.location.href.includes(".autodesk.wd1.myworkdayjobs.")
         ) {
           if (!delte) {
             await delay(2000);
@@ -320,7 +321,18 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
             await delay(1000);
           }
         }
-
+        // if (window.location.href.includes(".ebayinc.") && !ebayinc) {
+        //   const removeButton: any = document.querySelectorAll(
+        //     'button[class="array-button-remove"]'
+        //   );
+        //   if (removeButton && removeButton.length > 0) {
+        //     for (let rbutton of removeButton) {
+        //       rbutton.click();
+        //       await delay(100);
+        //     }
+        //     ebayinc = true;
+        //   }
+        // }
         // if (Number(educationNumber) == 0 && index == 1) {
         //   console.log("meet::");
         // } else {

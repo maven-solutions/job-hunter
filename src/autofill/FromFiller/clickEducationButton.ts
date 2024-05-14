@@ -35,7 +35,7 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
 
         await delay(500);
         button.click();
-        if (window.location.href.includes(".wd5.")) {
+        if (window.location.href.includes(".leidos.wd5.myworkdayjobs.")) {
           if (!delte) {
             await delay(2000);
             const delteButton: any = document.querySelector(
@@ -181,10 +181,10 @@ const degreeFiller = async (data, index) => {
   const selectButtonFields: any = tempDiv.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
-  console.log("selectButtonFields::", selectButtonFields);
+  // console.log("selectButtonFields::", selectButtonFields);
   // console.log("selectButtonFields::", selectButtonFields);
   for (const [selectIndex, select] of selectButtonFields.entries()) {
-    console.log("select::", select);
+    // console.log("select::", select);
 
     const selectid = select.getAttribute("id");
     const labelElement = tempDiv.querySelector(`[for="${selectid}"]`);
@@ -192,7 +192,7 @@ const degreeFiller = async (data, index) => {
       return;
     }
     const labelText = labelElement.textContent.trim();
-    console.log("labelText::", labelText);
+    // console.log("labelText::", labelText);
 
     // for degree
     if (
@@ -202,12 +202,12 @@ const degreeFiller = async (data, index) => {
       const id = select.getAttribute("id");
       const allInputId = getAllinputId();
 
-      console.log("degree::fired");
+      // console.log("degree::fired");
 
       if (!allInputId?.includes(id) && !select.hasAttribute("ci_date_filled")) {
         select.click();
         await delay(200);
-        console.log("degree::fired22");
+        // console.log("degree::fired22");
 
         const selectOptions: any = document.querySelectorAll('[role="option"]');
         for (const [index, element] of selectOptions.entries()) {
@@ -267,11 +267,11 @@ const degreeFiller = async (data, index) => {
           Array.from(select.options).find((option: any) => {
             if (
               fromatStirngInLowerCase(option?.text) ===
-                fromatStirngInLowerCase(data.degree) ||
+                fromatStirngInLowerCase(data?.degree) ||
               fromatStirngInLowerCase(option?.text).includes(
-                fromatStirngInLowerCase(data.degree)
+                fromatStirngInLowerCase(data?.degree)
               ) ||
-              fromatStirngInLowerCase(data.degree).includes(
+              fromatStirngInLowerCase(data?.degree).includes(
                 fromatStirngInLowerCase(option?.text)
               )
             ) {
@@ -279,6 +279,10 @@ const degreeFiller = async (data, index) => {
               option.click();
               option.selected = true;
               select.setAttribute("ci_date_filled", index);
+              select.dispatchEvent(
+                new Event("change", { bubbles: true, cancelable: false })
+              );
+              option.blur();
               handleValueChanges(option);
               // gender = true;
               return true;
