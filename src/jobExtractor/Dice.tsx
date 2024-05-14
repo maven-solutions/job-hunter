@@ -7,10 +7,12 @@ import {
   setJobFoundStatus,
   setJobLocation,
   setJobPostUrl,
+  setJobRelatedInfo,
   setJobSource,
   setJobSummary,
   setJobTitle,
   setJobType,
+  setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 import { useEffect } from "react";
 
@@ -53,11 +55,16 @@ const getJobsFromDice = (dispatch): void => {
     dispatch(setJobDesc(description));
   }
 
-  const jobTypeText =
-    document
-      .querySelector('[data-cy="locationDetails"]')
-      ?.textContent?.trim() ?? "";
-
+  const jobTypeEle = document.querySelector('[data-cy="locationDetails"]')
+    ?.children[0];
+  let jobTypeText = "";
+  jobTypeText = jobTypeEle.textContent.trim();
+  if (
+    jobTypeText.toLocaleLowerCase().includes("on site") ||
+    jobTypeText.toLocaleLowerCase().includes("on-site")
+  ) {
+    jobTypeText = "Onsite";
+  }
   const payDetailText =
     document.querySelector('[data-cy="payDetails"]')?.textContent?.trim() ?? "";
 
@@ -72,9 +79,9 @@ const getJobsFromDice = (dispatch): void => {
       ?.textContent?.trim() ?? "";
 
   dispatch(setJobType(jobTypeText));
-  dispatch(
-    setJobSummary([payDetailText, employmentDetailsText, willingToSponsorText])
-  );
+  dispatch(setSalary(payDetailText));
+  dispatch(setJobRelatedInfo(jobTypeText));
+  dispatch(setJobSummary([employmentDetailsText, willingToSponsorText]));
 
   dispatch(setJobSource("Dice"));
   dispatch(setJobFoundStatus(true));
