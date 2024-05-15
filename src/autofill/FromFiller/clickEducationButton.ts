@@ -181,7 +181,10 @@ const degreeFiller = async (data, index) => {
   let selectButtonFields: any = tempDiv.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
-  if (window.location.href.includes("autodesk.wd1.myworkdayjobs.")) {
+  if (
+    window.location.href.includes("autodesk.wd1.myworkdayjobs.") ||
+    window.location.href.includes("zayo.wd1.myworkdayjobs.")
+  ) {
     selectButtonFields = tempDiv.querySelectorAll(
       'button[data-automation-id="degree"]'
     );
