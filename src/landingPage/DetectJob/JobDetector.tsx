@@ -96,6 +96,7 @@ const JobDetector = (props: any) => {
         ".adp.",
         "services",
         "peoplehr",
+        "techfetch.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowIcon(true);
@@ -112,6 +113,7 @@ const JobDetector = (props: any) => {
         "motionrecruitment.",
         ".lever.",
         ".icims.",
+        "techfetch.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowAutofillPage(true);
