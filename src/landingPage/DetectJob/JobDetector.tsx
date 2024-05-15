@@ -110,6 +110,8 @@ const JobDetector = (props: any) => {
         ".myworkdayjobs.",
         ".paylocity.",
         "motionrecruitment.",
+        ".lever.",
+        ".icims.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
       setShowAutofillPage(true);

@@ -76,23 +76,31 @@ export const detectInputAndFillData = async (
   stopLoading: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
+  // console.log("iframeList::", iframeList);
   let iframe: any = "";
 
   // for icims  = [0]
   if (iframeList.length > 0 && window.location.href.includes("icims")) {
     iframe = iframeList[0];
+    if (window.location.href.includes("careers-virginpulse.icims.com")) {
+      iframe = iframeList[4];
+    }
   }
   if (iframe) {
     startLoading();
 
     const iframeDocument =
       iframe.contentDocument || iframe.contentWindow.document;
-    console.log("iframeDocument::");
+    // console.log("iframeDocument::", iframeDocument);
 
     const tempDiv = iframeDocument.querySelector("form");
     // console.log("tempDiv::", tempDiv);
 
     const tempDivForFile = iframeDocument.querySelector("body");
+    // console.log("tempDivForFile::", tempDivForFile);
+
+    console.log("iframe::");
+
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -108,6 +116,7 @@ export const detectInputAndFillData = async (
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
     stopLoading();
+    // console.log("ended::");
   } else {
     startLoading();
     console.log("no-iframe::");
