@@ -35,7 +35,10 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
 
         await delay(500);
         button.click();
-        if (window.location.href.includes("leidos.wd5.myworkdayjobs")) {
+        if (
+          window.location.href.includes("leidos.wd5.myworkdayjobs") ||
+          window.location.href.includes("bah.wd1.myworkdayjobs.com")
+        ) {
           if (!delte) {
             await delay(2000);
             const delteButton: any = document.querySelector(
