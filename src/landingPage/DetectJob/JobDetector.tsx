@@ -100,7 +100,7 @@ const JobDetector = (props: any) => {
         ".tal.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
-      // setShowIcon(true);
+      setShowIcon(true);
     }
 
     if (
