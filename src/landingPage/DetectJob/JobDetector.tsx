@@ -100,7 +100,7 @@ const JobDetector = (props: any) => {
         ".tal.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
-      setShowIcon(true);
+      // setShowIcon(true);
     }
 
     if (
@@ -116,10 +116,14 @@ const JobDetector = (props: any) => {
         ".icims.",
         "techfetch.",
         ".tal.",
+        ".fisglobal.",
+        ".jobdiva.",
+        ".pinpointhq.",
         // ".pinpointhq.",
         // "hhstechgroup.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))
     ) {
+      setShowIcon(true);
       setShowAutofillPage(true);
     }
   }, []);

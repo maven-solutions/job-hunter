@@ -60,7 +60,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     // console.log("labelElement::", labelElement);
 
     const labelText = labelElement?.textContent?.trim() ?? "";
-    console.log("labelText::", labelText);
+    // console.log("labelText::", labelText);
 
     // for country or nation
     if (!window.location.href.includes("myworkdayjobs")) {
@@ -88,7 +88,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     if (checkIfExist(labelText, fieldNames.state) && !state) {
       select.click();
       await delay(500);
-      console.log("state::fired");
+      // console.log("state::fired");
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
         if (

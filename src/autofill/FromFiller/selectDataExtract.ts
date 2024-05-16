@@ -6,7 +6,7 @@ import {
 } from "../helper";
 import { fieldNames } from "./fieldsname";
 
-const countryHandler = (option, applicantData, country) => {
+export const countryHandler = (option, applicantData, country) => {
   if (
     fromatStirngInLowerCase(option?.text) ===
       fromatStirngInLowerCase(applicantData.country) &&

@@ -14,7 +14,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
   // console.log("iframeForm::", iframeForm);
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
-  console.log("textfield::", textInputFields);
+  // console.log("textfield::", textInputFields);
   textInputFields.forEach((input: any) => {
     // Extract all attributes
     const attributes: any = Array.from(input.attributes);
@@ -22,7 +22,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     const inputId = input?.getAttribute("id") ?? "";
     const labelElement = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
-    console.log("labeltext::", labelText);
+    // console.log("labeltext::", labelText);
     attributes.some((attribute) => {
       if (
         checkIfExist(labelText, fieldNames.first_name) ||

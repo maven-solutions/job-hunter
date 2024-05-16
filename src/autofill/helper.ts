@@ -21,6 +21,7 @@ import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
 import { myworkDays } from "./domainSpecific/myworkdays";
+import { pinpointhq } from "./domainSpecific/pinpointhq";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -192,6 +193,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".careers-page.")) {
       careersPage(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".pinpointhq.")) {
+      await pinpointhq(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();
