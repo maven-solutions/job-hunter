@@ -123,9 +123,14 @@ export const detectInputAndFillData = async (
     let launchWork = true;
     let launcEducation = true;
     let tempDiv: any = document.querySelector("form");
+    // console.log("tempvid::", tempDiv);
     let tempDivForFile = document.querySelector("body");
+    // console.log("tempDivForFile::", tempDivForFile);
 
-    if (window.location.href.includes(".peoplehr.")) {
+    if (
+      window.location.href.includes(".peoplehr.") ||
+      window.location.href.includes(".tal.")
+    ) {
       tempDiv = document.querySelector("body");
     }
 
