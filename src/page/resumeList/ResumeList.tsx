@@ -91,8 +91,7 @@ const ResumeList = (props: any) => {
                       htmlFor={index}
                       className="ci_resume_radio_button_label"
                     >
-                      {item.applicant.title ??
-                        `Untitled - ${item.applicant.name}`}
+                      {item.applicant.title ?? `${item.applicant.name}`}
                     </label>
                     {selectedResume === index && (
                       <div className="ci_radio_check_circle">
