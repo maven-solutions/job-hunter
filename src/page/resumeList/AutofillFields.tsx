@@ -10,8 +10,6 @@ import { RootStore, useAppSelector } from "../../store/store";
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
 
-  console.log("resumeData:::::", resumeData);
-
   const {
     firstName,
     lastName,

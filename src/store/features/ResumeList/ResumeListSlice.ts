@@ -40,7 +40,9 @@ const ResumeList = createSlice({
         state.loading = false;
         state.res_success = true;
 
-        state.applicantData = payload.data;
+        const filteredData =
+          payload.data.filter((data: any) => data.pdfUrl) ?? [];
+        state.applicantData = filteredData;
       }
     );
     builder.addCase(getApplicantResume.rejected, (state) => {
