@@ -190,6 +190,19 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         handleValueChanges(input);
         return true; // Stop iterating
       }
+
+      // github
+      if (
+        checkIfExist(labelText, fieldNames.github) ||
+        checkIfExist(attribute.value, fieldNames.github)
+      ) {
+        input.value = applicantData.github_url;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
       // for state
       if (
         checkIfExist(labelText, fieldNames.state) ||

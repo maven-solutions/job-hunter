@@ -48,6 +48,7 @@ export const fieldNames = {
   field_of_study: ["study", "field"],
   gpa: ["gpa", "result"],
   gender: ["gender", "sex"],
+  github: ["git", "github"],
 
   is_over_18: ["age"],
   job_title: ["jobtitle", "title", "job"],
