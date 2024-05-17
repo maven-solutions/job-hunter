@@ -8,7 +8,9 @@ import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 
 const extractInfo = (resumeData, applicationForm) => {
-  const { pdfUrl, fields } = resumeData;
+  const { pdfUrl, fields, title, name: applicantName } = resumeData;
+
+  console.log("resumeData:::::", resumeData);
 
   const {
     firstName,
@@ -64,6 +66,7 @@ const extractInfo = (resumeData, applicationForm) => {
   const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
   return {
+    resume_title: title ?? applicantName,
     full_name: fullName,
     first_name: firstName,
     last_name: lastName,

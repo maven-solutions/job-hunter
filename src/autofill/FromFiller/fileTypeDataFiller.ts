@@ -1,12 +1,12 @@
 import { Applicant } from "../data";
 
-async function createFile(url) {
+async function createFile(url, resumetitle) {
   let response = await fetch(url);
   let data = await response.blob();
   let metadata = {
     type: "application/pdf",
   };
-  return new File([data], "resume.pdf", metadata);
+  return new File([data], `${resumetitle}.pdf`, metadata);
 }
 
 export const fileTypeDataFiller = async (
@@ -36,7 +36,10 @@ export const fileTypeDataFiller = async (
     ) {
       textInputField.setAttribute("ci-aria-file-uploaded", "true");
       // Create file asynchronously
-      const designFile = await createFile(applicantData.pdf_url);
+      const designFile = await createFile(
+        applicantData.pdf_url,
+        applicantData.resume_title
+      );
       // Set file to input field only for the first file input field found
       const dt = new DataTransfer();
       dt.items.add(designFile);

@@ -39,6 +39,8 @@ export interface Applicant {
   portfolio_url?: string | null;
 
   race?: string | null;
+  resume_title?: string | null;
+
   state?: string | undefined;
   salary?: string | number | null;
 
