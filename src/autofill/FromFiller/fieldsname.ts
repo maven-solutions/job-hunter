@@ -19,7 +19,7 @@ export const fieldNames = {
   company: ["company", "employer"],
   company_location: ["location"],
   currently_work_here: ["currentlyworkhere"],
-  collage: ["school", "university"],
+  collage: ["school", "university", "institute"],
   country: ["country", "countryid", "nation"],
 
   degree: ["degree"],
@@ -56,6 +56,7 @@ export const fieldNames = {
   language: ["language"],
   middle_name: ["middlename", "mname"],
   month: ["month"],
+  major: ["major", "department"],
   name: ["name"],
 
   linkedin_url: [

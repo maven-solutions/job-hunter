@@ -22,6 +22,7 @@ import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
 import { myworkDays } from "./domainSpecific/myworkdays";
 import { pinpointhq } from "./domainSpecific/pinpointhq";
+import { zohorecruit } from "./domainSpecific/zohorecruit";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -196,6 +197,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".pinpointhq.")) {
       await pinpointhq(tempDiv ?? tempDivForFile, applicantData);
+    }
+        if (window.location.href.includes(".zohorecruit.")) {
+      await zohorecruit(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();

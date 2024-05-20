@@ -24,9 +24,6 @@ const isAuthorizedToWorkInUs = (applicantData: Applicant) => {
   const yes: any = spanList[1];
   const No: any = spanList[2];
 
-  console.log("spanList::", spanList);
-  console.log("spanyesList::", yes);
-  console.log("No::", No);
   if (applicantData.us_work_authoriztaion) {
     yes.click();
   }
