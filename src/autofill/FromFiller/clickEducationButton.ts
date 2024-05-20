@@ -186,7 +186,7 @@ const degreeFiller = async (data, index) => {
   );
   if (
     window.location.href.includes("autodesk.wd1.myworkdayjobs.") ||
-    window.location.href.includes("zayo.wd1.myworkdayjobs.")
+    window.location.href.includes("zayo.wd1.myworkdayjobs.") ||  window.location.href.includes("philips.wd3.myworkdayjobs.")
   ) {
     selectButtonFields = tempDiv.querySelectorAll(
       'button[data-automation-id="degree"]'
