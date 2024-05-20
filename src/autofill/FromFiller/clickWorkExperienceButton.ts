@@ -4,7 +4,7 @@ import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
 import { fieldNames } from "./fieldsname";
 import { getMonthFromDate, getYearFromDate } from "./helper";
-function sanitizeHTML(htmlString) {
+export function sanitizeHTML(htmlString) {
   // Remove inline styles
   htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
 

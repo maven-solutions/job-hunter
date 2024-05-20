@@ -1,3 +1,4 @@
+import { sanitizeHTML } from "../FromFiller/clickWorkExperienceButton";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { checkIfExist, delay, handleValueChanges } from "../helper";
 
@@ -145,7 +146,6 @@ const educationDataFiller = async (applicantData) => {
   const educationButton: any = document.querySelector(
     'a[title="Add Educational Details"]'
   );
-  console.log("educationButton::", educationButton);
 
   if (
     educationButton &&
@@ -172,15 +172,164 @@ const educationDataFiller = async (applicantData) => {
       "No education details found or education button not available"
     );
   }
-
-  const toSelect = document.querySelectorAll('select[aria-label="To"]');
 };
 
-const workExperienceDataFiller = async (applicantData) => {
+const workExperienceDatafiller = (data) => {
+  const textInputFields: any = document.querySelectorAll('input[type="text"]');
+  for (const input of textInputFields) {
+    const attributes: any = Array.from(input.attributes);
+
+    for (const attribute of attributes) {
+      if (checkIfExist(attribute.value, ["occupation"]) && !input.value) {
+        input.focus();
+        input.click();
+        input.value = data.jobTitle;
+        handleValueChanges(input);
+        // break;
+      }
+
+      if (checkIfExist(attribute.value, fieldNames.company) && !input.value) {
+        input.focus();
+        input.click();
+        input.value = data.employeer;
+        handleValueChanges(input);
+        // break;
+      }
+
+      if (checkIfExist(attribute.value, ["summary"]) && !input.value) {
+        input.focus();
+        input.click();
+        const cleanedHtml = sanitizeHTML(data.description);
+        input.value = cleanedHtml;
+        handleValueChanges(input);
+        // break;
+      }
+    }
+  }
+
+  const textareaInputFields: any = document.querySelectorAll("textarea");
+  for (const input of textareaInputFields) {
+    const attributes: any = Array.from(input.attributes);
+
+    for (const attribute of attributes) {
+      if (checkIfExist(attribute.value, ["summary"]) && !input.value) {
+        input.focus();
+        input.click();
+        const cleanedHtml = sanitizeHTML(data.description);
+        input.value = cleanedHtml;
+        handleValueChanges(input);
+        // break;
+      }
+    }
+  }
+};
+
+const workExperienceDatefiller = (data) => {
+  const fromSelect: any = document.querySelectorAll(
+    'select[aria-label="From"]'
+  );
+
+  for (const select of fromSelect) {
+    if (!select.value) {
+      Array.from(select.options).find((option: any) => {
+        //   console.log("text::", option.textContent.trim());
+        if (option.textContent.trim() === getYear(data.startDate)) {
+          option.focus(); // Autofocus on the option field
+          option.click();
+          option.selected = true;
+          select.dispatchEvent(
+            new Event("change", { bubbles: true, cancelable: false })
+          );
+          option.blur();
+          handleValueChanges(option);
+          return true;
+        }
+      });
+    }
+  }
+
+  const fromMonthSelect: any = document.querySelectorAll(
+    'select[aria-label="Work Duration From"]'
+  );
+
+  for (const select of fromMonthSelect) {
+    if (!select.value) {
+      Array.from(select.options).find((option: any) => {
+        if (option.textContent.trim() === getMonth(data.startDate)) {
+          option.focus(); // Autofocus on the option field
+          option.click();
+          option.selected = true;
+          select.dispatchEvent(
+            new Event("change", { bubbles: true, cancelable: false })
+          );
+          option.blur();
+          handleValueChanges(option);
+          return true;
+        }
+      });
+    }
+  }
+
+  const toSelect: any = document.querySelectorAll('select[aria-label="To"]');
+
+  for (const select of toSelect) {
+    if (!select.value) {
+      Array.from(select.options).find((option: any) => {
+        //   console.log("text::", option.textContent.trim());
+        if (option.textContent.trim() === getYear(data.endDate)) {
+          option.focus(); // Autofocus on the option field
+          option.click();
+          option.selected = true;
+          select.dispatchEvent(
+            new Event("change", { bubbles: true, cancelable: false })
+          );
+          option.blur();
+          handleValueChanges(option);
+          return true;
+        }
+
+        if (option.textContent.trim() === getMonth(data.endDate)) {
+          option.focus(); // Autofocus on the option field
+          option.click();
+          option.selected = true;
+          select.dispatchEvent(
+            new Event("change", { bubbles: true, cancelable: false })
+          );
+          option.blur();
+          handleValueChanges(option);
+          return true;
+        }
+      });
+    }
+  }
+};
+
+const workExperience = async (applicantData) => {
   // Implementation for work experience filling if needed
+  const workButton: any = document.querySelector(
+    'a[title="Add Experience Details"]'
+  );
+
+  if (
+    applicantData.employment_history &&
+    applicantData.employment_history.length > 0
+  ) {
+    for await (const [
+      index,
+      element,
+    ] of applicantData.employment_history.entries()) {
+      await delay(500);
+      workButton.click();
+      await delay(500);
+      await workExperienceDatafiller(element);
+      await workExperienceDatefiller(element);
+      await delay(500);
+      // console.log("Processed element:", index);
+    }
+  }
 };
 
 export const zohorecruit = async (tempDiv, applicantData) => {
   await educationDataFiller(applicantData);
-  await workExperienceDataFiller(applicantData);
+  await workExperience(applicantData);
 };
