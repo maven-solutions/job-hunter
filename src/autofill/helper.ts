@@ -130,7 +130,7 @@ export const detectInputAndFillData = async (
 
     if (
       window.location.href.includes(".peoplehr.") ||
-      window.location.href.includes(".tal.")
+      window.location.href.includes(".tal.") ||  window.location.href.includes(".zohorecruit.")
     ) {
       tempDiv = document.querySelector("body");
     }

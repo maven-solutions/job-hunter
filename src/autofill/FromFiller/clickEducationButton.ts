@@ -204,7 +204,7 @@ const degreeFiller = async (data, index) => {
         return;
       }
       const labelText = labelElement.textContent.trim();
-      console.log("labelText::", labelText);
+      // console.log("labelText::", labelText);
 
       // for degree
       if (
