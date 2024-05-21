@@ -60,8 +60,28 @@ const fillRace = (applicantData: Applicant) => {
     }
   });
 };
+
+const fillUSA = (applicantData: Applicant) => {
+  const wokPermission = document.querySelector(
+    ".application-question.custom-question"
+  );
+  if (!wokPermission) {
+    return;
+  }
+  const ul: any = wokPermission?.querySelector("ul") ?? "";
+  const yes: any = ul.children[0] ?? "";
+  const no: any = ul.children[1] ?? "";
+
+  if (applicantData.us_work_authoriztaion) {
+    yes?.click();
+  } else {
+    no?.click();
+  }
+};
+
 export const jobsLever = (tempDiv: any, applicantData: Applicant) => {
   fillName(applicantData);
   fillDate(applicantData);
   fillRace(applicantData);
+  fillUSA(applicantData);
 };
