@@ -199,7 +199,6 @@ export const selectDataExtract = (
           ) {
             option.selected = true;
             handleValueChanges(option);
-            gender = true;
             return true;
           }
         });
@@ -218,7 +217,6 @@ export const selectDataExtract = (
           ) {
             option.selected = true;
             handleValueChanges(option);
-            gender = true;
             return true;
           }
         });

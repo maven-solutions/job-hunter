@@ -20,6 +20,7 @@ import { careersPage } from "./domainSpecific/careers-page";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
+import { jobvite } from "./domainSpecific/jobvite";
 import { myworkDays } from "./domainSpecific/myworkdays";
 import { pinpointhq } from "./domainSpecific/pinpointhq";
 import { zohorecruit } from "./domainSpecific/zohorecruit";
@@ -204,6 +205,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".zohorecruit.")) {
       await zohorecruit(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".jobvite.")) {
+      await jobvite(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();
