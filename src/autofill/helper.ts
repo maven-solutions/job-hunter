@@ -17,6 +17,7 @@ import { urlTypeDataFiller } from "./FromFiller/urlTypeDataFiller";
 import { adp } from "./domainSpecific/adp";
 import { autheo } from "./domainSpecific/autheo";
 import { careersPage } from "./domainSpecific/careers-page";
+import { csod } from "./domainSpecific/csod";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
@@ -208,6 +209,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".jobvite.")) {
       await jobvite(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".csod.")) {
+      await csod(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();
