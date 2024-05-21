@@ -87,6 +87,9 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes("careers-virginpulse.icims.com")) {
       iframe = iframeList[4];
     }
+    if (window.location.href.includes("careers-berrydunn.icims.com")) {
+      iframe = iframeList[0];
+    }
   }
   if (iframe) {
     startLoading();
@@ -131,7 +134,8 @@ export const detectInputAndFillData = async (
 
     if (
       window.location.href.includes(".peoplehr.") ||
-      window.location.href.includes(".tal.") ||  window.location.href.includes(".zohorecruit.")
+      window.location.href.includes(".tal.") ||
+      window.location.href.includes(".zohorecruit.")
     ) {
       tempDiv = document.querySelector("body");
     }
@@ -198,7 +202,7 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".pinpointhq.")) {
       await pinpointhq(tempDiv ?? tempDivForFile, applicantData);
     }
-        if (window.location.href.includes(".zohorecruit.")) {
+    if (window.location.href.includes(".zohorecruit.")) {
       await zohorecruit(tempDiv ?? tempDivForFile, applicantData);
     }
 

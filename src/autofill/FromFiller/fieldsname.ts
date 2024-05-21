@@ -87,6 +87,7 @@ export const fieldNames = {
     "mobile",
     "mobilenumber",
     "telephone",
+    "cellular ",
   ],
   phone_type: ["phonetype", "devicetype", "phone", "device"],
   race: ["race", "ethnicity"],
