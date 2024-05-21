@@ -63,7 +63,7 @@ const fillEducationInputBox = async (data) => {
   }
 };
 
-const educationDateFiller = (data) => {
+const educationDateFiller = async (data) => {
   const fromSelect: any = document.querySelectorAll(
     'select[aria-label="From"]'
   );
@@ -224,7 +224,7 @@ const workExperienceDatafiller = (data) => {
   }
 };
 
-const workExperienceDatefiller = (data) => {
+const workExperienceDatefiller = async (data) => {
   const fromSelect: any = document.querySelectorAll(
     'select[aria-label="From"]'
   );
@@ -288,7 +288,10 @@ const workExperienceDatefiller = (data) => {
           return true;
         }
 
-        if (option.textContent.trim() === getMonth(data.endDate)) {
+        if (
+          !data.isWorking &&
+          option.textContent.trim() === getMonth(data.endDate)
+        ) {
           option.focus(); // Autofocus on the option field
           option.click();
           option.selected = true;
@@ -301,6 +304,14 @@ const workExperienceDatefiller = (data) => {
         }
       });
     }
+  }
+  await delay(500);
+  if (data.isWorking) {
+    const checkbox: any = document.querySelector(
+      '[aria-label="I currently work here"]'
+    );
+    checkbox.checked = true;
+    handleValueChanges(checkbox);
   }
 };
 
