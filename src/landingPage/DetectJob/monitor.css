@@ -1,0 +1,16 @@
+.bot-web-monitor {
+  position: fixed;
+  left: 10px;
+  right: 0;
+  bottom: 0;
+  height: 300px !important;
+  background-color: #fff !important;
+  z-index: 9999999 !important;
+  width: 100%;
+  border: 1px solid #bfbfbf;
+}
+.bot-web-monitor-title-section {
+  width: 100%;
+  height: 30px;
+  border-bottom: 1px solid #bfbfbf;
+}
