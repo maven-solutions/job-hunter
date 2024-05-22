@@ -21,6 +21,10 @@
   font-weight: 600;
   font-size: 16px;
 }
+.ci_job_company_name {
+  color: #000000;
+  font-weight: 500;
+}
 .ci_job_company_detail_row {
   color: #000000;
   font-weight: 400;

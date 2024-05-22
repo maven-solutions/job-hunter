@@ -101,16 +101,16 @@ const getAddationalInfo = (dispatch) => {
   const secondLiText = secondLiElement?.textContent?.trim() ?? "";
 
   let imgEle: any = document.querySelector(
-    ".jobs-search-results-list__list-item--active-v2"
+    // ".jobs-search-results-list__list-item--active-v2"
+    ".jobs-search-results-list__list-item--active"
   );
   if (imgEle) {
     const img = imgEle?.querySelector("img");
     dispatch(setJobCompanyLogo(img?.src));
-  } else {
-    imgEle = document.querySelector(".ivm-image-view-model");
-    if (imgEle) {
-      const img = imgEle?.querySelector("img");
-      dispatch(setJobCompanyLogo(img?.src));
+    const companyname = imgEle.querySelectorAll("span");
+    const companyele = companyname[2];
+    if (companyele) {
+      dispatch(setJobCompany(companyele?.textContent?.trim()));
     }
   }
 
@@ -165,16 +165,16 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     dispatch(setJobSource("Linkedin"));
 
     // Assuming you have a reference to the DOM element
-    setTimeout(() => {
-      const domElement = document?.querySelector(
-        ".job-details-jobs-unified-top-card__primary-description-without-tagline"
-      );
-      const aTag = domElement?.querySelector("a.app-aware-link");
-      const companyName = aTag?.textContent;
-      if (companyName?.trim()) {
-        dispatch(setJobCompany(companyName?.trim()));
-      }
-    }, 500);
+    // setTimeout(() => {
+    //   const domElement = document?.querySelector(
+    //     ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+    //   );
+    //   const aTag = domElement?.querySelector("a.app-aware-link");
+    //   const companyName = aTag?.textContent;
+    //   if (companyName?.trim()) {
+    //     dispatch(setJobCompany(companyName?.trim()));
+    //   }
+    // }, 500);
 
     const company2 = document.querySelector(
       ".job-details-jobs-unified-top-card__company-name"
@@ -185,6 +185,24 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     const companyName2 = aTag2?.textContent;
     if (companyName2?.trim()) {
       dispatch(setJobCompany(companyName2?.trim()));
+    }
+    const imgLogo: any = document?.querySelector(
+      ".ivm-view-attr__img--centered.EntityPhoto-square-0"
+    );
+    if (imgLogo) {
+      dispatch(setJobCompanyLogo(imgLogo?.src));
+    }
+
+    // handling refresh situation
+    const comele = document.querySelector(
+      ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+    );
+    if (comele) {
+      const atagele = comele.querySelector("a");
+
+      if (atagele) {
+        dispatch(setJobCompany(atagele.textContent?.trim()));
+      }
     }
 
     // job - details - jobs - unified - top - card__company - name;
