@@ -34,7 +34,7 @@ export const getJobsFromIndeed = (dispatch): void => {
     if (updatedText) {
       dispatch(setJobTitle(updatedText));
     }
-  }, 1000);
+  }, 100);
 
   const companyElement = document.querySelector(
     '[data-testid="inlineHeader-companyName"]'
