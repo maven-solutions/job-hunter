@@ -106,7 +106,9 @@ const getAddationalInfo = (dispatch) => {
   );
   if (imgEle) {
     const img = imgEle?.querySelector("img");
-    dispatch(setJobCompanyLogo(img?.src));
+    if (img) {
+      dispatch(setJobCompanyLogo(img?.src));
+    }
     const companyname = imgEle.querySelectorAll("span");
     const companyele = companyname[2];
     if (companyele) {
