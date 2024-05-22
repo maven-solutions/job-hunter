@@ -16,7 +16,7 @@ import {
 } from "../store/features/JobDetail/JobDetailSlice";
 import { useEffect } from "react";
 
-const getJobsFromDice = (dispatch): void => {
+export const getJobsFromDice = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
 
   // Get the HTML element by its data-cy attribute
@@ -70,6 +70,14 @@ const getJobsFromDice = (dispatch): void => {
   if (compalyLogoEle) {
     dispatch(setJobCompanyLogo(compalyLogoEle?.src));
   }
+  const companyLogo: any = document.querySelector("dhi-company-logo");
+  if (companyLogo) {
+    const logourl = companyLogo?.getAttribute("logo-url");
+    if (logourl) {
+      dispatch(setJobCompanyLogo(logourl));
+    }
+  }
+
   const payDetailText =
     document.querySelector('[data-cy="payDetails"]')?.textContent?.trim() ?? "";
 
@@ -91,19 +99,3 @@ const getJobsFromDice = (dispatch): void => {
   dispatch(setJobSource("Dice"));
   dispatch(setJobFoundStatus(true));
 };
-
-const Dice = (props: any) => {
-  const { setShowPage } = props;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    setTimeout(() => {
-      getJobsFromDice(dispatch);
-    }, 4000);
-    // setShowPage("");
-    dispatch(clearJobState());
-  }, [window.location.href]);
-
-  return null;
-};
-
-export default Dice;

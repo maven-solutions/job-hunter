@@ -28,7 +28,7 @@ import {
   setJobReqSucccessFalse,
 } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
-import Dice from "../../jobExtractor/Dice";
+import { getJobsFromDice } from "../../jobExtractor/Dice";
 import { getJobsFromIndeed } from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 import Builtin from "../../jobExtractor/Builtin";
@@ -141,13 +141,6 @@ const JobDetector = (props: any) => {
   useEffect(() => {
     if (window.location.href.includes("simplyhired.")) {
       setWebsite(SUPPORTED_WEBSITE.simplyhired);
-    }
-
-    if (
-      window.location.href.includes("dice.") &&
-      window.location.href.includes("job-detail")
-    ) {
-      setWebsite(SUPPORTED_WEBSITE.dice);
     }
 
     if (window.location.href.includes("ziprecruiter.")) {
@@ -270,6 +263,15 @@ const JobDetector = (props: any) => {
       }, 2000);
     }
 
+    if (
+      window.location.href.includes("dice.") &&
+      window.location.href.includes("job-detail")
+    ) {
+      setTimeout(() => {
+        getJobsFromDice(dispatch);
+      }, 2000);
+    }
+
     setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
@@ -315,7 +317,7 @@ const JobDetector = (props: any) => {
       {website === SUPPORTED_WEBSITE.simplyhired && (
         <SimplyHiredJob setShowPage={setShowPage} />
       )}
-      {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
+      {/* {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />} */}
 
       {website === SUPPORTED_WEBSITE.ziprecruiter && (
         <Ziprecruiter setShowPage={setShowPage} />
