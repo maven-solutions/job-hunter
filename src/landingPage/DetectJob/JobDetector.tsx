@@ -29,7 +29,7 @@ import {
 } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import Dice from "../../jobExtractor/Dice";
-import Indeed from "../../jobExtractor/Indeed";
+import { getJobsFromIndeed } from "../../jobExtractor/Indeed";
 import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
 import Builtin from "../../jobExtractor/Builtin";
 import Glassdoor from "../../jobExtractor/Glassdoor";
@@ -148,9 +148,7 @@ const JobDetector = (props: any) => {
     ) {
       setWebsite(SUPPORTED_WEBSITE.dice);
     }
-    if (window.location.href.includes("indeed.")) {
-      setWebsite(SUPPORTED_WEBSITE.indeed);
-    }
+
     if (window.location.href.includes("ziprecruiter.")) {
       setWebsite(SUPPORTED_WEBSITE.ziprecruiter);
     }
@@ -262,6 +260,11 @@ const JobDetector = (props: any) => {
         getContentFromLinkedInJobs(dispatch);
       }, 2000);
     }
+    if (window.location.href.includes("indeed.")) {
+      setTimeout(() => {
+        getJobsFromIndeed(dispatch);
+      }, 2000);
+    }
 
     setShowPage("");
     dispatch(clearJobState());
@@ -309,9 +312,7 @@ const JobDetector = (props: any) => {
         <SimplyHiredJob setShowPage={setShowPage} />
       )}
       {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
-      {website === SUPPORTED_WEBSITE.indeed && (
-        <Indeed setShowPage={setShowPage} />
-      )}
+
       {website === SUPPORTED_WEBSITE.ziprecruiter && (
         <Ziprecruiter setShowPage={setShowPage} />
       )}

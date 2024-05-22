@@ -14,7 +14,7 @@ import {
   setJobType,
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
-const getJobsFromIndeed = (dispatch): void => {
+export const getJobsFromIndeed = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
   setTimeout(() => {
     const titleElement = document?.querySelector(
@@ -70,19 +70,3 @@ const getJobsFromIndeed = (dispatch): void => {
   dispatch(setJobSource("Indeed"));
   dispatch(setJobFoundStatus(true));
 };
-
-const Indeed = (props: any) => {
-  const { setShowPage } = props;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    setTimeout(() => {
-      getJobsFromIndeed(dispatch);
-    }, 4000);
-    // setShowPage("");
-    dispatch(clearJobState());
-  }, [window.location.href]);
-
-  return null;
-};
-
-export default Indeed;
