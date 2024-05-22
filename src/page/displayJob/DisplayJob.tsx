@@ -46,12 +46,6 @@ const DisplayJob = (props: any) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!jobSlice.stage_data_success) {
-      dispatch(getApplicationStageData());
-    }
-  }, []);
-
-  useEffect(() => {
     // setLoadSkleton(true);
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));

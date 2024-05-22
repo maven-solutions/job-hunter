@@ -39,7 +39,10 @@ import {
   setUser,
 } from "../../store/features/Auth/AuthSlice";
 import ResumeList from "../../page/resumeList/ResumeList";
-import { chekJobExists } from "../../store/features/JobDetail/JobApi";
+import {
+  chekJobExists,
+  getApplicationStageData,
+} from "../../store/features/JobDetail/JobApi";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -235,6 +238,11 @@ const JobDetector = (props: any) => {
   //     }
   //   });
   // }, []);
+  useEffect(() => {
+    if (!jobDetailState.stage_data_success) {
+      dispatch(getApplicationStageData());
+    }
+  }, []);
 
   useEffect(() => {
     let intervalId: any = "";

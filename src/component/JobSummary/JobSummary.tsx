@@ -22,9 +22,9 @@ const JobSummary = () => {
         <div className="ci_job_company_detail_section">
           <h3 className="ci_company_job_title"> {jobDetailState?.title}</h3>
           <div className="ci_job_company_detail_row">
-            <span className="ci_job_company_name">
+            <strong className="ci_job_company_name">
               {jobDetailState?.company}
-            </span>
+            </strong>
             <span className="ci_job_company_detail_separator"> . </span>
             <span className="ci_job_company_location">
               {jobDetailState?.location}

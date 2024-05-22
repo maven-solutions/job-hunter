@@ -23,7 +23,7 @@
 }
 .ci_job_company_name {
   color: #000000;
-  font-weight: 500;
+  font-weight: 500 !important;
 }
 .ci_job_company_detail_row {
   color: #000000;
