@@ -28,8 +28,8 @@ const AuthSlice = createSlice({
       state.authenticated = payload ? true : false;
     },
     logoutUser: (state: any, { payload }: PayloadAction<string>) => {
-      chrome.storage.local.set({ ci_user: "" });
-      chrome.storage.local.set({ ci_token: "" });
+      chrome.storage.local.clear();
+      // chrome.storage.local.set({ ci_token: "" });
       state.ci_token = null;
       state.ci_user = null;
       state.authenticated = false;

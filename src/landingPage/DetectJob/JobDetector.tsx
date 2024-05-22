@@ -63,8 +63,6 @@ const JobDetector = (props: any) => {
   });
   // console.log("job:slice::", jobDetailState);
 
-  // console.log("authstate::", authState);
-
   useEffect(() => {
     if (
       [
@@ -208,6 +206,9 @@ const JobDetector = (props: any) => {
   useEffect(() => {
     if (authState.authenticated) {
       setShowPage("");
+      if (!jobDetailState.stage_data_success) {
+        dispatch(getApplicationStageData());
+      }
     }
   }, [authState.authenticated]);
   // console.log("authState::", authState);
@@ -238,11 +239,6 @@ const JobDetector = (props: any) => {
   //     }
   //   });
   // }, []);
-  useEffect(() => {
-    if (!jobDetailState.stage_data_success) {
-      dispatch(getApplicationStageData());
-    }
-  }, []);
 
   useEffect(() => {
     let intervalId: any = "";
