@@ -120,7 +120,7 @@ const getAddationalInfo = (dispatch) => {
   dispatch(setJobSummary([secondLiText]));
   dispatch(setJobFoundStatus(true));
 };
-const getContentFromLinkedInJobs = (dispatch): void => {
+export const getContentFromLinkedInJobs = (dispatch): void => {
   try {
     if (!document.querySelector(".jobs-search__job-details--wrapper")) {
       return;
@@ -210,18 +210,3 @@ const getContentFromLinkedInJobs = (dispatch): void => {
     console.log(error);
   }
 };
-
-const Linkedin = (props: any) => {
-  const { setShowPage } = props;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    setTimeout(() => {
-      getContentFromLinkedInJobs(dispatch);
-    }, 4000);
-    // setShowPage("");
-    dispatch(clearJobState());
-  }, [window.location.href]);
-  return null;
-};
-
-export default Linkedin;

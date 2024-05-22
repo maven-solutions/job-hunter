@@ -9,7 +9,6 @@ import {
   addButtonToSimplyHired,
 } from "../../component/CareerAibutton";
 import Logo from "../../component/Logo";
-import JobFrom from "../../contentScript/JobFrom";
 import LoginFrom from "../../auth/LoginForm/LoginFrom";
 import SignupForm from "../../auth/signup/Signup";
 import DisplayJob from "../../page/displayJob/DisplayJob";
@@ -17,15 +16,15 @@ import Profile from "../../page/profile/Profile";
 import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import Linkedin from "../../jobExtractor/Linkedin";
+import { getContentFromLinkedInJobs } from "../../jobExtractor/Linkedin";
 import {
   EXTENSION_ACTION,
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
 import {
+  clearJobState,
   setButtonDisabledFalse,
-  setJobFoundStatus,
   setJobReqSucccessFalse,
 } from "../../store/features/JobDetail/JobDetailSlice";
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
@@ -40,7 +39,6 @@ import {
   setUser,
 } from "../../store/features/Auth/AuthSlice";
 import ResumeList from "../../page/resumeList/ResumeList";
-import { detectInputAndFillData } from "../../autofill/helper";
 import { chekJobExists } from "../../store/features/JobDetail/JobApi";
 
 const JobDetector = (props: any) => {
@@ -60,6 +58,7 @@ const JobDetector = (props: any) => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
+  console.log("job:slice::", jobDetailState);
 
   // console.log("authstate::", authState);
 
@@ -139,9 +138,6 @@ const JobDetector = (props: any) => {
   }, []);
 
   useEffect(() => {
-    if (window.location.href.includes("linkedin.")) {
-      setWebsite(SUPPORTED_WEBSITE.linkedin);
-    }
     if (window.location.href.includes("simplyhired.")) {
       setWebsite(SUPPORTED_WEBSITE.simplyhired);
     }
@@ -230,17 +226,17 @@ const JobDetector = (props: any) => {
       // return true;
     });
   }, []);
-  useEffect(() => {
-    chrome.runtime.onMessage.addListener(async function (
-      request,
-      sender,
-      sendResponse
-    ) {
-      if (request.message === "updateFields") {
-        // detectInputAndFillData(request.data);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   chrome.runtime.onMessage.addListener(async function (
+  //     request,
+  //     sender,
+  //     sendResponse
+  //   ) {
+  //     if (request.message === "updateFields") {
+  //       // detectInputAndFillData(request.data);
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     let intervalId: any = "";
@@ -259,6 +255,18 @@ const JobDetector = (props: any) => {
     // Clear the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    if (window.location.href.includes("linkedin.")) {
+      setTimeout(() => {
+        getContentFromLinkedInJobs(dispatch);
+      }, 2000);
+    }
+
+    setShowPage("");
+    dispatch(clearJobState());
+  }, [window.location.href]);
+
   return (
     <div className="content__script__section">
       {showIcon && showPage === "" && (
@@ -294,9 +302,9 @@ const JobDetector = (props: any) => {
         <ResumeList setShowPage={setShowPage} content={content} />
       )}
       <MenuPopUp setShowPage={setShowPage} />
-      {website === SUPPORTED_WEBSITE.linkedin && (
+      {/* {website === SUPPORTED_WEBSITE.linkedin && (
         <Linkedin setShowPage={setShowPage} />
-      )}
+      )} */}
       {website === SUPPORTED_WEBSITE.simplyhired && (
         <SimplyHiredJob setShowPage={setShowPage} />
       )}

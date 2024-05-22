@@ -39,7 +39,6 @@ const DisplayJob = (props: any) => {
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
-  console.log("job:slice::", jobSlice);
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
@@ -53,13 +52,13 @@ const DisplayJob = (props: any) => {
   }, []);
 
   useEffect(() => {
-    setLoadSkleton(true);
+    // setLoadSkleton(true);
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));
     }
-    setTimeout(() => {
-      setLoadSkleton(false);
-    }, 4000);
+    // setTimeout(() => {
+    //   setLoadSkleton(false);
+    // }, 1000);
   }, [window.location.href]);
 
   const savejobs = () => {
@@ -138,7 +137,7 @@ const DisplayJob = (props: any) => {
         alreadySavedInfo={alreadySavedInfo}
         foruser
       />
-      {loadSkleton ? (
+      {!jobSlice.title ? (
         <Skleton />
       ) : (
         <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
