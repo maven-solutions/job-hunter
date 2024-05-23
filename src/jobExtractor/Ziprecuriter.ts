@@ -1,4 +1,3 @@
-import { useAppDispatch } from "../store/store";
 import {
   clearJobState,
   setJobCompany,
@@ -15,7 +14,7 @@ import {
   setJobType,
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
-import { useEffect } from "react";
+
 const getJobsFromZipRecuriter1 = (dispatch, zipDom: any) => {
   const zipDomForLink = document.querySelector(".job_result_selected");
   if (zipDomForLink) {
@@ -38,6 +37,10 @@ const getJobsFromZipRecuriter1 = (dispatch, zipDom: any) => {
     dispatch(setJobDesc(description));
   }
 };
+
+function removeDynamicPart(url) {
+  return url.replace(/=[^"]*$/, "");
+}
 const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   const titleEle = zipDom.querySelector(".job_title");
   const title = titleEle?.textContent?.trim();
@@ -56,8 +59,11 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   dispatch(setJobLocation(locationtext));
 
   const jobCharacterstics = zipDom.querySelector(".job_characteristics");
-  const workType =
+  let workType =
     jobCharacterstics.querySelector(".wfh_label")?.textContent?.trim() ?? "";
+  if (!workType) {
+    workType = "Onsite";
+  }
   dispatch(setJobType(workType));
   const employmentType =
     jobCharacterstics
@@ -98,16 +104,107 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   }
 };
 
+const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
+  const img = zipDom.querySelector("img");
+  if (img) {
+    const url = removeDynamicPart(img.src);
+    if (url) {
+      dispatch(setJobCompanyLogo(url));
+    }
+  }
+
+  const location = zipDom.querySelector('[data-testid="job-card-location"]');
+  if (location) {
+    const address = location.textContent.trim();
+    if (address) {
+      dispatch(setJobLocation(address));
+    }
+  }
+  const parentElement = location.parentNode;
+  const childNodes = parentElement.childNodes;
+
+  // Iterate through the child nodes to find the text node after the anchor tag
+  let remoteText = "";
+  for (let i = 0; i < childNodes.length; i++) {
+    if (childNodes[i] === location && i + 1 < childNodes.length) {
+      // Get the text content of the next node and remove the "•" symbol
+      remoteText = childNodes[i + 1].textContent.replace("•", "").trim();
+      break;
+    }
+  }
+
+  if (!remoteText) {
+    remoteText = "Onsite";
+  }
+
+  dispatch(setJobType(remoteText));
+
+  let flexEle = zipDom.querySelector('div[class="flex flex-col"]');
+  const sallaryEle = flexEle?.querySelector(".flex.items-center");
+  const sallary = sallaryEle?.textContent?.trim() ?? "";
+  if (sallary) {
+    dispatch(setSalary(sallary));
+  }
+
+  let medicalInfo = "";
+  let workCulturalInfo = "";
+  const siblingPTags = flexEle.querySelectorAll(":scope > p");
+  if (siblingPTags.length > 0) {
+    const text = siblingPTags[0]?.textContent?.trim();
+    console.log("medicaltext::", text);
+
+    if (
+      ["time", "contract", "temporary"].some((type) =>
+        text.toLowerCase().includes(type)
+      )
+    ) {
+      workCulturalInfo = text;
+    } else {
+      medicalInfo = text;
+    }
+  }
+  if (siblingPTags.length > 1) {
+    const text = siblingPTags[1]?.textContent?.trim();
+
+    if (text) {
+      workCulturalInfo = text;
+    }
+  }
+
+  let elements: string[] = [];
+
+  if (remoteText) {
+    elements.push(remoteText);
+  }
+  if (workCulturalInfo) {
+    elements.push(workCulturalInfo);
+  }
+  let firstEle = elements.join(" • ");
+
+  if (medicalInfo) {
+    dispatch(setJobSummary([medicalInfo]));
+  }
+  dispatch(setJobRelatedInfo(firstEle));
+  dispatch(setJobCulture(workCulturalInfo));
+};
+
 export const getJobFromZipRecruiter = (dispatch): void => {
   const zipDom = document.querySelector('[data-testid="right-pane"]');
 
   const zipDom2 = document.querySelector(".job_details");
+  const zipDom3 = document.querySelector(
+    ".job_result_wrapper.job_result_selected"
+  );
   if (zipDom) {
     getJobsFromZipRecuriter1(dispatch, zipDom);
   }
   if (zipDom2) {
     dispatch(setJobPostUrl(window.location.href));
     getJobsFromZipRecuriter2(dispatch, zipDom2);
+  }
+  if (zipDom3) {
+    dispatch(setJobPostUrl(window.location.href));
+    getJobsFromZipRecuriter3(dispatch, zipDom3);
   }
 
   dispatch(setJobSource("ZipRecruiter"));
