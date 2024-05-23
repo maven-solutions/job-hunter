@@ -17,7 +17,7 @@ import {
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 
-const getJobFromSimplyhired = (dispatch): void => {
+export const getJobFromSimplyhired = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
   // this is for the desing where there is tab section in that page
   const titleElement = document.querySelector('[data-testid="viewJobTitle"]');
@@ -43,9 +43,13 @@ const getJobFromSimplyhired = (dispatch): void => {
     document
       .querySelector('[data-testid="viewJobCompanyLocation"]')
       ?.textContent?.trim() ?? "";
-
+  let jobtype = "";
   dispatch(setJobLocation(locationText));
-
+  if (locationText && locationText.toLowerCase() === "remote") {
+    jobtype = "Remote";
+  } else {
+    jobtype = "Onsite";
+  }
   const CompanylogoEle: any = document.querySelector(
     '[data-testid="companyVJLogo"]'
   );
@@ -61,8 +65,16 @@ const getJobFromSimplyhired = (dispatch): void => {
       .querySelector('[data-testid="viewJobBodyJobCompensation"]')
       ?.textContent?.trim() ?? "";
 
-  dispatch(setJobType(""));
-  dispatch(setJobRelatedInfo(workType));
+  let element = [];
+  if (jobtype) {
+    element.push(jobtype);
+  }
+  if (workType) {
+    element.push(workType);
+  }
+  let firstEle = element.join(" • ");
+  dispatch(setJobType(jobtype));
+  dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobCulture(workType));
   // dispatch(setJobSummary([payment]));
   dispatch(setSalary(payment));
@@ -79,18 +91,3 @@ const getJobFromSimplyhired = (dispatch): void => {
 
   dispatch(setJobSource("Simplyhired"));
 };
-
-const SimplyHiredJob = (props: any) => {
-  const { setShowPage } = props;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    setTimeout(() => {
-      getJobFromSimplyhired(dispatch);
-    }, 4000);
-    dispatch(clearJobState());
-  }, [window.location.href]);
-
-  return null;
-};
-
-export default SimplyHiredJob;

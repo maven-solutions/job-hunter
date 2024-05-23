@@ -27,7 +27,7 @@ import {
   setButtonDisabledFalse,
   setJobReqSucccessFalse,
 } from "../../store/features/JobDetail/JobDetailSlice";
-import SimplyHiredJob from "../../jobExtractor/SimplyHired";
+import { getJobFromSimplyhired } from "../../jobExtractor/SimplyHired";
 import { getJobsFromDice } from "../../jobExtractor/Dice";
 import { getJobsFromIndeed } from "../../jobExtractor/Indeed";
 
@@ -140,10 +140,6 @@ const JobDetector = (props: any) => {
   }, []);
 
   useEffect(() => {
-    if (window.location.href.includes("simplyhired.")) {
-      setWebsite(SUPPORTED_WEBSITE.simplyhired);
-    }
-
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
     }
@@ -275,6 +271,12 @@ const JobDetector = (props: any) => {
         getJobFromZipRecruiter(dispatch);
       }, 2000);
     }
+
+    if (window.location.href.includes("simplyhired.")) {
+      setTimeout(() => {
+        getJobFromSimplyhired(dispatch);
+      }, 2000);
+    }
     setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
@@ -317,9 +319,7 @@ const JobDetector = (props: any) => {
       {/* {website === SUPPORTED_WEBSITE.linkedin && (
         <Linkedin setShowPage={setShowPage} />
       )} */}
-      {website === SUPPORTED_WEBSITE.simplyhired && (
-        <SimplyHiredJob setShowPage={setShowPage} />
-      )}
+
       {/* {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />} */}
 
       {website === SUPPORTED_WEBSITE.builtin && (
