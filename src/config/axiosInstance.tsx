@@ -41,8 +41,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401 || error.response.status === 403) {
-        // clearBrowserStorage.removeUserRef();
-        window.location.href = "/";
+        chrome.storage.local.clear();
+        // window.location.href = "/";
       }
       throw error;
     } else {
