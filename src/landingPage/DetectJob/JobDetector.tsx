@@ -10,7 +10,7 @@ import {
 } from "../../component/CareerAibutton";
 import Logo from "../../component/Logo";
 import LoginFrom from "../../auth/LoginForm/LoginFrom";
-import SignupForm from "../../auth/signup/Signup";
+
 import DisplayJob from "../../page/displayJob/DisplayJob";
 import Profile from "../../page/profile/Profile";
 import JobDetail from "../../page/jobDetail/JobDetail";
@@ -293,9 +293,7 @@ const JobDetector = (props: any) => {
       {showPage === SHOW_PAGE.loginPage && (
         <LoginFrom setShowPage={setShowPage} />
       )}
-      {showPage === SHOW_PAGE.singupPage && (
-        <SignupForm setShowPage={setShowPage} />
-      )}
+
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
       )}

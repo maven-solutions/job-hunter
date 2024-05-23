@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import "./index.css";
 import Layout from "../../template/Layout";
 import HeadingTitle from "../../component/heading/HeadingTitle";
-import InputBox from "../../component/InputBox";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
-import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import { userSignIn } from "../../store/features/Auth/AuthApi";
-import { SHOW_PAGE } from "../../utils/constant";
+
 import {
   EXTENSION_IN_LIVE,
   EXTENSION_IN_LOCAL,
@@ -19,11 +16,6 @@ import {
 
 const LoginFrom = (props: any) => {
   const { setShowPage } = props;
-
-  const dispatch = useAppDispatch();
-  const authState: any = useAppSelector((store: RootStore) => {
-    return store.AuthSlice;
-  });
 
   const userLogin = () => {
     if (EXTENSION_IN_LOCAL) {
@@ -36,6 +28,7 @@ const LoginFrom = (props: any) => {
       window.open(LIVE_WEBSITE_URL, "_blank");
     }
   };
+
   return (
     <Layout setShowPage={setShowPage}>
       <Height height="-15" />
@@ -51,13 +44,7 @@ const LoginFrom = (props: any) => {
           Log in now with CareerAi to enhance your job search experience and
           discover your dream job.
         </p>
-        <PrimaryButton
-          text="Login"
-          onclick={userLogin}
-          loading={authState.loading.login}
-          loadingText="please wait..."
-          disabled={authState.loading.login}
-        />
+        <PrimaryButton text="Login" onclick={() => userLogin()} />
       </WhiteCard>
     </Layout>
   );
