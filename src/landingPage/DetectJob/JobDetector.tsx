@@ -30,7 +30,7 @@ import {
 import SimplyHiredJob from "../../jobExtractor/SimplyHired";
 import { getJobsFromDice } from "../../jobExtractor/Dice";
 import { getJobsFromIndeed } from "../../jobExtractor/Indeed";
-import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
+
 import Builtin from "../../jobExtractor/Builtin";
 import Glassdoor from "../../jobExtractor/Glassdoor";
 import {
@@ -43,6 +43,7 @@ import {
   chekJobExists,
   getApplicationStageData,
 } from "../../store/features/JobDetail/JobApi";
+import { getJobFromZipRecruiter } from "../../jobExtractor/Ziprecuriter";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -143,9 +144,6 @@ const JobDetector = (props: any) => {
       setWebsite(SUPPORTED_WEBSITE.simplyhired);
     }
 
-    if (window.location.href.includes("ziprecruiter.")) {
-      setWebsite(SUPPORTED_WEBSITE.ziprecruiter);
-    }
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
     }
@@ -272,6 +270,11 @@ const JobDetector = (props: any) => {
       }, 2000);
     }
 
+    if (window.location.href.includes("ziprecruiter.")) {
+      setTimeout(() => {
+        getJobFromZipRecruiter(dispatch);
+      }, 2000);
+    }
     setShowPage("");
     dispatch(clearJobState());
   }, [window.location.href]);
@@ -319,9 +322,6 @@ const JobDetector = (props: any) => {
       )}
       {/* {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />} */}
 
-      {website === SUPPORTED_WEBSITE.ziprecruiter && (
-        <Ziprecruiter setShowPage={setShowPage} />
-      )}
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
       )}

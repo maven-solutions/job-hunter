@@ -89,7 +89,7 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   dispatch(setJobRelatedInfo(firstEle));
 
   dispatch(setJobCulture(elements2?.join(" • ") ?? ""));
-  dispatch(setJobSummary([benefits, compensation]));
+  dispatch(setJobSummary([benefits]));
 
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {
@@ -98,7 +98,7 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
   }
 };
 
-const getJobFromZipRecruiter = (dispatch): void => {
+export const getJobFromZipRecruiter = (dispatch): void => {
   const zipDom = document.querySelector('[data-testid="right-pane"]');
 
   const zipDom2 = document.querySelector(".job_details");
@@ -114,18 +114,3 @@ const getJobFromZipRecruiter = (dispatch): void => {
 
   dispatch(setJobFoundStatus(true));
 };
-
-const Ziprecruiter = (props: any) => {
-  const { setShowPage } = props;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    setTimeout(() => {
-      getJobFromZipRecruiter(dispatch);
-    }, 4000);
-    dispatch(clearJobState());
-  }, [window.location.href]);
-
-  return null;
-};
-
-export default Ziprecruiter;
