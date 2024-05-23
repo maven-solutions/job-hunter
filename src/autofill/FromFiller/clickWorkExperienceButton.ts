@@ -423,7 +423,7 @@ const workExperienceDatafiller = async (
         const allInputId = getAllinputId();
         if (!allInputId?.includes(id)) {
           setIdToLocalstorage(id);
-          input.value = data.city.label ?? "";
+          input.value = data?.city?.label ?? "";
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
