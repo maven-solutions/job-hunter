@@ -8,10 +8,7 @@ import Layout from "../../template/Layout";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { SHOW_PAGE } from "../../utils/constant";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import {
-  getApplicationStageData,
-  saveJobCareerAI,
-} from "../../store/features/JobDetail/JobApi";
+import { saveJobCareerAI } from "../../store/features/JobDetail/JobApi";
 import { setSelectedStage } from "../../store/features/JobDetail/JobDetailSlice";
 import Notification from "../../contentScript/Notification";
 import {
@@ -75,19 +72,21 @@ const DisplayJob = (props: any) => {
     };
 
     try {
-      dispatch(
-        saveJobCareerAI({
-          data,
-          onSuccess: () => {
-            setSavedNotification(true);
-            setSaveLoading(false);
-          },
-          onFail: () => {
-            setSavedNotification(false);
-            setSaveLoading(false);
-          },
-        })
-      );
+      if (authState.authenticated) {
+        dispatch(
+          saveJobCareerAI({
+            data,
+            onSuccess: () => {
+              setSavedNotification(true);
+              setSaveLoading(false);
+            },
+            onFail: () => {
+              setSavedNotification(false);
+              setSaveLoading(false);
+            },
+          })
+        );
+      }
     } catch (error) {
       setSaveLoading(false);
       console.log("catched err", error);

@@ -38,21 +38,20 @@ const JobDetail = (props: any) => {
   const [savedNotification, setSavedNotification] = useState(false);
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
 
-  const jobDetailState: any = useAppSelector((store: RootStore) => {
-    return store.JobDetailSlice;
-  });
-
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
+  });
+  const authState: any = useAppSelector((store: RootStore) => {
+    return store.AuthSlice;
   });
 
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (!jobSlice.stage_data_success) {
-      dispatch(getApplicationStageData());
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!jobSlice.stage_data_success) {
+  //     dispatch(getApplicationStageData());
+  //   }
+  // }, []);
 
   const savejobs = () => {
     setSaveLoading(true);
@@ -73,22 +72,24 @@ const JobDetail = (props: any) => {
       fromExtension: true,
     };
     try {
-      dispatch(
-        saveJobCareerAI({
-          data,
-          onSuccess: () => {
-            setSavedNotification(true);
-            SetAlreadySavedInfo(false);
-            setSaveLoading(false);
-            setShowPage(SHOW_PAGE.summaryPage);
-          },
-          onFail: () => {
-            setSavedNotification(false);
-            SetAlreadySavedInfo(true);
-            setSaveLoading(false);
-          },
-        })
-      );
+      if (authState.authenticated) {
+        dispatch(
+          saveJobCareerAI({
+            data,
+            onSuccess: () => {
+              setSavedNotification(true);
+              SetAlreadySavedInfo(false);
+              setSaveLoading(false);
+              setShowPage(SHOW_PAGE.summaryPage);
+            },
+            onFail: () => {
+              setSavedNotification(false);
+              SetAlreadySavedInfo(true);
+              setSaveLoading(false);
+            },
+          })
+        );
+      }
     } catch (error) {
       setSaveLoading(false);
       console.log("catched err", error);
@@ -109,14 +110,14 @@ const JobDetail = (props: any) => {
 
         <InputBox
           title="Job title"
-          value={jobDetailState.title}
+          value={jobSlice.title}
           valueSetter={setJobstitle}
           name="jobtitle"
         />
         <Height height="10" />
         <InputBox
           title="Company"
-          value={jobDetailState.company}
+          value={jobSlice.company}
           valueSetter={setCompanyName}
           name="company"
         />
@@ -124,7 +125,7 @@ const JobDetail = (props: any) => {
 
         <InputBox
           title="Location"
-          value={jobDetailState.location}
+          value={jobSlice.location}
           valueSetter={setLocation}
           name="location"
         />
@@ -135,7 +136,7 @@ const JobDetail = (props: any) => {
           <div className="label-top">Additional Info</div> */}
           <EditorProvider>
             <Editor
-              value={jobDetailState.description ?? ""}
+              value={jobSlice.description ?? ""}
               onChange={setDescValue}
               // onBlur={() => console.log("Editor lost focus")}
               // onFocus={() => console.log("Editor gained focus")}
