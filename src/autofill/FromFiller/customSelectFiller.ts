@@ -122,40 +122,40 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     }
 
     // for language
-    if (checkIfExist(labelText, fieldNames.language)) {
-      select.click();
-      await delay(500);
-      // console.log("state::language");
-      const selectOptions: any = document.querySelectorAll('[role="option"]');
-      for (const [index, element] of selectOptions.entries()) {
-        if (
-          fromatStirngInLowerCase(element.textContent.trim()) ===
-          fromatStirngInLowerCase(applicantData.language)
-        ) {
-          element.click();
-          // return true;
-        }
-      }
-      await delay(1000);
-    }
+    // if (checkIfExist(labelText, fieldNames.language)) {
+    //   select.click();
+    //   await delay(500);
+    //   // console.log("state::language");
+    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
+    //   for (const [index, element] of selectOptions.entries()) {
+    //     if (
+    //       fromatStirngInLowerCase(element.textContent.trim()) ===
+    //       fromatStirngInLowerCase(applicantData.language)
+    //     ) {
+    //       element.click();
+    //       // return true;
+    //     }
+    //   }
+    //   await delay(1000);
+    // }
 
     // for race
-    if (checkIfExist(labelText, fieldNames.race)) {
-      select.click();
-      await delay(500);
-      const selectOptions: any = document.querySelectorAll('[role="option"]');
-      for (const [index, element] of selectOptions.entries()) {
-        if (
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
-            fromatStirngInLowerCase(applicantData.race)
-          )
-        ) {
-          element.click();
-          // return true;
-        }
-      }
-      await delay(1000);
-    }
+    // if (checkIfExist(labelText, fieldNames.race)) {
+    //   select.click();
+    //   await delay(500);
+    //   const selectOptions: any = document.querySelectorAll('[role="option"]');
+    //   for (const [index, element] of selectOptions.entries()) {
+    //     if (
+    //       fromatStirngInLowerCase(element.textContent.trim()).includes(
+    //         fromatStirngInLowerCase(applicantData.race)
+    //       )
+    //     ) {
+    //       element.click();
+    //       // return true;
+    //     }
+    //   }
+    //   await delay(1000);
+    // }
 
     // for veteran
     if (checkIfExist(labelText, fieldNames.veteran)) {

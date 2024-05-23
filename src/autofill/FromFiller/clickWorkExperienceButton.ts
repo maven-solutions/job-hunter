@@ -54,110 +54,6 @@ const checkobxFiller = () => {
   });
 };
 
-// const dateFiller = async (data, index) => {
-//   console.log("date:::", index, "::", data);
-//   const allDateInput = document.querySelectorAll<HTMLInputElement>("input");
-
-//   for (const [inputIndex, input] of allDateInput.entries()) {
-//     const attributes: any = Array.from(input.attributes);
-//     // console.log("input::", input);
-//     for (const attribute of attributes) {
-//       if (
-//         checkIfExist(attribute.value, fieldNames.month) &&
-//         input.value === ""
-//       ) {
-//         const id = input.getAttribute("id");
-//         const allInputId = getAllinputId();
-//         console.log("MM::", getMonthFromDate(data.startDate));
-//         if (
-//           !allInputId?.includes(id) &&
-//           !input.hasAttribute("ci_to_month") &&
-//           !input.hasAttribute("ci_from_month")
-//         ) {
-//           setIdToLocalstorage(id);
-//           input.setAttribute("ci_from_month", "true");
-//           input.value = getMonthFromDate(data.startDate);
-//           input.focus(); // Autofocus on the input field
-//           input.click();
-//           input.select();
-//           // await delay(100);
-//           handleValueChanges(input);
-//           // await delay(100);
-//           break;
-//         }
-//       }
-
-//       if (
-//         checkIfExist(attribute.value, fieldNames.year) &&
-//         input.value === ""
-//       ) {
-//         const id = input.getAttribute("id");
-//         const allInputId = getAllinputId();
-//         console.log("yy::", getYearFromDate(data.startDate));
-//         if (
-//           !allInputId?.includes(id) &&
-//           !input.hasAttribute("ci_to_year") &&
-//           !input.hasAttribute("ci_from_year")
-//         ) {
-//           setIdToLocalstorage(id);
-//           input.setAttribute("ci_from_year", "true");
-//           input.value = getYearFromDate(data.startDate);
-//           input.focus(); // Autofocus on the input field
-//           input.click();
-//           input.select();
-//           // await delay(100);
-//           handleValueChanges(input);
-//           // await delay(100);
-//           break;
-//         }
-//       }
-
-//       // code is not executing
-//       if (
-//         checkIfExist(attribute.value, fieldNames.month) &&
-//         input.value === ""
-//       ) {
-//         const id = input.getAttribute("id");
-//         const allInputId = getAllinputId();
-//         console.log("MMe::", getMonthFromDate(data.endDate));
-//         if (!allInputId?.includes(id) && !input.hasAttribute("ci_from_month")) {
-//           setIdToLocalstorage(id);
-//           input.setAttribute("ci_to_month", "true");
-
-//           input.value = getMonthFromDate(data.endDate);
-//           input.focus(); // Autofocus on the input field
-//           input.click();
-//           input.select();
-//           // await delay(100);
-//           handleValueChanges(input);
-//           // await delay(100);
-//           break;
-//         }
-//       }
-
-//       if (
-//         checkIfExist(attribute.value, fieldNames.year) &&
-//         input.value === ""
-//       ) {
-//         const id = input.getAttribute("id");
-//         const allInputId = getAllinputId();
-//         console.log("yye::", getYearFromDate(data.endDate));
-//         if (!allInputId?.includes(id) && !input.hasAttribute("ci_from_year")) {
-//           setIdToLocalstorage(id);
-//           input.setAttribute("ci_to_year", "true");
-//           input.value = getYearFromDate(data.endDate);
-//           input.focus(); // Autofocus on the input field
-//           input.click();
-//           input.select();
-//           // await delay(100);
-//           handleValueChanges(input);
-//           // await delay(100);
-//           break;
-//         }
-//       }
-//     }
-//   }
-// };
 export const dateFiller = async (data, index) => {
   // console.log("date:::", index, "::", data);
   let fromMonthFiled = false;
@@ -284,6 +180,9 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
       applicantData.employment_history &&
       applicantData.employment_history.length > 0
     ) {
+      const jobtitle = document.querySelector(
+        '[data-automation-id="jobTitle"]'
+      );
       for await (const [
         index,
         element,
@@ -304,12 +203,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
         await delay(500);
         button.click();
 
-        if (
-          window.location.href.includes("leidos.wd5.myworkdayjobs.") ||
-          window.location.href.includes("autodesk.wd1.myworkdayjobs.") ||
-          window.location.href.includes("bah.wd1.myworkdayjobs.com") ||
-          window.location.href.includes("pnc.wd5.myworkdayjobs.com")
-        ) {
+        if (jobtitle) {
           if (!delte) {
             await delay(2000);
             const delteButton: any = document.querySelector(

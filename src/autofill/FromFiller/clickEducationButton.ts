@@ -30,15 +30,15 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
       applicantData.education &&
       applicantData.education.length > 0
     ) {
+      const degreeDected = document.querySelector(
+        '[data-automation-id="degree"]'
+      );
       for await (const [index, element] of applicantData.education.entries()) {
         // console.log("Processing employment history element:", element);
 
         await delay(500);
         button.click();
-        if (
-          window.location.href.includes("leidos.wd5.myworkdayjobs") ||
-          window.location.href.includes("bah.wd1.myworkdayjobs.com")
-        ) {
+        if (degreeDected) {
           if (!delte) {
             await delay(2000);
             const delteButton: any = document.querySelector(
@@ -186,7 +186,8 @@ const degreeFiller = async (data, index) => {
   );
   if (
     window.location.href.includes("autodesk.wd1.myworkdayjobs.") ||
-    window.location.href.includes("zayo.wd1.myworkdayjobs.") ||  window.location.href.includes("philips.wd3.myworkdayjobs.")
+    window.location.href.includes("zayo.wd1.myworkdayjobs.") ||
+    window.location.href.includes("philips.wd3.myworkdayjobs.")
   ) {
     selectButtonFields = tempDiv.querySelectorAll(
       'button[data-automation-id="degree"]'
