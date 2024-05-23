@@ -252,7 +252,7 @@ export const dateFiller = async (data, index) => {
         if (!allInputId?.includes(id) && !input.hasAttribute("ci_to_year")) {
           setIdToLocalstorage(id);
           input.setAttribute("ci_to_year", index);
-          input.value = getYearFromDate(data.endDate);
+          input.value = getYearFromDate(data?.endDate);
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
@@ -381,7 +381,7 @@ const workExperienceDatafiller = async (
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
         if (!allInputId?.includes(id)) {
-          input.value = data.jobTitle;
+          input.value = data?.jobTitle ?? "";
           setIdToLocalstorage(id);
           input.focus(); // Autofocus on the input field
           input.click();
@@ -404,7 +404,7 @@ const workExperienceDatafiller = async (
         if (!allInputId?.includes(id)) {
           setIdToLocalstorage(id);
 
-          input.value = data.employeer;
+          input.value = data?.employeer ?? "";
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
@@ -465,7 +465,7 @@ const workExperienceDatafiller = async (
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          const cleanedHtml = sanitizeHTML(data.description);
+          const cleanedHtml = sanitizeHTML(data?.description ?? "");
           input.value = cleanedHtml;
           await delay(100);
           handleValueChanges(input);
