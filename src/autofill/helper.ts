@@ -118,7 +118,7 @@ export const detectInputAndFillData = async (
     fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fileTypeDataFiller(tempDivForFile, applicantData, false);
+    fileTypeDataFiller(tempDivForFile, applicantData, true);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
