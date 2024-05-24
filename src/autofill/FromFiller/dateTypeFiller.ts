@@ -16,17 +16,15 @@ export const dateTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     const inputId = input?.getAttribute("id") ?? "";
     const labelElement = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
-    console.log("labelTextdd::", labelText);
 
     const attributes: any = Array.from(input.attributes);
 
     // Log all attributes
     attributes.some((attribute) => {
       if (
-        checkIfExist(labelText, fieldNames.dob) ||
+        (applicantData.dob && checkIfExist(labelText, fieldNames.dob)) ||
         checkIfExist(attribute.value, fieldNames.dob)
       ) {
-        console.log("da---", formatDateInDDMMYY(applicantData.dob));
         input.value = formatDateInDDMMYY(applicantData.dob);
         input.focus(); // Autofocus on the input field
         input.click();

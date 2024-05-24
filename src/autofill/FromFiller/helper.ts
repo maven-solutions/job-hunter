@@ -10,7 +10,10 @@ export const getYearFromDate = (dateString: string): string => {
   return year.toString();
 };
 export const formatDateInDDMMYY = (inputDate: string): string => {
-  const [year, month, day] = inputDate.split("-");
-
-  return `${day}-${month}-${year}`;
+  if (inputDate) {
+    const [year, month, day] = inputDate?.split("-");
+    return `${day}-${month}-${year}`;
+  } else {
+    return "";
+  }
 };

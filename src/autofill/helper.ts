@@ -171,6 +171,10 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".ebayinc.")) {
       launchWork = false;
     }
+    if (window.location.href.includes(".paylocity.")) {
+      launchWork = false;
+      launcEducation = false;
+    }
 
     if (launchWork) {
       await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);

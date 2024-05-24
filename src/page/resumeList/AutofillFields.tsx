@@ -49,6 +49,9 @@ const extractInfo = (resumeData, applicationForm) => {
   );
 
   const isAdult = (dateOfBirth: string): boolean => {
+    if (!dateOfBirth) {
+      return false;
+    }
     const dob: Date = new Date(dateOfBirth);
     const today: Date = new Date();
     const age: number = today.getFullYear() - dob.getFullYear();
@@ -57,7 +60,6 @@ const extractInfo = (resumeData, applicationForm) => {
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
       return age - 1 >= 18;
     }
-
     return age >= 18;
   };
 
