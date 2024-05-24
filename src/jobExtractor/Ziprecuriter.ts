@@ -151,8 +151,6 @@ const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
   const siblingPTags = flexEle.querySelectorAll(":scope > p");
   if (siblingPTags.length > 0) {
     const text = siblingPTags[0]?.textContent?.trim();
-    console.log("medicaltext::", text);
-
     if (
       ["time", "contract", "temporary"].some((type) =>
         text.toLowerCase().includes(type)
@@ -186,6 +184,16 @@ const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
   }
   dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobCulture(workCulturalInfo));
+
+  const desc = document.querySelector(
+    'div[class="relative flex flex-col gap-24"]'
+  );
+  if (desc) {
+    const description = desc?.innerHTML;
+    if (description) {
+      dispatch(setJobDesc(description));
+    }
+  }
 };
 
 export const getJobFromZipRecruiter = (dispatch): void => {
