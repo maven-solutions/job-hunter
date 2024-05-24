@@ -10,65 +10,90 @@ import {
 const checkAdultAge = (applicantData: Applicant) => {
   let isOver18 = false;
 
-  const select: any = document.querySelector(
-    "#job_application_answers_attributes_3_boolean_value"
-  );
-  if (!select) {
-    return;
-  }
-  Array.from(select.options).find((option: any) => {
-    if (
-      applicantData.is_over_18 &&
-      fromatStirngInLowerCase(option?.text).includes("yes")
-    ) {
-      option.selected = true;
-      handleValueChanges(option);
-      isOver18 = true;
-      return true;
-    }
+  const allLabel = document.querySelectorAll("label");
+  if (allLabel.length > 0) {
+    for (const label of allLabel) {
+      if (
+        label.textContent.trim().includes("18 years") ||
+        label.textContent.trim().toLowerCase().includes("adult")
+      ) {
+        const select = label.querySelector("select");
+        if (!select) {
+          return;
+        }
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.is_over_18 &&
+            fromatStirngInLowerCase(option?.text).includes("yes")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            isOver18 = true;
+            return true;
+          }
 
-    if (
-      !applicantData.is_over_18 &&
-      fromatStirngInLowerCase(option?.text).includes("no")
-    ) {
-      option.selected = true;
-      handleValueChanges(option);
-      isOver18 = true;
-      return true;
+          if (
+            !applicantData.is_over_18 &&
+            fromatStirngInLowerCase(option?.text).includes("no")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            isOver18 = true;
+            return true;
+          }
+        });
+        return;
+      }
     }
-  });
+  }
 };
 
 const usWorkAuthorization = (applicantData: Applicant) => {
   let workAuthorization = false;
 
-  const select: any = document.querySelector(
-    "#job_application_answers_attributes_4_boolean_value"
-  );
-  if (!select) {
-    return;
-  }
-  Array.from(select.options).find((option: any) => {
-    if (
-      applicantData.us_work_authoriztaion &&
-      fromatStirngInLowerCase(option?.text).includes("yes")
-    ) {
-      option.selected = true;
-      handleValueChanges(option);
-      workAuthorization = true;
-      return true;
-    }
+  // });
 
-    if (
-      !applicantData.us_work_authoriztaion &&
-      fromatStirngInLowerCase(option?.text).includes("no")
-    ) {
-      option.selected = true;
-      handleValueChanges(option);
-      workAuthorization = true;
-      return true;
+  const allLabel = document.querySelectorAll("label");
+  if (allLabel.length > 0) {
+    for (const label of allLabel) {
+      if (
+        label.textContent
+          .trim()
+          .includes("legally authorized to work in the United States") ||
+        label.textContent
+          .trim()
+          .toLowerCase()
+          .includes("legally authorized to work in the united states")
+      ) {
+        const select = label.querySelector("select");
+        if (!select) {
+          return;
+        }
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text).includes("yes")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text).includes("no")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+        });
+        return;
+      }
     }
-  });
+  }
 };
 
 const fillEducation = async (educationData: Education[]) => {
@@ -76,7 +101,9 @@ const fillEducation = async (educationData: Education[]) => {
   // console.log("educationData::", educationData);
 
   const addEducationButton = document.getElementById("add_education");
-
+  if (!addEducationButton) {
+    return;
+  }
   for (let index = 0; index < educationData.length - 1; index++) {
     addEducationButton.click();
     await delay(1000);
@@ -86,7 +113,9 @@ const fillEducation = async (educationData: Education[]) => {
   const selectInputFields: any = document.querySelectorAll(
     '[name="job_application[educations][][degree_id]"]'
   );
-
+  if (!selectInputFields) {
+    return;
+  }
   for (const [index, select] of selectInputFields.entries()) {
     const education = educationData[index];
     Array.from(select.options).find((option: any) => {
@@ -111,6 +140,9 @@ const fillEducation = async (educationData: Education[]) => {
   const selectInputFieldsForMajor: any = document.querySelectorAll(
     '[name="job_application[educations][][discipline_id]"]'
   );
+  if (!selectInputFieldsForMajor) {
+    return;
+  }
 
   for (const [index, select] of selectInputFieldsForMajor.entries()) {
     const education = educationData[index];
