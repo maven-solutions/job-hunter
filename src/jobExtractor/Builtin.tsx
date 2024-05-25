@@ -38,29 +38,34 @@ const getJobFromBuiltin = (dispatch, dom?: any, dom2?: any) => {
     const location = locationEle2?.textContent?.trim();
     dispatch(setJobLocation(location));
   }
-
+  let jobtypeinfo = "";
   const remoteWorkType = dom?.querySelector(".remote");
   if (remoteWorkType) {
     // Get the text content from the element
-    const jobtype = remoteWorkType?.textContent?.trim();
-    dispatch(setJobType(jobtype));
-    dispatch(setJobRelatedInfo(jobtype));
+    jobtypeinfo = remoteWorkType?.textContent?.trim();
+    dispatch(setJobType(jobtypeinfo));
+    dispatch(setJobRelatedInfo(jobtypeinfo));
   }
 
   const hybridWorkType = dom?.querySelector(".hybrid-text");
   if (hybridWorkType) {
     // Get the text content from the element
-    const jobtype = hybridWorkType?.textContent?.trim();
-    dispatch(setJobType(jobtype));
-    dispatch(setJobRelatedInfo(jobtype));
+    jobtypeinfo = hybridWorkType?.textContent?.trim();
+    dispatch(setJobType(jobtypeinfo));
+    dispatch(setJobRelatedInfo(jobtypeinfo));
   }
 
   const hybridWorkType2 = dom2?.querySelector(".job-hybrid");
   if (hybridWorkType2) {
     // Get the text content from the element
-    const jobtype = hybridWorkType2?.textContent?.trim();
-    dispatch(setJobType(jobtype));
-    dispatch(setJobRelatedInfo(jobtype));
+    jobtypeinfo = hybridWorkType2?.textContent?.trim();
+    dispatch(setJobType(jobtypeinfo));
+    dispatch(setJobRelatedInfo(jobtypeinfo));
+  }
+
+  if (!jobtypeinfo) {
+    dispatch(setJobType("Onsite"));
+    dispatch(setJobRelatedInfo("Onsite"));
   }
 
   const jobInfoEle = dom?.querySelector(".job-info");
