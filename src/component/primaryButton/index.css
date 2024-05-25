@@ -41,3 +41,11 @@
   background: #363538 !important;
   cursor: no-drop;
 }
+.ci_job__button__disabled:disabled {
+  background: #363538 !important;
+  cursor: no-drop;
+}
+.ci_job_save_button:disabled {
+  background: #363538 !important;
+  cursor: no-drop;
+}

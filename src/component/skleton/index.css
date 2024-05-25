@@ -3,7 +3,7 @@
   height: 30px; /* Adjust as needed */
   margin-bottom: 20px;
   background-color: #e0e0e0; /* Skeleton color */
-  animation: loading 1.5s infinite ease-in-out; /* Animation */
+  animation: ciskletonloading 1.5s infinite ease-in-out; /* Animation */
   border-radius: 5px; /* Border radius */
 }
 
@@ -12,11 +12,11 @@
   height: 18px; /* Adjust as needed */
   margin-bottom: 10px;
   background-color: #e0e0e0; /* Skeleton color */
-  animation: loading 1.5s infinite ease-in-out; /* Animation */
+  animation: ciskletonloading 1.5s infinite ease-in-out; /* Animation */
   border-radius: 5px; /* Border radius */
 }
 
-@keyframes loading {
+@keyframes ciskletonloading {
   0% {
     background-color: #e0e0e0;
   } /* Skeleton color */
