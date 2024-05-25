@@ -14,6 +14,17 @@ import "./index.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 
+const RenderName = (props: any) => {
+  const { item } = props;
+  if (item?.applicant?.title) {
+    return item.applicant.title;
+  }
+  if (item?.applicant?.name) {
+    return item.applicant.name;
+  }
+  return "Untitled Resume";
+};
+
 const ResumeList = (props: any) => {
   const { setShowPage, content } = props;
   const [showdropDown, setShowDropdown] = useState(false);
@@ -76,44 +87,50 @@ const ResumeList = (props: any) => {
         {!autoFilling && (
           <>
             {resumeList.res_success &&
-              resumeList.applicantData.map((item, index) => (
-                <div className="ci_resume_list_section" key={item.applicant.id}>
-                  <div className="ci_resume_item_left_section">
-                    <input
-                      className="ci_resume_radio_button"
-                      type="radio"
-                      name="resume"
-                      id={index}
-                      onChange={() => setSelectedResume(index)}
-                      checked={selectedResume === index}
-                    />
-                    <label
-                      htmlFor={index}
-                      className="ci_resume_radio_button_label"
-                    >
-                      {item.applicant.title ?? `${item.applicant.name}`}
-                    </label>
-                    {selectedResume === index && (
-                      <div className="ci_radio_check_circle">
-                        <Check className="ci_check_icon" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="ext__tooltip__wrapper">
-                    <div className="ext__toolip__container">
-                      <div
-                        className="ext__toolip"
-                        onClick={() =>
-                          window.open(item.applicant.pdfUrl, "_blank")
-                        }
+              resumeList.applicantData.map((item, index) => {
+                console.log("item::", item);
+                return (
+                  <div
+                    className="ci_resume_list_section"
+                    key={item.applicant.id}
+                  >
+                    <div className="ci_resume_item_left_section">
+                      <input
+                        className="ci_resume_radio_button"
+                        type="radio"
+                        name="resume"
+                        id={index}
+                        onChange={() => setSelectedResume(index)}
+                        checked={selectedResume === index}
+                      />
+                      <label
+                        htmlFor={index}
+                        className="ci_resume_radio_button_label"
                       >
-                        <Eye size={16} />
-                        <p className="ext__tooltip__text">Preview</p>
+                        <RenderName item={item} />
+                      </label>
+                      {selectedResume === index && (
+                        <div className="ci_radio_check_circle">
+                          <Check className="ci_check_icon" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="ext__tooltip__wrapper">
+                      <div className="ext__toolip__container">
+                        <div
+                          className="ext__toolip"
+                          onClick={() =>
+                            window.open(item.applicant.pdfUrl, "_blank")
+                          }
+                        >
+                          <Eye size={16} />
+                          <p className="ext__tooltip__text">Preview</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             {resumeList.loading && <ResumeSkleton />}
             <Height height="10" />
             <AutofillFields
