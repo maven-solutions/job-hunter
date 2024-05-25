@@ -88,7 +88,6 @@ const ResumeList = (props: any) => {
           <>
             {resumeList.res_success &&
               resumeList.applicantData.map((item, index) => {
-                console.log("item::", item);
                 return (
                   <div
                     className="ci_resume_list_section"
