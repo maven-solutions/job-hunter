@@ -51,9 +51,9 @@ const Logo = (props: any) => {
     loadUser();
     if (authState.authenticated) {
       if (authState.ci_user.userType === "va") {
-        setShowPage(SHOW_PAGE.resumeListPage);
+        // setShowPage(SHOW_PAGE.resumeListPage);
       } else if (showAutofillPage) {
-        setShowPage(SHOW_PAGE.resumeListPage);
+        // setShowPage(SHOW_PAGE.resumeListPage);
       } else {
         setShowPage(SHOW_PAGE.summaryPage);
       }

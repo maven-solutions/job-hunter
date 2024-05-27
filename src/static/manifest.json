@@ -1,7 +1,7 @@
 {
   "name": "CareerAI",
   "description": "Unlock career opportunities with a simple click - our Chrome extension saves and organizes job listings seamlessly.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "manifest_version": 3,
   "icons": {
     "16": "icon.png",

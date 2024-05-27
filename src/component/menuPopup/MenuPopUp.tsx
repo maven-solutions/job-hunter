@@ -93,7 +93,7 @@ const MenuPopUp = (props: any) => {
           <span>Profile </span>
         </div>
 
-        {(authState?.ci_user?.organizations?.length === 0 ||
+        {/* {(authState?.ci_user?.organizations?.length === 0 ||
           authState?.ci_user?.organizations?.length > 0) &&
           !hideAutofill && (
             <>
@@ -110,7 +110,7 @@ const MenuPopUp = (props: any) => {
                 <span>Autofill </span>
               </div>
             </>
-          )}
+          )} */}
       </div>
       <Height height="13" />
     </div>
