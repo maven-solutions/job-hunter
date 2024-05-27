@@ -97,6 +97,7 @@ const extractInfo = (resumeData, applicationForm) => {
     canada_work_authoriztaion: userAuthorizationCanada,
     phone_type: phoneType,
     salary: expectedSalaryRange,
+    sponsorship_required: false,
   };
 };
 

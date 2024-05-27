@@ -43,6 +43,7 @@ export interface Applicant {
 
   state?: string | undefined;
   salary?: string | number | null;
+  sponsorship_required?: boolean;
 
   terms_and_condation?: boolean | null;
   us_work_authoriztaion?: boolean | null;
