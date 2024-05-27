@@ -27,6 +27,7 @@ import { jobvite } from "./domainSpecific/jobvite";
 import { myworkDays } from "./domainSpecific/myworkdays";
 import { pinpointhq } from "./domainSpecific/pinpointhq";
 import { zohorecruit } from "./domainSpecific/zohorecruit";
+import { icims } from "./domainSpecific/icims";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -124,6 +125,10 @@ export const detectInputAndFillData = async (
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
+
+    if (window.location.href.includes(".icims.")) {
+      await icims(tempDiv ?? tempDivForFile, applicantData);
+    }
     stopLoading();
     // console.log("ended::");
   } else {
