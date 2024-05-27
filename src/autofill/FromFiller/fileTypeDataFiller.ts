@@ -27,7 +27,10 @@ export const fileTypeDataFiller = async (
   if (!textInputField) {
     return;
   }
-
+  if (window.location.href.includes(".ashbyhq.")) {
+    const allInputfield = document.querySelectorAll('input[type="file"]');
+    textInputField = allInputfield[1];
+  }
   try {
     if (
       applicantData.pdf_url &&
