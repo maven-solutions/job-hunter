@@ -57,7 +57,7 @@ export const fieldNames = {
   middle_name: ["middlename", "mname"],
   month: ["month"],
   major: ["major", "department"],
-  name: ["name"],
+  name: ["name", "signature"],
 
   linkedin_url: [
     "urls[linkedin]",

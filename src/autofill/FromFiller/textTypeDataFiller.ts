@@ -72,7 +72,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         return true; // Stop iterating
       }
 
-      if (fromatStirngInLowerCase(labelText) === fieldNames.name[0]) {
+      if (fromatStirngInLowerCase(labelText) === fieldNames.name) {
         input.value = applicantData.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
