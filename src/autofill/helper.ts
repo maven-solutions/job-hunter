@@ -19,6 +19,7 @@ import { ashbyhq } from "./domainSpecific/ashbyhq";
 import { autheo } from "./domainSpecific/autheo";
 import { careersPage } from "./domainSpecific/careers-page";
 import { csod } from "./domainSpecific/csod";
+import { avature } from "./domainSpecific/avature";
 import { eightFold } from "./domainSpecific/eightFold";
 import { greenHouse } from "./domainSpecific/greenhouse";
 import { jobsLever } from "./domainSpecific/jobslever";
@@ -218,6 +219,11 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".csod.")) {
       await csod(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    if (window.location.href.includes(".avature.")) {
+      await avature(tempDiv ?? tempDivForFile, applicantData);
+    }
+
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
       ashbyhq(tempDiv ?? tempDivForFile, applicantData);
