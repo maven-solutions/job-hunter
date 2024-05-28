@@ -139,8 +139,8 @@ const fillSponshership = async (applicantData: Applicant) => {
     // console.log("select::", select);
     const label = select.getAttribute("aria-label");
     if (
-      label.toLowerCase().includes("sponsorship") ||
-      label.toLowerCase().includes("visa")
+      label?.toLowerCase().includes("sponsorship") ||
+      label?.toLowerCase().includes("visa")
     ) {
       select.click();
       await delay(2000);
@@ -179,8 +179,8 @@ const authorizedTowork = async (applicantData: Applicant) => {
   for (const select of selectElement) {
     const label = select.getAttribute("aria-label");
     if (
-      label.toLowerCase().includes("legally") ||
-      label.toLowerCase().includes("permit")
+      label?.toLowerCase().includes("legally") ||
+      label?.toLowerCase().includes("currently authorized")
     ) {
       select.click();
       await delay(2000);
@@ -203,10 +203,38 @@ const authorizedTowork = async (applicantData: Applicant) => {
   await delay(1000);
 };
 
+const fillisAdult = async (applicantData: Applicant) => {
+  const selectElement: any = document.querySelectorAll(
+    'button[aria-haspopup="listbox"]'
+  );
+
+  for (const select of selectElement) {
+    const label = select.getAttribute("aria-label");
+    if (label?.toLowerCase().includes("18 years")) {
+      select.click();
+      await delay(2000);
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const element of selectOptions) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            fromatStirngInLowerCase("yes")
+          )
+        ) {
+          //   phonetype = true;
+          element.click();
+          return;
+        }
+      }
+    }
+  }
+  await delay(1000);
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
   await fillDeviceType(applicantData);
   await fillSponshership(applicantData);
   await authorizedTowork(applicantData);
+  await fillisAdult(applicantData);
 };
