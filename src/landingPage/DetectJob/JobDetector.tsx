@@ -130,6 +130,7 @@ const JobDetector = (props: any) => {
         ".clearcompany.",
         ".ashbyhq.",
         ".zohorecruit.",
+        ".successfactors.",
         // ".pinpointhq.",
         // "hhstechgroup.",
       ].some((domain) => window.location.href.toLowerCase().includes(domain))

@@ -144,7 +144,8 @@ export const detectInputAndFillData = async (
     if (
       window.location.href.includes(".peoplehr.") ||
       window.location.href.includes(".tal.") ||
-      window.location.href.includes(".zohorecruit.")
+      window.location.href.includes(".zohorecruit.") ||
+      window.location.href.includes(".successfactors.")
     ) {
       tempDiv = document.querySelector("body");
     }
