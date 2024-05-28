@@ -1,6 +1,24 @@
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
+const fillcountry = async (applicantData) => {
+  const countryDropDown: any = document.querySelector(
+    '[data-automation-id="countryDropdown"]'
+  );
+  if (!countryDropDown) {
+    return;
+  }
+  countryDropDown.click();
+  await delay(2000);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (countryHandler(element.textContent.trim(), applicantData)) {
+      element.click();
+    }
+  }
+  await delay(3000);
+};
+
 const fillDeviceType = async (applicantData) => {
   const phoneElement: any = document.querySelector(
     '[data-automation-id="phone-device-type"]'
@@ -9,7 +27,7 @@ const fillDeviceType = async (applicantData) => {
     return;
   }
   phoneElement.click();
-  await delay(1000);
+  await delay(1500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
 
   for (const [index, element] of selectOptions.entries()) {
@@ -22,7 +40,7 @@ const fillDeviceType = async (applicantData) => {
       element.click();
     }
   }
-  await delay(1000);
+  await delay(1500);
 };
 
 const countryHandler = (text, applicantData) => {
@@ -112,23 +130,71 @@ const filltodayDate = () => {
   handleValueChanges(year);
 };
 
-export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
-  filltodayDate();
-  const countryDropDown: any = document.querySelector(
-    '[data-automation-id="countryDropdown"]'
+const fillSponshership = async (applicantData) => {
+  const selectElement: any = document.querySelectorAll(
+    'button[aria-haspopup="listbox"]'
   );
-  if (!countryDropDown) {
-    return;
-  }
-  countryDropDown.click();
-  await delay(2000);
-  const selectOptions: any = document.querySelectorAll('[role="option"]');
-  for (const [index, element] of selectOptions.entries()) {
-    if (countryHandler(element.textContent.trim(), applicantData)) {
-      element.click();
+
+  for (const select of selectElement) {
+    // console.log("select::", select);
+    const label = select.getAttribute("aria-label");
+    if (
+      label.toLowerCase().includes("sponsorship") ||
+      label.toLowerCase().includes("visa")
+    ) {
+      select.click();
+      await delay(2000);
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const element of selectOptions) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            fromatStirngInLowerCase("no")
+          )
+        ) {
+          //   phonetype = true;
+          element.click();
+          return;
+        }
+      }
     }
   }
-  await delay(3000);
-  fillDeviceType(applicantData);
-  await delay(2000);
+  await delay(1000);
+};
+
+const authorizedTowork = async (applicantData) => {
+  const selectElement: any = document.querySelectorAll(
+    'button[aria-haspopup="listbox"]'
+  );
+
+  for (const select of selectElement) {
+    const label = select.getAttribute("aria-label");
+    if (
+      label.toLowerCase().includes("legally") ||
+      label.toLowerCase().includes("permit")
+    ) {
+      select.click();
+      await delay(2000);
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const element of selectOptions) {
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            fromatStirngInLowerCase("yes")
+          )
+        ) {
+          //   phonetype = true;
+          element.click();
+          return;
+        }
+      }
+    }
+  }
+  await delay(1000);
+};
+
+export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
+  filltodayDate();
+  await fillcountry(applicantData);
+  await fillDeviceType(applicantData);
+  await fillSponshership(applicantData);
+  await authorizedTowork(applicantData);
 };
