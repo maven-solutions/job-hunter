@@ -130,7 +130,7 @@ const filltodayDate = () => {
   handleValueChanges(year);
 };
 
-const fillSponshership = async (applicantData) => {
+const fillSponshership = async (applicantData: Applicant) => {
   const selectElement: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
@@ -148,7 +148,7 @@ const fillSponshership = async (applicantData) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim()).includes(
-            fromatStirngInLowerCase("no")
+            fromatStirngInLowerCase("no") && !applicantData.sponsorship_required
           )
         ) {
           //   phonetype = true;
@@ -161,7 +161,7 @@ const fillSponshership = async (applicantData) => {
   await delay(1000);
 };
 
-const authorizedTowork = async (applicantData) => {
+const authorizedTowork = async (applicantData: Applicant) => {
   const selectElement: any = document.querySelectorAll(
     'button[aria-haspopup="listbox"]'
   );
@@ -178,7 +178,9 @@ const authorizedTowork = async (applicantData) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim()).includes(
-            fromatStirngInLowerCase("yes")
+            fromatStirngInLowerCase("yes") &&
+              (applicantData.us_work_authoriztaion ||
+                applicantData.canada_work_authoriztaion)
           )
         ) {
           //   phonetype = true;
