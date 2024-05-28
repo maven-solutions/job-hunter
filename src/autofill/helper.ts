@@ -28,6 +28,7 @@ import { myworkDays } from "./domainSpecific/myworkdays";
 import { pinpointhq } from "./domainSpecific/pinpointhq";
 import { zohorecruit } from "./domainSpecific/zohorecruit";
 import { icims } from "./domainSpecific/icims";
+import { successfactors } from "./domainSpecific/successfactors";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -228,6 +229,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".avature.")) {
       await avature(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".successfactors.")) {
+      await successfactors(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
