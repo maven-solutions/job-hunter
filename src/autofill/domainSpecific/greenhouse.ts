@@ -96,6 +96,125 @@ const usWorkAuthorization = (applicantData: Applicant) => {
   }
 };
 
+const sponsorship = (applicantData: Applicant) => {
+  let workAuthorization = false;
+
+  // });
+
+  const allLabel = document.querySelectorAll("label");
+  if (allLabel.length > 0) {
+    for (const label of allLabel) {
+      if (
+        label.textContent.trim().toLowerCase().includes("sponsorship") ||
+        label.textContent.trim().toLowerCase().includes("visa")
+      ) {
+        const select = label.querySelector("select");
+        if (!select) {
+          return;
+        }
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("yes")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("no")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+        });
+        // return;
+      }
+
+      if (
+        label.textContent
+          .trim()
+          .toLowerCase()
+          .includes("immigration sponsorship")
+      ) {
+        const select = label.querySelector("select");
+        if (!select) {
+          return;
+        }
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("yes")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("no")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            workAuthorization = true;
+            return true;
+          }
+        });
+        return;
+      }
+    }
+  }
+};
+
+const immigrationsponsorship = (applicantData: Applicant) => {
+  let workAuthorization = false;
+
+  // });
+
+  const allLabel = document.querySelectorAll("label");
+  if (allLabel.length > 0) {
+    for (const label of allLabel) {
+      console.log("label::", label.textContent.trim());
+      if (
+        label.textContent.trim().toLowerCase().includes("h1b") ||
+        label.textContent.trim().toLowerCase().includes("f1") ||
+        label.textContent.trim().toLowerCase().includes("h4")
+      ) {
+        const select = label.querySelector("select");
+        if (!select) {
+          return;
+        }
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("yes")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
+
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text).includes("no")
+          ) {
+            option.selected = true;
+            handleValueChanges(option);
+            return true;
+          }
+        });
+        return;
+      }
+    }
+  }
+};
 const fillEducation = async (educationData: Education[]) => {
   //---
   // console.log("educationData::", educationData);
@@ -169,5 +288,7 @@ const fillEducation = async (educationData: Education[]) => {
 export const greenHouse = (tempDiv: any, applicantData: Applicant) => {
   checkAdultAge(applicantData);
   usWorkAuthorization(applicantData);
+  sponsorship(applicantData);
+  immigrationsponsorship(applicantData);
   fillEducation(applicantData.education);
 };
