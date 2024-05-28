@@ -148,10 +148,20 @@ const fillSponshership = async (applicantData: Applicant) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim()).includes(
-            fromatStirngInLowerCase("no") && !applicantData.sponsorship_required
-          )
+            fromatStirngInLowerCase("no")
+          ) &&
+          !applicantData.sponsorship_required
         ) {
-          //   phonetype = true;
+          element.click();
+          return;
+        }
+
+        if (
+          fromatStirngInLowerCase(element.textContent.trim()).includes(
+            fromatStirngInLowerCase("yes")
+          ) &&
+          applicantData.sponsorship_required
+        ) {
           element.click();
           return;
         }
@@ -178,10 +188,10 @@ const authorizedTowork = async (applicantData: Applicant) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim()).includes(
-            fromatStirngInLowerCase("yes") &&
-              (applicantData.us_work_authoriztaion ||
-                applicantData.canada_work_authoriztaion)
-          )
+            fromatStirngInLowerCase("yes")
+          ) &&
+          (applicantData.us_work_authoriztaion ||
+            applicantData.canada_work_authoriztaion)
         ) {
           //   phonetype = true;
           element.click();
