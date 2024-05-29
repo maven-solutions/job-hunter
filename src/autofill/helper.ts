@@ -30,6 +30,7 @@ import { zohorecruit } from "./domainSpecific/zohorecruit";
 import { icims } from "./domainSpecific/icims";
 import { successfactors } from "./domainSpecific/successfactors";
 import { battelle } from "./domainSpecific/battelle";
+import { oraclecloud } from "./domainSpecific/oraclecloud";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -237,6 +238,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".battelle.")) {
       await battelle(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".oraclecloud.")) {
+      await oraclecloud(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
