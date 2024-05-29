@@ -1,6 +1,6 @@
 {
-  "name": "CareerAI",
-  "description": "Unlock career opportunities with a simple click - our Chrome extension saves and organizes job listings seamlessly.",
+  "name": "CareerAI - Search, Track and Autofill Jobs",
+  "description": "Streamline your job search with CareerAI: Effortlessly search and track jobs, autofill job applications, and create professional resumes and cover letters, all with one powerful extension.",
   "version": "1.0.2",
   "manifest_version": 3,
   "icons": {
