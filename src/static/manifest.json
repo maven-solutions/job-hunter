@@ -1,7 +1,7 @@
 {
   "name": "CareerAI",
   "description": "Unlock career opportunities with a simple click - our Chrome extension saves and organizes job listings seamlessly.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "manifest_version": 3,
   "icons": {
     "16": "icon.png",
@@ -14,8 +14,8 @@
     "default_icon": "icon.png"
   },
   "permissions": ["storage"],
-  "homepage_url": "https://resumebuilder.joinswiftly.com",
-  "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
+  "homepage_url": "https://app.careerai.io",
+  "host_permissions": ["https://app.careerai.io/*"],
 
   "options_page": "options.html",
   "background": {
