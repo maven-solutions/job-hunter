@@ -181,7 +181,6 @@ const immigrationsponsorship = (applicantData: Applicant) => {
   const allLabel = document.querySelectorAll("label");
   if (allLabel.length > 0) {
     for (const label of allLabel) {
-      console.log("label::", label.textContent.trim());
       if (
         label.textContent.trim().toLowerCase().includes("h1b") ||
         label.textContent.trim().toLowerCase().includes("f1") ||
