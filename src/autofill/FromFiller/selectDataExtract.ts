@@ -69,8 +69,29 @@ export const selectDataExtract = (
     // filling country data
     Array.from(input.options).find((option: any) => {
       if (countryHandler(option, applicantData, country)) {
+        console.log("country::", option);
         option.selected = true;
-        handleValueChanges(option);
+        input.dispatchEvent(
+          new Event("change", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("input", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("focus", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("click", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("blur", { bubbles: true, cancelable: false })
+        );
+        input.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+        // handleValueChanges(option);
         country = true;
         return true;
       }
@@ -84,7 +105,26 @@ export const selectDataExtract = (
         !state
       ) {
         option.selected = true;
-        handleValueChanges(option);
+        input.dispatchEvent(
+          new Event("change", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("input", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("focus", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("click", { bubbles: true, cancelable: false })
+        );
+        input.dispatchEvent(
+          new Event("blur", { bubbles: true, cancelable: false })
+        );
+        input.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
         state = true;
         return true;
       }
@@ -157,7 +197,26 @@ export const selectDataExtract = (
             !gender
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             gender = true;
             return true;
           }
@@ -172,7 +231,26 @@ export const selectDataExtract = (
         Array.from(select.options).find((option: any) => {
           if (fromatStirngInLowerCase(option?.text) === "yes") {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             return true;
           }
         });
@@ -189,7 +267,26 @@ export const selectDataExtract = (
             applicantData.disability_status
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             return true;
           }
 
@@ -198,7 +295,26 @@ export const selectDataExtract = (
             !applicantData.disability_status
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             return true;
           }
         });
@@ -216,7 +332,26 @@ export const selectDataExtract = (
             )
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             return true;
           }
         });
@@ -236,7 +371,26 @@ export const selectDataExtract = (
               fromatStirngInLowerCase(option?.text).includes("amveteran"))
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
 
@@ -246,7 +400,26 @@ export const selectDataExtract = (
             fromatStirngInLowerCase(option?.text).includes("iamnot")
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
 
@@ -257,7 +430,26 @@ export const selectDataExtract = (
             fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
 
@@ -270,7 +462,26 @@ export const selectDataExtract = (
             )
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
 
@@ -283,7 +494,26 @@ export const selectDataExtract = (
             )
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
           // for yes---
@@ -296,7 +526,26 @@ export const selectDataExtract = (
             )
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
 
@@ -310,7 +559,26 @@ export const selectDataExtract = (
               fromatStirngInLowerCase(option?.text).includes("notwish"))
           ) {
             option.selected = true;
-            handleValueChanges(option);
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
             veteran = true;
           }
         });

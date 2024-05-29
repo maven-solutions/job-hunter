@@ -36,7 +36,7 @@ export const fieldNames = {
     "retypeemail",
   ],
 
-  full_name: ["fullname"],
+  full_name: ["fullname", "signature"],
   first_name: [
     "firstname",
     "givenname",
@@ -103,6 +103,8 @@ export const fieldNames = {
     "termsandconditions",
     "terms",
     "conditions",
+    "accept",
+    "agree",
   ],
 
   us_work_authorization: ["legallyauthorized"],
