@@ -64,28 +64,74 @@ const JobDetector = (props: any) => {
   });
   // console.log("job:slice::", jobDetailState);
 
-  useEffect(() => {
-    if (
-      [
-        "linkedin",
-        "indeed",
-        "dice",
-        "ziprecruiter",
-        "glassdoor",
-        "simplyhired",
-        "builtin",
-        "localhost",
-      ].some((domain) => window.location.href.toLowerCase().includes(domain))
-    ) {
-      setShowIcon(true);
-    } else {
-      setShowAutofillPage(true);
-    }
-  }, []);
-
   // // setShowAutofillPage(true);
 
+  useEffect(() => {}, []);
+
+  // useEffect(() => {
+  //   if (
+  //     [
+  //       "job",
+  //       "apply",
+  //       "career",
+  //       "carees",
+  //       "work",
+  //       "placement",
+  //       ".adp.",
+  //       "services",
+  //       ".services.",
+  //       "peoplehr.",
+  //       ".ebayinc.",
+  //       ".myworkdayjobs.",
+  //       ".paylocity.",
+  //       "motionrecruitment.",
+  //       ".lever.",
+  //       ".icims.",
+  //       "techfetch.",
+  //       ".tal.",
+  //       ".fisglobal.",
+  //       ".jobdiva.",
+  //       ".pinpointhq.",
+  //       ".teds.",
+  //       ".entertimeonline.",
+  //       ".dayforcehcm.",
+  //       ".cisco.",
+  //       ".jobvite.",
+  //       ".pinkertonhr.",
+  //       "jackhenry.",
+  //       ".clearcompany.",
+  //       ".ashbyhq.",
+  //       ".zohorecruit.",
+  //       ".successfactors.",
+  //       ".greenhouse.",
+  //       // ".pinpointhq.",
+  //       // "hhstechgroup.",
+  //     ].some((domain) => window.location.href.toLowerCase().includes(domain))
+  //   ) {
+  //     setShowIcon(true);
+  //     setShowAutofillPage(true);
+  //   }
+
+  //   if (
+  //     [
+  //       "linkedin.",
+  //       "indeed.",
+  //       "dice.",
+  //       "ziprecruiter.",
+  //       "glassdoor.",
+  //       "simplyhired.",
+  //       "builtin.",
+  //       "localhost",
+  //     ].some((domain) => window.location.href.toLowerCase().includes(domain))
+  //   ) {
+  //     setShowIcon(true);
+  //     setShowAutofillPage(false);
+  //   }
+  // }, []);
+
   useEffect(() => {
+    const url = window.location.href.toLowerCase();
+
     if (
       [
         "job",
@@ -96,19 +142,8 @@ const JobDetector = (props: any) => {
         "placement",
         ".adp.",
         "services",
-        "peoplehr",
-        "techfetch.",
-        ".tal.",
-      ].some((domain) => window.location.href.toLowerCase().includes(domain))
-    ) {
-      setShowIcon(true);
-    }
-
-    if (
-      [
-        ".adp.",
         ".services.",
-        ".peoplehr.",
+        "peoplehr.",
         ".ebayinc.",
         ".myworkdayjobs.",
         ".paylocity.",
@@ -132,10 +167,30 @@ const JobDetector = (props: any) => {
         ".zohorecruit.",
         ".successfactors.",
         ".greenhouse.",
-        // ".pinpointhq.",
-        // "hhstechgroup.",
-      ].some((domain) => window.location.href.toLowerCase().includes(domain))
+      ].some((domain) => url.includes(domain))
     ) {
+      setShowIcon(true);
+      setShowAutofillPage(true);
+    }
+
+    if (
+      [
+        "linkedin.",
+        "indeed.",
+        "dice.",
+        "ziprecruiter.",
+        "glassdoor.",
+        "simplyhired.",
+        "builtin.",
+        "localhost",
+      ].some((domain) => url.includes(domain))
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(false);
+    }
+
+    // some extra case
+    if ([".battelle."].some((domain) => url.includes(domain))) {
       setShowIcon(true);
       setShowAutofillPage(true);
     }
