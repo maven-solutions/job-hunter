@@ -230,6 +230,29 @@ const fillisAdult = async (applicantData: Applicant) => {
   await delay(1000);
 };
 
+const fillFieldSetDataType = (applicantData: Applicant) => {
+  const ethnicityPrompt = document.querySelector(
+    '[data-automation-id="ethnicityPrompt"]'
+  );
+  if (!ethnicityPrompt) {
+    return;
+  }
+  const allLabel = ethnicityPrompt.querySelectorAll("label");
+  if (!allLabel || allLabel?.length === 0) {
+    return;
+  }
+  for (const label of allLabel) {
+    if (
+      fromatStirngInLowerCase(label.textContent.trim()).includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      label.click();
+      return;
+    }
+  }
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
@@ -237,4 +260,5 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await fillSponshership(applicantData);
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);
+  await fillFieldSetDataType(applicantData);
 };
