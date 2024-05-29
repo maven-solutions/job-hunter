@@ -20,6 +20,16 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
     const labelText = labelElement?.textContent?.trim();
     const attributes: any = Array.from(select.attributes);
     attributes.some((attribute) => {
+      // for work authorization
+      if (checkIfExist(labelText, ["legally"])) {
+        Array.from(select.options).find((option: any) => {
+          if (fromatStirngInLowerCase(option?.text).includes("yes")) {
+            option.selected = true;
+            handleValueChanges(option);
+            return;
+          }
+        });
+      }
       // for disability
       if (
         checkIfExist(labelText, fieldNames.disability_status) ||
