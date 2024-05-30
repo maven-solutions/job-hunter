@@ -31,6 +31,7 @@ import { icims } from "./domainSpecific/icims";
 import { successfactors } from "./domainSpecific/successfactors";
 import { battelle } from "./domainSpecific/battelle";
 import { oraclecloud } from "./domainSpecific/oraclecloud";
+import { ultipro } from "./domainSpecific/ultipro";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -168,7 +169,7 @@ export const detectInputAndFillData = async (
     fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fileTypeDataFiller(tempDivForFile, applicantData, false);
+    // fileTypeDataFiller(tempDivForFile, applicantData, false);
     selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
@@ -241,6 +242,10 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".oraclecloud.")) {
       await oraclecloud(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".ultipro.")) {
+      await ultipro(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
