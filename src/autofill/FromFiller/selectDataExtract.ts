@@ -69,7 +69,6 @@ export const selectDataExtract = (
     // filling country data
     Array.from(input.options).find((option: any) => {
       if (countryHandler(option, applicantData, country)) {
-        console.log("country::", option);
         option.selected = true;
         input.dispatchEvent(
           new Event("change", { bubbles: true, cancelable: false })
