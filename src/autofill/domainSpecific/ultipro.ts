@@ -1,5 +1,5 @@
 import { Applicant } from "../data";
-import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
 const fillAdress = (applicantData: Applicant) => {
   const input: HTMLInputElement = document.querySelector("#AddressLine1");
@@ -53,8 +53,9 @@ const fillCheckBox = (applicantData: Applicant) => {
     }
     // for work authorization
     if (
-      label?.textContent?.trim()?.includes("legally") ||
-      label?.textContent?.trim()?.includes("authorized to work")
+      (label?.textContent?.trim()?.includes("legally") ||
+        label?.textContent?.trim()?.includes("authorized to work")) &&
+      applicantData.us_work_authoriztaion
     ) {
       const parentElement = label.parentElement;
       if (!parentElement) {
@@ -105,7 +106,19 @@ const fillCheckBox = (applicantData: Applicant) => {
         }
 
         if (
-          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes("no")
+          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes(
+            "no"
+          ) &&
+          !applicantData.sponsorship_required
+        ) {
+          radioLabel.click();
+          handleValueChanges(radioLabel);
+        }
+        if (
+          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes(
+            "yes"
+          ) &&
+          applicantData.sponsorship_required
         ) {
           radioLabel.click();
           handleValueChanges(radioLabel);
