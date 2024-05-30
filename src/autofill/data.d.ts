@@ -14,7 +14,6 @@ export interface Applicant {
   citizenship_status?: string | null;
   country?: string;
   covid_vaccination_status?: boolean | null;
-  canada_work_authoriztaion?: boolean | null;
   dob?: string | null;
   disability_status?: string | null;
 

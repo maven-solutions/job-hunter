@@ -10,8 +10,7 @@ const fillCitizen = (applicantData: Applicant) => {
   Array.from(select.options).find((option: any) => {
     if (
       fromatStirngInLowerCase(option?.text) === "yes" &&
-      (applicantData.us_work_authoriztaion ||
-        applicantData.canada_work_authoriztaion)
+      applicantData.us_work_authoriztaion
     ) {
       option.selected = true;
       select.dispatchEvent(

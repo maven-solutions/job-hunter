@@ -190,8 +190,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
           fromatStirngInLowerCase(element.textContent.trim()).includes(
             fromatStirngInLowerCase("yes")
           ) &&
-          (applicantData.us_work_authoriztaion ||
-            applicantData.canada_work_authoriztaion)
+          applicantData.us_work_authoriztaion
         ) {
           //   phonetype = true;
           element.click();
