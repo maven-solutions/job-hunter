@@ -38,7 +38,7 @@ const extractInfo = (resumeData, applicationForm) => {
 
   // Extracting full name, first name, and last name
 
-  const fullName = firstName + lastName;
+  const fullName = firstName + " " + lastName;
 
   const address = `${city?.label}, ${state?.label}`;
 

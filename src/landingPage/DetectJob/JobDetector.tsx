@@ -167,6 +167,7 @@ const JobDetector = (props: any) => {
         ".zohorecruit.",
         ".successfactors.",
         ".greenhouse.",
+        ".oraclecloud.",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
@@ -190,7 +191,9 @@ const JobDetector = (props: any) => {
     }
 
     // some extra case
-    if ([".battelle."].some((domain) => url.includes(domain))) {
+    if (
+      [".battelle.", ".oraclecloud."].some((domain) => url.includes(domain))
+    ) {
       setShowIcon(true);
       setShowAutofillPage(true);
     }
