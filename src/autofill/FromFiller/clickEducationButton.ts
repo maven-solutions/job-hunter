@@ -17,8 +17,12 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
   const buttonFields = tempDiv.querySelectorAll("button");
   for await (const button of buttonFields) {
     const attributes: any = Array.from(button.attributes);
+    const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
     attributes.some((attribute) => {
-      if (checkIfExist(attribute.value, fieldNames.education_button)) {
+      if (
+        !notAbutton &&
+        checkIfExist(attribute.value, fieldNames.education_button)
+      ) {
         educationFound = true;
         return true; // Stop iterating
       }
@@ -26,6 +30,7 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
     });
 
     if (
+      !notAbutton &&
       educationFound &&
       applicantData.education &&
       applicantData.education.length > 0

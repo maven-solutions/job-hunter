@@ -166,9 +166,13 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   let delte = false;
   let ebayinc = false;
   for (const button of buttonFields) {
+    const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
     const attributes: any = Array.from(button.attributes);
     attributes.some((attribute) => {
-      if (checkIfExist(attribute.value, fieldNames.work_experience)) {
+      if (
+        !notAbutton &&
+        checkIfExist(attribute.value, fieldNames.work_experience)
+      ) {
         workFound = true;
         return true; // Stop iterating
       }
@@ -176,6 +180,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
     });
 
     if (
+      !notAbutton &&
       workFound &&
       applicantData.employment_history &&
       applicantData.employment_history.length > 0
