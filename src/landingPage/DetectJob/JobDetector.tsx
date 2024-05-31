@@ -46,6 +46,7 @@ import {
   getApplicationStageData,
 } from "../../store/features/JobDetail/JobApi";
 import { getJobFromZipRecruiter } from "../../jobExtractor/Ziprecuriter";
+import { setResumeResponseToFalse } from "../../store/features/ResumeList/ResumeListSlice";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -263,6 +264,7 @@ const JobDetector = (props: any) => {
   // console.log("authState::", authState);
   const handleLogOut = () => {
     dispatch(clearStageData());
+    dispatch(setResumeResponseToFalse());
     dispatch(logoutUser());
     setShowPage("");
   };

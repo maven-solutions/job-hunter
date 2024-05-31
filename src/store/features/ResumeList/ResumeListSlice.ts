@@ -9,7 +9,11 @@ const initialState: any = {
 const ResumeList = createSlice({
   name: "ResumeList",
   initialState,
-  reducers: {},
+  reducers: {
+    setResumeResponseToFalse: (state: any) => {
+      state.res_success = false;
+    },
+  },
   extraReducers: (builder) => {
     // getStages
     builder.addCase(getApplicantsData.pending, (state) => {
@@ -52,6 +56,6 @@ const ResumeList = createSlice({
   },
 });
 
-export const {} = ResumeList.actions;
+export const { setResumeResponseToFalse } = ResumeList.actions;
 
 export default ResumeList.reducer;

@@ -61,10 +61,14 @@ const ResumeList = (props: any) => {
   useEffect(() => {
     if (authState.authenticated && authState?.ci_user?.userType === "va") {
       if (!resumeList.res_success || resumeList.applicantData.length === 0) {
+        // for va user
         dispatch(getApplicantsData());
       }
     } else {
-      dispatch(getApplicantResume());
+      // for normal user
+      if (!resumeList.res_success) {
+        dispatch(getApplicantResume());
+      }
     }
   }, []);
 
