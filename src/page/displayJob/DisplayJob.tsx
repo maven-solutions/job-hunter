@@ -192,7 +192,7 @@ const DisplayJob = (props: any) => {
                 cursor: "pointer",
               }),
             }}
-            value={jobSlice.selectedStage}
+            value={jobSlice?.selectedStage}
             // defaultValue={jobSlice?.stage_data[0]}
             placeholder="Select Application Stage"
             onChange={(option) => {

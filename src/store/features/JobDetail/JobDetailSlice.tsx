@@ -91,6 +91,12 @@ const JobDetails = createSlice({
     setJobReqSucccessFalse: (state: any) => {
       state.check_job_res_success = false;
     },
+    clearStageData: (state: any) => {
+      state.stage_data = [];
+      state.stage_data_success = false;
+      state.stage_data_loading = false;
+      state.selectedStage = "";
+    },
     clearJobState: (state: any) => {
       state.title = "";
       state.location = "";
@@ -208,6 +214,7 @@ export const {
   setSalary,
   setJobRelatedInfo,
   setJobCulture,
+  clearStageData,
 } = JobDetails.actions;
 
 export default JobDetails.reducer;

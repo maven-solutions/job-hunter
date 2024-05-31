@@ -24,8 +24,10 @@ import {
 } from "../../utils/constant";
 import {
   clearJobState,
+  clearStageData,
   setButtonDisabledFalse,
   setJobReqSucccessFalse,
+  setSelectedStage,
 } from "../../store/features/JobDetail/JobDetailSlice";
 import { getJobFromSimplyhired } from "../../jobExtractor/SimplyHired";
 import { getJobsFromDice } from "../../jobExtractor/Dice";
@@ -260,6 +262,7 @@ const JobDetector = (props: any) => {
   }, [authState.authenticated]);
   // console.log("authState::", authState);
   const handleLogOut = () => {
+    dispatch(clearStageData());
     dispatch(logoutUser());
     setShowPage("");
   };
