@@ -205,7 +205,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
 
         if (jobtitle) {
           if (!delte) {
-            await delay(2000);
+            await delay(1000);
             const delteButton: any = document.querySelector(
               'button[aria-label="Delete Work Experience 1"]'
             );
@@ -214,7 +214,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
             }
             delteButton.click();
             delte = true;
-            await delay(1000);
+            await delay(500);
           }
         }
         // if (window.location.href.includes(".ebayinc.") && !ebayinc) {
@@ -241,11 +241,11 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
           button.dispatchEvent(new MouseEvent("click"));
         });
 
-        await delay(1000);
+        await delay(500);
         console.log("workExperienceDatafiller called");
         await workExperienceDatafiller(tempDiv, applicantData, element, index);
 
-        await delay(1000);
+        await delay(500);
         // console.log("Processed element:", index);
       }
       workFound = false;

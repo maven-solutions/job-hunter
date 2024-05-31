@@ -40,7 +40,7 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
         button.click();
         if (degreeDected) {
           if (!delte) {
-            await delay(2000);
+            await delay(500);
             const delteButton: any = document.querySelector(
               'button[aria-label="Delete Education 1"]'
             );
@@ -50,7 +50,7 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
 
             delteButton.click();
             delte = true;
-            await delay(1000);
+            await delay(500);
           }
         }
 
@@ -61,11 +61,11 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
           button.dispatchEvent(new MouseEvent("click"));
         });
 
-        await delay(1000);
+        await delay(500);
         // console.log("educationDatafiller called");
         await educationDatafiller(tempDiv, applicantData, element, index);
 
-        await delay(1000);
+        await delay(500);
         // console.log("Processed element:", index);
       }
       educationFound = false;
