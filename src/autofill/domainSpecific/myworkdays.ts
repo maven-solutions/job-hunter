@@ -8,15 +8,23 @@ const fillcountry = async (applicantData) => {
   if (!countryDropDown) {
     return;
   }
+
+  const countryLabelText = countryDropDown?.textContent?.trim();
+  if (countryLabelText) {
+    if (countryHandler(countryLabelText, applicantData)) {
+      return;
+    }
+  }
+  console.log("country::", countryLabelText);
   countryDropDown.click();
-  await delay(2000);
+  await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
   for (const [index, element] of selectOptions.entries()) {
     if (countryHandler(element.textContent.trim(), applicantData)) {
       element.click();
     }
   }
-  await delay(3000);
+  await delay(2000);
 };
 
 const fillDeviceType = async (applicantData) => {
@@ -27,7 +35,7 @@ const fillDeviceType = async (applicantData) => {
     return;
   }
   phoneElement.click();
-  await delay(1500);
+  await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
 
   for (const [index, element] of selectOptions.entries()) {
@@ -40,7 +48,7 @@ const fillDeviceType = async (applicantData) => {
       element.click();
     }
   }
-  await delay(1500);
+  await delay(500);
 };
 
 const countryHandler = (text, applicantData) => {
@@ -143,7 +151,7 @@ const fillSponshership = async (applicantData: Applicant) => {
       label?.toLowerCase().includes("visa")
     ) {
       select.click();
-      await delay(2000);
+      await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
@@ -168,7 +176,7 @@ const fillSponshership = async (applicantData: Applicant) => {
       }
     }
   }
-  await delay(1000);
+  await delay(500);
 };
 
 const authorizedTowork = async (applicantData: Applicant) => {
@@ -183,7 +191,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
       label?.toLowerCase().includes("currently authorized")
     ) {
       select.click();
-      await delay(2000);
+      await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
@@ -199,7 +207,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
       }
     }
   }
-  await delay(1000);
+  await delay(500);
 };
 
 const fillisAdult = async (applicantData: Applicant) => {
@@ -211,7 +219,7 @@ const fillisAdult = async (applicantData: Applicant) => {
     const label = select.getAttribute("aria-label");
     if (label?.toLowerCase().includes("18 years")) {
       select.click();
-      await delay(2000);
+      await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
@@ -226,7 +234,7 @@ const fillisAdult = async (applicantData: Applicant) => {
       }
     }
   }
-  await delay(1000);
+  await delay(500);
 };
 
 const fillFieldSetDataType = (applicantData: Applicant) => {
