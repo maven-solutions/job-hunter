@@ -166,7 +166,10 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   let delte = false;
   let ebayinc = false;
 
-  if (window.location.href.toLowerCase().includes("autofillwithresume")) {
+  if (
+    window.location.href.toLowerCase().includes("myworkdayjobs") &&
+    window.location.href.toLowerCase().includes("autofillwithresume")
+  ) {
     const delteButtonAll: any = document.querySelectorAll(
       'button[data-automation-id="panel-set-delete-button"]'
     );
