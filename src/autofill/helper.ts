@@ -258,6 +258,23 @@ export const detectInputAndFillData = async (
       urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     }
 
+    // const body = document.querySelector("body");
+    // if (body) {
+    //   await delay(500);
+    //   body.click();
+    //   body.dispatchEvent(
+    //     new Event("change", { bubbles: true, cancelable: false })
+    //   );
+    //   body.dispatchEvent(
+    //     new Event("focus", { bubbles: true, cancelable: false })
+    //   );
+    //   body.dispatchEvent(
+    //     new Event("click", { bubbles: true, cancelable: false })
+    //   );
+    //   body.dispatchEvent(
+    //     new Event("blur", { bubbles: true, cancelable: false })
+    //   );
+    // }
     stopLoading();
   }
 };

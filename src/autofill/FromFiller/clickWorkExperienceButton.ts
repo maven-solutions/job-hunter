@@ -165,6 +165,47 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   let workFound = false;
   let delte = false;
   let ebayinc = false;
+
+  if (window.location.href.toLowerCase().includes("autofillwithresume")) {
+    const delteButtonAll: any = document.querySelectorAll(
+      'button[data-automation-id="panel-set-delete-button"]'
+    );
+
+    for (const delteButton of delteButtonAll) {
+      if (delteButton) {
+        delteButton.click();
+        await delay(500);
+      }
+    }
+
+    const title: HTMLInputElement = document.querySelector(
+      '[data-automation-id="jobTitle"]'
+    );
+    if (title) {
+      title.value = "";
+    }
+    const company: HTMLInputElement = document.querySelector(
+      '[data-automation-id="company"]'
+    );
+    if (company) {
+      company.value = "";
+    }
+
+    const location: HTMLInputElement = document.querySelector(
+      '[data-automation-id="location"]'
+    );
+    if (location) {
+      location.value = "";
+    }
+
+    const checkbox: HTMLInputElement = document.querySelector(
+      '[data-automation-id="currentlyWorkHere"]'
+    );
+    if (checkbox) {
+      checkbox.checked = false;
+    }
+  }
+
   for (const button of buttonFields) {
     const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
     const attributes: any = Array.from(button.attributes);
@@ -193,17 +234,6 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
         element,
       ] of applicantData.employment_history.entries()) {
         // console.log("Processing employment history element:", element);
-        let educationNumber: string | number = JSON.parse(
-          localStorage.getItem("times")
-        );
-        // console.log(
-        //   "educationNumber::",
-        //   educationNumber,
-        //   "::",
-        //   applicantData.employment_history.length,
-        //   "::",
-        //   index
-        // );
 
         await delay(500);
         button.click();
@@ -214,32 +244,14 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
             const delteButton: any = document.querySelector(
               'button[aria-label="Delete Work Experience 1"]'
             );
-            if (!delteButton) {
-              return;
+            if (delteButton) {
+              delteButton.click();
+              delte = true;
+              await delay(500);
             }
-            delteButton.click();
-            delte = true;
-            await delay(500);
           }
         }
-        // if (window.location.href.includes(".ebayinc.") && !ebayinc) {
-        //   const removeButton: any = document.querySelectorAll(
-        //     'button[class="array-button-remove"]'
-        //   );
-        //   if (removeButton && removeButton.length > 0) {
-        //     for (let rbutton of removeButton) {
-        //       rbutton.click();
-        //       await delay(100);
-        //     }
-        //     ebayinc = true;
-        //   }
-        // }
-        // if (Number(educationNumber) == 0 && index == 1) {
-        //   console.log("meet::");
-        // } else {
 
-        // }
-        // console.log("Button clicked");
         // Attach click event handler instead of directly invoking click()
         await new Promise((resolve) => {
           button.addEventListener("click", resolve, { once: true });

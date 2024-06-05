@@ -15,7 +15,7 @@ const fillcountry = async (applicantData) => {
       return;
     }
   }
-  console.log("country::", countryLabelText);
+
   countryDropDown.click();
   await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
@@ -176,6 +176,7 @@ const fillSponshership = async (applicantData: Applicant) => {
       }
     }
   }
+
   await delay(500);
 };
 
@@ -260,6 +261,16 @@ const fillFieldSetDataType = (applicantData: Applicant) => {
   }
 };
 
+const deleteResume = async () => {
+  const AllResume: any = document.querySelector(
+    '[data-automation-id="delete-file"]'
+  );
+  if (AllResume) {
+    console.log("allresumeUtton::", AllResume);
+    AllResume.click();
+  }
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
@@ -268,4 +279,5 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);
   await fillFieldSetDataType(applicantData);
+  await deleteResume();
 };
