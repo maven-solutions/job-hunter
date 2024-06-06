@@ -161,11 +161,17 @@ export const dateFiller = async (data, index) => {
 };
 
 export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
-  const buttonFields = tempDiv.querySelectorAll("button");
-  let workFound = false;
   let delte = false;
-  let ebayinc = false;
-
+  let button: any = "";
+  button = document.querySelector('button[aria-label="Add Work Experience"]');
+  if (!button) {
+    button = document.querySelector(
+      'button[aria-label="Add Another Work Experience"]'
+    );
+  }
+  if (!button) {
+    return;
+  }
   if (
     window.location.href.toLowerCase().includes("myworkdayjobs") &&
     window.location.href.toLowerCase().includes("autofillwithresume")
@@ -209,66 +215,47 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
     }
   }
 
-  for (const button of buttonFields) {
-    const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
-    const attributes: any = Array.from(button.attributes);
-    attributes.some((attribute) => {
-      if (
-        !notAbutton &&
-        checkIfExist(attribute.value, fieldNames.work_experience)
-      ) {
-        workFound = true;
-        return true; // Stop iterating
-      }
-      return false; // Continue iterating
-    });
+  if (
+    applicantData.employment_history &&
+    applicantData.employment_history.length > 0
+  ) {
+    const jobtitle = document.querySelector('[data-automation-id="jobTitle"]');
+    for await (const [
+      index,
+      element,
+    ] of applicantData.employment_history.entries()) {
+      // console.log("Processing employment history element:", element);
 
-    if (
-      !notAbutton &&
-      workFound &&
-      applicantData.employment_history &&
-      applicantData.employment_history.length > 0
-    ) {
-      const jobtitle = document.querySelector(
-        '[data-automation-id="jobTitle"]'
-      );
-      for await (const [
-        index,
-        element,
-      ] of applicantData.employment_history.entries()) {
-        // console.log("Processing employment history element:", element);
+      await delay(500);
+      button.click();
 
-        await delay(500);
-        button.click();
-
-        if (jobtitle) {
-          if (!delte) {
-            await delay(1000);
-            const delteButton: any = document.querySelector(
-              'button[aria-label="Delete Work Experience 1"]'
-            );
-            if (delteButton) {
-              delteButton.click();
-              delte = true;
-              await delay(500);
-            }
+      if (jobtitle) {
+        if (!delte) {
+          // previously there was 1000
+          await delay(500);
+          const delteButton: any = document.querySelector(
+            'button[aria-label="Delete Work Experience 1"]'
+          );
+          if (delteButton) {
+            delteButton.click();
+            delte = true;
+            // await delay(500);
           }
         }
-
-        // Attach click event handler instead of directly invoking click()
-        await new Promise((resolve) => {
-          button.addEventListener("click", resolve, { once: true });
-          button.dispatchEvent(new MouseEvent("click"));
-        });
-
-        await delay(500);
-        console.log("workExperienceDatafiller called");
-        await workExperienceDatafiller(tempDiv, applicantData, element, index);
-
-        await delay(500);
-        // console.log("Processed element:", index);
       }
-      workFound = false;
+
+      // Attach click event handler instead of directly invoking click()
+      await new Promise((resolve) => {
+        button.addEventListener("click", resolve, { once: true });
+        button.dispatchEvent(new MouseEvent("click"));
+      });
+
+      await delay(500);
+      console.log("workExperienceDatafiller called");
+      await workExperienceDatafiller(tempDiv, applicantData, element, index);
+
+      // await delay(500);
+      // console.log("Processed element:", index);
     }
   }
 };
