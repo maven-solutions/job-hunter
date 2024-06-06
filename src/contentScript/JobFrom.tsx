@@ -134,14 +134,11 @@ const JobFrom = (props: any) => {
 
       // Assuming you have a reference to the DOM element
       setTimeout(() => {
-        const domElement = document?.querySelector(
-          ".job-details-jobs-unified-top-card__primary-description-without-tagline"
+        const companyNameEle = document.querySelector(
+          ".job-details-jobs-unified-top-card__company-name"
         );
-
-        const aTag = domElement?.querySelector("a.app-aware-link");
-        const companyName = aTag?.textContent;
-
-        setCompanyName(companyName?.trim());
+        const companyName = companyNameEle.textContent.trim();
+        setCompanyName(companyName);
       }, 500);
     } catch (error) {
       console.log(error);
