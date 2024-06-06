@@ -251,7 +251,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
       });
 
       await delay(500);
-      console.log("workExperienceDatafiller called");
+      // console.log("workExperienceDatafiller called");
       await workExperienceDatafiller(tempDiv, applicantData, element, index);
 
       // await delay(500);

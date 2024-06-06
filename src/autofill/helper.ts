@@ -191,9 +191,9 @@ export const detectInputAndFillData = async (
     if (launchWork) {
       await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
     }
-    // if (launcEducation) {
-    //   await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
-    // }
+    if (launcEducation) {
+      await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
+    }
 
     // for domain specific
     if (window.location.href.includes(".greenhouse.")) {
