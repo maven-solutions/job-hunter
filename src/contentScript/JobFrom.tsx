@@ -266,10 +266,21 @@ const JobFrom = (props: any) => {
       const inputString = companyEle?.textContent?.trim();
       setCompanyName(inputString);
     }
-    const jobDescriptionEle = zipDom.querySelector(".job_description");
+    let jobDescriptionEle: any = "";
+    jobDescriptionEle = zipDom.querySelector(".job_description");
     if (jobDescriptionEle) {
       const description = jobDescriptionEle?.innerHTML;
       setJobDescription(description);
+    }
+
+    jobDescriptionEle = document.querySelector(
+      'div[class="relative flex flex-col gap-24"]'
+    );
+    if (jobDescriptionEle) {
+      const description = jobDescriptionEle?.innerHTML;
+      if (description) {
+        setJobDescription(description);
+      }
     }
   };
   const getJobsFromZipRecuriter2 = (zipDom: any) => {
@@ -301,7 +312,6 @@ const JobFrom = (props: any) => {
     }
     if (zipDom2) {
       setPostUrl(window.location.href);
-
       getJobsFromZipRecuriter2(zipDom2);
     }
 
