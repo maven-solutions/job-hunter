@@ -67,7 +67,8 @@ const JobDetector = (props: any) => {
 
   const [showIcon, showAutofillPage] = useWebsiteDetection();
   // console.log("job:slice::", jobDetailState);
-
+  console.log("showIcon22::", showIcon);
+  console.log("showAutofillPage22::", showAutofillPage);
   useEffect(() => {
     // Function to remove the element
     function removeAutofillButton() {

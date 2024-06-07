@@ -26,3 +26,25 @@
 .jd-inner-padding {
   padding: 20px 20px 20px 20px;
 }
+.ci_jobs__collapse_button {
+  position: absolute;
+  width: 15px;
+  height: 70px;
+  border-radius: 45px 0px 0px 45px;
+  left: -15px;
+  top: 50%; /* Change to 50% */
+  background-color: #0145fd;
+  box-shadow: 0px 10px 15px 0px #00000026;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%); /* Vertically center */
+}
+
+.ci_job_close_icon {
+  color: #ffffff;
+  width: 15px;
+  margin-left: 2px !important;
+}
