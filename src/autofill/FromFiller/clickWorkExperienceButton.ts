@@ -161,56 +161,58 @@ export const dateFiller = async (data, index) => {
 };
 
 export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
-  const buttonFields = tempDiv.querySelectorAll("button");
-  let workFound = false;
   let delte = false;
-  let ebayinc = false;
+  let button: any = "";
+  button = document.querySelector('button[aria-label="Add Work Experience"]');
+  if (!button) {
+    button = document.querySelector(
+      'button[aria-label="Add Another Work Experience"]'
+    );
+  }
+  if (!button) {
+    return;
+  }
 
-  for (const button of buttonFields) {
-    if (
-      applicantData.employment_history &&
-      applicantData.employment_history.length > 0
-    ) {
-      const jobtitle = document.querySelector(
-        '[data-automation-id="jobTitle"]'
-      );
-      for await (const [
-        index,
-        element,
-      ] of applicantData.employment_history.entries()) {
-        // console.log("Processing employment history element:", element);
+  if (
+    applicantData.employment_history &&
+    applicantData.employment_history.length > 0
+  ) {
+    const jobtitle = document.querySelector('[data-automation-id="jobTitle"]');
+    for await (const [
+      index,
+      element,
+    ] of applicantData.employment_history.entries()) {
+      // console.log("Processing employment history element:", element);
 
-        await delay(500);
-        button.click();
+      await delay(500);
+      button.click();
 
-        if (jobtitle) {
-          if (!delte) {
-            await delay(1000);
-            const delteButton: any = document.querySelector(
-              'button[aria-label="Delete Work Experience 1"]'
-            );
-            if (delteButton) {
-              delteButton.click();
-              delte = true;
-              await delay(500);
-            }
+      if (jobtitle) {
+        if (!delte) {
+          await delay(500);
+          const delteButton: any = document.querySelector(
+            'button[aria-label="Delete Work Experience 1"]'
+          );
+          if (delteButton) {
+            delteButton.click();
+            delte = true;
+            // await delay(500);
           }
         }
-
-        // Attach click event handler instead of directly invoking click()
-        await new Promise((resolve) => {
-          button.addEventListener("click", resolve, { once: true });
-          button.dispatchEvent(new MouseEvent("click"));
-        });
-
-        await delay(500);
-        console.log("workExperienceDatafiller called");
-        await workExperienceDatafiller(tempDiv, applicantData, element, index);
-
-        await delay(500);
-        // console.log("Processed element:", index);
       }
-      workFound = false;
+
+      // Attach click event handler instead of directly invoking click()
+      await new Promise((resolve) => {
+        button.addEventListener("click", resolve, { once: true });
+        button.dispatchEvent(new MouseEvent("click"));
+      });
+
+      await delay(500);
+      console.log("workExperienceDatafiller called");
+      await workExperienceDatafiller(tempDiv, applicantData, element, index);
+
+      // await delay(500);
+      // console.log("Processed element:", index);
     }
   }
 };
