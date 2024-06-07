@@ -71,7 +71,7 @@ export const dateFiller = async (data, index) => {
       ) {
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
-        // console.log("MM::", getMonthFromDate(data.startDate));
+        console.log("MM::", getMonthFromDate(data.startDate));
         if (
           !allInputId?.includes(id) &&
           !input.hasAttribute("ci_date_filled") &&
@@ -96,7 +96,7 @@ export const dateFiller = async (data, index) => {
       ) {
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
-        // console.log("yy::", getYearFromDate(data.startDate));
+        console.log("yy::", getYearFromDate(data.startDate));
         if (
           !allInputId?.includes(id) &&
           !input.hasAttribute("ci_date_filled") &&
@@ -121,7 +121,7 @@ export const dateFiller = async (data, index) => {
       ) {
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
-        // console.log("MMe::", getMonthFromDate(data.endDate));
+        console.log("MMe::", getMonthFromDate(data.endDate));
         if (
           !allInputId?.includes(id) &&
           !input.hasAttribute("ci_date_filled")
@@ -144,7 +144,7 @@ export const dateFiller = async (data, index) => {
       ) {
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
-        // console.log("yye::", getYearFromDate(data.endDate));
+        console.log("yye::", getYearFromDate(data.endDate));
         if (!allInputId?.includes(id) && !input.hasAttribute("ci_to_year")) {
           setIdToLocalstorage(id);
           input.setAttribute("ci_to_year", index);
@@ -179,40 +179,70 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
     const delteButtonAll: any = document.querySelectorAll(
       'button[data-automation-id="panel-set-delete-button"]'
     );
-
-    for (const delteButton of delteButtonAll) {
+    // console.log("delteButtonAll::", delteButtonAll);
+    for await (const delteButton of delteButtonAll) {
       if (delteButton) {
+        const label = delteButton.getAttribute("aria-label");
         delteButton.click();
-        await delay(500);
+        // await delay(1000);
+        await new Promise((resolve) => {
+          delteButton.addEventListener("click", resolve, { once: true });
+          delteButton.dispatchEvent(new MouseEvent("click"));
+        });
+        await delay(1000);
+        console.log("delteButtonclicked::", label);
+      }
+    }
+  }
+
+  if (
+    window.location.href.toLowerCase().includes("myworkdayjobs") &&
+    window.location.href.toLowerCase().includes("autofillwithresume")
+  ) {
+    const delteButtonAll: any = document.querySelectorAll(
+      'button[data-automation-id="panel-set-delete-button"]'
+    );
+    // console.log("delteButtonAll::", delteButtonAll);
+    for await (const delteButton of delteButtonAll) {
+      if (delteButton) {
+        const label = delteButton.getAttribute("aria-label");
+        delteButton.click();
+        // await delay(1000);
+        await new Promise((resolve) => {
+          delteButton.addEventListener("click", resolve, { once: true });
+          delteButton.dispatchEvent(new MouseEvent("click"));
+        });
+        await delay(1000);
+        // console.log("delteButtonclicked::", label);
       }
     }
 
-    const title: HTMLInputElement = document.querySelector(
-      '[data-automation-id="jobTitle"]'
-    );
-    if (title) {
-      title.value = "";
-    }
-    const company: HTMLInputElement = document.querySelector(
-      '[data-automation-id="company"]'
-    );
-    if (company) {
-      company.value = "";
-    }
+    // const title: HTMLInputElement = document.querySelector(
+    //   '[data-automation-id="jobTitle"]'
+    // );
+    // if (title) {
+    //   title.value = "";
+    // }
+    // const company: HTMLInputElement = document.querySelector(
+    //   '[data-automation-id="company"]'
+    // );
+    // if (company) {
+    //   company.value = "";
+    // }
 
-    const location: HTMLInputElement = document.querySelector(
-      '[data-automation-id="location"]'
-    );
-    if (location) {
-      location.value = "";
-    }
+    // const location: HTMLInputElement = document.querySelector(
+    //   '[data-automation-id="location"]'
+    // );
+    // if (location) {
+    //   location.value = "";
+    // }
 
-    const checkbox: HTMLInputElement = document.querySelector(
-      '[data-automation-id="currentlyWorkHere"]'
-    );
-    if (checkbox) {
-      checkbox.checked = false;
-    }
+    // const checkbox: HTMLInputElement = document.querySelector(
+    //   '[data-automation-id="currentlyWorkHere"]'
+    // );
+    // if (checkbox) {
+    //   checkbox.checked = false;
+    // }
   }
 
   if (
@@ -228,21 +258,22 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
 
       await delay(500);
       button.click();
+      // await delay(1000);
 
-      if (jobtitle) {
-        if (!delte) {
-          // previously there was 1000
-          await delay(500);
-          const delteButton: any = document.querySelector(
-            'button[aria-label="Delete Work Experience 1"]'
-          );
-          if (delteButton) {
-            delteButton.click();
-            delte = true;
-            // await delay(500);
-          }
-        }
-      }
+      // if (jobtitle) {
+      //   if (!delte) {
+      //     // previously there was 1000
+      //     await delay(1000);
+      //     const delteButton: any = document.querySelector(
+      //       'button[aria-label="Delete Work Experience 1"]'
+      //     );
+      //     if (delteButton) {
+      //       delteButton.click();
+      //       delte = true;
+      //       await delay(500);
+      //     }
+      //   }
+      // }
 
       // Attach click event handler instead of directly invoking click()
       await new Promise((resolve) => {
@@ -254,7 +285,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
       // console.log("workExperienceDatafiller called");
       await workExperienceDatafiller(tempDiv, applicantData, element, index);
 
-      // await delay(500);
+      await delay(500);
       // console.log("Processed element:", index);
     }
   }

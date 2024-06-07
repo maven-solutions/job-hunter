@@ -14,39 +14,47 @@ function delay(ms) {
 export const clickEducationButton = async (tempDiv, applicantData) => {
   let delte = false;
   let button: any = "";
-  button = document.querySelector('button[aria-label="Add Education"]');
+  await delay(2000);
+
+  button = document.querySelector('[aria-label="Add Education"]');
+
   if (!button) {
-    button = document.querySelector(
-      'button[aria-label="Add Another Education"]'
-    );
+    button = document.querySelector('[aria-label="Add Another Education"]');
+    console.log("secondbutton::", button);
+
+    // aria-label="Add Education"
   }
   if (!button) {
     return;
   }
+  console.log("firstbutton::", button);
+
   if (applicantData.education && applicantData.education.length > 0) {
     const degreeDected = document.querySelector(
       '[data-automation-id="degree"]'
     );
     for await (const [index, element] of applicantData.education.entries()) {
-      // console.log("Processing employment history element:", element);
+      console.log("Processing employment history element:", element);
 
       await delay(500);
       button.click();
-      if (degreeDected) {
-        if (!delte) {
-          await delay(500);
-          const delteButton: any = document.querySelector(
-            'button[aria-label="Delete Education 1"]'
-          );
-          if (!delteButton) {
-            return;
-          }
+      // await delay(1000);
 
-          delteButton.click();
-          delte = true;
-          // await delay(500);
-        }
-      }
+      // if (degreeDected) {
+      //   if (!delte) {
+      //     await delay(1000);
+      //     const delteButton: any = document.querySelector(
+      //       'button[aria-label="Delete Education 1"]'
+      //     );
+      //     if (!delteButton) {
+      //       return;
+      //     }
+
+      //     delteButton.click();
+      //     delte = true;
+      //     await delay(500);
+      //   }
+      // }
 
       // console.log("Button clicked");
       // Attach click event handler instead of directly invoking click()
@@ -59,7 +67,7 @@ export const clickEducationButton = async (tempDiv, applicantData) => {
       // console.log("educationDatafiller called");
       await educationDatafiller(tempDiv, applicantData, element, index);
 
-      // await delay(500);
+      await delay(500);
       // console.log("Processed element:", index);
     }
   }
@@ -99,7 +107,7 @@ const degreeFiller = async (data, index) => {
           !select.hasAttribute("ci_date_filled")
         ) {
           select.click();
-          await delay(500);
+          await delay(1000);
 
           const selectOptions: any =
             document.querySelectorAll('[role="option"]');
