@@ -69,8 +69,6 @@ const JobDetector = (props: any) => {
 
   // // setShowAutofillPage(true);
 
-  useEffect(() => {}, []);
-
   // useEffect(() => {
   //   if (
   //     [
@@ -203,6 +201,54 @@ const JobDetector = (props: any) => {
   }, []);
 
   useEffect(() => {
+    // Function to remove the element
+    function removeAutofillButton() {
+      const autofillButton: HTMLButtonElement = document.querySelector(
+        '[data-automation-id="autofillWithResume"]'
+      );
+      if (autofillButton) {
+        autofillButton.remove();
+      }
+    }
+
+    function changeButtonText() {
+      const manualApplyButton: HTMLButtonElement = document.querySelector(
+        '[data-automation-id="applyManually"]'
+      );
+      if (manualApplyButton) {
+        manualApplyButton.textContent = "Apply with AareerAi";
+      }
+    }
+
+    // Function to observe changes in the DOM
+    function observeModal() {
+      const modalObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === "childList") {
+            // Check if the modal is added
+            const modal = document.querySelector(
+              '[data-automation-id="wd-popup-frame"]'
+            ); // Adjust the selector to match your modal
+            if (modal) {
+              removeAutofillButton();
+              changeButtonText();
+            }
+          }
+        });
+      });
+
+      // Start observing the body for changes
+      modalObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Call the function to start observing
+
+    if (window.location.href.includes("myworkdayjobs.")) {
+      observeModal();
+    }
+
+    //
+
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
     }
