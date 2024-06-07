@@ -84,7 +84,7 @@ const JobDetector = (props: any) => {
         '[data-automation-id="applyManually"]'
       );
       if (manualApplyButton) {
-        manualApplyButton.textContent = "Apply with AareerAi";
+        manualApplyButton.textContent = "Apply with CareerAi";
       }
     }
 
