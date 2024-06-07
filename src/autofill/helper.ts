@@ -187,6 +187,10 @@ export const detectInputAndFillData = async (
       launchWork = false;
       launcEducation = false;
     }
+    if (window.location.href.includes(".myworkdayjobs.")) {
+      launchWork = false;
+      launcEducation = false;
+    }
 
     if (launchWork) {
       await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);

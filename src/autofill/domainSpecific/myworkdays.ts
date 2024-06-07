@@ -1,5 +1,7 @@
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { clickWorkdayEducationButton } from "./myworkdayEducation";
+import { clickWorkdayWorkExperienceButton } from "./myworkdayWork";
 
 const fillcountry = async (applicantData) => {
   const countryDropDown: any = document.querySelector(
@@ -266,7 +268,6 @@ const deleteResume = async () => {
     '[data-automation-id="delete-file"]'
   );
   if (AllResume) {
-    console.log("allresumeUtton::", AllResume);
     AllResume.click();
   }
 };
@@ -275,6 +276,8 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
   await fillDeviceType(applicantData);
+  await clickWorkdayEducationButton(applicantData);
+  await clickWorkdayWorkExperienceButton(applicantData);
   await fillSponshership(applicantData);
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);
