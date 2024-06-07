@@ -12,68 +12,54 @@ function delay(ms) {
 }
 
 export const clickEducationButton = async (tempDiv, applicantData) => {
-  let educationFound = false;
   let delte = false;
-  const buttonFields = tempDiv.querySelectorAll("button");
-  for await (const button of buttonFields) {
-    const attributes: any = Array.from(button.attributes);
-    const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
-    attributes.some((attribute) => {
-      if (
-        !notAbutton &&
-        checkIfExist(attribute.value, fieldNames.education_button)
-      ) {
-        educationFound = true;
-        return true; // Stop iterating
-      }
-      return false; // Continue iterating
-    });
+  let button: any = "";
+  button = document.querySelector('[aria-label="Add Education"]');
+  if (!button) {
+    button = document.querySelector('[aria-label="Add Another Education"]');
+  }
+  if (!button) {
+    return;
+  }
 
-    if (
-      !notAbutton &&
-      educationFound &&
-      applicantData.education &&
-      applicantData.education.length > 0
-    ) {
-      const degreeDected = document.querySelector(
-        '[data-automation-id="degree"]'
-      );
-      for await (const [index, element] of applicantData.education.entries()) {
-        // console.log("Processing employment history element:", element);
+  if (applicantData.education && applicantData.education.length > 0) {
+    const degreeDected = document.querySelector(
+      '[data-automation-id="degree"]'
+    );
+    for await (const [index, element] of applicantData.education.entries()) {
+      // console.log("Processing employment history element:", element);
 
-        await delay(500);
-        button.click();
-        if (degreeDected) {
-          if (!delte) {
-            await delay(500);
-            const delteButton: any = document.querySelector(
-              'button[aria-label="Delete Education 1"]'
-            );
-            if (!delteButton) {
-              return;
-            }
-
-            delteButton.click();
-            delte = true;
-            await delay(500);
+      await delay(500);
+      button.click();
+      if (degreeDected) {
+        if (!delte) {
+          await delay(500);
+          const delteButton: any = document.querySelector(
+            'button[aria-label="Delete Education 1"]'
+          );
+          if (!delteButton) {
+            return;
           }
+
+          delteButton.click();
+          delte = true;
+          // await delay(500);
         }
-
-        // console.log("Button clicked");
-        // Attach click event handler instead of directly invoking click()
-        await new Promise((resolve) => {
-          button.addEventListener("click", resolve, { once: true });
-          button.dispatchEvent(new MouseEvent("click"));
-        });
-
-        await delay(500);
-        // console.log("educationDatafiller called");
-        await educationDatafiller(tempDiv, applicantData, element, index);
-
-        await delay(500);
-        // console.log("Processed element:", index);
       }
-      educationFound = false;
+
+      // console.log("Button clicked");
+      // Attach click event handler instead of directly invoking click()
+      await new Promise((resolve) => {
+        button.addEventListener("click", resolve, { once: true });
+        button.dispatchEvent(new MouseEvent("click"));
+      });
+
+      await delay(500);
+      // console.log("educationDatafiller called");
+      await educationDatafiller(tempDiv, applicantData, element, index);
+
+      // await delay(500);
+      // console.log("Processed element:", index);
     }
   }
 };
