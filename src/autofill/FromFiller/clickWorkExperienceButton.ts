@@ -177,6 +177,10 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
     for (const delteButton of delteButtonAll) {
       if (delteButton) {
         delteButton.click();
+        await new Promise((resolve) => {
+          delteButton.addEventListener("click", resolve, { once: true });
+          delteButton.dispatchEvent(new MouseEvent("click"));
+        });
         await delay(500);
       }
     }
@@ -210,22 +214,7 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   }
 
   for (const button of buttonFields) {
-    const notAbutton = button?.getAttribute("aria-haspopup") ?? "";
-    const attributes: any = Array.from(button.attributes);
-    attributes.some((attribute) => {
-      if (
-        !notAbutton &&
-        checkIfExist(attribute.value, fieldNames.work_experience)
-      ) {
-        workFound = true;
-        return true; // Stop iterating
-      }
-      return false; // Continue iterating
-    });
-
     if (
-      !notAbutton &&
-      workFound &&
       applicantData.employment_history &&
       applicantData.employment_history.length > 0
     ) {
