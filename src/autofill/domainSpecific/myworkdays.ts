@@ -272,10 +272,30 @@ const deleteResume = async () => {
   }
 };
 
+const fillNo = () => {
+  const formField = document.querySelector('[data-automation-id="formField-"]');
+  if (!formField) {
+    return;
+  }
+  const allLabel = formField.querySelectorAll("label");
+  if (allLabel && allLabel.length > 1) {
+    const buttonOne = allLabel[0];
+    const buttonTwo = allLabel[1];
+
+    if (fromatStirngInLowerCase(buttonOne.textContent.trim()) === "no") {
+      buttonOne.click();
+    }
+    if (fromatStirngInLowerCase(buttonTwo.textContent.trim()) === "no") {
+      buttonTwo.click();
+    }
+  }
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
   await fillDeviceType(applicantData);
+  await fillNo();
   await clickWorkdayEducationButton(applicantData);
   await clickWorkdayWorkExperienceButton(applicantData);
   await fillSponshership(applicantData);
