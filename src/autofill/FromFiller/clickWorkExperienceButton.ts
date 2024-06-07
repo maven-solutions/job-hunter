@@ -166,53 +166,6 @@ export const clickWorkExperienceButton = async (tempDiv, applicantData) => {
   let delte = false;
   let ebayinc = false;
 
-  if (
-    window.location.href.toLowerCase().includes("myworkdayjobs") &&
-    window.location.href.toLowerCase().includes("autofillwithresume")
-  ) {
-    const delteButtonAll: any = document.querySelectorAll(
-      'button[data-automation-id="panel-set-delete-button"]'
-    );
-
-    for (const delteButton of delteButtonAll) {
-      if (delteButton) {
-        delteButton.click();
-        await new Promise((resolve) => {
-          delteButton.addEventListener("click", resolve, { once: true });
-          delteButton.dispatchEvent(new MouseEvent("click"));
-        });
-        await delay(500);
-      }
-    }
-
-    const title: HTMLInputElement = document.querySelector(
-      '[data-automation-id="jobTitle"]'
-    );
-    if (title) {
-      title.value = "";
-    }
-    const company: HTMLInputElement = document.querySelector(
-      '[data-automation-id="company"]'
-    );
-    if (company) {
-      company.value = "";
-    }
-
-    const location: HTMLInputElement = document.querySelector(
-      '[data-automation-id="location"]'
-    );
-    if (location) {
-      location.value = "";
-    }
-
-    const checkbox: HTMLInputElement = document.querySelector(
-      '[data-automation-id="currentlyWorkHere"]'
-    );
-    if (checkbox) {
-      checkbox.checked = false;
-    }
-  }
-
   for (const button of buttonFields) {
     if (
       applicantData.employment_history &&
