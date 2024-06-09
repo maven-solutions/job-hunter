@@ -32,6 +32,7 @@ import { successfactors } from "./domainSpecific/successfactors";
 import { battelle } from "./domainSpecific/battelle";
 import { oraclecloud } from "./domainSpecific/oraclecloud";
 import { ultipro } from "./domainSpecific/ultipro";
+import { workable } from "./domainSpecific/workable";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -250,6 +251,9 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".ultipro.")) {
       await ultipro(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".workable.")) {
+      await workable(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
