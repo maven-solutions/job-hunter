@@ -51,6 +51,9 @@ import useWebsiteDetection from "../../hooks/useWebsiteDetection";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
+
+  const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [showAutofillPage, setShowAutofillPage] = useState<boolean>(false);
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [showPage, setShowPage] = useState<string>("");
@@ -65,10 +68,76 @@ const JobDetector = (props: any) => {
     return store.JobDetailSlice;
   });
 
-  const [showIcon, showAutofillPage] = useWebsiteDetection();
-  // console.log("job:slice::", jobDetailState);
-  console.log("showIcon22::", showIcon);
-  console.log("showAutofillPage22::", showAutofillPage);
+  useEffect(() => {
+    const url = window.location.href.toLowerCase();
+
+    if (
+      [
+        "job",
+        "apply",
+        "career",
+        "carees",
+        "work",
+        "placement",
+        ".adp.",
+        "services",
+        ".services.",
+        "peoplehr.",
+        ".ebayinc.",
+        ".myworkdayjobs.",
+        ".paylocity.",
+        "motionrecruitment.",
+        ".lever.",
+        ".icims.",
+        "techfetch.",
+        ".tal.",
+        ".fisglobal.",
+        ".jobdiva.",
+        ".pinpointhq.",
+        ".teds.",
+        ".entertimeonline.",
+        ".dayforcehcm.",
+        ".cisco.",
+        ".jobvite.",
+        ".pinkertonhr.",
+        "jackhenry.",
+        ".clearcompany.",
+        ".ashbyhq.",
+        ".zohorecruit.",
+        ".successfactors.",
+        ".greenhouse.",
+        ".oraclecloud.",
+      ].some((domain) => url.includes(domain))
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(true);
+    }
+
+    if (
+      [
+        "linkedin.",
+        "indeed.",
+        "dice.",
+        "ziprecruiter.",
+        "glassdoor.",
+        "simplyhired.",
+        "builtin.",
+        "localhost",
+      ].some((domain) => url.includes(domain))
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(false);
+    }
+
+    // some extra case
+    if (
+      [".battelle.", ".oraclecloud."].some((domain) => url.includes(domain))
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(true);
+    }
+  }, []);
+
   useEffect(() => {
     // Function to remove the element
     function removeAutofillButton() {
