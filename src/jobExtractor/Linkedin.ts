@@ -163,6 +163,17 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
       dispatch(setJobLocation(locationtext2?.textContent?.trim()));
     }
 
+    const loaction3Parent = document.querySelector(
+      ".job-details-jobs-unified-top-card__primary-description-container"
+    );
+
+    if (loaction3Parent) {
+      const allList = loaction3Parent.querySelectorAll(".tvm__text");
+      if (allList && allList.length > 0) {
+        const location = allList[0];
+        dispatch(setJobLocation(location?.textContent?.trim()));
+      }
+    }
     getAddationalInfo(dispatch);
     dispatch(setJobSource("Linkedin"));
 
