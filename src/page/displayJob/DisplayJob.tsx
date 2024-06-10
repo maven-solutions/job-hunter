@@ -68,6 +68,7 @@ const DisplayJob = (props: any) => {
       location: jobSlice.location,
       salary: jobSlice.salary,
       jobCulture: jobSlice.job_culture,
+      isEasyApply: jobSlice.isEasyApply,
       fromExtension: true,
     };
 

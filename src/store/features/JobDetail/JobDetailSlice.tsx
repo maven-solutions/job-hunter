@@ -23,6 +23,7 @@ const initialState: any = {
   title: "",
   location: "",
   jobtype: "",
+  isEasyApply: false,
   company: "",
   postUrl: "",
   description: "",
@@ -78,6 +79,9 @@ const JobDetails = createSlice({
     setSalary: (state: any, { payload }: PayloadAction<any>) => {
       state.salary = payload;
     },
+    setIsEasyApply: (state: any, { payload }: PayloadAction<any>) => {
+      state.isEasyApply = payload;
+    },
 
     setJobCulture: (state: any, { payload }: PayloadAction<any>) => {
       state.job_culture = payload;
@@ -111,6 +115,7 @@ const JobDetails = createSlice({
       state.job_related_info = "";
       state.salary = "";
       state.job_culture = "";
+      state.isEasyApply = false;
       // state.selectedStage = "";
     },
   },
@@ -197,6 +202,7 @@ const JobDetails = createSlice({
 });
 
 export const {
+  setIsEasyApply,
   setJobTitle,
   setJobCompany,
   setJobType,
