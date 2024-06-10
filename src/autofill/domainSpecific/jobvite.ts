@@ -145,4 +145,13 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
       }
     });
   }
+
+  const checkBox: HTMLInputElement = document.querySelector(
+    '[ng-model="linkedInRecruiter.statusSync"]'
+  );
+  if (checkBox) {
+    checkBox.click();
+    checkBox.checked;
+    handleValueChanges(checkBox);
+  }
 };
