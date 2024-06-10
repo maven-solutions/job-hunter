@@ -33,6 +33,7 @@ import { battelle } from "./domainSpecific/battelle";
 import { oraclecloud } from "./domainSpecific/oraclecloud";
 import { ultipro } from "./domainSpecific/ultipro";
 import { workable } from "./domainSpecific/workable";
+import { hiretrakstar } from "./domainSpecific/hiretrakstar";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -150,6 +151,7 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".peoplehr.") ||
       window.location.href.includes(".tal.") ||
       window.location.href.includes(".zohorecruit.") ||
+      window.location.href.includes(".hire.") ||
       window.location.href.includes(".successfactors.")
     ) {
       tempDiv = document.querySelector("body");
@@ -254,6 +256,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".workable.")) {
       await workable(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".hire.trakstar.")) {
+      await hiretrakstar(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
