@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
   clearJobState,
+  setIsEasyApply,
   setJobCompany,
   setJobCompanyLogo,
   setJobCulture,
@@ -17,6 +18,7 @@ import {
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 import { extractSalaryFromString } from "../utils/helper";
+import { fromatStirngInLowerCase } from "../autofill/helper";
 
 const getAddationalInfo = (dispatch) => {
   const jobInsightElement = document.querySelector(
@@ -215,6 +217,20 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
 
       if (atagele) {
         dispatch(setJobCompany(atagele.textContent?.trim()));
+      }
+    }
+
+    // for easy apply
+    const easyApplyCard = document.querySelector(
+      ".jobs-apply-button--top-card"
+    );
+    if (easyApplyCard) {
+      const button = easyApplyCard.querySelector("button");
+      if (button) {
+        const text = fromatStirngInLowerCase(button.textContent);
+        if (text === "easyapply") {
+          dispatch(setIsEasyApply(true));
+        }
       }
     }
 
