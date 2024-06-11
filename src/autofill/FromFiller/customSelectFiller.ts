@@ -139,6 +139,32 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
     //   await delay(1000);
     // }
 
+    // for Hispanic/Latino?
+
+    if (checkIfExist(labelText, fieldNames.hispanic_latino)) {
+      select.click();
+      await delay(500);
+      const selectOptions: any = document.querySelectorAll('[role="option"]');
+      for (const [index, element] of selectOptions.entries()) {
+        if (
+          applicantData.hispanic_latino &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes("yes")
+        ) {
+          element.click();
+          // return true;
+        }
+
+        if (
+          !applicantData.hispanic_latino &&
+          fromatStirngInLowerCase(element.textContent.trim()).includes("no")
+        ) {
+          element.click();
+          // return true;
+        }
+      }
+      await delay(1000);
+    }
+
     // for race
     if (checkIfExist(labelText, fieldNames.race)) {
       select.click();

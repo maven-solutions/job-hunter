@@ -50,6 +50,7 @@ export const fieldNames = {
   gpa: ["gpa", "result"],
   gender: ["gender", "sex"],
   github: ["git", "github"],
+  hispanic_latino: ["hispanic", "latino"],
 
   is_over_18: ["age"],
   job_title: ["jobtitle", "title", "job"],
