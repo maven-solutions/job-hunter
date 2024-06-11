@@ -163,22 +163,21 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".myworkdayjobs.")) {
       await myworkDays(tempDiv ?? tempDivForFile, applicantData);
     }
-    if (!window.location.href.includes(".successfactors.")) {
-      buttonFilder();
-      textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
-      dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-      fileTypeDataFiller(tempDivForFile, applicantData, false);
-      selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
-      customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
-      customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
-    }
+
+    buttonFilder();
+    textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
+    dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    fileTypeDataFiller(tempDivForFile, applicantData, false);
+    selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
+    customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
     if (window.location.href.includes("smartrecruiters")) {
