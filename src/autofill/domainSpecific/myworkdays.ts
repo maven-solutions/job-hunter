@@ -296,8 +296,8 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await fillcountry(applicantData);
   await fillDeviceType(applicantData);
   await fillNo();
-  await clickWorkdayEducationButton(applicantData);
   await clickWorkdayWorkExperienceButton(applicantData);
+  await clickWorkdayEducationButton(applicantData);
   await fillSponshership(applicantData);
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);

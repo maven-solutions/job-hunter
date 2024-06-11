@@ -144,6 +144,7 @@ const JobDetector = (props: any) => {
       const autofillButton: HTMLButtonElement = document.querySelector(
         '[data-automation-id="autofillWithResume"]'
       );
+      console.log("autofillButton::", autofillButton);
       if (autofillButton) {
         autofillButton.remove();
       }
@@ -168,6 +169,9 @@ const JobDetector = (props: any) => {
               '[data-automation-id="wd-popup-frame"]'
             ); // Adjust the selector to match your modal
             if (modal) {
+              removeAutofillButton();
+              changeButtonText();
+            } else {
               removeAutofillButton();
               changeButtonText();
             }
