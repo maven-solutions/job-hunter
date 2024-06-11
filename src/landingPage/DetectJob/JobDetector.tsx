@@ -168,10 +168,11 @@ const JobDetector = (props: any) => {
             const modal = document.querySelector(
               '[data-automation-id="wd-popup-frame"]'
             ); // Adjust the selector to match your modal
-            if (modal) {
-              removeAutofillButton();
-              changeButtonText();
-            } else {
+            const mainContent = document.getElementById("mainContent");
+            const stadlone = document.querySelector(
+              '[data-automation-id="standaloneAdventure"]'
+            );
+            if (modal || mainContent || stadlone) {
               removeAutofillButton();
               changeButtonText();
             }
