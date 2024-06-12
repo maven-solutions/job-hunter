@@ -207,7 +207,10 @@ const fillRace = async (applicantData: Applicant) => {
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (text.toLowerCase().includes("race")) {
+    if (
+      text.toLowerCase().includes("race") ||
+      text.toLowerCase().includes("ethnicity")
+    ) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -325,6 +328,108 @@ const fillCheckBox = () => {
   }
 };
 
+const fillSapsfVeteran = async (applicantData: Applicant) => {
+  const allLabel = document.querySelectorAll("label");
+  let veteran = false;
+  for (const label of allLabel) {
+    const text = label?.textContent?.trim();
+
+    if (!veteran && fromatStirngInLowerCase(text) === "protectedveteran") {
+      const labelId = label.getAttribute("for");
+      const select = document.getElementById(labelId);
+      if (!select) {
+        return;
+      }
+      select.click();
+      handleValueChanges(select);
+      await delay(1500);
+      const allOption: any = document.querySelectorAll('li[role="option"]');
+      if (!allOption || allOption.length === 0) {
+        return;
+      }
+      for (const option of allOption) {
+        const answertext = option?.textContent;
+        // for veteran
+
+        if (
+          (applicantData.veteran_status === 1 ||
+            applicantData.veteran_status === 3 ||
+            applicantData.veteran_status === 4) &&
+          fromatStirngInLowerCase(answertext) ===
+            "iidentifyasoneormoreoftheclassificationsofprotectedveteranlistedabove"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+
+        if (
+          applicantData.veteran_status === 2 &&
+          fromatStirngInLowerCase(answertext) === "iamnotaprotectedveteran"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+
+        if (
+          applicantData.veteran_status === 5 &&
+          fromatStirngInLowerCase(answertext) === "idontwishtoanswer"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+      }
+    }
+  }
+};
+
+const fillSapsfDisability = async (applicantData: Applicant) => {
+  const allLabel = document.querySelectorAll("label");
+  for (const label of allLabel) {
+    const text = label?.textContent?.trim();
+
+    if (
+      fromatStirngInLowerCase(text)?.includes(
+        "pleaseselectoneoftheoptionsbelow"
+      )
+    ) {
+      const labelId = label.getAttribute("for");
+      const select = document.getElementById(labelId);
+      if (!select) {
+        return;
+      }
+      select.click();
+      handleValueChanges(select);
+      await delay(1500);
+      const allOption: any = document.querySelectorAll('li[role="option"]');
+      if (!allOption || allOption.length === 0) {
+        return;
+      }
+      for (const option of allOption) {
+        const answertext = option?.textContent;
+        // for disability
+
+        if (
+          !applicantData.disability_status &&
+          fromatStirngInLowerCase(answertext) ===
+            "noidonthaveadisabilityorahistoryrecordofhavingadisability"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+
+        if (
+          applicantData.disability_status &&
+          fromatStirngInLowerCase(answertext) ===
+            "yesihaveadisabilityorhaveahistoryrecordofhavingadisability"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+      }
+    }
+  }
+};
+
 export const successfactors = async (
   tempDivs: any,
   applicantData: Applicant
@@ -336,6 +441,12 @@ export const successfactors = async (
   await fillVisa(applicantData);
   await fillGender(applicantData);
   await fillRace(applicantData);
-  await fillVeteran(applicantData);
+  if (window.location.href.includes(".successfactors.")) {
+    await fillVeteran(applicantData);
+  }
+  if (window.location.href.includes(".sapsf.")) {
+    await fillSapsfVeteran(applicantData);
+    await fillSapsfDisability(applicantData);
+  }
   fillCheckBox();
 };

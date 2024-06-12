@@ -243,9 +243,13 @@ export const detectInputAndFillData = async (
       await avature(tempDiv ?? tempDivForFile, applicantData);
     }
 
-    if (window.location.href.includes(".successfactors.")) {
+    if (
+      window.location.href.includes(".successfactors.") ||
+      window.location.href.includes(".sapsf.")
+    ) {
       await successfactors(tempDiv ?? tempDivForFile, applicantData);
     }
+
     if (window.location.href.includes(".battelle.")) {
       await battelle(tempDiv ?? tempDivForFile, applicantData);
     }
