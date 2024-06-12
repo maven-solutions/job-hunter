@@ -138,12 +138,17 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
       dispatch(setJobTitle(jobsBody[0]?.textContent.trim()));
     }
 
-    setTimeout(() => {
-      let jobDetailsElement: any = document?.querySelector(
-        ".jobs-description__container"
-      );
-      dispatch(setJobDesc(jobDetailsElement?.innerHTML));
-    }, 500);
+    // setTimeout(() => {
+    //   let jobDetailsElement: any = document?.querySelector(
+    //     ".jobs-description__container"
+    //   );
+    //   dispatch(setJobDesc(jobDetailsElement?.innerHTML));
+    // }, 500);
+
+    let jobDetailsElement: any = document?.querySelector(
+      ".jobs-description__container"
+    );
+    dispatch(setJobDesc(jobDetailsElement?.innerHTML));
 
     // find posted date
     const locationText = document
