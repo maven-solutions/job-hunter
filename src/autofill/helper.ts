@@ -35,6 +35,7 @@ import { ultipro } from "./domainSpecific/ultipro";
 import { workable } from "./domainSpecific/workable";
 import { hiretrakstar } from "./domainSpecific/hiretrakstar";
 import { jcat } from "./domainSpecific/jcat";
+import { applytojob } from "./domainSpecific/applytojob";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -268,6 +269,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".jcat.")) {
       await jcat(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".applytojob.")) {
+      await applytojob(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
