@@ -160,6 +160,11 @@ const JobDetector = (props: any) => {
     }
   }, [postUrl]);
 
+  function handleMajorDOMChanges() {
+    console.log("Major DOM change detected");
+    // Add logic here to handle major changes
+  }
+
   useEffect(() => {
     // Function to remove the element
     function removeAutofillButton() {
@@ -184,6 +189,7 @@ const JobDetector = (props: any) => {
     // Function to observe changes in the DOM
     function observeModal() {
       const modalObserver = new MutationObserver((mutations) => {
+        let majorChangeDetected = false;
         mutations.forEach((mutation) => {
           if (mutation.type === "childList") {
             // Check if the modal is added
@@ -199,8 +205,33 @@ const JobDetector = (props: any) => {
               changeButtonText();
             }
           }
+          // Detect major changes by checking added or removed nodes
+          const progressBar = document.querySelector(
+            '[data-automation-id="progressBar"]'
+          );
+          if (
+            progressBar &&
+            (mutation.target === progressBar ||
+              progressBar.contains(mutation.target))
+          ) {
+            majorChangeDetected = true;
+          }
         });
+        if (majorChangeDetected) {
+          handleMajorDOMChanges();
+        }
       });
+
+      // const progressBar = document.querySelector(
+      //   '[data-automation-id="progressBar"]'
+      // );
+      // if (progressBar) {
+      //   // Start observing the progressBar for changes
+      //   modalObserver.observe(progressBar, {
+      //     childList: true,
+      //     subtree: true,
+      //   });
+      // }
 
       // Start observing the body for changes
       modalObserver.observe(document.body, {
