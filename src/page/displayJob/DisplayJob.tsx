@@ -39,7 +39,7 @@ const DisplayJob = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
+  console.log("jobSlice::", jobSlice);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -68,6 +68,8 @@ const DisplayJob = (props: any) => {
       location: jobSlice.location,
       salary: jobSlice.salary,
       jobCulture: jobSlice.job_culture,
+      recruiterDetails: jobSlice.recruiterDetails,
+      companyDetails: jobSlice.companyDetails,
       isEasyApply: jobSlice.isEasyApply,
       fromExtension: true,
     };

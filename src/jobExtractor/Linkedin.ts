@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAppDispatch } from "../store/store";
 import {
   clearJobState,
+  setCompanyDetails,
   setIsEasyApply,
   setJobCompany,
   setJobCompanyLogo,
@@ -15,6 +16,7 @@ import {
   setJobSummary,
   setJobTitle,
   setJobType,
+  setRecruiterDetails,
   setSalary,
 } from "../store/features/JobDetail/JobDetailSlice";
 import { extractSalaryFromString } from "../utils/helper";
@@ -155,7 +157,7 @@ function sanitizeHtml(description: string): string {
   return finalHtml;
 }
 
-const getCompanyDetails = () => {
+const getCompanyDetails = (dispatch) => {
   const companyDetails: CompanyDetails = {};
 
   const companyDetailsEle =
@@ -205,14 +207,17 @@ const getCompanyDetails = () => {
       companyDetails.description = sanitizedDescription;
     }
   }
-
-  console.log("companyDetails::", companyDetails);
+  dispatch(setCompanyDetails(companyDetails));
 };
 
-const getHiringTeamDetails = () => {
+const getHiringTeamDetails = (dispatch) => {
   let recruiterDetails: RecruiterDetails = {};
 
-  const hiringSectionEle = document.querySelector(".artdeco-card.mb4");
+  const hiringSectionEle = document.querySelector(
+    ".hirer-card__hirer-information"
+  );
+
+  console.log("hiringsection::", hiringSectionEle);
   if (!hiringSectionEle) {
     return;
   }
@@ -229,22 +234,11 @@ const getHiringTeamDetails = () => {
     recruiterDetails.link = prfileLink.href;
   }
 
-  const prfileImage = hiringSectionEle.querySelector<HTMLImageElement>("img");
+  const profilesection = hiringSectionEle.previousElementSibling;
+  const prfileImage = profilesection.querySelector<HTMLImageElement>("img");
   if (prfileImage?.src) {
     recruiterDetails.profileImage = prfileImage?.src;
   }
-
-  // const userJobDetailsEle = hiringSectionEle.querySelector(
-  //   ".hirer-card__hirer-information"
-  // );
-  // if (userJobDetailsEle) {
-  //   return;
-  // }
-  // const detailsEle = userJobDetailsEle.querySelector(".text-body-small");
-  // if (detailsEle) {
-  //   const details = detailsEle.textContent.trim();
-  //   recruiterDetails.summary = details;
-  // }
 
   const detailsEle = hiringSectionEle.querySelector<HTMLElement>(
     ".hirer-card__hirer-information .text-body-small"
@@ -252,7 +246,7 @@ const getHiringTeamDetails = () => {
   if (detailsEle?.textContent) {
     recruiterDetails.title = detailsEle.textContent.trim();
   }
-  console.log("recruiterDetails::", recruiterDetails);
+  dispatch(setRecruiterDetails(recruiterDetails));
 };
 export const getContentFromLinkedInJobs = (dispatch): void => {
   try {
@@ -370,8 +364,8 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
     }
 
     // for comany details---
-    getCompanyDetails();
-    getHiringTeamDetails();
+    getCompanyDetails(dispatch);
+    getHiringTeamDetails(dispatch);
     // job - details - jobs - unified - top - card__company - name;
   } catch (error) {
     console.log(error);
