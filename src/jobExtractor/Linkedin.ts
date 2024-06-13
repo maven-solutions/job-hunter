@@ -20,6 +20,21 @@ import {
 import { extractSalaryFromString } from "../utils/helper";
 import { fromatStirngInLowerCase } from "../autofill/helper";
 
+interface CompanyDetails {
+  name?: string | null;
+  logo?: string | null;
+  summary?: string | null;
+  link?: string | null;
+  description?: string | null;
+}
+interface RecruiterDetails {
+  name?: string | null;
+  logo?: string | null;
+  link?: string | null;
+  summary?: string | null;
+  description?: string | null;
+}
+
 const getAddationalInfo = (dispatch) => {
   const jobInsightElement = document.querySelector(
     ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
@@ -31,6 +46,7 @@ const getAddationalInfo = (dispatch) => {
   let worktype: string | null = null;
   let position: string | null = null;
   let salary: string | null = null;
+  let recruiterDetails: RecruiterDetails = {};
 
   // const matches = jobInsightText.match(regex);
   const matches = extractSalaryFromString(jobInsightText);
@@ -123,6 +139,77 @@ const getAddationalInfo = (dispatch) => {
   dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobSummary([secondLiText]));
   dispatch(setJobFoundStatus(true));
+};
+
+const getCompanyDetails = () => {
+  let companyDetails: CompanyDetails = {};
+
+  const companyDetailsEle = document.querySelector(".jobs-company__box");
+  if (!companyDetailsEle) {
+    return;
+  }
+  const companylogo = companyDetailsEle.querySelector("img");
+  if (companylogo) {
+    const logo = companylogo.getAttribute("src");
+    companyDetails.logo = logo;
+  }
+
+  const companyNameSection = companyDetailsEle.querySelector(
+    ".artdeco-entity-lockup__content"
+  );
+  if (companyNameSection) {
+    const atag = companyNameSection.querySelector("a");
+    const companyName = atag.textContent.trim();
+    if (companyName) {
+      companyDetails.name = companyName;
+    }
+    const link = atag.getAttribute("href");
+    if (link) {
+      companyDetails.link = `${"https://www.linkedin.com"}${link}`;
+    }
+  }
+
+  const summarysection = companyDetailsEle.querySelector(".t-14.mt5");
+  if (summarysection) {
+    const summary = summarysection.textContent.trim();
+    let parts = summary
+      .split("\n")
+      .map((part) => part.trim())
+      .filter((part) => part !== "");
+    let formattedString = parts.join(" • ");
+    companyDetails.summary = formattedString;
+  }
+
+  function sanitizeHtml(description: string): string {
+    // Remove all tags except <br> and replace with empty string
+    const sanitizedHtml = description.replace(/<(?!br\s*\/?)[^>]+>/gi, "");
+
+    // Remove specific words and patterns
+    const cleanedHtml = sanitizedHtml
+      .replace(/…/g, "") // Remove ellipsis (...)
+      .replace(/\bshow more\b/gi, ""); // Remove "show more" (case insensitive whole word)
+
+    // Remove trailing whitespace and specific test pattern
+    const finalHtml = cleanedHtml.trim().replace(/<!---->\s*/g, "");
+
+    return finalHtml;
+  }
+
+  const descriptionSection = companyDetailsEle.querySelector(
+    ".jobs-company__company-description"
+  );
+
+  if (descriptionSection) {
+    const children = descriptionSection.children;
+    const desc = children[0];
+    if (!desc) {
+      return;
+    }
+    const sanitizedDescription = sanitizeHtml(desc.innerHTML);
+    if (sanitizedDescription) {
+      companyDetails.description = sanitizedDescription;
+    }
+  }
 };
 export const getContentFromLinkedInJobs = (dispatch): void => {
   try {
@@ -239,6 +326,8 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
       }
     }
 
+    // for comany details---
+    getCompanyDetails();
     // job - details - jobs - unified - top - card__company - name;
   } catch (error) {
     console.log(error);
