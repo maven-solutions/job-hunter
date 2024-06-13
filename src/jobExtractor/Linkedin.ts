@@ -29,9 +29,9 @@ interface CompanyDetails {
 }
 interface RecruiterDetails {
   name?: string | null;
-  logo?: string | null;
+  profileImage?: string | null;
   link?: string | null;
-  summary?: string | null;
+  title?: string | null;
   description?: string | null;
 }
 
@@ -46,7 +46,6 @@ const getAddationalInfo = (dispatch) => {
   let worktype: string | null = null;
   let position: string | null = null;
   let salary: string | null = null;
-  let recruiterDetails: RecruiterDetails = {};
 
   // const matches = jobInsightText.match(regex);
   const matches = extractSalaryFromString(jobInsightText);
@@ -141,75 +140,119 @@ const getAddationalInfo = (dispatch) => {
   dispatch(setJobFoundStatus(true));
 };
 
-const getCompanyDetails = () => {
-  let companyDetails: CompanyDetails = {};
+function sanitizeHtml(description: string): string {
+  // Remove all tags except <br> and replace with empty string
+  const sanitizedHtml = description.replace(/<(?!br\s*\/?)[^>]+>/gi, "");
 
-  const companyDetailsEle = document.querySelector(".jobs-company__box");
+  // Remove specific words and patterns
+  const cleanedHtml = sanitizedHtml
+    .replace(/…/g, "") // Remove ellipsis (...)
+    .replace(/\bshow more\b/gi, ""); // Remove "show more" (case insensitive whole word)
+
+  // Remove trailing whitespace and specific test pattern
+  const finalHtml = cleanedHtml.trim().replace(/<!---->\s*/g, "");
+
+  return finalHtml;
+}
+
+const getCompanyDetails = () => {
+  const companyDetails: CompanyDetails = {};
+
+  const companyDetailsEle =
+    document.querySelector<HTMLElement>(".jobs-company__box");
   if (!companyDetailsEle) {
     return;
   }
-  const companylogo = companyDetailsEle.querySelector("img");
-  if (companylogo) {
-    const logo = companylogo.getAttribute("src");
+
+  // Get company logo
+  const logo = companyDetailsEle.querySelector<HTMLImageElement>("img")?.src;
+  if (logo) {
     companyDetails.logo = logo;
   }
 
-  const companyNameSection = companyDetailsEle.querySelector(
-    ".artdeco-entity-lockup__content"
+  // Get company name and link
+  const atag = companyDetailsEle.querySelector<HTMLAnchorElement>(
+    ".artdeco-entity-lockup__content a"
   );
-  if (companyNameSection) {
-    const atag = companyNameSection.querySelector("a");
-    const companyName = atag.textContent.trim();
-    if (companyName) {
-      companyDetails.name = companyName;
-    }
-    const link = atag.getAttribute("href");
-    if (link) {
-      companyDetails.link = `${"https://www.linkedin.com"}${link}`;
-    }
+  if (atag?.textContent) {
+    companyDetails.name = atag.textContent.trim();
+  }
+  if (atag?.href) {
+    companyDetails.link = `https://www.linkedin.com${atag.getAttribute(
+      "href"
+    )}`;
   }
 
-  const summarysection = companyDetailsEle.querySelector(".t-14.mt5");
-  if (summarysection) {
-    const summary = summarysection.textContent.trim();
-    let parts = summary
+  // Get company summary
+  const summarySection =
+    companyDetailsEle.querySelector<HTMLElement>(".t-14.mt5");
+  if (summarySection?.textContent) {
+    const formattedSummary = summarySection.textContent
       .split("\n")
       .map((part) => part.trim())
-      .filter((part) => part !== "");
-    let formattedString = parts.join(" • ");
-    companyDetails.summary = formattedString;
+      .filter((part) => part !== "")
+      .join(" • ");
+    companyDetails.summary = formattedSummary;
   }
 
-  function sanitizeHtml(description: string): string {
-    // Remove all tags except <br> and replace with empty string
-    const sanitizedHtml = description.replace(/<(?!br\s*\/?)[^>]+>/gi, "");
-
-    // Remove specific words and patterns
-    const cleanedHtml = sanitizedHtml
-      .replace(/…/g, "") // Remove ellipsis (...)
-      .replace(/\bshow more\b/gi, ""); // Remove "show more" (case insensitive whole word)
-
-    // Remove trailing whitespace and specific test pattern
-    const finalHtml = cleanedHtml.trim().replace(/<!---->\s*/g, "");
-
-    return finalHtml;
-  }
-
-  const descriptionSection = companyDetailsEle.querySelector(
-    ".jobs-company__company-description"
+  // Get company description
+  const desc = companyDetailsEle.querySelector<HTMLElement>(
+    ".jobs-company__company-description > *:first-child"
   );
-
-  if (descriptionSection) {
-    const children = descriptionSection.children;
-    const desc = children[0];
-    if (!desc) {
-      return;
-    }
+  if (desc?.innerHTML) {
     const sanitizedDescription = sanitizeHtml(desc.innerHTML);
     if (sanitizedDescription) {
       companyDetails.description = sanitizedDescription;
     }
   }
+
+  console.log("companyDetails::", companyDetails);
+};
+
+const getHiringTeamDetails = () => {
+  let recruiterDetails: RecruiterDetails = {};
+
+  const hiringSectionEle = document.querySelector(".artdeco-card.mb4");
+  if (!hiringSectionEle) {
+    return;
+  }
+
+  const nameTag = hiringSectionEle.querySelector<HTMLElement>(
+    ".jobs-poster__name strong"
+  );
+  if (nameTag?.textContent) {
+    recruiterDetails.name = nameTag.textContent.trim();
+  }
+
+  const prfileLink = hiringSectionEle.querySelector<HTMLAnchorElement>("a");
+  if (prfileLink?.href) {
+    recruiterDetails.link = prfileLink.href;
+  }
+
+  const prfileImage = hiringSectionEle.querySelector<HTMLImageElement>("img");
+  if (prfileImage?.src) {
+    recruiterDetails.profileImage = prfileImage?.src;
+  }
+
+  // const userJobDetailsEle = hiringSectionEle.querySelector(
+  //   ".hirer-card__hirer-information"
+  // );
+  // if (userJobDetailsEle) {
+  //   return;
+  // }
+  // const detailsEle = userJobDetailsEle.querySelector(".text-body-small");
+  // if (detailsEle) {
+  //   const details = detailsEle.textContent.trim();
+  //   recruiterDetails.summary = details;
+  // }
+
+  const detailsEle = hiringSectionEle.querySelector<HTMLElement>(
+    ".hirer-card__hirer-information .text-body-small"
+  );
+  if (detailsEle?.textContent) {
+    recruiterDetails.title = detailsEle.textContent.trim();
+  }
+  console.log("recruiterDetails::", recruiterDetails);
 };
 export const getContentFromLinkedInJobs = (dispatch): void => {
   try {
@@ -328,6 +371,7 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
 
     // for comany details---
     getCompanyDetails();
+    getHiringTeamDetails();
     // job - details - jobs - unified - top - card__company - name;
   } catch (error) {
     console.log(error);
