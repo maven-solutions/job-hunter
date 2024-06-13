@@ -139,59 +139,6 @@ const JobDetector = (props: any) => {
   }, []);
 
   useEffect(() => {
-    // Function to remove the element
-    function removeAutofillButton() {
-      const autofillButton: HTMLButtonElement = document.querySelector(
-        '[data-automation-id="autofillWithResume"]'
-      );
-      console.log("autofillButton::", autofillButton);
-      if (autofillButton) {
-        autofillButton.remove();
-      }
-    }
-
-    function changeButtonText() {
-      const manualApplyButton: HTMLButtonElement = document.querySelector(
-        '[data-automation-id="applyManually"]'
-      );
-      if (manualApplyButton) {
-        manualApplyButton.textContent = "Apply with CareerAI";
-      }
-    }
-
-    // Function to observe changes in the DOM
-    function observeModal() {
-      const modalObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === "childList") {
-            // Check if the modal is added
-            const modal = document.querySelector(
-              '[data-automation-id="wd-popup-frame"]'
-            ); // Adjust the selector to match your modal
-            const mainContent = document.getElementById("mainContent");
-            const stadlone = document.querySelector(
-              '[data-automation-id="standaloneAdventure"]'
-            );
-            if (modal || mainContent || stadlone) {
-              removeAutofillButton();
-              changeButtonText();
-            }
-          }
-        });
-      });
-
-      // Start observing the body for changes
-      modalObserver.observe(document.body, { childList: true, subtree: true });
-    }
-
-    // Call the function to start observing
-
-    if (window.location.href.includes("myworkdayjobs.")) {
-      observeModal();
-    }
-
-    //
-
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
     }
@@ -210,6 +157,67 @@ const JobDetector = (props: any) => {
     dispatch(setJobReqSucccessFalse());
     if (authState.authenticated) {
       dispatch(chekJobExists({ jobLink: window.location.href }));
+    }
+  }, [postUrl]);
+
+  useEffect(() => {
+    // Function to remove the element
+    function removeAutofillButton() {
+      const autofillButton = document.querySelector(
+        '[data-automation-id="autofillWithResume"]'
+      );
+      if (autofillButton) {
+        autofillButton.remove();
+      }
+    }
+
+    // Function to change button text
+    function changeButtonText() {
+      const manualApplyButton = document.querySelector(
+        '[data-automation-id="applyManually"]'
+      );
+      if (manualApplyButton) {
+        manualApplyButton.textContent = "Apply with CareerAI";
+      }
+    }
+
+    // Function to observe changes in the DOM
+    function observeModal() {
+      const modalObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === "childList") {
+            // Check if the modal is added
+            const modal = document.querySelector(
+              '[data-automation-id="wd-popup-frame"]'
+            );
+            const mainContent = document.getElementById("mainContent");
+            const stadlone = document.querySelector(
+              '[data-automation-id="standaloneAdventure"]'
+            );
+            if (modal || mainContent || stadlone) {
+              removeAutofillButton();
+              changeButtonText();
+            }
+          }
+        });
+      });
+
+      // Start observing the body for changes
+      modalObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      // Cleanup function to disconnect the observer when the component unmounts
+      return () => {
+        modalObserver.disconnect();
+      };
+    }
+
+    // Call the function to start observing if the URL contains the specified string
+    if (window.location.href.includes("myworkdayjobs.")) {
+      const cleanup = observeModal();
+      return cleanup;
     }
   }, [postUrl]);
 
