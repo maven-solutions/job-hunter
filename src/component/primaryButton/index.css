@@ -38,14 +38,18 @@
   color: #ff3a29;
 }
 .ci_job__button__disabled {
-  background: #363538 !important;
-  cursor: no-drop;
+  /* cursor: not-allowed;
+  background: #e2e2e2;
+  color: #808080; */
 }
+
 .ci_job__button__disabled:disabled {
-  background: #363538 !important;
-  cursor: no-drop;
+  cursor: not-allowed;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
 }
 .ci_job_save_button:disabled {
-  background: #363538 !important;
-  cursor: no-drop;
+  cursor: not-allowed;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
 }
