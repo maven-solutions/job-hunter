@@ -39,7 +39,6 @@ const DisplayJob = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  console.log("jobSlice::", jobSlice);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
