@@ -217,7 +217,6 @@ const getHiringTeamDetails = (dispatch) => {
     ".hirer-card__hirer-information"
   );
 
-  console.log("hiringsection::", hiringSectionEle);
   if (!hiringSectionEle) {
     return;
   }
