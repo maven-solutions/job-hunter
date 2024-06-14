@@ -18,7 +18,6 @@ import {
   LIVE_WEBSITE_URL,
   STAGING_WEBSITE_URL,
 } from "../../config/urlconfig";
-import Spinner from "../shared/Spinner";
 import Skleton from "../../component/skleton/Skleton";
 
 const DisplayJob = (props: any) => {
@@ -31,8 +30,6 @@ const DisplayJob = (props: any) => {
   } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
-  const [loadSkleton, setLoadSkleton] = useState<Boolean>(true);
-
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
@@ -144,11 +141,6 @@ const DisplayJob = (props: any) => {
       <WhiteCard>
         <span className="ci_job_stage_title_new">
           <div>Application Stage</div>
-          {/* {jobSlice?.stage_data_loading && (
-            <div style={{ paddingTop: "-8px" }}>
-              <Spinner size={25} />
-            </div>
-          )} */}
         </span>
         <div className="aaaaaaaaaa">
           <Select
