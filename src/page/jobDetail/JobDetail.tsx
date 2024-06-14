@@ -70,6 +70,8 @@ const JobDetail = (props: any) => {
       salary: jobSlice.salary,
       jobCulture: jobSlice.job_culture,
       isEasyApply: jobSlice.isEasyApply,
+      recruiterDetails: jobSlice.recruiterDetails,
+      companyDetails: jobSlice.companyDetails,
       fromExtension: true,
     };
     try {

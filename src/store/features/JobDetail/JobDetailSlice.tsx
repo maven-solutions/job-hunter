@@ -36,6 +36,8 @@ const initialState: any = {
   job_related_info: "",
   selectedStage: "",
   stage_data: [],
+  companyDetails: {},
+  recruiterDetails: {},
 };
 
 const JobDetails = createSlice({
@@ -95,6 +97,12 @@ const JobDetails = createSlice({
     setJobReqSucccessFalse: (state: any) => {
       state.check_job_res_success = false;
     },
+    setCompanyDetails: (state: any, { payload }: PayloadAction<any>) => {
+      state.companyDetails = payload;
+    },
+    setRecruiterDetails: (state: any, { payload }: PayloadAction<any>) => {
+      state.recruiterDetails = payload;
+    },
     clearStageData: (state: any) => {
       state.stage_data = [];
       state.stage_data_success = false;
@@ -116,6 +124,8 @@ const JobDetails = createSlice({
       state.salary = "";
       state.job_culture = "";
       state.isEasyApply = false;
+      state.recruiterDetails = {};
+      state.companyDetails = {};
       // state.selectedStage = "";
     },
   },
@@ -221,6 +231,8 @@ export const {
   setJobRelatedInfo,
   setJobCulture,
   clearStageData,
+  setRecruiterDetails,
+  setCompanyDetails,
 } = JobDetails.actions;
 
 export default JobDetails.reducer;
