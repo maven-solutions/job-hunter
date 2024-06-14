@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import {
-  clearLocalStorageData,
-  detectInputAndFillData,
-} from "../../autofill/helper";
+import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
-import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -128,11 +124,6 @@ const AutofillFields = (props: any) => {
     });
   };
 
-  const logoutUser = () => {
-    clearLocalStorageData("login_token");
-    // updateUserLoginState(false);
-  };
-
   const autofillByContentScript = () => {
     const url = window.location.href;
     const applicantData = extractInfo(
@@ -163,9 +154,9 @@ const AutofillFields = (props: any) => {
           Auto Fill
         </button>
 
-        <button className={`autofill__btn `} disabled>
+        {/* <button className={`autofill__btn `} disabled>
           Save jobs
-        </button>
+        </button> */}
       </div>
     </div>
   );
