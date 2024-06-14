@@ -52,6 +52,7 @@ import {
   handleMajorDOMChangesInMyworkdays,
   removeMyWorkdaysAutofillButton,
 } from "../helper/myworkdays";
+import useTrackJobsFromWebsite from "../../hooks/useTrackJobsFromWebsite";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -271,42 +272,42 @@ const JobDetector = (props: any) => {
     // Clear the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
+  useTrackJobsFromWebsite(dispatch, setShowPage);
+  // useEffect(() => {
+  //   if (window.location.href.includes("linkedin.")) {
+  //     setTimeout(() => {
+  //       getContentFromLinkedInJobs(dispatch);
+  //     }, 2000);
+  //   }
+  //   if (window.location.href.includes("indeed.")) {
+  //     setTimeout(() => {
+  //       getJobsFromIndeed(dispatch);
+  //     }, 2000);
+  //   }
 
-  useEffect(() => {
-    if (window.location.href.includes("linkedin.")) {
-      setTimeout(() => {
-        getContentFromLinkedInJobs(dispatch);
-      }, 2000);
-    }
-    if (window.location.href.includes("indeed.")) {
-      setTimeout(() => {
-        getJobsFromIndeed(dispatch);
-      }, 2000);
-    }
+  //   if (
+  //     window.location.href.includes("dice.") &&
+  //     window.location.href.includes("job-detail")
+  //   ) {
+  //     setTimeout(() => {
+  //       getJobsFromDice(dispatch);
+  //     }, 2000);
+  //   }
 
-    if (
-      window.location.href.includes("dice.") &&
-      window.location.href.includes("job-detail")
-    ) {
-      setTimeout(() => {
-        getJobsFromDice(dispatch);
-      }, 2000);
-    }
+  //   if (window.location.href.includes("ziprecruiter.")) {
+  //     setTimeout(() => {
+  //       getJobFromZipRecruiter(dispatch);
+  //     }, 2000);
+  //   }
 
-    if (window.location.href.includes("ziprecruiter.")) {
-      setTimeout(() => {
-        getJobFromZipRecruiter(dispatch);
-      }, 2000);
-    }
-
-    if (window.location.href.includes("simplyhired.")) {
-      setTimeout(() => {
-        getJobFromSimplyhired(dispatch);
-      }, 2000);
-    }
-    setShowPage("");
-    dispatch(clearJobState());
-  }, [window.location.href]);
+  //   if (window.location.href.includes("simplyhired.")) {
+  //     setTimeout(() => {
+  //       getJobFromSimplyhired(dispatch);
+  //     }, 2000);
+  //   }
+  //   setShowPage("");
+  //   dispatch(clearJobState());
+  // }, [window.location.href]);
 
   return (
     <div className="content__script__section">
