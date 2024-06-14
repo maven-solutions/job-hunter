@@ -26,11 +26,11 @@ const RenderName = (props: any) => {
 };
 
 const ResumeList = (props: any) => {
-  const { setShowPage, content } = props;
+  const { setShowPage, content, autoFilling, setAutoFilling } = props;
   const [showdropDown, setShowDropdown] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedResume, setSelectedResume] = useState(0);
-  const [autoFilling, setAutoFilling] = useState<Boolean>(false);
+  // const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });

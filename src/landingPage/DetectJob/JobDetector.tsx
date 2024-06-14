@@ -48,6 +48,7 @@ import {
 import { getJobFromZipRecruiter } from "../../jobExtractor/Ziprecuriter";
 import { setResumeResponseToFalse } from "../../store/features/ResumeList/ResumeListSlice";
 import useWebsiteDetection from "../../hooks/useWebsiteDetection";
+import { detectInputAndFillData } from "../../autofill/helper";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -59,6 +60,7 @@ const JobDetector = (props: any) => {
   const [showPage, setShowPage] = useState<string>("");
   const [savedNotification, setSavedNotification] = useState(false);
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
+  const [autoFilling, setAutoFilling] = useState<Boolean>(false);
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -159,15 +161,24 @@ const JobDetector = (props: any) => {
       dispatch(chekJobExists({ jobLink: window.location.href }));
     }
   }, [postUrl]);
+  const startLoading = () => {
+    setAutoFilling(true);
+  };
+
+  const stopLoading = () => {
+    setAutoFilling(false);
+  };
 
   function handleMajorDOMChanges() {
     const localUrl = localStorage.getItem("url");
     if (localUrl === window.location.href) {
-      console.log("Major DOM change detected");
+      const getUser = localStorage.getItem("userinfo");
+      const applicantData = JSON.parse(getUser);
+      console.log("applicant---automatic------::", applicantData);
+      detectInputAndFillData(applicantData, startLoading, stopLoading);
     }
     // Add logic here to handle major changes
   }
-
   useEffect(() => {
     // Function to remove the element
     function removeAutofillButton() {
@@ -193,20 +204,19 @@ const JobDetector = (props: any) => {
     function observeModal() {
       const modalObserver = new MutationObserver((mutations) => {
         let majorChangeDetected = false;
+        let modal: any = "";
+        let mainContent: any = "";
+        let stadlone: any = "";
         mutations.forEach((mutation) => {
           if (mutation.type === "childList") {
             // Check if the modal is added
-            const modal = document.querySelector(
+            modal = document.querySelector(
               '[data-automation-id="wd-popup-frame"]'
             );
-            const mainContent = document.getElementById("mainContent");
-            const stadlone = document.querySelector(
+            mainContent = document.getElementById("mainContent");
+            stadlone = document.querySelector(
               '[data-automation-id="standaloneAdventure"]'
             );
-            if (modal || mainContent || stadlone) {
-              removeAutofillButton();
-              changeButtonText();
-            }
           }
           // Detect major changes by checking added or removed nodes
           const progressBar = document.querySelector(
@@ -220,21 +230,26 @@ const JobDetector = (props: any) => {
             majorChangeDetected = true;
           }
         });
+
+        if (modal || mainContent || stadlone) {
+          removeAutofillButton();
+          changeButtonText();
+        }
         if (majorChangeDetected) {
           handleMajorDOMChanges();
         }
       });
 
-      // const progressBar = document.querySelector(
-      //   '[data-automation-id="progressBar"]'
-      // );
-      // if (progressBar) {
-      //   // Start observing the progressBar for changes
-      //   modalObserver.observe(progressBar, {
-      //     childList: true,
-      //     subtree: true,
-      //   });
-      // }
+      const progressBar = document.querySelector(
+        '[data-automation-id="progressBar"]'
+      );
+      if (progressBar) {
+        // Start observing the progressBar for changes
+        modalObserver.observe(progressBar, {
+          childList: true,
+          subtree: true,
+        });
+      }
 
       // Start observing the body for changes
       modalObserver.observe(document.body, {
@@ -262,6 +277,7 @@ const JobDetector = (props: any) => {
   }, [jobDetailState.check_job_res_success]);
 
   useEffect(() => {
+    localStorage.removeItem("url");
     const observer = new MutationObserver(() => {
       const url = window.location.href;
       // chrome.runtime.sendMessage({ action: "urlChange", url });
@@ -411,7 +427,12 @@ const JobDetector = (props: any) => {
         <Profile setShowPage={setShowPage} />
       )}
       {showPage === SHOW_PAGE.resumeListPage && (
-        <ResumeList setShowPage={setShowPage} content={content} />
+        <ResumeList
+          autoFilling={autoFilling}
+          setAutoFilling={setAutoFilling}
+          setShowPage={setShowPage}
+          content={content}
+        />
       )}
       <MenuPopUp setShowPage={setShowPage} />
       {/* {website === SUPPORTED_WEBSITE.linkedin && (

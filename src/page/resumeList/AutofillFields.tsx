@@ -134,21 +134,17 @@ const AutofillFields = (props: any) => {
   };
 
   const autofillByContentScript = () => {
+    const url = window.location.href;
     const applicantData = extractInfo(
       resumeList.applicantData[selectedResume].applicant,
       resumeList.applicantData[selectedResume].applicationForm
     );
-    console.log("applicantData---", applicantData);
+    localStorage.setItem("userinfo", JSON.stringify(applicantData));
+    localStorage.setItem("url", url);
     detectInputAndFillData(applicantData, startLoading, stopLoading);
   };
 
-  const setURLtoLocalStorage = () => {
-    const url = window.location.href;
-    localStorage.setItem("url", url);
-  };
-
   const handleAutofill = () => {
-    setURLtoLocalStorage();
     if (content) {
       autofillByContentScript();
     } else {
