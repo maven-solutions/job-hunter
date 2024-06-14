@@ -161,7 +161,10 @@ const JobDetector = (props: any) => {
   }, [postUrl]);
 
   function handleMajorDOMChanges() {
-    console.log("Major DOM change detected");
+    const localUrl = localStorage.getItem("url");
+    if (localUrl === window.location.href) {
+      console.log("Major DOM change detected");
+    }
     // Add logic here to handle major changes
   }
 

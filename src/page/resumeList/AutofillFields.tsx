@@ -142,7 +142,13 @@ const AutofillFields = (props: any) => {
     detectInputAndFillData(applicantData, startLoading, stopLoading);
   };
 
+  const setURLtoLocalStorage = () => {
+    const url = window.location.href;
+    localStorage.setItem("url", url);
+  };
+
   const handleAutofill = () => {
+    setURLtoLocalStorage();
     if (content) {
       autofillByContentScript();
     } else {
