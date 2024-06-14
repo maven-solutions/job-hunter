@@ -53,6 +53,7 @@ import {
   removeMyWorkdaysAutofillButton,
 } from "../helper/myworkdays";
 import useTrackJobsFromWebsite from "../../hooks/useTrackJobsFromWebsite";
+import useSimplyhiredGlassdoorNoti from "../../hooks/useSimplyhiredGlassdoorNoti";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -255,23 +256,24 @@ const JobDetector = (props: any) => {
   //   });
   // }, []);
 
-  useEffect(() => {
-    let intervalId: any = "";
-    if (
-      window.location.href.includes("glassdoor") &&
-      !window.location.href.includes("job-listing")
-    ) {
-      glassDoorNotiification();
-      // Clear any existing intervals before setting a new one
-      intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
-    }
-    if (window.location.href === "https://www.simplyhired.com/") {
-      simplyHiredNotiification();
-      intervalId = setInterval(addButtonToSimplyHired, 3000);
-    }
-    // Clear the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []);
+  // useEffect(() => {
+  //   let intervalId: any = "";
+  //   if (
+  //     window.location.href.includes("glassdoor") &&
+  //     !window.location.href.includes("job-listing")
+  //   ) {
+  //     glassDoorNotiification();
+  //     // Clear any existing intervals before setting a new one
+  //     intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
+  //   }
+  //   if (window.location.href === "https://www.simplyhired.com/") {
+  //     simplyHiredNotiification();
+  //     intervalId = setInterval(addButtonToSimplyHired, 3000);
+  //   }
+  //   // Clear the interval when the component unmounts
+  //   return () => clearInterval(intervalId);
+  // }, []);
+  useSimplyhiredGlassdoorNoti();
   useTrackJobsFromWebsite(dispatch, setShowPage);
   // useEffect(() => {
   //   if (window.location.href.includes("linkedin.")) {
