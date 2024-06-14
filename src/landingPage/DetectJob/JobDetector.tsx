@@ -27,7 +27,6 @@ import {
   clearStageData,
   setButtonDisabledFalse,
   setJobReqSucccessFalse,
-  setSelectedStage,
 } from "../../store/features/JobDetail/JobDetailSlice";
 import { getJobFromSimplyhired } from "../../jobExtractor/SimplyHired";
 import { getJobsFromDice } from "../../jobExtractor/Dice";
@@ -48,7 +47,11 @@ import {
 import { getJobFromZipRecruiter } from "../../jobExtractor/Ziprecuriter";
 import { setResumeResponseToFalse } from "../../store/features/ResumeList/ResumeListSlice";
 import useWebsiteDetection from "../../hooks/useWebsiteDetection";
-import { detectInputAndFillData } from "../../autofill/helper";
+import {
+  changeMyWorkdaysButtonText,
+  handleMajorDOMChangesInMyworkdays,
+  removeMyWorkdaysAutofillButton,
+} from "../helper/myworkdays";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -169,54 +172,30 @@ const JobDetector = (props: any) => {
     setAutoFilling(false);
   };
 
-  function handleMajorDOMChanges() {
-    const localUrl = localStorage.getItem("url");
-    if (localUrl === window.location.href) {
-      const getUser = localStorage.getItem("userinfo");
-      const applicantData = JSON.parse(getUser);
-      console.log("applicant---automatic------::", applicantData);
-      detectInputAndFillData(applicantData, startLoading, stopLoading);
-    }
-    // Add logic here to handle major changes
-  }
   useEffect(() => {
     // Function to remove the element
-    function removeAutofillButton() {
-      const autofillButton = document.querySelector(
-        '[data-automation-id="autofillWithResume"]'
-      );
-      if (autofillButton) {
-        autofillButton.remove();
-      }
-    }
-
-    // Function to change button text
-    function changeButtonText() {
-      const manualApplyButton = document.querySelector(
-        '[data-automation-id="applyManually"]'
-      );
-      if (manualApplyButton) {
-        manualApplyButton.textContent = "Apply with CareerAI";
-      }
-    }
 
     // Function to observe changes in the DOM
     function observeModal() {
       const modalObserver = new MutationObserver((mutations) => {
         let majorChangeDetected = false;
-        let modal: any = "";
-        let mainContent: any = "";
-        let stadlone: any = "";
+        let workdaysButtonChanged = false;
+        // let modal: any = "";
+        // let mainContent: any = "";
+        // let stadlone: any = "";
         mutations.forEach((mutation) => {
           if (mutation.type === "childList") {
             // Check if the modal is added
-            modal = document.querySelector(
+            const modal = document.querySelector(
               '[data-automation-id="wd-popup-frame"]'
             );
-            mainContent = document.getElementById("mainContent");
-            stadlone = document.querySelector(
+            const mainContent = document.getElementById("mainContent");
+            const stadlone = document.querySelector(
               '[data-automation-id="standaloneAdventure"]'
             );
+            if (modal || mainContent || stadlone) {
+              workdaysButtonChanged = true;
+            }
           }
           // Detect major changes by checking added or removed nodes
           const progressBar = document.querySelector(
@@ -231,12 +210,12 @@ const JobDetector = (props: any) => {
           }
         });
 
-        if (modal || mainContent || stadlone) {
-          removeAutofillButton();
-          changeButtonText();
+        if (workdaysButtonChanged) {
+          removeMyWorkdaysAutofillButton();
+          changeMyWorkdaysButtonText();
         }
         if (majorChangeDetected) {
-          handleMajorDOMChanges();
+          handleMajorDOMChangesInMyworkdays(startLoading, stopLoading);
         }
       });
 
@@ -435,11 +414,6 @@ const JobDetector = (props: any) => {
         />
       )}
       <MenuPopUp setShowPage={setShowPage} />
-      {/* {website === SUPPORTED_WEBSITE.linkedin && (
-        <Linkedin setShowPage={setShowPage} />
-      )} */}
-
-      {/* {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />} */}
 
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
