@@ -222,13 +222,141 @@ export const selectDataExtract = (
         });
       }
 
-      // for phone type
+      // for is 18 years
       if (
         checkIfExist(labelText, fieldNames.is_over_18) ||
         checkIfExist(attribute.value, fieldNames.is_over_18)
       ) {
         Array.from(select.options).find((option: any) => {
           if (fromatStirngInLowerCase(option?.text) === "yes") {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+        });
+      }
+
+      // for work authorizaion
+      if (
+        checkIfExist(labelText, fieldNames.us_work_authorization) ||
+        checkIfExist(attribute.value, fieldNames.us_work_authorization)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "yes"
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "no"
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+        });
+      }
+
+      // for sponsersship
+      if (
+        checkIfExist(labelText, fieldNames.sponsorship) ||
+        checkIfExist(attribute.value, fieldNames.sponsorship)
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text) === "yes"
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text) === "no"
+          ) {
             option.selected = true;
             select.dispatchEvent(
               new Event("change", { bubbles: true, cancelable: false })

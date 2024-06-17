@@ -96,6 +96,7 @@ export const fieldNames = {
   role_description: ["roledescription", "description", "role"],
 
   salary: ["salary", "pay"],
+  sponsorship: ["sponsorship", "visa"],
   started_date: [""],
   state: ["state", "province", "territory"],
   salary_expectations: ["salary_expectation", "salary_expectations"],
@@ -109,7 +110,7 @@ export const fieldNames = {
     "agree",
   ],
 
-  us_work_authorization: ["legallyauthorized"],
+  us_work_authorization: ["legallyauthorized", "legallyeligible"],
   veteran: ["veteran"],
   veteran_status: [" veteranstatus", " veteran"],
   visa: ["sponsorship", "visa"],
