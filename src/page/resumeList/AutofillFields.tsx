@@ -3,6 +3,7 @@ import React from "react";
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
+import { LOCALSTORAGE } from "../../utils/constant";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -130,8 +131,11 @@ const AutofillFields = (props: any) => {
       resumeList.applicantData[selectedResume].applicant,
       resumeList.applicantData[selectedResume].applicationForm
     );
-    localStorage.setItem("userinfo", JSON.stringify(applicantData));
-    localStorage.setItem("url", url);
+    localStorage.setItem(
+      LOCALSTORAGE.CI_AUTOFILL_USERINFO,
+      JSON.stringify(applicantData)
+    );
+    localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
     detectInputAndFillData(applicantData, startLoading, stopLoading);
   };
 

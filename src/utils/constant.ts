@@ -27,3 +27,8 @@ export const USER_ROLE_TYPE = {
   INDIVIDUAL: "individual",
   ORGANIZATIONAL: "individual",
 };
+
+export const LOCALSTORAGE = {
+  CI_AUTOFILL_USERINFO: "ciautofilluserinfo",
+  CI_AUTOFILL_URL: "ciautofillurl",
+};

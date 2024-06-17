@@ -9,6 +9,7 @@ import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   EXTENSION_ACTION,
+  LOCALSTORAGE,
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
@@ -39,6 +40,7 @@ import {
 } from "../helper/myworkdays";
 import useTrackJobsFromWebsite from "../../hooks/useTrackJobsFromWebsite";
 import useSimplyhiredGlassdoorNoti from "../../hooks/useSimplyhiredGlassdoorNoti";
+import { handleMajorDOMChangesManagehealth } from "../helper/magellanhealth";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -89,7 +91,7 @@ const JobDetector = (props: any) => {
   };
 
   useEffect(() => {
-    localStorage.removeItem("url");
+    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_URL);
     const observer = new MutationObserver(() => {
       const url = window.location.href;
       // chrome.runtime.sendMessage({ action: "urlChange", url });
@@ -165,6 +167,17 @@ const JobDetector = (props: any) => {
     if (window.location.href.includes("myworkdayjobs.")) {
       const cleanup = observeModal();
       return cleanup;
+    }
+
+    if (window.location.href.includes(".magellanhealth.")) {
+      const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
+      if (
+        localurl &&
+        localurl !== window.location.href &&
+        window.location.href.includes("step=")
+      ) {
+        // handleMajorDOMChangesManagehealth(startLoading, stopLoading);
+      }
     }
   }, [postUrl]);
 

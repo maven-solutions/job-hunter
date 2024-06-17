@@ -1,6 +1,5 @@
-import { all } from "axios";
 import { Applicant } from "../data";
-import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { fromatStirngInLowerCase } from "../helper";
 
 export const magellanhealth = async (
   tempDiv: any,
@@ -12,7 +11,6 @@ export const magellanhealth = async (
   if (!disabilityEle) {
     return;
   }
-  console.log("disability::", disabilityEle);
   const allLabel = disabilityEle.querySelectorAll("label");
   if (!allLabel || allLabel.length === 0) {
     return;
@@ -28,18 +26,10 @@ export const magellanhealth = async (
 
     if (
       label &&
-      applicantData.disability_status &&
+      !applicantData.disability_status &&
       fromatStirngInLowerCase(label.textContent).includes("idonothave")
     ) {
       label.click();
     }
   }
-
-  //   if (phone) {
-  //     phone.value = applicantData.phone_number;
-  //     phone.focus(); // Autofocus on the input field
-  //     phone.click();
-  //     phone.select();
-  //     handleValueChanges(phone);
-  //   }
 };

@@ -1,4 +1,5 @@
 import { detectInputAndFillData } from "../../autofill/helper";
+import { LOCALSTORAGE } from "../../utils/constant";
 
 export const removeMyWorkdaysAutofillButton = () => {
   const autofillButton = document.querySelector<HTMLElement>(
@@ -23,11 +24,10 @@ export const handleMajorDOMChangesInMyworkdays = (
   startLoading: () => void,
   stopLoading: () => void
 ) => {
-  const localUrl = localStorage.getItem("url");
+  const localUrl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
   if (localUrl === window.location.href) {
-    const getUser = localStorage.getItem("userinfo");
+    const getUser = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
     const applicantData = JSON.parse(getUser);
-    console.log("applicant---automatic------::", applicantData);
     detectInputAndFillData(applicantData, startLoading, stopLoading);
   }
 };
