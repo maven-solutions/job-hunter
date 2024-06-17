@@ -9,6 +9,9 @@ export const magellanhealth = async (
   const disabilityEle: HTMLElement = document.getElementById(
     "disability_heading_self_identity.disabilityStatus"
   );
+  if (!disabilityEle) {
+    return;
+  }
   console.log("disability::", disabilityEle);
   const allLabel = disabilityEle.querySelectorAll("label");
   if (!allLabel || allLabel.length === 0) {
