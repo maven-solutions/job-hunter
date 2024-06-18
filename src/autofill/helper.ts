@@ -166,20 +166,20 @@ export const detectInputAndFillData = async (
       await myworkDays(tempDiv ?? tempDivForFile, applicantData);
     }
 
-    buttonFilder();
-    textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
-    dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // buttonFilder();
+    // textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
+    // dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
-    selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
-    customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
-    customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
+    // selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
+    // customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
+    // customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
     if (window.location.href.includes("smartrecruiters")) {
@@ -289,23 +289,6 @@ export const detectInputAndFillData = async (
       urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     }
 
-    // const body = document.querySelector("body");
-    // if (body) {
-    //   await delay(500);
-    //   body.click();
-    //   body.dispatchEvent(
-    //     new Event("change", { bubbles: true, cancelable: false })
-    //   );
-    //   body.dispatchEvent(
-    //     new Event("focus", { bubbles: true, cancelable: false })
-    //   );
-    //   body.dispatchEvent(
-    //     new Event("click", { bubbles: true, cancelable: false })
-    //   );
-    //   body.dispatchEvent(
-    //     new Event("blur", { bubbles: true, cancelable: false })
-    //   );
-    // }
     stopLoading();
   }
 };
