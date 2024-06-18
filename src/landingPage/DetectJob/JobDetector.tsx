@@ -176,7 +176,7 @@ const JobDetector = (props: any) => {
         localurl !== window.location.href &&
         window.location.href.includes("step=")
       ) {
-        // handleMajorDOMChangesManagehealth(startLoading, stopLoading);
+        handleMajorDOMChangesManagehealth(startLoading, stopLoading);
       }
     }
   }, [postUrl]);

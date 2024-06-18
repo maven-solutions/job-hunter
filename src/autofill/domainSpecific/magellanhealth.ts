@@ -185,7 +185,6 @@ const educationDataFiller = async (
 
           for await (const date of allDate) {
             if (date.textContent == getYearFromDate(data.startDate)) {
-              console.log("startDate::----", date.textContent);
               date.click();
               handleValueChanges(date);
             }
@@ -209,7 +208,6 @@ const educationDataFiller = async (
           );
           for await (const date of allDate) {
             if (date.textContent == getYearFromDate(data.endDate)) {
-              console.log("endDate::----", date.textContent);
               date.click();
               handleValueChanges(date);
             }
