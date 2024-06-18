@@ -9,16 +9,11 @@
     "48": "icon.png",
     "128": "icon.png"
   },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Job Hunter",
-    "default_icon": "icon.png"
-  },
+  "action": {},
   "permissions": ["storage"],
   "homepage_url": "https://resumebuilder.joinswiftly.com",
   "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
 
-  "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
   },
