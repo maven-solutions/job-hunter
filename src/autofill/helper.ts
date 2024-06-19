@@ -38,6 +38,7 @@ import { jcat } from "./domainSpecific/jcat";
 import { applytojob } from "./domainSpecific/applytojob";
 import { magellanhealth } from "./domainSpecific/magellanhealth";
 import { paylocity } from "./domainSpecific/paylocity";
+import { recpro } from "./domainSpecific/recpro";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -156,6 +157,7 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".tal.") ||
       window.location.href.includes(".zohorecruit.") ||
       window.location.href.includes(".hire.") ||
+      window.location.href.includes(".rec.pro.") ||
       window.location.href.includes(".successfactors.")
     ) {
       tempDiv = document.querySelector("body");
@@ -279,6 +281,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".magellanhealth.")) {
       await magellanhealth(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".rec.pro.")) {
+      await recpro(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
