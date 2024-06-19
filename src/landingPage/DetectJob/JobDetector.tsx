@@ -9,7 +9,6 @@ import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   EXTENSION_ACTION,
-  LOCALSTORAGE,
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
@@ -33,14 +32,12 @@ import {
 } from "../../store/features/JobDetail/JobApi";
 import { setResumeResponseToFalse } from "../../store/features/ResumeList/ResumeListSlice";
 import useWebsiteDetection from "../../hooks/useWebsiteDetection";
-import {
-  changeMyWorkdaysButtonText,
-  handleMajorDOMChangesInMyworkdays,
-  removeMyWorkdaysAutofillButton,
-} from "../helper/myworkdays";
 import useTrackJobsFromWebsite from "../../hooks/useTrackJobsFromWebsite";
 import useSimplyhiredGlassdoorNoti from "../../hooks/useSimplyhiredGlassdoorNoti";
-import { handleMajorDOMChangesManagehealth } from "../helper/magellanhealth";
+import useWorkDaysObserver from "../../hooks/observer/useWorkDaysObserver";
+import usePaylocityObserver from "../../hooks/observer/usePaylocityObserver";
+import useMagellanhealthObserver from "../../hooks/observer/useMagellanhealthObserver";
+import useURLobserver from "../../hooks/observer/useURLobserver";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -82,222 +79,32 @@ const JobDetector = (props: any) => {
       dispatch(chekJobExists({ jobLink: window.location.href }));
     }
   }, [postUrl]);
+
+  // TO INCIDATE LOADING IN AUTOFILL
   const startLoading = () => {
     setAutoFilling(true);
   };
-
+  // TO INCIDATE LOADING IN AUTOFILL
   const stopLoading = () => {
     setAutoFilling(false);
   };
 
-  useEffect(() => {
-    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_URL);
-    const observer = new MutationObserver(() => {
-      const url = window.location.href;
-      // chrome.runtime.sendMessage({ action: "urlChange", url });
-      if (url !== postUrl) {
-        setPostUrl(url);
-      }
-    });
+  // URL OBSERVER FOR JOB SAVE
+  useURLobserver(postUrl, setPostUrl);
 
-    // Observe changes in the DOM
-    observer.observe(document, { childList: true, subtree: true });
+  // DOM OBSERVER --- VERY CURISAL HOOKS
+  useWorkDaysObserver(postUrl, startLoading, stopLoading);
+  usePaylocityObserver(postUrl, startLoading, stopLoading);
+  useMagellanhealthObserver(postUrl, startLoading, stopLoading);
 
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  const majorChangesDetected = () => {
-    console.log("major changes dected for");
-
-    const localUrl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
-    if (localUrl === window.location.href) {
-      const getUser = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
-      const applicantData = JSON.parse(getUser);
-      // detectInputAndFillData(applicantData, startLoading, stopLoading);
-      console.log("major changes dected for payloycit");
-    }
-  };
-
-  useEffect(() => {
-    // Function to observe changes in the DOM
-    function observeModal() {
-      const modalObserver = new MutationObserver((mutations) => {
-        let majorChangeDetected = false;
-        let workdaysButtonChanged = false;
-
-        mutations.forEach((mutation) => {
-          if (mutation.type === "childList") {
-            // Check if specific elements are added to the DOM
-            const modal = document.querySelector(
-              '[data-automation-id="wd-popup-frame"]'
-            );
-            const mainContent = document.getElementById("mainContent");
-            const stadlone = document.querySelector(
-              '[data-automation-id="standaloneAdventure"]'
-            );
-            if (modal || mainContent || stadlone) {
-              workdaysButtonChanged = true;
-            }
-          }
-          // Detect major changes by checking added or removed nodes
-          const progressBar = document.querySelector(
-            '[data-automation-id="progressBar"]'
-          );
-          if (
-            progressBar &&
-            (mutation.target === progressBar ||
-              progressBar.contains(mutation.target))
-          ) {
-            majorChangeDetected = true;
-          }
-        });
-
-        if (workdaysButtonChanged) {
-          removeMyWorkdaysAutofillButton();
-          changeMyWorkdaysButtonText();
-        }
-        if (majorChangeDetected) {
-          handleMajorDOMChangesInMyworkdays(startLoading, stopLoading);
-        }
-      });
-
-      // Start observing the body for changes
-      modalObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-
-      // Cleanup function to disconnect the observer when the component unmounts
-      return () => {
-        modalObserver.disconnect();
-      };
-    }
-
-    function observePaylocity() {
-      const progressBarObserver = new MutationObserver((mutations) => {
-        let majorChangeDetected = false;
-        mutations.forEach((mutation) => {
-          if (
-            mutation.type === "attributes" &&
-            mutation.attributeName === "style"
-          ) {
-            const target = mutation.target as HTMLElement;
-            if (
-              target.classList.contains("current-step") ||
-              target.classList.contains("progress")
-            ) {
-              majorChangeDetected = true;
-            }
-          } else if (mutation.type === "childList") {
-            mutation.addedNodes.forEach((node) => {
-              if (
-                node.nodeType === Node.ELEMENT_NODE &&
-                (node as HTMLElement).classList.contains("bar")
-              ) {
-                const currentStep = (node as HTMLElement).querySelector(
-                  ".current-step"
-                );
-                const progress = (node as HTMLElement).querySelector(
-                  ".progress"
-                );
-                if (currentStep || progress) {
-                  majorChangeDetected = true;
-                }
-              }
-            });
-          }
-        });
-        if (majorChangeDetected) {
-          majorChangesDetected();
-        }
-      });
-
-      // Start observing the body for changes
-      progressBarObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-
-      // Cleanup function to disconnect the observer when the component unmounts
-      return () => {
-        progressBarObserver.disconnect();
-      };
-    }
-
-    if (window.location.href.includes(".paylocity.")) {
-      const cleanup = observePaylocity();
-      return cleanup;
-    }
-  }, [postUrl]);
-  // useEffect(() => {
-  //   // Function to observe changes in the specific DOM structure
-  //   function observeProgressBar() {
-  //     const progressBarObserver = new MutationObserver((mutations) => {
-  //       let majorChangeDetected = false;
-  //       mutations.forEach((mutation) => {
-  //         if (
-  //           mutation.type === "attributes" &&
-  //           mutation.attributeName === "style"
-  //         ) {
-  //           const target = mutation.target as HTMLElement;
-  //           if (
-  //             target.classList.contains("current-step") ||
-  //             target.classList.contains("progress")
-  //           ) {
-  //             majorChangeDetected = true;
-  //           }
-  //         } else if (mutation.type === "childList") {
-  //           mutation.addedNodes.forEach((node) => {
-  //             if (
-  //               node.nodeType === Node.ELEMENT_NODE &&
-  //               (node as HTMLElement).classList.contains("bar")
-  //             ) {
-  //               const currentStep = (node as HTMLElement).querySelector(
-  //                 ".current-step"
-  //               );
-  //               const progress = (node as HTMLElement).querySelector(
-  //                 ".progress"
-  //               );
-  //               if (currentStep || progress) {
-  //                 majorChangeDetected = true;
-  //               }
-  //             }
-  //           });
-  //         }
-  //       });
-  //       if (majorChangeDetected) {
-  //         majorChangesDetected();
-  //       }
-  //     });
-
-  //     // Start observing the body for changes
-  //     progressBarObserver.observe(document.body, {
-  //       childList: true,
-  //       subtree: true,
-  //       attributes: true,
-  //       attributeFilter: ["style"],
-  //     });
-
-  //     // Cleanup function to disconnect the observer when the component unmounts
-  //     return () => {
-  //       progressBarObserver.disconnect();
-  //     };
-  //   }
-
-  //   // Start observing the specific DOM structure
-  //   const cleanup = observeProgressBar();
-  //   return cleanup;
-  // }, [postUrl]);
-
+  // TO DISPLAY JOB IS SAVED NOTIFICATION
   useEffect(() => {
     if (jobDetailState.check_job_res_success) {
       SetAlreadySavedInfo(true);
     }
   }, [jobDetailState.check_job_res_success]);
 
+  // LOAD USER FUNCTION TO GET DATA FORM CHROME EXTENSION LOCAL STORAGE
   const loadUser = () => {
     chrome.storage.local.get(["ci_user"]).then((result) => {
       const data = result.ci_user;
@@ -309,6 +116,7 @@ const JobDetector = (props: any) => {
     });
   };
 
+  // FETCH ALL APPLICATION STAGE DATA IS USER IS AUTHENTICATED
   useEffect(() => {
     if (authState.authenticated) {
       setShowPage("");
@@ -317,26 +125,28 @@ const JobDetector = (props: any) => {
       }
     }
   }, [authState.authenticated]);
-  // console.log("authState::", authState);
+
+  // LOGOUT FUNCTION TO CLEAR ALL DATA AND STATE
   const handleLogOut = () => {
     dispatch(clearStageData());
     dispatch(setResumeResponseToFalse());
     dispatch(logoutUser());
     setShowPage("");
   };
+
+  // FOR LOGIN AND LOGOUT FOMR OUR WEBSITE
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      // console.log("date message::", message);
       if (message.action === EXTENSION_ACTION.LOGIN_TO_CI_EXTENSION) {
         loadUser();
       }
       if (message.action === EXTENSION_ACTION.LOGOUT_TO_CI_EXTENSION) {
         handleLogOut();
       }
-      // return true;
     });
   }, []);
 
+  // CUSTOM HOOK TO ADD CUSTOM BUTTON ON WEBSITE
   useSimplyhiredGlassdoorNoti();
   useTrackJobsFromWebsite(dispatch, setShowPage);
 
