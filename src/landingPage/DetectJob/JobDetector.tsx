@@ -108,6 +108,18 @@ const JobDetector = (props: any) => {
     };
   }, []);
 
+  const majorChangesDetected = () => {
+    console.log("major changes dected for");
+
+    const localUrl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
+    if (localUrl === window.location.href) {
+      const getUser = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
+      const applicantData = JSON.parse(getUser);
+      // detectInputAndFillData(applicantData, startLoading, stopLoading);
+      console.log("major changes dected for payloycit");
+    }
+  };
+
   useEffect(() => {
     // Function to observe changes in the DOM
     function observeModal() {
@@ -117,7 +129,7 @@ const JobDetector = (props: any) => {
 
         mutations.forEach((mutation) => {
           if (mutation.type === "childList") {
-            // Check if the modal is added
+            // Check if specific elements are added to the DOM
             const modal = document.querySelector(
               '[data-automation-id="wd-popup-frame"]'
             );
@@ -163,23 +175,122 @@ const JobDetector = (props: any) => {
       };
     }
 
-    // Call the function to start observing if the URL contains the specified string
-    if (window.location.href.includes("myworkdayjobs.")) {
-      const cleanup = observeModal();
-      return cleanup;
+    function observePaylocity() {
+      const progressBarObserver = new MutationObserver((mutations) => {
+        let majorChangeDetected = false;
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "style"
+          ) {
+            const target = mutation.target as HTMLElement;
+            if (
+              target.classList.contains("current-step") ||
+              target.classList.contains("progress")
+            ) {
+              majorChangeDetected = true;
+            }
+          } else if (mutation.type === "childList") {
+            mutation.addedNodes.forEach((node) => {
+              if (
+                node.nodeType === Node.ELEMENT_NODE &&
+                (node as HTMLElement).classList.contains("bar")
+              ) {
+                const currentStep = (node as HTMLElement).querySelector(
+                  ".current-step"
+                );
+                const progress = (node as HTMLElement).querySelector(
+                  ".progress"
+                );
+                if (currentStep || progress) {
+                  majorChangeDetected = true;
+                }
+              }
+            });
+          }
+        });
+        if (majorChangeDetected) {
+          majorChangesDetected();
+        }
+      });
+
+      // Start observing the body for changes
+      progressBarObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      // Cleanup function to disconnect the observer when the component unmounts
+      return () => {
+        progressBarObserver.disconnect();
+      };
     }
 
-    if (window.location.href.includes(".magellanhealth.")) {
-      const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
-      if (
-        localurl &&
-        localurl !== window.location.href &&
-        window.location.href.includes("step=")
-      ) {
-        handleMajorDOMChangesManagehealth(startLoading, stopLoading);
-      }
+    if (window.location.href.includes(".paylocity.")) {
+      const cleanup = observePaylocity();
+      return cleanup;
     }
   }, [postUrl]);
+  // useEffect(() => {
+  //   // Function to observe changes in the specific DOM structure
+  //   function observeProgressBar() {
+  //     const progressBarObserver = new MutationObserver((mutations) => {
+  //       let majorChangeDetected = false;
+  //       mutations.forEach((mutation) => {
+  //         if (
+  //           mutation.type === "attributes" &&
+  //           mutation.attributeName === "style"
+  //         ) {
+  //           const target = mutation.target as HTMLElement;
+  //           if (
+  //             target.classList.contains("current-step") ||
+  //             target.classList.contains("progress")
+  //           ) {
+  //             majorChangeDetected = true;
+  //           }
+  //         } else if (mutation.type === "childList") {
+  //           mutation.addedNodes.forEach((node) => {
+  //             if (
+  //               node.nodeType === Node.ELEMENT_NODE &&
+  //               (node as HTMLElement).classList.contains("bar")
+  //             ) {
+  //               const currentStep = (node as HTMLElement).querySelector(
+  //                 ".current-step"
+  //               );
+  //               const progress = (node as HTMLElement).querySelector(
+  //                 ".progress"
+  //               );
+  //               if (currentStep || progress) {
+  //                 majorChangeDetected = true;
+  //               }
+  //             }
+  //           });
+  //         }
+  //       });
+  //       if (majorChangeDetected) {
+  //         majorChangesDetected();
+  //       }
+  //     });
+
+  //     // Start observing the body for changes
+  //     progressBarObserver.observe(document.body, {
+  //       childList: true,
+  //       subtree: true,
+  //       attributes: true,
+  //       attributeFilter: ["style"],
+  //     });
+
+  //     // Cleanup function to disconnect the observer when the component unmounts
+  //     return () => {
+  //       progressBarObserver.disconnect();
+  //     };
+  //   }
+
+  //   // Start observing the specific DOM structure
+  //   const cleanup = observeProgressBar();
+  //   return cleanup;
+  // }, [postUrl]);
 
   useEffect(() => {
     if (jobDetailState.check_job_res_success) {
