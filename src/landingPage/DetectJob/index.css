@@ -610,3 +610,8 @@ button.generate-resume-button {
   flex-direction: row-reverse;
   gap: 10px;
 }
+
+.careerai-form {
+  display: flex;
+  gap: 10px;
+}
