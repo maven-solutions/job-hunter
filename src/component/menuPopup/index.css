@@ -5,6 +5,12 @@
   bottom: 80px;
   z-index: 99999;
 }
+.ci_menu_outer_continer_new {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 99999;
+}
 .ci_menu_pop_up_container {
   width: 220px !important;
   background-color: #fafbff !important;
@@ -27,4 +33,15 @@
 .ci__tester {
   margin-bottom: 20px;
   background: transparent;
+}
+.ci_hambirger_close_icon_section {
+  margin-top: -10px;
+  display: flex;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+.ci_hambirger_close_icon {
+  color: #000000;
+  width: 20px;
+  cursor: pointer;
 }

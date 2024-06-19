@@ -17,6 +17,15 @@
   z-index: 5;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ci_job_detail_hamurger {
+  color: #ffffff;
+  margin-right: 20px;
+  cursor: pointer;
+  width: 20px;
 }
 .jd-inner {
   position: relative;

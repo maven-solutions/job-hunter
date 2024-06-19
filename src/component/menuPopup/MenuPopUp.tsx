@@ -10,9 +10,10 @@ import {
   STAGING_WEBSITE_URL,
 } from "../../config/urlconfig";
 import { RootStore, useAppSelector } from "../../store/store";
+import { X } from "react-feather";
 
 const MenuPopUp = (props: any) => {
-  const { setShowPage } = props;
+  const { setShowPage, layout, setShowHamBurger } = props;
   const [hideAutofill, setHideAutofill] = useState(false);
 
   const authState: any = useAppSelector((store: RootStore) => {
@@ -67,9 +68,20 @@ const MenuPopUp = (props: any) => {
   };
   // USER_ROLE_TYPE;
   return (
-    <div className="ci_menu_outer_continer">
-      {" "}
+    <div
+      className={`${
+        layout ? "ci_menu_outer_continer_new" : "ci_menu_outer_continer"
+      }`}
+    >
       <div className="ci_menu_pop_up_container">
+        {layout && (
+          <div className="ci_hambirger_close_icon_section">
+            <X
+              className="ci_hambirger_close_icon"
+              onClick={() => setShowHamBurger(false)}
+            />{" "}
+          </div>
+        )}
         <div
           className="ci_menu_list_item"
           role="button"

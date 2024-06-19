@@ -16,8 +16,12 @@ const Layout = (props: any) => {
           {/* <CloseIcon /> */}
           <ChevronRight className="ci_job_close_icon" />
         </div>
-        <AllSvg firstBgWidth={firstBgWidth} secondBgWidth={secondBgWidth} />
-        <div className="jd-inner-padding"> {children} </div>
+        <AllSvg
+          firstBgWidth={firstBgWidth}
+          secondBgWidth={secondBgWidth}
+          setShowPage={setShowPage}
+        />
+        <div className="jd-inner-padding">{children} </div>
       </div>
     </div>
   );

@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+import { Menu, X } from "react-feather";
+import MenuPopUp from "../component/menuPopup/MenuPopUp";
 
 const AllSvg = (props: any) => {
-  const { firstBgWidth, secondBgWidth } = props;
+  const { firstBgWidth, secondBgWidth, setShowPage } = props;
+  const [showHamburger, setShowHamBurger] = useState(false);
   return (
     <>
       {" "}
@@ -25,6 +28,17 @@ const AllSvg = (props: any) => {
         <div className="job_detail_header">
           <img src={chrome.runtime.getURL("hub.svg")} alt="hub-icon" />
         </div>
+        <Menu
+          className="ci_job_detail_hamurger"
+          onClick={() => setShowHamBurger(true)}
+        />
+        {showHamburger && (
+          <MenuPopUp
+            setShowPage={setShowPage}
+            layout
+            setShowHamBurger={setShowHamBurger}
+          />
+        )}
       </div>
     </>
   );
