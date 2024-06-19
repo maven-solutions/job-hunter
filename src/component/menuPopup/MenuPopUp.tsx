@@ -66,6 +66,17 @@ const MenuPopUp = (props: any) => {
   const callAutoFill = () => {
     setShowPage(SHOW_PAGE.resumeListPage);
   };
+  const userLogin = () => {
+    if (EXTENSION_IN_LOCAL) {
+      window.open("http://localhost:3000", "_blank");
+    }
+    if (EXTENSION_IN_STAGING) {
+      window.open(STAGING_WEBSITE_URL, "_blank");
+    }
+    if (EXTENSION_IN_LIVE) {
+      window.open(LIVE_WEBSITE_URL, "_blank");
+    }
+  };
   // USER_ROLE_TYPE;
   return (
     <div
@@ -82,28 +93,51 @@ const MenuPopUp = (props: any) => {
             />{" "}
           </div>
         )}
-        <div
-          className="ci_menu_list_item"
-          role="button"
-          onClick={() => setShowPage(SHOW_PAGE.jobDetailPage)}
-        >
-          <img src={chrome.runtime.getURL("pin.svg")} alt="pin-icon" />
-          <span>Save to jobs </span>
-        </div>
-        <Height height="20" />
-        <div className="ci_menu_list_item" role="button" onClick={viewJobBoard}>
-          <img src={chrome.runtime.getURL("jobboard.svg")} alt="pin-icon" />
-          <span>View Job Board </span>
-        </div>
-        <Height height="20" />
-        <div
-          className="ci_menu_list_item"
-          role="button"
-          onClick={() => setShowPage(SHOW_PAGE.profilePage)}
-        >
-          <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
-          <span>Profile </span>
-        </div>
+        {authState.authenticated && (
+          <>
+            {" "}
+            <div
+              className="ci_menu_list_item"
+              role="button"
+              onClick={() => setShowPage(SHOW_PAGE.summaryPage)}
+            >
+              <img src={chrome.runtime.getURL("pin.svg")} alt="pin-icon" />
+              <span>Save to jobs </span>
+            </div>
+            <Height height="20" />
+            <div
+              className="ci_menu_list_item"
+              role="button"
+              onClick={viewJobBoard}
+            >
+              <img src={chrome.runtime.getURL("jobboard.svg")} alt="pin-icon" />
+              <span>View Job Board </span>
+            </div>
+            <Height height="20" />
+            <div
+              className="ci_menu_list_item"
+              role="button"
+              onClick={() => setShowPage(SHOW_PAGE.profilePage)}
+            >
+              <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
+              <span>Profile </span>
+            </div>
+          </>
+        )}
+
+        {!authState.authenticated && (
+          <>
+            {" "}
+            <div
+              className="ci_menu_list_item"
+              role="button"
+              onClick={() => userLogin()}
+            >
+              <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
+              <span>Login </span>
+            </div>
+          </>
+        )}
 
         {(authState?.ci_user?.organizations?.length === 0 ||
           authState?.ci_user?.organizations?.length > 0) &&
