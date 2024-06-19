@@ -1,14 +1,15 @@
 import React, { useEffect } from "react";
 import { LOCALSTORAGE } from "../../utils/constant";
+import { detectInputAndFillData } from "../../autofill/helper";
 
-const majorChangesDetected = () => {
-  console.log("major changes dected for");
+const majorChangesDetected = (startLoading: any, stopLoading: any) => {
+  //   console.log("major changes dected for");
   const localUrl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
   if (localUrl === window.location.href) {
     const getUser = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
     const applicantData = JSON.parse(getUser);
-    // detectInputAndFillData(applicantData, startLoading, stopLoading);
-    console.log("major changes dected for payloycit");
+    detectInputAndFillData(applicantData, startLoading, stopLoading);
+    // console.log("major changes dected for payloycit");
   }
 };
 
@@ -35,7 +36,7 @@ const usePaylocityObserver = (
           }
         });
         if (majorChangeDetected) {
-          majorChangesDetected();
+          majorChangesDetected(startLoading, stopLoading);
         }
       });
 

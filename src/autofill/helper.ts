@@ -37,6 +37,7 @@ import { hiretrakstar } from "./domainSpecific/hiretrakstar";
 import { jcat } from "./domainSpecific/jcat";
 import { applytojob } from "./domainSpecific/applytojob";
 import { magellanhealth } from "./domainSpecific/magellanhealth";
+import { paylocity } from "./domainSpecific/paylocity";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -193,6 +194,7 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".paylocity.")) {
       launchWork = false;
       launcEducation = false;
+      await paylocity(tempDiv ?? tempDivForFile, applicantData);
     }
     if (window.location.href.includes(".myworkdayjobs.")) {
       launchWork = false;
