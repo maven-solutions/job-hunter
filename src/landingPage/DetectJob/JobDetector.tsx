@@ -151,7 +151,6 @@ const JobDetector = (props: any) => {
 
   useEffect(() => {
     if (window.location.href.includes("chatgpt.")) {
-      console.log("test url", window.location.href);
       resumeGPTmainFunction(setIsGenerating, isGenerating, authState);
     }
   }, [window.location.href, isGenerating]);
