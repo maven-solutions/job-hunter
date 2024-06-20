@@ -44,6 +44,7 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "C.svg",
         "icon.png",
         "closeicon.svg",
         "lockedicon.svg",
