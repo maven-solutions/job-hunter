@@ -15,24 +15,12 @@ import Height from "../../component/height/Height";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import { SHOW_PAGE } from "../../utils/constant";
-import {
-  getApplicationStageData,
-  saveJobCareerAI,
-} from "../../store/features/JobDetail/JobApi";
+import { saveJobCareerAI } from "../../store/features/JobDetail/JobApi";
 import Notification from "../../contentScript/Notification";
+import { setJobDesc } from "../../store/features/JobDetail/JobDetailSlice";
 
 const JobDetail = (props: any) => {
-  const {
-    setShowPage,
-
-    setCompanyName,
-
-    setJobstitle,
-
-    setLocation,
-
-    setDescValue,
-  } = props;
+  const { setShowPage } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
   const [savedNotification, setSavedNotification] = useState(false);
@@ -52,6 +40,10 @@ const JobDetail = (props: any) => {
   //     dispatch(getApplicationStageData());
   //   }
   // }, []);
+
+  const setDescValue = (e: any) => {
+    dispatch(setJobDesc(e.target.value));
+  };
 
   const savejobs = () => {
     setSaveLoading(true);
@@ -114,23 +106,26 @@ const JobDetail = (props: any) => {
         <InputBox
           title="Job title"
           value={jobSlice.title}
-          valueSetter={setJobstitle}
           name="jobtitle"
+          dispatch={dispatch}
+          jobtitle
         />
         <Height height="10" />
         <InputBox
           title="Company"
           value={jobSlice.company}
-          valueSetter={setCompanyName}
+          dispatch={dispatch}
           name="company"
+          company
         />
         <Height height="10" />
 
         <InputBox
           title="Location"
           value={jobSlice.location}
-          valueSetter={setLocation}
+          dispatch={dispatch}
           name="location"
+          location
         />
         <Height height="10" />
         <div className="ci_job_desc">
