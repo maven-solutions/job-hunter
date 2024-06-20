@@ -1103,7 +1103,7 @@ function resumeGPTmainFunction(
     };
 
     if (divToEmbedInto) {
-      const existingButton = divToEmbedInto.querySelector(
+      const existingButton: any = divToEmbedInto.querySelector(
         ".generate-resume-button"
       );
 
@@ -1112,6 +1112,7 @@ function resumeGPTmainFunction(
 
         const buttonText = isGenerating ? "Generating..." : "Generate Resume";
         existingButton.textContent = buttonText;
+        existingButton.disabled = isGenerating;
 
         if (isGenerating) {
           const buttonElement: any = document.querySelector(
