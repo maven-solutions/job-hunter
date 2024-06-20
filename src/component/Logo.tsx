@@ -4,10 +4,11 @@ import { RootStore, useAppDispatch, useAppSelector } from "../store/store";
 import { setToken, setUser } from "../store/features/Auth/AuthSlice";
 
 const Logo = (props: any) => {
-  const { setShowPage, jobFound } = props;
+  const { setShowPage, jobFound, showAutofillPage } = props;
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+
   const dispatch = useAppDispatch();
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startY, setStartY] = useState<number>(0);
@@ -49,7 +50,13 @@ const Logo = (props: any) => {
   const handlePage = () => {
     loadUser();
     if (authState.authenticated) {
-      setShowPage(SHOW_PAGE.summaryPage);
+      if (authState.ci_user.userType === "va") {
+        setShowPage(SHOW_PAGE.resumeListPage);
+      } else if (showAutofillPage) {
+        setShowPage(SHOW_PAGE.resumeListPage);
+      } else {
+        setShowPage(SHOW_PAGE.summaryPage);
+      }
     } else {
       setShowPage(SHOW_PAGE.loginPage);
     }

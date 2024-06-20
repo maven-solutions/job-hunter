@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import "./index.css";
-import {
-  glassDoorNotiification,
-  simplyHiredNotiification,
-} from "../../component/InfoNotification";
-import {
-  addButtonToGlassdoorWebsite,
-  addButtonToSimplyHired,
-} from "../../component/CareerAibutton";
 import Logo from "../../component/Logo";
-import JobFrom from "../../contentScript/JobFrom";
 import LoginFrom from "../../auth/LoginForm/LoginFrom";
-import SignupForm from "../../auth/signup/Signup";
 import DisplayJob from "../../page/displayJob/DisplayJob";
 import Profile from "../../page/profile/Profile";
 import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import Linkedin from "../../jobExtractor/Linkedin";
 import {
   EXTENSION_ACTION,
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
-import { setJobFoundStatus } from "../../store/features/JobDetail/JobDetailSlice";
-import SimplyHiredJob from "../../jobExtractor/SimplyHired";
-import Dice from "../../jobExtractor/Dice";
-import Indeed from "../../jobExtractor/Indeed";
-import Ziprecruiter from "../../jobExtractor/Ziprecuriter";
+import {
+  clearStageData,
+  setButtonDisabledFalse,
+  setJobReqSucccessFalse,
+} from "../../store/features/JobDetail/JobDetailSlice";
+
 import Builtin from "../../jobExtractor/Builtin";
 import Glassdoor from "../../jobExtractor/Glassdoor";
 import {
@@ -36,29 +26,30 @@ import {
   setToken,
   setUser,
 } from "../../store/features/Auth/AuthSlice";
-import { uploadPDFPromptCollection } from "./uploadPDFPromptCollection";
+import ResumeList from "../../page/resumeList/ResumeList";
 import {
-  convertDescriptionToBulletPoints,
-  createSelectOption,
-  extractSummary,
-  formatDateWhileUploading,
-  parseJsonArrayOrObject,
-} from "./helper";
-import { getToken } from "../../config/axiosInstance";
-import { BASE_URL } from "../../config/urlconfig";
-import {
-  adjustButtonStyle,
-  handleDomChanges,
-  resumeGPTmainFunction,
-} from "./gpt-resume";
-import moment from "moment";
+  chekJobExists,
+  getApplicationStageData,
+} from "../../store/features/JobDetail/JobApi";
+import { setResumeResponseToFalse } from "../../store/features/ResumeList/ResumeListSlice";
+import useWebsiteDetection from "../../hooks/useWebsiteDetection";
+import useTrackJobsFromWebsite from "../../hooks/useTrackJobsFromWebsite";
+import useSimplyhiredGlassdoorNoti from "../../hooks/useSimplyhiredGlassdoorNoti";
+import useWorkDaysObserver from "../../hooks/observer/useWorkDaysObserver";
+import usePaylocityObserver from "../../hooks/observer/usePaylocityObserver";
+import useMagellanhealthObserver from "../../hooks/observer/useMagellanhealthObserver";
+import useURLobserver from "../../hooks/observer/useURLobserver";
+import { resumeGPTmainFunction } from "./gpt-resume";
 
-const JobDetector = () => {
-  const [showIcon, setShowIcon] = useState<boolean>(false);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+const JobDetector = (props: any) => {
+  const { content, popup } = props;
   const [postUrl, setPostUrl] = useState<string>("");
   const [website, setWebsite] = useState<string>("");
   const [showPage, setShowPage] = useState<string>("");
+  const [savedNotification, setSavedNotification] = useState(false);
+  const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
+  const [autoFilling, setAutoFilling] = useState<Boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<Boolean>(false);
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -68,47 +59,9 @@ const JobDetector = () => {
     return store.JobDetailSlice;
   });
 
-  useEffect(() => {
-    if (
-      [
-        "linkedin",
-        "indeed",
-        "dice",
-        "ziprecruiter",
-        "glassdoor",
-        "simplyhired",
-        "builtin",
-        "localhost",
-        "openai",
-      ].some((domain) => window.location.href.includes(domain))
-    ) {
-      setShowIcon(true);
-    }
-  }, []);
+  const [showIcon, showAutofillPage] = useWebsiteDetection();
 
   useEffect(() => {
-    if (window.location.href.includes("openai.")) {
-      setWebsite(SUPPORTED_WEBSITE.openai);
-    }
-    if (window.location.href.includes("linkedin.")) {
-      setWebsite(SUPPORTED_WEBSITE.linkedin);
-    }
-    if (window.location.href.includes("simplyhired.")) {
-      setWebsite(SUPPORTED_WEBSITE.simplyhired);
-    }
-
-    if (
-      window.location.href.includes("dice.") &&
-      window.location.href.includes("job-detail")
-    ) {
-      setWebsite(SUPPORTED_WEBSITE.dice);
-    }
-    if (window.location.href.includes("indeed.")) {
-      setWebsite(SUPPORTED_WEBSITE.indeed);
-    }
-    if (window.location.href.includes("ziprecruiter.")) {
-      setWebsite(SUPPORTED_WEBSITE.ziprecruiter);
-    }
     if (window.location.href.includes("builtin.")) {
       setWebsite(SUPPORTED_WEBSITE.builtin);
     }
@@ -121,20 +74,40 @@ const JobDetector = () => {
     }
 
     loadUser();
+    dispatch(setButtonDisabledFalse());
+    setSavedNotification(false);
+    SetAlreadySavedInfo(false);
+    dispatch(setJobReqSucccessFalse());
+    if (authState.authenticated) {
+      dispatch(chekJobExists({ jobLink: window.location.href }));
+    }
   }, [postUrl]);
 
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const url = window.location.href;
-      // chrome.runtime.sendMessage({ action: "urlChange", url });
-      if (url !== postUrl) {
-        setPostUrl(url);
-      }
-    });
+  // TO INCIDATE LOADING IN AUTOFILL
+  const startLoading = () => {
+    setAutoFilling(true);
+  };
+  // TO INCIDATE LOADING IN AUTOFILL
+  const stopLoading = () => {
+    setAutoFilling(false);
+  };
 
-    // Observe changes in the DOM
-    observer.observe(document, { childList: true, subtree: true });
-  }, []);
+  // URL OBSERVER FOR JOB SAVE
+  useURLobserver(postUrl, setPostUrl);
+
+  // DOM OBSERVER --- VERY CURISAL HOOKS
+  useWorkDaysObserver(postUrl, startLoading, stopLoading);
+  usePaylocityObserver(postUrl, startLoading, stopLoading);
+  useMagellanhealthObserver(postUrl, startLoading, stopLoading);
+
+  // TO DISPLAY JOB IS SAVED NOTIFICATION
+  useEffect(() => {
+    if (jobDetailState.check_job_res_success) {
+      SetAlreadySavedInfo(true);
+    }
+  }, [jobDetailState.check_job_res_success]);
+
+  // LOAD USER FUNCTION TO GET DATA FORM CHROME EXTENSION LOCAL STORAGE
   const loadUser = () => {
     chrome.storage.local.get(["ci_user"]).then((result) => {
       const data = result.ci_user;
@@ -146,48 +119,34 @@ const JobDetector = () => {
     });
   };
 
+  // FETCH ALL APPLICATION STAGE DATA IS USER IS AUTHENTICATED
   useEffect(() => {
     if (authState.authenticated) {
       setShowPage("");
+      if (!jobDetailState.stage_data_success) {
+        dispatch(getApplicationStageData());
+      }
     }
   }, [authState.authenticated]);
 
+  // LOGOUT FUNCTION TO CLEAR ALL DATA AND STATE
   const handleLogOut = () => {
+    dispatch(clearStageData());
+    dispatch(setResumeResponseToFalse());
     dispatch(logoutUser());
     setShowPage("");
   };
+
+  // FOR LOGIN AND LOGOUT FOMR OUR WEBSITE
   useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      // console.log("date message::", message);
       if (message.action === EXTENSION_ACTION.LOGIN_TO_CI_EXTENSION) {
         loadUser();
       }
       if (message.action === EXTENSION_ACTION.LOGOUT_TO_CI_EXTENSION) {
         handleLogOut();
       }
-      // return true;
     });
-
-    // setTimeout(() => {
-    //   chrome.storage.sync.get(["maven_resume_token"]).then((result) => {
-    //     console.log("Value is " + result.maven_resume_token);
-    //   });
-    // }, 5000);
-    // let intervalId: any = "";
-    // if (
-    //   window.location.href.includes("glassdoor") &&
-    //   !window.location.href.includes("job-listing")
-    // ) {
-    //   glassDoorNotiification();
-    //   // Clear any existing intervals before setting a new one
-    //   intervalId = setInterval(addButtonToGlassdoorWebsite, 3000);
-    // }
-    // if (window.location.href === "https://www.simplyhired.com/") {
-    //   simplyHiredNotiification();
-    //   intervalId = setInterval(addButtonToSimplyHired, 3000);
-    // }
-    // // Clear the interval when the component unmounts
-    // return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -196,58 +155,52 @@ const JobDetector = () => {
       resumeGPTmainFunction(setIsGenerating, isGenerating, authState);
     }
   }, [window.location.href, isGenerating]);
+  // CUSTOM HOOK TO ADD CUSTOM BUTTON ON WEBSITE
+  useSimplyhiredGlassdoorNoti();
+  useTrackJobsFromWebsite(dispatch, setShowPage);
 
   return (
     <div className="content__script__section">
-      {showIcon ? (
+      {showIcon && showPage === "" && (
         <Logo
+          showAutofillPage={showAutofillPage}
           setShowPage={setShowPage}
           jobFound={jobDetailState?.jobFound || false}
         />
-      ) : null}
-
-      {/* <LoginFrom setShowPage={setShowPage} /> */}
-
-      {/* <SignupForm setShowForm={setShowFrom} /> */}
-
+      )}
       {showPage === SHOW_PAGE.loginPage && (
         <LoginFrom setShowPage={setShowPage} />
-      )}
-
-      {showPage === SHOW_PAGE.singupPage && (
-        <SignupForm setShowPage={setShowPage} />
       )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
         <JobDetail setShowPage={setShowPage} />
       )}
       {showPage === SHOW_PAGE.summaryPage && (
-        <DisplayJob setShowPage={setShowPage} />
+        <DisplayJob
+          setShowPage={setShowPage}
+          savedNotification={savedNotification}
+          setSavedNotification={setSavedNotification}
+          SetAlreadySavedInfo={SetAlreadySavedInfo}
+          alreadySavedInfo={alreadySavedInfo}
+        />
       )}
 
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} />
       )}
+      {showPage === SHOW_PAGE.resumeListPage && (
+        <ResumeList
+          autoFilling={autoFilling}
+          setAutoFilling={setAutoFilling}
+          setShowPage={setShowPage}
+          content={content}
+        />
+      )}
       <MenuPopUp setShowPage={setShowPage} />
-      {website === SUPPORTED_WEBSITE.linkedin && (
-        <Linkedin setShowPage={setShowPage} />
-      )}
-
-      {website === SUPPORTED_WEBSITE.simplyhired && (
-        <SimplyHiredJob setShowPage={setShowPage} />
-      )}
-      {website === SUPPORTED_WEBSITE.dice && <Dice setShowPage={setShowPage} />}
-      {website === SUPPORTED_WEBSITE.indeed && (
-        <Indeed setShowPage={setShowPage} />
-      )}
-      {website === SUPPORTED_WEBSITE.ziprecruiter && (
-        <Ziprecruiter setShowPage={setShowPage} />
-      )}
 
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />
       )}
-
       {website === SUPPORTED_WEBSITE.glassdoor && (
         <Glassdoor setShowPage={setShowPage} />
       )}

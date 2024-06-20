@@ -37,3 +37,19 @@
 .ci_job_logout_button:hover {
   color: #ff3a29;
 }
+.ci_job__button__disabled {
+  /* cursor: not-allowed;
+  background: #e2e2e2;
+  color: #808080; */
+}
+
+.ci_job__button__disabled:disabled {
+  cursor: not-allowed;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
+}
+.ci_job_save_button:disabled {
+  cursor: not-allowed;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "CareerHub",
+  "name": "CareerAI",
   "description": "Unlock career opportunities with a simple click - our Chrome extension saves and organizes job listings seamlessly.",
   "version": "1.0.0",
   "manifest_version": 3,
@@ -9,23 +9,11 @@
     "48": "icon.png",
     "128": "icon.png"
   },
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "Job Hunter",
-    "default_icon": "icon.png"
-  },
-  "permissions": [
-    "storage",
-    "identity",
-    "tabs",
-    "activeTab",
-    "scripting",
-    "alarms"
-  ],
+  "action": {},
+  "permissions": ["storage"],
   "homepage_url": "https://resumebuilder.joinswiftly.com",
   "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
 
-  "options_page": "options.html",
   "background": {
     "service_worker": "background.js"
   },
@@ -61,6 +49,7 @@
         "job.svg",
         "company.svg",
         "pin.svg",
+        "waring.svg",
         "user.svg",
         "jobboard.svg",
         "simplyhired.svg",

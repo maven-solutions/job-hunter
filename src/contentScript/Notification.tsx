@@ -8,6 +8,7 @@ const Notification = (props: any) => {
     alreadySavedStatus,
     alreadySavedInfo,
     SetAlreadySavedInfo,
+    foruser,
   } = props;
   return (
     <>
@@ -25,7 +26,11 @@ const Notification = (props: any) => {
         </div>
       )} */}
       {alreadySavedInfo && (
-        <div className="jobs-notification">
+        <div
+          className={`jobs-notification ${
+            foruser && "jobs-notification-padding-top-0"
+          }`}
+        >
           <div className="jobs-notification-inner">
             <img src={chrome.runtime.getURL("info.svg")} alt="info-icon" />
             <div className="text">
@@ -39,7 +44,11 @@ const Notification = (props: any) => {
         </div>
       )}
       {!alreadySavedInfo && savedNotification && (
-        <div className="jobs-notification">
+        <div
+          className={`jobs-notification ${
+            foruser && "jobs-notification-padding-top-0"
+          }`}
+        >
           <div className="jobs-notification-inner jobs-notification-inner-saved">
             <img
               src={chrome.runtime.getURL("success.svg")}

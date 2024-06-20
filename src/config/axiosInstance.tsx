@@ -26,10 +26,10 @@ axiosInstance.interceptors.request.use(
     Promise.reject(error);
   }
 );
-export const getToken = async () => {
-  console.log("fired::");
+const getToken = async () => {
+  // console.log("fired::");
   const result = await chrome.storage.local.get(["ci_token"]);
-  console.log("res::", result);
+  // console.log("res::", result);
   const token = result.ci_token;
   return token;
 };
@@ -41,8 +41,8 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response) {
       if (error.response.status === 401 || error.response.status === 403) {
-        // clearBrowserStorage.removeUserRef();
-        window.location.href = "/";
+        chrome.storage.local.clear();
+        // window.location.href = "/";
       }
       throw error;
     } else {

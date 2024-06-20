@@ -22,9 +22,9 @@ const JobSummary = () => {
         <div className="ci_job_company_detail_section">
           <h3 className="ci_company_job_title"> {jobDetailState?.title}</h3>
           <div className="ci_job_company_detail_row">
-            <span className="ci_job_company_name">
+            <strong className="ci_job_company_name">
               {jobDetailState?.company}
-            </span>
+            </strong>
             <span className="ci_job_company_detail_separator"> . </span>
             <span className="ci_job_company_location">
               {jobDetailState?.location}
@@ -36,10 +36,10 @@ const JobSummary = () => {
       </div>
       <Height height="15" />
       <div className="ci_job_summary_bottm_section">
-        {jobDetailState.jobtype && (
+        {jobDetailState.job_related_info && (
           <div className="ci_job_worktype_section">
             <img src={chrome.runtime.getURL("job.svg")} alt="company-icon" />
-            <span>{jobDetailState.jobtype}</span>
+            <span>{jobDetailState.job_related_info}</span>
           </div>
         )}
         {jobDetailState.addationlIfo.length > 0 && (

@@ -15,9 +15,21 @@ export const SHOW_PAGE = {
   profilePage: "profile",
   loginPage: "login",
   singupPage: "singup",
+  resumeListPage: "resumelist",
+  applicantAutofillPage: "applicantAutofillPage",
 };
 
 export const EXTENSION_ACTION = {
   LOGIN_TO_CI_EXTENSION: "LOGIN_TO_CI_EXTENSION",
   LOGOUT_TO_CI_EXTENSION: "LOGOUT_TO_CI_EXTENSION",
+};
+
+export const USER_ROLE_TYPE = {
+  INDIVIDUAL: "individual",
+  ORGANIZATIONAL: "individual",
+};
+
+export const LOCALSTORAGE = {
+  CI_AUTOFILL_USERINFO: "ciautofilluserinfo",
+  CI_AUTOFILL_URL: "ciautofillurl",
 };

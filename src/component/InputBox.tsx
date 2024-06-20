@@ -1,11 +1,33 @@
 import React from "react";
+import {
+  setJobCompany,
+  setJobLocation,
+  setJobTitle,
+} from "../store/features/JobDetail/JobDetailSlice";
 
 const InputBox = (props: any) => {
-  const { title, type, value, valueSetter, name, placeholder } = props;
+  const {
+    title,
+    type,
+    value,
+    valueSetter,
+    name,
+    placeholder,
+    dispatch,
+    jobtitle,
+    company,
+    location,
+  } = props;
 
-  const setValue = (e: any) => {
-    if (e.target.value) {
-      valueSetter(e.target.value);
+  const handleOnChange = (e: any) => {
+    if (jobtitle) {
+      dispatch(setJobTitle(e.target.value));
+    }
+    if (company) {
+      dispatch(setJobCompany(e.target.value));
+    }
+    if (location) {
+      dispatch(setJobLocation(e.target.value));
     }
   };
 
@@ -20,7 +42,7 @@ const InputBox = (props: any) => {
         type={type || "text"}
         className="job_input_box"
         value={value ?? ""}
-        onChange={(e) => valueSetter(e.target.value)}
+        onChange={handleOnChange}
         placeholder={placeholder ?? ""}
       />
     </div>
