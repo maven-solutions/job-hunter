@@ -145,14 +145,6 @@ const JobDetector = () => {
       dispatch(setToken(data));
     });
   };
-  const loadUser1 = () => {
-    chrome.storage.local.get(["ci_user"]).then((result) => {
-      dispatch(setUser(JSON.parse(result.ci_user)));
-    });
-    chrome.storage.local.get(["ci_token"]).then((result) => {
-      dispatch(setToken(JSON.parse(result.ci_token)));
-    });
-  };
 
   useEffect(() => {
     if (authState.authenticated) {
@@ -198,31 +190,12 @@ const JobDetector = () => {
     // return () => clearInterval(intervalId);
   }, []);
 
-  // const lightDiv = document.querySelector(".light");
-
-  // Function to handle changes in the DOM
-
-  // Create a new instance of MutationObserver
-  const observer = new MutationObserver(handleDomChanges);
-
-  // Configure and start observing the target node
-  const observerConfig = { childList: true, subtree: true };
-  observer.observe(document.body, observerConfig);
-
-  // Listen for click events on the document body to adjust the button style
-  document.body.addEventListener("click", (event) => {
-    adjustButtonStyle();
-  });
-
   useEffect(() => {
-    console.log("test url", window.location.href);
-    resumeGPTmainFunction(setIsGenerating, isGenerating, authState);
+    if (window.location.href.includes("chatgpt.")) {
+      console.log("test url", window.location.href);
+      resumeGPTmainFunction(setIsGenerating, isGenerating, authState);
+    }
   }, [window.location.href, isGenerating]);
-
-  chrome.storage.local.get(["ci_token"]).then((result: any) => {
-    const myToken = result.ci_token;
-    // console.log({ myToken });
-  });
 
   return (
     <div className="content__script__section">
