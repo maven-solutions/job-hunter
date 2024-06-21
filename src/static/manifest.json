@@ -10,8 +10,8 @@
   },
   "action": {},
   "permissions": ["storage"],
-  "homepage_url": "https://resumebuilder.joinswiftly.com",
-  "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
+  "homepage_url": "https://app.careerai.io",
+  "host_permissions": ["https://app.careerai.io/*"],
 
   "background": {
     "service_worker": "background.js"
