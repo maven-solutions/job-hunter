@@ -42,7 +42,7 @@ function resumeGPTmainFunction(
   isGenerating: any,
   authState: any
 ) {
-  console.log({ authState });
+  // console.log({ authState });
   function isEmpty(obj: any) {
     return Object.entries(obj).length === 0;
   }
@@ -62,15 +62,15 @@ function resumeGPTmainFunction(
     return false;
   };
 
-  console.log("plan", checkIfSubscribedOrUnSubscribed());
+  // console.log("plan", checkIfSubscribedOrUnSubscribed());
   const plan = checkIfSubscribedOrUnSubscribed();
 
   if (window.location.href.includes("chatgpt")) {
-    console.log("entered");
+    // console.log("entered");
     // const divToEmbedInto = document.querySelector(".stretch");
     const divToEmbedInto = document.querySelector("form");
     divToEmbedInto.classList.add("careerai-form");
-    console.log("newDivToEmbed", divToEmbedInto);
+    // console.log("newDivToEmbed", divToEmbedInto);
     let imgElement; // Declare imgElement variable outside the if block
 
     const handleClick = async (event) => {
@@ -87,7 +87,7 @@ function resumeGPTmainFunction(
       divsWithTestId.forEach((div) => {
         const id = div.getAttribute("data-testid");
         lastId = id;
-        console.log({ id });
+        // console.log({ id });
         // const number = parseInt(id.split("-")[1]);
 
         // if (!isNaN(number) && number > maxNumber) {
@@ -95,7 +95,7 @@ function resumeGPTmainFunction(
         //   parentDivv = div;
         // }
       });
-      console.log("this is CONTENT", `[data-testid="${lastId}"]`);
+      // console.log("this is CONTENT", `[data-testid="${lastId}"]`);
       // if (parentDivv) {
       //   // Rest of your code remains the same
       //   // ...
@@ -108,24 +108,24 @@ function resumeGPTmainFunction(
         const textContent: any = parentDiv.textContent
           .replace(/<\/?[^>]+(>|$)/g, "")
           .trim();
-        console.log("Text content:", textContent);
+        // console.log("Text content:", textContent);
       }
 
       if (parentDiv) {
         const textContent: any = parentDiv.textContent
           .replace(/<\/?[^>]+(>|$)/g, "")
           .trim();
-        console.log("Text content:", textContent);
+        // console.log("Text content:", textContent);
 
         const token = await getToken();
 
-        console.log({ token });
+        // console.log({ token });
 
         if (token) {
           setIsGenerating(true);
           try {
             const listResponse = await fetch(
-              "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+              "https://backend.careerai.io/api/v1/applicants/",
               {
                 method: "GET",
                 headers: {
@@ -138,7 +138,7 @@ function resumeGPTmainFunction(
             // console.log({ listResponse });
             if (listResponse.ok) {
               const responseData = await listResponse.json();
-              console.log({ responseData }, responseData?.data?.length);
+              // console.log({ responseData }, responseData?.data?.length);
 
               if (!plan && responseData?.data?.length === 3) {
                 alert(
@@ -150,14 +150,14 @@ function resumeGPTmainFunction(
                   (async () => {
                     function isInTheExtractedData(passedItem: any) {
                       const temp = textContent?.replaceAll("\n", " ");
-                      console.log("check, ", temp, passedItem);
+                      // console.log("check, ", temp, passedItem);
                       return temp.includes(passedItem);
                     }
                     function isMultipleInTheExtractedData(passedItems: any) {
                       const temp = textContent
                         ?.replaceAll("\n", " ")
                         ?.toLowerCase();
-                      console.log("check, ", temp, passedItems);
+                      // console.log("check, ", temp, passedItems);
                       return passedItems.some((item: any) =>
                         temp.includes(item?.toLowerCase())
                       );
@@ -1030,11 +1030,11 @@ function resumeGPTmainFunction(
                               ],
                             };
 
-                            console.log({ finalData });
+                            // console.log({ finalData });
                             try {
                               const uniqueID = uuidv4();
                               const response = await fetch(
-                                "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+                                "https://backend.careerai.io/api/v1/applicants/",
                                 {
                                   method: "POST",
                                   headers: {
@@ -1048,26 +1048,26 @@ function resumeGPTmainFunction(
                               setIsGenerating(false);
                               if (response.ok) {
                                 const responseData = await response.json();
-                                console.log({ responseData });
+                                // console.log({ responseData });
                                 setIsGenerating(false);
                                 window.open(
-                                  `https://resumebuilder.joinswiftly.com/editor/${responseData?.data?.id}`,
+                                  `https://app.careerai.io/editor/${responseData?.data?.id}`,
                                   "_blank"
                                 );
                               } else {
                                 setIsGenerating(false);
-                                console.error("API request failed");
+                                // console.error("API request failed");
                                 alert("API request failed!");
                               }
                             } catch (error) {
                               setIsGenerating(false);
                               alert("Something error occured!");
-                              console.error("An error occurred:", error);
+                              // console.error("An error occurred:", error);
                             }
                           } catch (error: any) {
                             // setShowError(true);
                             // setUploading(false);
-                            console.log(error);
+                            // console.log(error);
                             // errorToastMessage(
                             //   error?.response?.data?.message ||
                             //     "Error while fetching information. Try again",
@@ -1097,7 +1097,7 @@ function resumeGPTmainFunction(
         } else {
           alert("You have to login first");
           setIsGenerating(false);
-          window.open(`https://resumebuilder.joinswiftly.com`, "_blank");
+          window.open(`https://app.careerai.io`, "_blank");
         }
       }
     };
@@ -1156,7 +1156,7 @@ function resumeGPTmainFunction(
           existingButton.appendChild(gifImg);
         }
       } else {
-        console.log("entered");
+        // console.log("entered");
 
         // Create button element
         const buttonElement = document.createElement("button");
@@ -1206,7 +1206,7 @@ function resumeGPTmainFunction(
         divToEmbedInto.appendChild(newDivElement);
       }
     } else {
-      console.error("Div not found!");
+      // console.error("Div not found!");
     }
 
     // Cleanup function to remove event listener when component unmounts
