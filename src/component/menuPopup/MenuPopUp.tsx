@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./index.css";
 import Height from "../height/Height";
 import { SHOW_PAGE, USER_ROLE_TYPE } from "../../utils/constant";
@@ -19,6 +19,22 @@ const MenuPopUp = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+
+  const popupRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setShowHamBurger(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (
@@ -78,11 +94,9 @@ const MenuPopUp = (props: any) => {
     }
   };
 
-  console.log("showPage::", showPage);
-  console.log("showPageprofle::", SHOW_PAGE.profilePage);
-  // USER_ROLE_TYPE;
   return (
     <div
+      ref={popupRef}
       className={`${
         layout ? "ci_menu_outer_continer_new" : "ci_menu_outer_continer"
       }`}
