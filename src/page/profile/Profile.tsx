@@ -11,13 +11,28 @@ const Profile = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
+  console.log("authstate::", authState);
   const dispatch = useAppDispatch();
 
   const handleLogOut = () => {
     dispatch(logoutUser());
     setShowPage("");
   };
+
+  function getInitials(name: string): string {
+    // Split the name into an array of words
+    let words: string[] = name.trim().split(/\s+/);
+
+    // Get the first letter of the first word
+    let initials: string = words[0][0].toUpperCase();
+
+    // If there is a second word, add the first letter of the second word
+    if (words.length > 1) {
+      initials += words[1][0].toUpperCase();
+    }
+
+    return initials;
+  }
   return (
     <Layout
       setShowPage={setShowPage}
@@ -28,12 +43,14 @@ const Profile = (props: any) => {
       <h3 className="ci_profile_titile">Profile </h3>
       <WhiteCard>
         <div className="ci_profile_section">
-          <img
-            src={chrome.runtime.getURL(
-              authState?.ci_user?.image ?? "linkedin.svg"
-            )}
-            alt="profile-icon"
-          />
+          {authState?.ci_user?.image && (
+            <img src={authState?.ci_user?.image} alt="profile-icon" />
+          )}
+          {!authState?.ci_user?.image && (
+            <div className="ci_user_has_no_image">
+              {getInitials(authState?.ci_user?.fullName)}
+            </div>
+          )}
           <div className="ci_profile_info_section">
             <span className="ci_profile_name">
               {" "}

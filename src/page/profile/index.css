@@ -21,6 +21,20 @@
   object-fit: cover;
   border-radius: 50%;
 }
+.ci_user_has_no_image {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #4339f2;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
 .ci_profile_name {
   display: block;
   font-family: "Montserrat", sans-serif;
