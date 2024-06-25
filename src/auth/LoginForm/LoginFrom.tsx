@@ -15,7 +15,7 @@ import {
 } from "../../config/urlconfig";
 
 const LoginFrom = (props: any) => {
-  const { setShowPage } = props;
+  const { setShowPage, popup } = props;
 
   const userLogin = () => {
     if (EXTENSION_IN_LOCAL) {
@@ -30,7 +30,7 @@ const LoginFrom = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage}>
+    <Layout setShowPage={setShowPage} popup={popup}>
       <Height height="-15" />
       <HeadingTitle title="Log in to CareerAI" />
       <Height height="10" />

@@ -181,7 +181,7 @@
   display: flex;
   align-items: center;
   color: #262626;
-  font-family: "Inter", sans-serif;
+  font-family: Inter;
   font-size: 14px;
   font-weight: 400;
   line-height: 17px;
@@ -189,7 +189,7 @@
   text-align: left;
 }
 .full label .label-top {
-  font-family: "Inter", sans-serif;
+  font-family: Inter;
   font-size: 14px;
   font-weight: 400;
   line-height: 17px;
@@ -326,7 +326,7 @@
   padding: 0 10px;
   background-color: #fff !important;
   transition: all 0.2s ease-in-out;
-  font-family: "Inter", sans-serif !important;
+  font-family: Inter !important;
   font-size: 12px !important;
   font-weight: 400 !important;
   letter-spacing: 0em;
@@ -355,7 +355,7 @@
 .react-select__single-value,
 .job_input_box,
 .react-select__input {
-  font-family: "Inter", sans-serif;
+  font-family: Inter;
   font-size: 12px;
   font-weight: 400;
   line-height: 15px;

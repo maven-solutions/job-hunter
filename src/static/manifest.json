@@ -9,7 +9,9 @@
     "48": "icon.png",
     "128": "icon.png"
   },
-  "action": {},
+  "action": {
+    "default_popup": "popup.html"
+  },
   "permissions": ["storage"],
   "homepage_url": "https://resumebuilder.joinswiftly.com",
   "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],

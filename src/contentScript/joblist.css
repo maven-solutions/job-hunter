@@ -79,7 +79,7 @@
   background: #edecfe;
   color: #667085;
   font-weight: 500;
-  font-family: "Inter";
+  font-family: "Inter", sans-serif;
   font-size: 12px;
   text-align: left;
 }
@@ -88,7 +88,7 @@
   padding-left: 20px;
 }
 .job__table__tr {
-  font-family: "Inter";
+  font-family: "Inter", sans-serif;
   font-weight: 400;
   font-size: 14px;
   border-bottom: 1px solid #eaecf0;
