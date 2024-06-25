@@ -32,7 +32,7 @@ const LoginFrom = (props: any) => {
   return (
     <Layout setShowPage={setShowPage} popup={popup}>
       <Height height="-15" />
-      <HeadingTitle title="Log in to CareerAI" />
+      {!popup && <HeadingTitle title="Log in to CareerAI" />}
       <Height height="10" />
       <WhiteCard>
         <div className="ci_login_image_wrapper">
