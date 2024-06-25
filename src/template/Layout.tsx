@@ -2,7 +2,7 @@ import React from "react";
 import CloseIcon from "../component/CloseIcon";
 import AllSvg from "../contentScript/AllSvg";
 import "./layout.css";
-import { ChevronLeft, ChevronRight } from "react-feather";
+import { ChevronLeft, ChevronRight, X } from "react-feather";
 
 const Layout = (props: any) => {
   const { children, setShowPage, firstBgWidth, secondBgWidth, popup } = props;
@@ -19,6 +19,14 @@ const Layout = (props: any) => {
             onClick={() => setShowPage("")}
           >
             <ChevronRight className="ci_job_close_icon" />
+          </div>
+        )}
+        {!popup && (
+          <div
+            className="ci_jobs_close_button_at_bottom"
+            onClick={() => setShowPage("")}
+          >
+            <X className="ci_job_close_icon_bottom" />
           </div>
         )}
         <AllSvg

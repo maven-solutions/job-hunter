@@ -80,3 +80,41 @@ body {
   width: 15px;
   margin-left: 2px !important;
 }
+
+/* Animation for delay and rotation */
+@keyframes cijobsrotateIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+.ci_job_close_icon_bottom {
+  color: #ffffff;
+  width: 20px;
+  margin-left: 2px !important;
+}
+
+.ci_jobs_close_button_at_bottom {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  right: 0;
+  bottom: -50px; /* Change to 50% */
+  background-color: #4339f2;
+  box-shadow: 0px 10px 15px 0px #00000026;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  /* Add animation properties */
+  animation: cijobsrotateIn 0.2s ease-in-out 0.2s forwards;
+  opacity: 0; /* Ensure element is hidden initially */
+}
