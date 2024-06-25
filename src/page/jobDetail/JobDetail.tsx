@@ -20,7 +20,7 @@ import Notification from "../../contentScript/Notification";
 import { setJobDesc } from "../../store/features/JobDetail/JobDetailSlice";
 
 const JobDetail = (props: any) => {
-  const { setShowPage } = props;
+  const { setShowPage, showPage } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
   const [savedNotification, setSavedNotification] = useState(false);
@@ -92,7 +92,7 @@ const JobDetail = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage}>
+    <Layout setShowPage={setShowPage} showPage={showPage}>
       <h3 className="ci_job_detail_title">Job Listing Details</h3>
       <Notification
         savedNotification={savedNotification}

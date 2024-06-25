@@ -26,7 +26,7 @@ const RenderName = (props: any) => {
 };
 
 const ResumeList = (props: any) => {
-  const { setShowPage, content, autoFilling, setAutoFilling } = props;
+  const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
   const [showdropDown, setShowDropdown] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedResume, setSelectedResume] = useState(0);
@@ -82,7 +82,7 @@ const ResumeList = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage} firstBgWidth="10">
+    <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />

@@ -168,11 +168,11 @@ const JobDetector = (props: any) => {
         />
       )}
       {showPage === SHOW_PAGE.loginPage && (
-        <LoginFrom setShowPage={setShowPage} />
+        <LoginFrom setShowPage={setShowPage} showPage={showPage} />
       )}
 
       {showPage === SHOW_PAGE.jobDetailPage && (
-        <JobDetail setShowPage={setShowPage} />
+        <JobDetail setShowPage={setShowPage} showPage={showPage} />
       )}
       {showPage === SHOW_PAGE.summaryPage && (
         <DisplayJob
@@ -181,11 +181,12 @@ const JobDetector = (props: any) => {
           setSavedNotification={setSavedNotification}
           SetAlreadySavedInfo={SetAlreadySavedInfo}
           alreadySavedInfo={alreadySavedInfo}
+          showPage={showPage}
         />
       )}
 
       {showPage === SHOW_PAGE.profilePage && (
-        <Profile setShowPage={setShowPage} />
+        <Profile setShowPage={setShowPage} showPage={showPage} />
       )}
       {showPage === SHOW_PAGE.resumeListPage && (
         <ResumeList
@@ -193,9 +194,10 @@ const JobDetector = (props: any) => {
           setAutoFilling={setAutoFilling}
           setShowPage={setShowPage}
           content={content}
+          showPage={showPage}
         />
       )}
-      <MenuPopUp setShowPage={setShowPage} />
+      <MenuPopUp setShowPage={setShowPage} showPage={showPage} />
 
       {website === SUPPORTED_WEBSITE.builtin && (
         <Builtin setShowPage={setShowPage} />

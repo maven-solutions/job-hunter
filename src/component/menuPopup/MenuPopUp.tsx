@@ -13,7 +13,7 @@ import { RootStore, useAppSelector } from "../../store/store";
 import { X } from "react-feather";
 
 const MenuPopUp = (props: any) => {
-  const { setShowPage, layout, setShowHamBurger } = props;
+  const { setShowPage, layout, setShowHamBurger, showPage } = props;
   const [hideAutofill, setHideAutofill] = useState(false);
 
   const authState: any = useAppSelector((store: RootStore) => {
@@ -77,6 +77,9 @@ const MenuPopUp = (props: any) => {
       window.open(LIVE_WEBSITE_URL, "_blank");
     }
   };
+
+  console.log("showPage::", showPage);
+  console.log("showPageprofle::", SHOW_PAGE.profilePage);
   // USER_ROLE_TYPE;
   return (
     <div
@@ -96,15 +99,19 @@ const MenuPopUp = (props: any) => {
         {authState.authenticated && (
           <>
             {" "}
-            <div
-              className="ci_menu_list_item"
-              role="button"
-              onClick={() => setShowPage(SHOW_PAGE.summaryPage)}
-            >
-              <img src={chrome.runtime.getURL("pin.svg")} alt="pin-icon" />
-              <span>Save to jobs </span>
-            </div>
-            <Height height="20" />
+            {showPage !== SHOW_PAGE.summaryPage && (
+              <>
+                <div
+                  className="ci_menu_list_item"
+                  role="button"
+                  onClick={() => setShowPage(SHOW_PAGE.summaryPage)}
+                >
+                  <img src={chrome.runtime.getURL("pin.svg")} alt="pin-icon" />
+                  <span>Save to jobs </span>
+                </div>
+                <Height height="20" />
+              </>
+            )}
             <div
               className="ci_menu_list_item"
               role="button"
@@ -113,15 +120,19 @@ const MenuPopUp = (props: any) => {
               <img src={chrome.runtime.getURL("jobboard.svg")} alt="pin-icon" />
               <span>View Job Board </span>
             </div>
-            <Height height="20" />
-            <div
-              className="ci_menu_list_item"
-              role="button"
-              onClick={() => setShowPage(SHOW_PAGE.profilePage)}
-            >
-              <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
-              <span>Profile </span>
-            </div>
+            {showPage !== SHOW_PAGE.profilePage && (
+              <>
+                <Height height="20" />
+                <div
+                  className="ci_menu_list_item"
+                  role="button"
+                  onClick={() => setShowPage(SHOW_PAGE.profilePage)}
+                >
+                  <img src={chrome.runtime.getURL("user.svg")} alt="pin-icon" />
+                  <span>Profile </span>
+                </div>
+              </>
+            )}
           </>
         )}
 

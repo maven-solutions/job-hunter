@@ -5,7 +5,14 @@ import "./layout.css";
 import { ChevronLeft, ChevronRight, X } from "react-feather";
 
 const Layout = (props: any) => {
-  const { children, setShowPage, firstBgWidth, secondBgWidth, popup } = props;
+  const {
+    children,
+    setShowPage,
+    firstBgWidth,
+    secondBgWidth,
+    popup,
+    showPage,
+  } = props;
   return (
     <div
       className={`${
@@ -34,6 +41,7 @@ const Layout = (props: any) => {
           secondBgWidth={secondBgWidth}
           setShowPage={setShowPage}
           popup={popup}
+          showPage={showPage}
         />
         <div className="jd-inner-padding">{children} </div>
       </div>

@@ -27,6 +27,7 @@ const DisplayJob = (props: any) => {
     setSavedNotification,
     alreadySavedInfo,
     SetAlreadySavedInfo,
+    showPage,
   } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
@@ -121,7 +122,7 @@ const DisplayJob = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage}>
+    <Layout setShowPage={setShowPage} showPage={showPage}>
       <Notification
         savedNotification={savedNotification}
         setSavedNotification={setSavedNotification}

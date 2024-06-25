@@ -30,6 +30,9 @@
   font-weight: 500;
   font-size: 14px;
 }
+.ci_menu_list_item:hover span {
+  color: #4339f2; /* Change this to the color you want on hover */
+}
 .ci__tester {
   margin-bottom: 20px;
   background: transparent;

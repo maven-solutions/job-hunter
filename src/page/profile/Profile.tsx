@@ -7,7 +7,7 @@ import { LogoutButton } from "../../component/primaryButton/PrimaryButton";
 import { logoutUser } from "../../store/features/Auth/AuthSlice";
 
 const Profile = (props: any) => {
-  const { setShowPage } = props;
+  const { setShowPage, showPage } = props;
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
@@ -19,7 +19,12 @@ const Profile = (props: any) => {
     setShowPage("");
   };
   return (
-    <Layout setShowPage={setShowPage} firstBgWidth="30" secondBgWidth="30">
+    <Layout
+      setShowPage={setShowPage}
+      showPage={showPage}
+      firstBgWidth="30"
+      secondBgWidth="30"
+    >
       <h3 className="ci_profile_titile">Profile </h3>
       <WhiteCard>
         <div className="ci_profile_section">

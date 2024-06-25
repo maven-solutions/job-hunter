@@ -3,7 +3,7 @@ import { Menu, X } from "react-feather";
 import MenuPopUp from "../component/menuPopup/MenuPopUp";
 
 const AllSvg = (props: any) => {
-  const { firstBgWidth, secondBgWidth, setShowPage, popup } = props;
+  const { firstBgWidth, secondBgWidth, setShowPage, popup, showPage } = props;
   const [showHamburger, setShowHamBurger] = useState(false);
   return (
     <>
@@ -48,6 +48,7 @@ const AllSvg = (props: any) => {
             setShowPage={setShowPage}
             layout
             setShowHamBurger={setShowHamBurger}
+            showPage={showPage}
           />
         )}
       </div>
