@@ -17,10 +17,12 @@ const App: React.FC<{}> = () => {
     });
   }, []);
 
-  // if (auth) {
-  //   return <LoginFrom setShowPage={setShowPage} popup />;
-  // }
-  return <PopUpDetailPage setShowPage={setShowPage} popup />;
+  if (!auth) {
+    return <LoginFrom setShowPage={setShowPage} popup />;
+  }
+  if (auth) {
+    return <PopUpDetailPage setShowPage={setShowPage} popup />;
+  }
 };
 
 const root = document.createElement("div");
