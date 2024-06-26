@@ -58,6 +58,9 @@ body {
 .jd-inner-padding {
   padding: 20px 20px 20px 20px;
 }
+.ci_popup_layout_nopadding {
+  padding: 0;
+}
 .ci_jobs__collapse_button {
   position: absolute;
   width: 15px;

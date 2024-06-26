@@ -12,12 +12,13 @@ const Layout = (props: any) => {
     secondBgWidth,
     popup,
     showPage,
+    popupDetail,
   } = props;
   return (
     <div
       className={`${
         popup ? "job__detail__containers" : "job__detail__container"
-      }`}
+      } `}
     >
       <div className="jd-inner">
         {!popup && (
@@ -43,7 +44,13 @@ const Layout = (props: any) => {
           popup={popup}
           showPage={showPage}
         />
-        <div className="jd-inner-padding">{children} </div>
+        <div
+          className={`jd-inner-padding ${
+            popupDetail && "ci_popup_layout_nopadding"
+          }`}
+        >
+          {children}{" "}
+        </div>
       </div>
     </div>
   );
