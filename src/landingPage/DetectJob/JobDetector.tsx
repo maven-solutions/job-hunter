@@ -146,7 +146,14 @@ const JobDetector = (props: any) => {
       if (message.action === EXTENSION_ACTION.LOGOUT_TO_CI_EXTENSION) {
         handleLogOut();
       }
+
+      if (message.action === EXTENSION_ACTION.OPEN_PROFILE_OF_CI_EXTENSION) {
+        console.log("Button was clicked in popup");
+        setShowPage(SHOW_PAGE.profilePage);
+      }
     });
+
+    // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {});
   }, []);
 
   useEffect(() => {
