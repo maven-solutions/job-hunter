@@ -4,7 +4,7 @@ import MenuPopUp from "../component/menuPopup/MenuPopUp";
 
 const AllSvg = (props: any) => {
   const { firstBgWidth, secondBgWidth, setShowPage, popup, showPage } = props;
-  const [showHamburger, setShowHamBurger] = useState(false);
+  const [showHamburger, setShowHamBurger] = useState<any>(false);
   return (
     <>
       {" "}
