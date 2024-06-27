@@ -45,6 +45,12 @@ const AllSvg = (props: any) => {
             onClick={() => setShowHamBurger(true)}
           />
         )}
+        {popup && (
+          <X
+            className="ci_job_detail_hamurger"
+            onClick={() => window.close()}
+          />
+        )}
         {showHamburger && (
           <MenuPopUp
             setShowPage={setShowPage}
