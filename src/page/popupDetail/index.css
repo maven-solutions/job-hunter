@@ -23,7 +23,7 @@
 }
 .ci_popup_content_section {
   padding: 15px;
-  background: #ffffff;
+  background: #ffffff !important;
 }
 .ci_popup_list_section {
   display: flex;

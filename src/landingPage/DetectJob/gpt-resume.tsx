@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "../../config/axiosInstance";
-import { BASE_URL } from "../../config/urlconfig";
+import { BASE_URL, STAGING_WEBSITE_URL } from "../../config/urlconfig";
 import { createSelectOption, formatDateWhileUploading } from "./helper";
 import { uploadPDFPromptCollection } from "./uploadPDFPromptCollection";
 import moment from "moment";
@@ -125,7 +125,7 @@ function resumeGPTmainFunction(
           setIsGenerating(true);
           try {
             const listResponse = await fetch(
-              "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+             `${BASE_URL}/applicants`,
               {
                 method: "GET",
                 headers: {
@@ -1034,7 +1034,7 @@ function resumeGPTmainFunction(
                             try {
                               const uniqueID = uuidv4();
                               const response = await fetch(
-                                "https://d2fa6tipx2eq6v.cloudfront.net/api/v1/applicants/",
+                                `${BASE_URL}/applicants`,
                                 {
                                   method: "POST",
                                   headers: {
@@ -1051,7 +1051,7 @@ function resumeGPTmainFunction(
                                 console.log({ responseData });
                                 setIsGenerating(false);
                                 window.open(
-                                  `https://resumebuilder.joinswiftly.com/editor/${responseData?.data?.id}`,
+                                  `${STAGING_WEBSITE_URL}/editor/${responseData?.data?.id}`,
                                   "_blank"
                                 );
                               } else {
@@ -1097,7 +1097,7 @@ function resumeGPTmainFunction(
         } else {
           alert("You have to login first");
           setIsGenerating(false);
-          window.open(`https://resumebuilder.joinswiftly.com`, "_blank");
+          window.open(`${STAGING_WEBSITE_URL}`, "_blank");
         }
       }
     };

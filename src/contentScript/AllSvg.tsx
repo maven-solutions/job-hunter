@@ -39,10 +39,12 @@ const AllSvg = (props: any) => {
         <div className="job_detail_header">
           <img src={chrome.runtime.getURL("hub.svg")} alt="hub-icon" />
         </div>
-        <Menu
-          className="ci_job_detail_hamurger"
-          onClick={() => setShowHamBurger(true)}
-        />
+        {!popup && (
+          <Menu
+            className="ci_job_detail_hamurger"
+            onClick={() => setShowHamBurger(true)}
+          />
+        )}
         {showHamburger && (
           <MenuPopUp
             setShowPage={setShowPage}
