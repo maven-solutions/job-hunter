@@ -23,7 +23,8 @@
 }
 .ci_popup_content_section {
   padding: 15px;
-  background: #ffffff !important;
+  background-color: #ffffff !important;
+  /* background-color: #000000 !important; */
 }
 .ci_popup_list_section {
   display: flex;
@@ -61,4 +62,13 @@
   font-weight: 400;
   font-family: "Inter", sans-serif;
   color: #4339f2;
+}
+.ci__popup__content__image__section {
+  margin-top: -10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ci__popup__content__image__section img {
+  width: 100px;
 }

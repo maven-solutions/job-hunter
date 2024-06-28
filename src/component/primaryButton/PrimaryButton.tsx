@@ -25,6 +25,7 @@ const PrimaryButton = (props: any) => {
     outline,
     buttonWidth,
     disabled,
+    color,
   } = props;
 
   return (
@@ -32,7 +33,7 @@ const PrimaryButton = (props: any) => {
       type="button"
       className={`ci_job_save_button ${
         outline && "ci_job_save_button_outline"
-      } ${disabled && "ci_job__button__disabled"}`}
+      } ${disabled && "ci_job__button__disabled"} ${color ? color : ""}`}
       style={{ width: `${buttonWidth ? buttonWidth + "px" : ""}` }}
       onClick={onclick}
       disabled={disabled}

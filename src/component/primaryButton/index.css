@@ -2,9 +2,9 @@
   all: unset;
   font-family: "Inter", sans-serif;
   width: 100%;
-  background: #4339f2 !important;
+  background-color: #4339f2 !important;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   color: #fff;
   padding: 8px 0 !important;
   border-radius: 5px;
@@ -12,6 +12,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.ci-blue-bg {
+  background-color: rgba(0, 145, 255, 0.7) !important;
+}
+.ci-red-bg {
+  background-color: rgba(234, 110, 110, 0.7) !important;
+}
+.ci-green-bg {
+  background-color: rgba(52, 181, 58, 0.7) !important;
+}
+.ci-yellow-bg {
+  background-color: rgba(255, 178, 0, 0.7) !important;
 }
 .ci_job_save_button_outline {
   background: #ffffff !important;
