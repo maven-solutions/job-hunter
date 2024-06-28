@@ -56,6 +56,7 @@ const AllSvg = (props: any) => {
             setShowPage={setShowPage}
             layout
             setShowHamBurger={setShowHamBurger}
+            showHamburger={showHamburger}
             showPage={showPage}
           />
         )}

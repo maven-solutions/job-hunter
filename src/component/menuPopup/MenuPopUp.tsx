@@ -13,7 +13,8 @@ import { RootStore, useAppSelector } from "../../store/store";
 import { X } from "react-feather";
 
 const MenuPopUp = (props: any) => {
-  const { setShowPage, layout, setShowHamBurger, showPage } = props;
+  const { setShowPage, layout, setShowHamBurger, showPage, showHamburger } =
+    props;
   const [hideAutofill, setHideAutofill] = useState(false);
 
   const authState: any = useAppSelector((store: RootStore) => {
@@ -24,7 +25,11 @@ const MenuPopUp = (props: any) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
+      if (
+        showHamburger &&
+        popupRef.current &&
+        !popupRef.current.contains(event.target)
+      ) {
         setShowHamBurger(false);
       }
     };
