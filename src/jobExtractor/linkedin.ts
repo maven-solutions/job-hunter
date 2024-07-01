@@ -12,7 +12,20 @@ interface RecruiterDetails {
   title?: string | null;
   description?: string | null;
 }
+function sanitizeHtml(description: string): string {
+  // Remove all tags except <br> and replace with empty string
+  const sanitizedHtml = description.replace(/<(?!br\s*\/?)[^>]+>/gi, "");
 
+  // Remove specific words and patterns
+  const cleanedHtml = sanitizedHtml
+    .replace(/…/g, "") // Remove ellipsis (...)
+    .replace(/\bshow more\b/gi, ""); // Remove "show more" (case insensitive whole word)
+
+  // Remove trailing whitespace and specific test pattern
+  const finalHtml = cleanedHtml.trim().replace(/<!---->\s*/g, "");
+
+  return finalHtml;
+}
 const getCompanyDetails = (dispatch) => {
   const companyDetails: CompanyDetails = {};
 
