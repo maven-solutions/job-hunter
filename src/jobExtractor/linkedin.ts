@@ -1,3 +1,18 @@
+interface CompanyDetails {
+  name?: string | null;
+  logo?: string | null;
+  summary?: string | null;
+  link?: string | null;
+  description?: string | null;
+}
+interface RecruiterDetails {
+  name?: string | null;
+  profileImage?: string | null;
+  link?: string | null;
+  title?: string | null;
+  description?: string | null;
+}
+
 const getCompanyDetails = (dispatch) => {
   const companyDetails: CompanyDetails = {};
 
