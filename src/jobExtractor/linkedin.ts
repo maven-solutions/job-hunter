@@ -188,6 +188,9 @@ export const getContentFromLinkedInJobs = (
       const companyName = companyNameEle.textContent.trim();
       setCompanyName(companyName);
     }, 500);
+    // for comany details---
+    // getCompanyDetails(dispatch);
+    // getHiringTeamDetails(dispatch);
   } catch (error) {
     console.log(error);
   }
