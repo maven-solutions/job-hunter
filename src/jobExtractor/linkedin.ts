@@ -26,7 +26,7 @@ function sanitizeHtml(description: string): string {
 
   return finalHtml;
 }
-const getCompanyDetails = (dispatch) => {
+const getCompanyDetails = (setCompanyDetails) => {
   const companyDetails: CompanyDetails = {};
 
   const companyDetailsEle =
@@ -76,10 +76,10 @@ const getCompanyDetails = (dispatch) => {
       companyDetails.description = sanitizedDescription;
     }
   }
-  //   dispatch(setCompanyDetails(companyDetails));
+  setCompanyDetails(companyDetails);
 };
 
-const getHiringTeamDetails = (dispatch) => {
+const getHiringTeamDetails = (setRecruiterDetails) => {
   let recruiterDetails: RecruiterDetails = {};
 
   const hiringSectionEle = document.querySelector(
@@ -114,7 +114,7 @@ const getHiringTeamDetails = (dispatch) => {
   if (detailsEle?.textContent) {
     recruiterDetails.title = detailsEle.textContent.trim();
   }
-  //   dispatch(setRecruiterDetails(recruiterDetails));
+  setRecruiterDetails(recruiterDetails);
 };
 
 export const getContentFromLinkedInJobs = (
@@ -128,7 +128,9 @@ export const getContentFromLinkedInJobs = (
   setJobType,
   setEmployment,
   setSource,
-  setCompanyName
+  setCompanyName,
+  setCompanyDetails,
+  setRecruiterDetails
 ): void => {
   try {
     setPostUrl(window.location.href);
@@ -189,8 +191,8 @@ export const getContentFromLinkedInJobs = (
       setCompanyName(companyName);
     }, 500);
     // for comany details---
-    // getCompanyDetails(dispatch);
-    // getHiringTeamDetails(dispatch);
+    getCompanyDetails(setCompanyDetails);
+    getHiringTeamDetails(setRecruiterDetails);
   } catch (error) {
     console.log(error);
   }
