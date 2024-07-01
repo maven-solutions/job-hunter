@@ -527,6 +527,8 @@ const JobFrom = (props: any) => {
       state: state?.value ?? "USA",
       city: city?.value,
       easyApply: easyApply?.value,
+      recruiterDetails: recruiterDetails,
+      companyDetails: companyDetails,
     };
 
     if (jobStatus) {
