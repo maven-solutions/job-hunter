@@ -24,7 +24,16 @@ const PopUpDetailPage = (props: any) => {
               <span className="ci_popup_list_title"> New Resume</span>{" "}
             </div>
           </div> */}
-          <PrimaryButton
+          <Height height="15" />
+
+          <div className="ci_popup_all_list_section">
+            <div className="ci_popup_list">New Cover Letter</div>
+            <div className="ci_popup_list">New Resume</div>
+            <div className="ci_popup_list">Tailor To Job</div>
+            <div className="ci_popup_list">Track Your Job</div>
+          </div>
+
+          {/* <PrimaryButton
             type="button"
             text="New Cover Letter"
             color="ci-blue-bg"
@@ -43,7 +52,7 @@ const PopUpDetailPage = (props: any) => {
             type="button"
             text="Track Your Job"
             color="ci-green-bg"
-          />
+          /> */}
           {/* <div className="ci_popup_list_section">
             <div className="ci_popup_list_underline">
               <PlusCircle className="ci_popup_list_icon" />
