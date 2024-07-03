@@ -58,6 +58,31 @@ const fillRace = (applicantData: Applicant) => {
       handleValueChanges(input);
       return;
     }
+    // for veteran
+
+    if (
+      (applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 4) &&
+      fromatStirngInLowerCase(labelText).includes(
+        fromatStirngInLowerCase("I identify as one or more")
+      )
+    ) {
+      input.parentElement.click();
+      handleValueChanges(input);
+      return;
+    }
+
+    if (
+      applicantData.veteran_status === 2 &&
+      fromatStirngInLowerCase(labelText).includes(
+        fromatStirngInLowerCase("I am not a protected")
+      )
+    ) {
+      input.parentElement.click();
+      handleValueChanges(input);
+      return;
+    }
   });
 };
 
