@@ -239,7 +239,7 @@
 .ext__autofill__fields__wrapper .autofill__btn__wrapper .autofill__btn {
   padding: 8px 25px;
   border-radius: 5px;
-  background: #4339f2;
+  background: #4339f2 !important;
   cursor: pointer;
   border: none;
   outline: none;
