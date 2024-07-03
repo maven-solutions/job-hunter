@@ -40,6 +40,7 @@ import usePaylocityObserver from "../../hooks/observer/usePaylocityObserver";
 import useMagellanhealthObserver from "../../hooks/observer/useMagellanhealthObserver";
 import useURLobserver from "../../hooks/observer/useURLobserver";
 import { resumeGPTmainFunction } from "./gpt-resume";
+import useHpeObserver from "../../hooks/observer/useHpeObserver";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -99,6 +100,7 @@ const JobDetector = (props: any) => {
   useWorkDaysObserver(postUrl, startLoading, stopLoading);
   usePaylocityObserver(postUrl, startLoading, stopLoading);
   useMagellanhealthObserver(postUrl, startLoading, stopLoading);
+  useHpeObserver(postUrl, startLoading, stopLoading);
 
   // TO DISPLAY JOB IS SAVED NOTIFICATION
   useEffect(() => {
