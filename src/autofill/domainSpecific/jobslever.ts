@@ -85,6 +85,24 @@ const fillRace = (applicantData: Applicant) => {
     }
   });
 };
+const fillRace2 = (applicantData: Applicant) => {
+  const textInputFields = document.querySelectorAll('input[type="checkbox"]');
+
+  textInputFields.forEach((input) => {
+    const labelElement = input.nextElementSibling;
+    const labelText = labelElement?.textContent?.trim() ?? "";
+
+    if (
+      fromatStirngInLowerCase(labelText).includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      input.parentElement.click();
+      handleValueChanges(input);
+      return;
+    }
+  });
+};
 
 const fillUSA = (applicantData: Applicant) => {
   const wokPermission = document.querySelector(
@@ -108,5 +126,6 @@ export const jobsLever = (tempDiv: any, applicantData: Applicant) => {
   fillName(applicantData);
   fillDate(applicantData);
   fillRace(applicantData);
+  fillRace2(applicantData);
   fillUSA(applicantData);
 };
