@@ -40,6 +40,7 @@ import { magellanhealth } from "./domainSpecific/magellanhealth";
 import { paylocity } from "./domainSpecific/paylocity";
 import { recpro } from "./domainSpecific/recpro";
 import { hpe } from "./domainSpecific/hpe";
+import { paycomonline } from "./domainSpecific/paycomonline";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -292,6 +293,11 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".hpe.")) {
       await hpe(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    if (window.location.href.includes("paycomonline.")) {
+      await paycomonline(tempDiv ?? tempDivForFile, applicantData);
+    }
+
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
       ashbyhq(tempDiv ?? tempDivForFile, applicantData);

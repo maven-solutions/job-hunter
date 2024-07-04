@@ -513,13 +513,14 @@ export const selectDataExtract = (
 
       // for race
       if (
-        checkIfExist(labelText, fieldNames.race) ||
-        checkIfExist(attribute.value, fieldNames.race)
+        checkIfExist(labelText, fieldNames?.race) ||
+        checkIfExist(attribute?.value, fieldNames?.race)
       ) {
         Array.from(select.options).find((option: any) => {
           if (
+            fromatStirngInLowerCase(option?.text) &&
             fromatStirngInLowerCase(option?.text).includes(
-              fromatStirngInLowerCase(applicantData.race)
+              fromatStirngInLowerCase(applicantData?.race)
             )
           ) {
             option.selected = true;
