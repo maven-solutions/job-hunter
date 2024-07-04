@@ -81,7 +81,6 @@ const getCompanyDetails = (setCompanyDetails) => {
 
 const getHiringTeamDetails = (setRecruiterDetails) => {
   let recruiterDetails: RecruiterDetails = {};
-
   const hiringSectionEle = document.querySelector(
     ".hirer-card__hirer-information"
   );
@@ -191,6 +190,8 @@ export const getContentFromLinkedInJobs = (
       setCompanyName(companyName);
     }, 500);
     // for comany details---
+    setCompanyDetails({});
+    setRecruiterDetails({});
     getCompanyDetails(setCompanyDetails);
     getHiringTeamDetails(setRecruiterDetails);
   } catch (error) {
