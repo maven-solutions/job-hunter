@@ -14,7 +14,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
   // console.log("iframeForm::", iframeForm);
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
-  // console.log("textfield::", textInputFields);
+
   textInputFields.forEach((input: any) => {
     // Extract all attributes
     const attributes: any = Array.from(input.attributes);

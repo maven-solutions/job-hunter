@@ -159,7 +159,8 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".zohorecruit.") ||
       window.location.href.includes(".hire.") ||
       window.location.href.includes(".rec.pro.") ||
-      window.location.href.includes(".successfactors.")
+      window.location.href.includes(".successfactors.") ||
+      window.location.href.includes("paycomonline.")
     ) {
       tempDiv = document.querySelector("body");
     }
