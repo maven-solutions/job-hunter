@@ -20,7 +20,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     const attributes: any = Array.from(input.attributes);
     // Log all attributes
     const inputId = input?.getAttribute("id") ?? "";
-    const labelElement = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
+    const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
     // console.log("labeltext::", labelText);
     attributes.some((attribute) => {
