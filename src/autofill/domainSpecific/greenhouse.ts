@@ -11,10 +11,11 @@ const checkAdultAge = (applicantData: Applicant) => {
   let isOver18 = false;
 
   const allLabel = document.querySelectorAll("label");
+
   if (allLabel.length > 0) {
     for (const label of allLabel) {
       if (
-        label.textContent.trim().includes("18 years") ||
+        label.textContent.trim().toLowerCase().includes("18 years") ||
         label.textContent.trim().toLowerCase().includes("adult")
       ) {
         const select = label.querySelector("select");
