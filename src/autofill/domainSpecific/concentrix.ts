@@ -1,23 +1,32 @@
 import { Applicant } from "../data";
-import { handleValueChanges } from "../helper";
+import { fromatStirngInLowerCase } from "../helper";
 
-const fillDisability = () => {
-  const disablityDiv = document.querySelector("disability-status-radio");
+const fillDisability = async (applicantData: Applicant) => {
+  const disablityDiv = document.querySelector(".disability-status-radio");
   if (!disablityDiv) {
     return;
   }
+  const allLabel = disablityDiv.querySelectorAll("label");
+  if (allLabel && allLabel.length > 0)
+    for (const label of allLabel) {
+      if (
+        fromatStirngInLowerCase(label.textContent).includes("yes") &&
+        applicantData.disability_status
+      ) {
+        label.click();
+        return;
+      }
+
+      if (
+        fromatStirngInLowerCase(label.textContent).includes("no") &&
+        !applicantData.disability_status
+      ) {
+        label.click();
+        return;
+      }
+    }
 };
 
 export const concentrix = async (tempDiv: any, applicantData: Applicant) => {
-  const phone: any = document.getElementById(
-    "application_form_application_phone"
-  );
-
-  if (phone) {
-    phone.value = applicantData.phone_number;
-    phone.focus(); // Autofocus on the input field
-    phone.click();
-    phone.select();
-    handleValueChanges(phone);
-  }
+  await fillDisability(applicantData);
 };
