@@ -42,6 +42,7 @@ import useURLobserver from "../../hooks/observer/useURLobserver";
 import { resumeGPTmainFunction } from "./gpt-resume";
 import useHpeObserver from "../../hooks/observer/useHpeObserver";
 import useConcentrixObserver from "../../hooks/observer/useConcentrixObserver";
+import useZimmerbiometObserver from "../../hooks/observer/useZimmerbiometObserver";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -103,6 +104,7 @@ const JobDetector = (props: any) => {
   useMagellanhealthObserver(postUrl, startLoading, stopLoading);
   useHpeObserver(postUrl, startLoading, stopLoading);
   useConcentrixObserver(postUrl, startLoading, stopLoading);
+  useZimmerbiometObserver(postUrl, startLoading, stopLoading);
 
   // TO DISPLAY JOB IS SAVED NOTIFICATION
   useEffect(() => {
