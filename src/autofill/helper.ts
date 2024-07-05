@@ -41,6 +41,7 @@ import { paylocity } from "./domainSpecific/paylocity";
 import { recpro } from "./domainSpecific/recpro";
 import { hpe } from "./domainSpecific/hpe";
 import { paycomonline } from "./domainSpecific/paycomonline";
+import { zimmerbiomet } from "./domainSpecific/zimmerbiomet";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -172,6 +173,11 @@ export const detectInputAndFillData = async (
       await myworkDays(tempDiv ?? tempDivForFile, applicantData);
     }
 
+    if (window.location.href.includes("zimmerbiomet")) {
+      await zimmerbiomet(tempDiv ?? tempDivForFile, applicantData);
+      stopLoading();
+      return;
+    }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
