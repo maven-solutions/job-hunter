@@ -226,7 +226,7 @@ export const selectDataExtract = (
       if (
         checkIfExist(labelText, fieldNames.is_over_18) ||
         checkIfExist(attribute.value, fieldNames.is_over_18) ||
-        labelText.toLowerCase().includes("18 years")
+        labelText?.toLowerCase()?.includes("18 years")
       ) {
         Array.from(select.options).find((option: any) => {
           if (fromatStirngInLowerCase(option?.text) === "yes") {
