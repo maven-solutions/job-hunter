@@ -42,6 +42,7 @@ import { recpro } from "./domainSpecific/recpro";
 import { hpe } from "./domainSpecific/hpe";
 import { paycomonline } from "./domainSpecific/paycomonline";
 import { zimmerbiomet } from "./domainSpecific/zimmerbiomet";
+import { concentrix } from "./domainSpecific/concentrix";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -302,6 +303,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes("paycomonline.")) {
       await paycomonline(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".concentrix.")) {
+      await concentrix(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
