@@ -1,5 +1,5 @@
 {
-  "name": "CareerHub",
+  "name": "CareerAI-VA",
   "description": "Unlock career opportunities with a simple click - our Chrome extension saves and organizes job listings seamlessly.",
   "version": "1.0.0",
   "manifest_version": 3,
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Job Hunter",
+    "default_title": "CareerAI-VA",
     "default_icon": "icon.png"
   },
   "permissions": ["storage"],
