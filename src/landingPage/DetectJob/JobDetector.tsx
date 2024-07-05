@@ -41,6 +41,7 @@ import useMagellanhealthObserver from "../../hooks/observer/useMagellanhealthObs
 import useURLobserver from "../../hooks/observer/useURLobserver";
 import { resumeGPTmainFunction } from "./gpt-resume";
 import useHpeObserver from "../../hooks/observer/useHpeObserver";
+import useConcentrixObserver from "../../hooks/observer/useConcentrixObserver";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -101,6 +102,7 @@ const JobDetector = (props: any) => {
   usePaylocityObserver(postUrl, startLoading, stopLoading);
   useMagellanhealthObserver(postUrl, startLoading, stopLoading);
   useHpeObserver(postUrl, startLoading, stopLoading);
+  useConcentrixObserver(postUrl, startLoading, stopLoading);
 
   // TO DISPLAY JOB IS SAVED NOTIFICATION
   useEffect(() => {
