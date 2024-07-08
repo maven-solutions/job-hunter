@@ -191,7 +191,8 @@ const authorizedTowork = async (applicantData: Applicant) => {
     const label = select.getAttribute("aria-label");
     if (
       label?.toLowerCase().includes("legally") ||
-      label?.toLowerCase().includes("currently authorized")
+      label?.toLowerCase().includes("currently authorized") ||
+      label?.toLowerCase().includes("Are you eligible to work in the country")
     ) {
       select.click();
       await delay(500);

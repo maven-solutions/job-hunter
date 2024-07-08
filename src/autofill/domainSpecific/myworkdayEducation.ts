@@ -13,9 +13,20 @@ export const clickWorkdayEducationButton = async (applicantData) => {
   let delte = false;
   let button: any = "";
   button = document.querySelector('[aria-label="Add Education"]');
+  if (window.location.href.includes("jda.wd5.myworkdayjobs.")) {
+    button = document.querySelector(
+      '[aria-label="Add Education and Training"]'
+    );
+  }
   if (!button) {
     button = document.querySelector('[aria-label="Add Another Education"]');
+    if (window.location.href.includes("jda.wd5.myworkdayjobs.")) {
+      button = document.querySelector(
+        '[aria-label="Add Another Education and Training"]'
+      );
+    }
   }
+
   if (!button) {
     return;
   }
