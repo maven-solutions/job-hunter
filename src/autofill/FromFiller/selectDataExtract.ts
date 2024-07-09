@@ -391,7 +391,7 @@ export const selectDataExtract = (
       ) {
         Array.from(select.options).find((option: any) => {
           if (
-            fromatStirngInLowerCase(option?.text).includes("yes") &&
+            fromatStirngInLowerCase(option?.text)?.includes("yes") &&
             applicantData.disability_status
           ) {
             option.selected = true;
@@ -419,7 +419,7 @@ export const selectDataExtract = (
           }
 
           if (
-            fromatStirngInLowerCase(option?.text).includes("no") &&
+            fromatStirngInLowerCase(option?.text)?.includes("no") &&
             !applicantData.disability_status
           ) {
             option.selected = true;
@@ -520,7 +520,7 @@ export const selectDataExtract = (
         Array.from(select.options).find((option: any) => {
           if (
             fromatStirngInLowerCase(option?.text) &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               fromatStirngInLowerCase(applicantData?.race)
             )
           ) {
@@ -560,8 +560,8 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 1 &&
             !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-              fromatStirngInLowerCase(option?.text).includes("amveteran"))
+            (fromatStirngInLowerCase(option?.text)?.includes("amaveteran") ||
+              fromatStirngInLowerCase(option?.text)?.includes("amveteran"))
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -590,7 +590,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 2 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("iamnot")
+            fromatStirngInLowerCase(option?.text)?.includes("iamnot")
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -620,7 +620,9 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 3 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+            fromatStirngInLowerCase(option?.text)?.includes(
+              "identifyasaveteran"
+            )
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -650,7 +652,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 3 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -682,7 +684,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 4 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -714,7 +716,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 1 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -746,10 +748,10 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 5 &&
             !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
-              fromatStirngInLowerCase(option?.text).includes("dontwish") ||
-              fromatStirngInLowerCase(option?.text).includes("decline") ||
-              fromatStirngInLowerCase(option?.text).includes("notwish"))
+            (fromatStirngInLowerCase(option?.text)?.includes("selfidentify") ||
+              fromatStirngInLowerCase(option?.text)?.includes("dontwish") ||
+              fromatStirngInLowerCase(option?.text)?.includes("decline") ||
+              fromatStirngInLowerCase(option?.text)?.includes("notwish"))
           ) {
             option.selected = true;
             select.dispatchEvent(
