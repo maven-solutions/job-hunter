@@ -45,6 +45,7 @@ import { zimmerbiomet } from "./domainSpecific/zimmerbiomet";
 import { concentrix } from "./domainSpecific/concentrix";
 import { rippling } from "./domainSpecific/rippling";
 import { bamboohr } from "./domainSpecific/bamboohr";
+import { fisglobal } from "./domainSpecific/fisglobal";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -316,6 +317,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".bamboohr.")) {
       await bamboohr(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".fisglobal.")) {
+      await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
