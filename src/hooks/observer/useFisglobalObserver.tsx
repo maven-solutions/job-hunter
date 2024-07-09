@@ -8,7 +8,10 @@ const useFisglobalObserver = (
   stopLoading: () => void
 ) => {
   useEffect(() => {
-    if (window.location.href.includes(".fisglobal.")) {
+    if (
+      window.location.href.includes(".fisglobal.") ||
+      window.location.href.includes(".gehealthcare.")
+    ) {
       const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
       if (
         localurl &&

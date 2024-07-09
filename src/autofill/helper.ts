@@ -318,7 +318,11 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".bamboohr.")) {
       await bamboohr(tempDiv ?? tempDivForFile, applicantData);
     }
-    if (window.location.href.includes(".fisglobal.")) {
+    // careers.gehealthcare a reasearch needed
+    if (
+      window.location.href.includes(".gehealthcare.") ||
+      window.location.href.includes(".fisglobal.")
+    ) {
       await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }
 
