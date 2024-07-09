@@ -2,6 +2,7 @@ import { Applicant } from "../data";
 import { fieldNames } from "../FromFiller/fieldsname";
 import {
   checkIfExist,
+  delay,
   fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
@@ -246,6 +247,207 @@ const texttypefiller = async (applicantData: Applicant) => {
   });
 };
 
+const fillGender = async (applicantData: Applicant) => {
+  const gender: HTMLElement = document.querySelector('[data-testid="gender"]');
+  const select: HTMLElement = gender.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()) ===
+      fromatStirngInLowerCase(applicantData.gender)
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+
+const fillRace = async (applicantData: Applicant) => {
+  const race: HTMLElement = document.querySelector('[data-testid="race"]');
+  const select: HTMLElement = race.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+
+const fillHispanic = async (applicantData: Applicant) => {
+  const hispanic: HTMLElement = document.querySelector(
+    '[data-testid="hispanicOrLatino"]'
+  );
+  const select: HTMLElement = hispanic.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  select.click();
+  await delay(500);
+
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("yes")
+    ) {
+      element.click();
+      // return true;
+    }
+
+    if (
+      !applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("no")
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+const fillVeteran = async (applicantData: Applicant) => {
+  const veteran: HTMLElement = document.querySelector(
+    '[data-testid="veteranStatus"]'
+  );
+  const select: HTMLElement = veteran.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    // for yes
+    if (
+      applicantData.veteran_status === 1 &&
+      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "amaveteran"
+      ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "amveteran"
+        ))
+    ) {
+      element.click();
+    }
+
+    // for no
+    if (
+      applicantData.veteran_status === 2 &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
+    ) {
+      element.click();
+    }
+
+    if (
+      (applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 4) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasaveteran"
+      )
+    ) {
+      element.click();
+    }
+
+    //for one or more
+    if (
+      (applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 4) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    //for one or more
+    if (
+      (applicantData.veteran_status === 4 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 3) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    //   for one or more
+    if (
+      applicantData.veteran_status === 1 &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    // for decline
+    if (
+      applicantData.veteran_status === 5 &&
+      !veteran &&
+      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "selfidentify"
+      ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "dontwish"
+        ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "decline"
+        ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes("notwish"))
+    ) {
+      element.click();
+    }
+  }
+  await delay(1000);
+};
+
+const fillDisability = async (applicantData: Applicant) => {
+  const disability: HTMLElement = document.querySelector(
+    '[data-testid="disabilityStatus"]'
+  );
+  const select: HTMLElement = disability.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes("yes") &&
+      applicantData.disability_status
+    ) {
+      element.click();
+    }
+
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes("noidont") &&
+      !applicantData.disability_status
+    ) {
+      element.click();
+    }
+  }
+  await delay(1000);
+};
 export const rippling = async (tempDiv: any, applicantData: Applicant) => {
   await texttypefiller(applicantData);
+  await fillGender(applicantData);
+  await fillRace(applicantData);
+  await fillHispanic(applicantData);
+  await fillVeteran(applicantData);
+  await fillDisability(applicantData);
 };
