@@ -6,6 +6,9 @@ const fillDisability = async (applicantData: Applicant) => {
     '[id="disability_heading_self_identity.disabilityStatus"]'
   );
 
+  if (!disability) {
+    return;
+  }
   const allLabel = disability.querySelectorAll("label");
   if (allLabel && allLabel.length > 0) {
     for (const label of allLabel) {
