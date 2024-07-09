@@ -249,9 +249,15 @@ const texttypefiller = async (applicantData: Applicant) => {
 
 const fillGender = async (applicantData: Applicant) => {
   const gender: HTMLElement = document.querySelector('[data-testid="gender"]');
+  if (!gender) {
+    return;
+  }
   const select: HTMLElement = gender.querySelector(
     '[data-testid="select-controller"]'
   );
+  if (!select) {
+    return;
+  }
   select.click();
   await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
@@ -269,9 +275,15 @@ const fillGender = async (applicantData: Applicant) => {
 
 const fillRace = async (applicantData: Applicant) => {
   const race: HTMLElement = document.querySelector('[data-testid="race"]');
+  if (!race) {
+    return;
+  }
   const select: HTMLElement = race.querySelector(
     '[data-testid="select-controller"]'
   );
+  if (!select) {
+    return;
+  }
   select.click();
   await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
@@ -292,9 +304,15 @@ const fillHispanic = async (applicantData: Applicant) => {
   const hispanic: HTMLElement = document.querySelector(
     '[data-testid="hispanicOrLatino"]'
   );
+  if (!hispanic) {
+    return;
+  }
   const select: HTMLElement = hispanic.querySelector(
     '[data-testid="select-controller"]'
   );
+  if (!select) {
+    return;
+  }
   select.click();
   await delay(500);
 
@@ -322,9 +340,15 @@ const fillVeteran = async (applicantData: Applicant) => {
   const veteran: HTMLElement = document.querySelector(
     '[data-testid="veteranStatus"]'
   );
+  if (!veteran) {
+    return;
+  }
   const select: HTMLElement = veteran.querySelector(
     '[data-testid="select-controller"]'
   );
+  if (!select) {
+    return;
+  }
   select.click();
   await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
@@ -420,9 +444,15 @@ const fillDisability = async (applicantData: Applicant) => {
   const disability: HTMLElement = document.querySelector(
     '[data-testid="disabilityStatus"]'
   );
+  if (!disability) {
+    return;
+  }
   const select: HTMLElement = disability.querySelector(
     '[data-testid="select-controller"]'
   );
+  if (!select) {
+    return;
+  }
   select.click();
   await delay(500);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
