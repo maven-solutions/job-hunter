@@ -1,18 +1,18 @@
 import { Applicant } from "../data";
+import { fieldNames } from "../FromFiller/fieldsname";
 import {
   checkIfExist,
-  checkNationForWorkDays,
+  delay,
   fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
-import { fieldNames } from "./fieldsname";
 
-export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
+const texttypefiller = async (applicantData: Applicant) => {
   // Extract input fields of type "text"
   let address = false;
   let phone = false;
 
-  const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
+  const textInputFields = document.querySelectorAll("input");
   // console.log("textInputFields::", textInputFields);
 
   textInputFields.forEach((input: any) => {
@@ -20,7 +20,8 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     const attributes: any = Array.from(input.attributes);
     // Log all attributes
     const inputId = input?.getAttribute("id") ?? "";
-    const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
+    const labelElement: any =
+      document.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
     // console.log("labeltext::", labelText);
     attributes.some((attribute) => {
@@ -177,19 +178,6 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         return true; // Stop iterating
       }
 
-      // // salary
-      // if (
-      //   checkIfExist(labelText, fieldNames.salary) ||
-      //   checkIfExist(attribute.value, fieldNames.salary)
-      // ) {
-      //   input.value = applicantData.salary;
-      //   input.focus(); // Autofocus on the input field
-      //   input.click();
-      //   input.select();
-      //   handleValueChanges(input);
-      //   return true; // Stop iterating
-      // }
-
       // portfolio
       if (
         checkIfExist(labelText, fieldNames.portfolio) ||
@@ -252,19 +240,244 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         handleValueChanges(input);
         return true; // Stop iterating
       }
-      // for workdays
-      if (checkNationForWorkDays(attribute.value, fieldNames.workday_country)) {
-        input.value = applicantData.country;
-        input.focus(); // Autofocus on the input field
-        input.click();
-        input.select();
-        handleValueChanges(input);
-        address = true;
-        return true; // Stop iterating
-      }
 
       return false; // Continue iterating
     });
     // You can do whatever you want with each input field here
   });
+};
+
+const fillGender = async (applicantData: Applicant) => {
+  const gender: HTMLElement = document.querySelector('[data-testid="gender"]');
+  if (!gender) {
+    return;
+  }
+  const select: HTMLElement = gender.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  if (!select) {
+    return;
+  }
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()) ===
+      fromatStirngInLowerCase(applicantData.gender)
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+
+const fillRace = async (applicantData: Applicant) => {
+  const race: HTMLElement = document.querySelector('[data-testid="race"]');
+  if (!race) {
+    return;
+  }
+  const select: HTMLElement = race.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  if (!select) {
+    return;
+  }
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+
+const fillHispanic = async (applicantData: Applicant) => {
+  const hispanic: HTMLElement = document.querySelector(
+    '[data-testid="hispanicOrLatino"]'
+  );
+  if (!hispanic) {
+    return;
+  }
+  const select: HTMLElement = hispanic.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  if (!select) {
+    return;
+  }
+  select.click();
+  await delay(500);
+
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("yes")
+    ) {
+      element.click();
+      // return true;
+    }
+
+    if (
+      !applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("no")
+    ) {
+      element.click();
+      // return true;
+    }
+  }
+  await delay(1000);
+};
+const fillVeteran = async (applicantData: Applicant) => {
+  const veteran: HTMLElement = document.querySelector(
+    '[data-testid="veteranStatus"]'
+  );
+  if (!veteran) {
+    return;
+  }
+  const select: HTMLElement = veteran.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  if (!select) {
+    return;
+  }
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    // for yes
+    if (
+      applicantData.veteran_status === 1 &&
+      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "amaveteran"
+      ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "amveteran"
+        ))
+    ) {
+      element.click();
+    }
+
+    // for no
+    if (
+      applicantData.veteran_status === 2 &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
+    ) {
+      element.click();
+    }
+
+    if (
+      (applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 4) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasaveteran"
+      )
+    ) {
+      element.click();
+    }
+
+    //for one or more
+    if (
+      (applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 4) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    //for one or more
+    if (
+      (applicantData.veteran_status === 4 ||
+        applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 3) &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    //   for one or more
+    if (
+      applicantData.veteran_status === 1 &&
+      fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "identifyasoneormore"
+      )
+    ) {
+      element.click();
+    }
+
+    // for decline
+    if (
+      applicantData.veteran_status === 5 &&
+      !veteran &&
+      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+        "selfidentify"
+      ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "dontwish"
+        ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes(
+          "decline"
+        ) ||
+        fromatStirngInLowerCase(element.textContent.trim()).includes("notwish"))
+    ) {
+      element.click();
+    }
+  }
+  await delay(1000);
+};
+
+const fillDisability = async (applicantData: Applicant) => {
+  const disability: HTMLElement = document.querySelector(
+    '[data-testid="disabilityStatus"]'
+  );
+  if (!disability) {
+    return;
+  }
+  const select: HTMLElement = disability.querySelector(
+    '[data-testid="select-controller"]'
+  );
+  if (!select) {
+    return;
+  }
+  select.click();
+  await delay(500);
+  const selectOptions: any = document.querySelectorAll('[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes("yes") &&
+      applicantData.disability_status
+    ) {
+      element.click();
+    }
+
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()).includes("noidont") &&
+      !applicantData.disability_status
+    ) {
+      element.click();
+    }
+  }
+  await delay(1000);
+};
+export const rippling = async (tempDiv: any, applicantData: Applicant) => {
+  await texttypefiller(applicantData);
+  await fillGender(applicantData);
+  await fillRace(applicantData);
+  await fillHispanic(applicantData);
+  await fillVeteran(applicantData);
+  await fillDisability(applicantData);
 };

@@ -14,6 +14,9 @@ const veteranStatus = (applicantData: Applicant) => {
   const select: HTMLSelectElement = document.querySelector(
     "#USFederalContractor"
   );
+  if (!select) {
+    return;
+  }
   // for veteran
   Array.from(select.options).find((option: any) => {
     //for yes

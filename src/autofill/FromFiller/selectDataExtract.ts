@@ -225,7 +225,8 @@ export const selectDataExtract = (
       // for is 18 years
       if (
         checkIfExist(labelText, fieldNames.is_over_18) ||
-        checkIfExist(attribute.value, fieldNames.is_over_18)
+        checkIfExist(attribute.value, fieldNames.is_over_18) ||
+        labelText?.toLowerCase()?.includes("18 years")
       ) {
         Array.from(select.options).find((option: any) => {
           if (fromatStirngInLowerCase(option?.text) === "yes") {
@@ -390,7 +391,7 @@ export const selectDataExtract = (
       ) {
         Array.from(select.options).find((option: any) => {
           if (
-            fromatStirngInLowerCase(option?.text).includes("yes") &&
+            fromatStirngInLowerCase(option?.text)?.includes("yes") &&
             applicantData.disability_status
           ) {
             option.selected = true;
@@ -418,7 +419,7 @@ export const selectDataExtract = (
           }
 
           if (
-            fromatStirngInLowerCase(option?.text).includes("no") &&
+            fromatStirngInLowerCase(option?.text)?.includes("no") &&
             !applicantData.disability_status
           ) {
             option.selected = true;
@@ -513,13 +514,14 @@ export const selectDataExtract = (
 
       // for race
       if (
-        checkIfExist(labelText, fieldNames.race) ||
-        checkIfExist(attribute.value, fieldNames.race)
+        checkIfExist(labelText, fieldNames?.race) ||
+        checkIfExist(attribute?.value, fieldNames?.race)
       ) {
         Array.from(select.options).find((option: any) => {
           if (
-            fromatStirngInLowerCase(option?.text).includes(
-              fromatStirngInLowerCase(applicantData.race)
+            fromatStirngInLowerCase(option?.text) &&
+            fromatStirngInLowerCase(option?.text)?.includes(
+              fromatStirngInLowerCase(applicantData?.race)
             )
           ) {
             option.selected = true;
@@ -558,8 +560,8 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 1 &&
             !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-              fromatStirngInLowerCase(option?.text).includes("amveteran"))
+            (fromatStirngInLowerCase(option?.text)?.includes("amaveteran") ||
+              fromatStirngInLowerCase(option?.text)?.includes("amveteran"))
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -588,7 +590,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 2 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("iamnot")
+            fromatStirngInLowerCase(option?.text)?.includes("iamnot")
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -618,7 +620,9 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 3 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+            fromatStirngInLowerCase(option?.text)?.includes(
+              "identifyasaveteran"
+            )
           ) {
             option.selected = true;
             select.dispatchEvent(
@@ -648,7 +652,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 3 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -680,7 +684,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 4 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -712,7 +716,7 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 1 &&
             !veteran &&
-            fromatStirngInLowerCase(option?.text).includes(
+            fromatStirngInLowerCase(option?.text)?.includes(
               "identifyasoneormore"
             )
           ) {
@@ -744,10 +748,10 @@ export const selectDataExtract = (
           if (
             applicantData.veteran_status === 5 &&
             !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
-              fromatStirngInLowerCase(option?.text).includes("dontwish") ||
-              fromatStirngInLowerCase(option?.text).includes("decline") ||
-              fromatStirngInLowerCase(option?.text).includes("notwish"))
+            (fromatStirngInLowerCase(option?.text)?.includes("selfidentify") ||
+              fromatStirngInLowerCase(option?.text)?.includes("dontwish") ||
+              fromatStirngInLowerCase(option?.text)?.includes("decline") ||
+              fromatStirngInLowerCase(option?.text)?.includes("notwish"))
           ) {
             option.selected = true;
             select.dispatchEvent(

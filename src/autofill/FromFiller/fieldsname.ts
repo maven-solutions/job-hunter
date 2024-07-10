@@ -110,9 +110,13 @@ export const fieldNames = {
     "agree",
   ],
 
-  us_work_authorization: ["legallyauthorized", "legallyeligible"],
+  us_work_authorization: [
+    "legallyauthorized",
+    "legallyeligible",
+    "legallyauthorizedtowork",
+  ],
   veteran: ["veteran"],
-  veteran_status: [" veteranstatus", " veteran"],
+  veteran_status: ["veteranstatus", " veteran"],
   visa: ["sponsorship", "visa"],
   work_experience: ["experience", "work", "employment", "working"],
   workday_country: ["addressSection_regionSubdivision1"],

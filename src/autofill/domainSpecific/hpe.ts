@@ -1,22 +1,23 @@
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
-const handleDisabiblit = (applicantData: Applicant) => {
+const handleDisabiblit = async (applicantData: Applicant) => {
+  delay(500);
+
   const disabilityEle: HTMLElement = document.getElementById(
     "disability_heading_self_identity.disabilityStatus"
   );
 
-  console.log("disabilityEle::", disabilityEle);
   if (!disabilityEle) {
     return;
   }
+  console.log("disabilityEle::", disabilityEle);
+
   const allLabel = disabilityEle.querySelectorAll("label");
   if (!allLabel || allLabel.length === 0) {
     return;
   }
   for (const label of allLabel) {
-    console.log("label::", label);
-
     if (
       label &&
       applicantData.disability_status &&
@@ -35,35 +36,39 @@ const handleDisabiblit = (applicantData: Applicant) => {
   }
 };
 
-const handleAgreement = () => {
+const handleAgreement = async () => {
+  delay(500);
+
   const agreementEle: any = document.getElementById("agreementCheck");
   if (agreementEle) {
-    agreementEle.ariaChecked;
-    agreementEle.checked;
-    handleValueChanges(agreementEle);
+    const parent = agreementEle.parentElement;
+    parent.click();
   }
 
   const agreement2: any = document.getElementById(
     "Additional Fields.noticeAgreement"
   );
   if (agreement2) {
-    agreement2.ariaChecked;
-    agreement2.checked;
-    handleValueChanges(agreement2);
+    const parent = agreement2.parentElement;
+    parent.click();
   }
 };
 
-const fillUrl = (applicantData: Applicant) => {
+const fillUrl = async (applicantData: Applicant) => {
+  delay(500);
   const likedin: any = document.querySelector(
     '[label="Please provide your LinkedIn profile"]'
   );
+
   if (likedin) {
+    console.log("linkedin::", likedin);
+
     likedin.value = applicantData.linkedin_url;
+    handleValueChanges(likedin);
   }
-  handleValueChanges(likedin);
 };
 export const hpe = async (tempDiv: any, applicantData: Applicant) => {
-  handleDisabiblit(applicantData);
-  fillUrl(applicantData);
-  handleAgreement();
+  await handleDisabiblit(applicantData);
+  await fillUrl(applicantData);
+  await handleAgreement();
 };

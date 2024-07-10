@@ -147,7 +147,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const [index, element] of selectOptions.entries()) {
         if (
-          applicantData.hispanic_latino &&
+          applicantData.hispanic_or_latino &&
           fromatStirngInLowerCase(element.textContent.trim()).includes("yes")
         ) {
           element.click();
@@ -155,7 +155,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
         }
 
         if (
-          !applicantData.hispanic_latino &&
+          !applicantData.hispanic_or_latino &&
           fromatStirngInLowerCase(element.textContent.trim()).includes("no")
         ) {
           element.click();

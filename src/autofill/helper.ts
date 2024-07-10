@@ -40,6 +40,12 @@ import { magellanhealth } from "./domainSpecific/magellanhealth";
 import { paylocity } from "./domainSpecific/paylocity";
 import { recpro } from "./domainSpecific/recpro";
 import { hpe } from "./domainSpecific/hpe";
+import { paycomonline } from "./domainSpecific/paycomonline";
+import { zimmerbiomet } from "./domainSpecific/zimmerbiomet";
+import { concentrix } from "./domainSpecific/concentrix";
+import { rippling } from "./domainSpecific/rippling";
+import { bamboohr } from "./domainSpecific/bamboohr";
+import { fisglobal } from "./domainSpecific/fisglobal";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -159,7 +165,9 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".zohorecruit.") ||
       window.location.href.includes(".hire.") ||
       window.location.href.includes(".rec.pro.") ||
-      window.location.href.includes(".successfactors.")
+      window.location.href.includes(".successfactors.") ||
+      window.location.href.includes("paycomonline.") ||
+      window.location.href.includes(".amazon.jobs")
     ) {
       tempDiv = document.querySelector("body");
     }
@@ -170,6 +178,11 @@ export const detectInputAndFillData = async (
       await myworkDays(tempDiv ?? tempDivForFile, applicantData);
     }
 
+    if (window.location.href.includes("zimmerbiomet")) {
+      await zimmerbiomet(tempDiv ?? tempDivForFile, applicantData);
+      stopLoading();
+      return;
+    }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -291,6 +304,28 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".hpe.")) {
       await hpe(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    if (window.location.href.includes("paycomonline.")) {
+      await paycomonline(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".concentrix.")) {
+      await concentrix(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".rippling.")) {
+      await rippling(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".bamboohr.")) {
+      await bamboohr(tempDiv ?? tempDivForFile, applicantData);
+    }
+    // careers.gehealthcare a reasearch needed
+    if (
+      window.location.href.includes(".gehealthcare.") ||
+      window.location.href.includes(".fisglobal.")
+    ) {
+      await fisglobal(tempDiv ?? tempDivForFile, applicantData);
+    }
+
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
       ashbyhq(tempDiv ?? tempDivForFile, applicantData);
