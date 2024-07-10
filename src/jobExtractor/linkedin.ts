@@ -116,6 +116,61 @@ const getHiringTeamDetails = (setRecruiterDetails) => {
   setRecruiterDetails(recruiterDetails);
 };
 
+const getAddationalInfo = (setJoboverview) => {
+  const jobInsightElement = document.querySelector(
+    ".job-details-jobs-unified-top-card__job-insight.job-details-jobs-unified-top-card__job-insight--highlight"
+  );
+  const jobInsightText =
+    jobInsightElement?.querySelector("span")?.textContent?.trim() ?? "";
+
+  let worktype: string | null = null;
+  let position: string | null = null;
+
+  // for jobtype
+  if (jobInsightText.toLocaleLowerCase().includes("full-time")) {
+    worktype = "Full-time";
+  } else if (jobInsightText.toLocaleLowerCase().includes("part-time")) {
+    worktype = "Part-time";
+  } else if (jobInsightText.toLocaleLowerCase().includes("contract")) {
+    worktype = "Contract";
+  } else if (jobInsightText.toLocaleLowerCase().includes("temporary")) {
+    worktype = "Temporary";
+  } else if (jobInsightText.toLocaleLowerCase().includes("volunteer")) {
+    worktype = "Volunteer";
+  } else if (jobInsightText.toLocaleLowerCase().includes("internship")) {
+    worktype = "Internship";
+  } else if (jobInsightText.toLocaleLowerCase().includes("other")) {
+    worktype = "Other";
+  }
+  // for experience
+
+  if (jobInsightText.toLocaleLowerCase().includes("internship")) {
+    position = "Internship";
+  } else if (jobInsightText.toLocaleLowerCase().includes("entry level")) {
+    position = "Entry level";
+  } else if (jobInsightText.toLocaleLowerCase().includes("associate")) {
+    position = "Associate";
+  } else if (jobInsightText.toLocaleLowerCase().includes("mid-senior")) {
+    position = "Mid-Senior level";
+  } else if (jobInsightText.toLocaleLowerCase().includes("director")) {
+    position = "Director";
+  } else if (jobInsightText.toLocaleLowerCase().includes("executive")) {
+    position = "Executive";
+  }
+
+  let elements: string[] = [];
+  let elements2: string[] = [];
+
+  if (worktype) {
+    elements2.push(worktype);
+  }
+  if (position) {
+    elements2.push(position);
+  }
+  let jobCulture = elements2.join(" • ");
+  setJoboverview(jobCulture);
+};
+
 export const getContentFromLinkedInJobs = (
   setPostUrl,
   clearStateAndCity,
@@ -129,11 +184,10 @@ export const getContentFromLinkedInJobs = (
   setSource,
   setCompanyName,
   setCompanyDetails,
-  setRecruiterDetails
+  setRecruiterDetails,
+  setJoboverview
 ): void => {
   try {
-    let worktype: string | null = null;
-    let position: string | null = null;
     setPostUrl(window.location.href);
     clearStateAndCity();
 
@@ -183,6 +237,7 @@ export const getContentFromLinkedInJobs = (
 
     setSource("linkedin");
 
+    getAddationalInfo(setJoboverview);
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
       const companyNameEle = document.querySelector(

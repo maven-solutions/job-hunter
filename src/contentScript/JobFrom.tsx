@@ -56,6 +56,7 @@ const JobFrom = (props: any) => {
   const [jobTableData, setJobTableData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState({});
   const [recruiterDetails, setRecruiterDetails] = useState({});
+  const [jobOverview, setJoboverview] = useState("");
 
   const clearStateAndCity = () => {
     setState(null);
@@ -339,7 +340,8 @@ const JobFrom = (props: any) => {
         setSource,
         setCompanyName,
         setCompanyDetails,
-        setRecruiterDetails
+        setRecruiterDetails,
+        setJoboverview
       );
     }
     if (window.location.href.includes("indeed.")) {
