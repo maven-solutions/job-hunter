@@ -56,7 +56,7 @@ const JobFrom = (props: any) => {
   const [jobTableData, setJobTableData] = useState([]);
   const [companyDetails, setCompanyDetails] = useState({});
   const [recruiterDetails, setRecruiterDetails] = useState({});
-  const [jobOverview, setJoboverview] = useState("");
+  const [jobOverview, setJoboverview] = useState([]);
 
   const clearStateAndCity = () => {
     setState(null);
@@ -531,6 +531,7 @@ const JobFrom = (props: any) => {
       easyApply: easyApply?.value,
       recruiterDetails: recruiterDetails,
       companyDetails: companyDetails,
+      jobOverview,
     };
 
     if (jobStatus) {
