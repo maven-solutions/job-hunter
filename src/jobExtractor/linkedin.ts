@@ -132,6 +132,8 @@ export const getContentFromLinkedInJobs = (
   setRecruiterDetails
 ): void => {
   try {
+    let worktype: string | null = null;
+    let position: string | null = null;
     setPostUrl(window.location.href);
     clearStateAndCity();
 
