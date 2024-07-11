@@ -47,7 +47,7 @@ const useWebsiteDetection = (): [boolean, boolean] => {
     ) {
       setShowIcon(true);
       setShowAutofillPage(true);
-      return;
+      // return;
     }
 
     if (

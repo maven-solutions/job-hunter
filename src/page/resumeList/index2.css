@@ -1,0 +1,46 @@
+.ciautofill_single_resume {
+  display: flex !important;
+  gap: 15px;
+  border-bottom: 1px solid #dbdbdb;
+  padding: 15px 0;
+  align-items: center !important;
+}
+.ciautofill__radio__button__section {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50%;
+  border: 1px solid #4339f2 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ciautofill__radio__checked {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50%;
+  background-color: #4339f2 !important;
+  cursor: pointer;
+}
+.ciautofill_resume_name {
+  all: unset !important;
+  font-family: "Inter", sans-serif !important;
+  display: block;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  color: #000000 !important;
+  cursor: pointer !important;
+}
+.ciautofill__checkbox__section {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4339f2 !important;
+}
+.ciautofill__check__icon {
+  width: 13px !important;
+  color: #ffffff !important;
+}

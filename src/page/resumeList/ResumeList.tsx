@@ -11,6 +11,7 @@ import Height from "../../component/height/Height";
 import HeadingTitle from "../../component/heading/HeadingTitle";
 import AutofillFields from "./AutofillFields";
 import "./index.css";
+import "./index2.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 
@@ -27,35 +28,14 @@ const RenderName = (props: any) => {
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
-  const [showdropDown, setShowDropdown] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
   const [selectedResume, setSelectedResume] = useState(0);
-  // const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
-  // console.log("resume::", resumeList);
-  // useEffect(() => {
-  //   chrome.runtime.onMessage.addListener(function (
-  //     message,
-  //     sender,
-  //     sendResponse
-  //   ) {
-  //     if (message.action === "startAnimation") {
-  //       setAutoFilling(true);
-  //       // console.log("Start animation command received in background script");
-  //       // Code to start animation
-  //     } else if (message.action === "stopAnimation") {
-  //       // console.log("Stop animation command received in background script");
-  //       // Code to stop animation
-  //       setAutoFilling(false);
-  //     }
-  //   });
-  // }, []);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -72,15 +52,6 @@ const ResumeList = (props: any) => {
     }
   }, []);
 
-  const showActionMenu = (index: any) => {
-    setCurrentIndex(index);
-    setShowDropdown(!showdropDown);
-  };
-
-  const handleChangeSelecetedResume = (index: number) => {
-    setSelectedResume(index);
-  };
-
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
@@ -88,61 +59,60 @@ const ResumeList = (props: any) => {
       <Height height="10" />
 
       <WhiteCard>
-        {!autoFilling && (
-          <>
-            {resumeList.res_success &&
-              resumeList.applicantData.map((item, index) => {
-                return (
+        <div className="ciautofill__resmelist__wrapper">
+          <Height height="-10" />
+
+          {resumeList.res_success &&
+            resumeList.applicantData.map((item, index) => {
+              return (
+                <div
+                  className="ciautofill_single_resume"
+                  key={item.applicant.id}
+                >
                   <div
-                    className="ci_resume_list_section"
-                    key={item.applicant.id}
+                    className="ciautofill__radio__button__section"
+                    onClick={() => setSelectedResume(index)}
                   >
-                    <div className="ci_resume_item_left_section">
-                      <input
-                        className="ci_resume_radio_button"
-                        type="radio"
-                        name="resume"
-                        id={index}
-                        onChange={() => setSelectedResume(index)}
-                        checked={selectedResume === index}
-                      />
-                      <label
-                        htmlFor={index}
-                        className="ci_resume_radio_button_label"
-                      >
-                        <RenderName item={item} />
-                      </label>
-                      {selectedResume === index && (
-                        <div className="ci_radio_check_circle">
-                          <Check className="ci_check_icon" />
-                        </div>
-                      )}
+                    {selectedResume === index && (
+                      <div className="ciautofill__radio__checked" />
+                    )}
+                  </div>
+                  <span
+                    className="ciautofill_resume_name"
+                    onClick={() => setSelectedResume(index)}
+                  >
+                    <RenderName item={item} />
+                  </span>
+                  {selectedResume === index && (
+                    <div className="ciautofill__checkbox__section">
+                      <Check className="ciautofill__check__icon" />
                     </div>
-                    <div className="ext__tooltip__wrapper">
-                      <div className="ext__toolip__container">
-                        <div
-                          className="ext__toolip"
-                          onClick={() =>
-                            window.open(item.applicant.pdfUrl, "_blank")
-                          }
-                        >
-                          <Eye size={16} />
-                          <p className="ext__tooltip__text">Preview</p>
-                        </div>
+                  )}
+
+                  <div className="ext__tooltip__wrapper">
+                    <div className="ext__toolip__container">
+                      <div
+                        className="ext__toolip"
+                        onClick={() =>
+                          window.open(item.applicant.pdfUrl, "_blank")
+                        }
+                      >
+                        <Eye size={16} />
+                        <p className="ext__tooltip__text">Preview</p>
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            {resumeList.loading && <ResumeSkleton />}
-            <Height height="10" />
-            <AutofillFields
-              selectedResume={selectedResume}
-              content={content}
-              setAutoFilling={setAutoFilling}
-            />
-          </>
-        )}
+                </div>
+              );
+            })}
+          {resumeList.loading && <ResumeSkleton />}
+          <Height height="10" />
+          <AutofillFields
+            selectedResume={selectedResume}
+            content={content}
+            setAutoFilling={setAutoFilling}
+          />
+        </div>
 
         {autoFilling && (
           <>
