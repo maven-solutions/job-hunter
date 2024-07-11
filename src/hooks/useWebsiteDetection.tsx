@@ -47,7 +47,7 @@ const useWebsiteDetection = (): [boolean, boolean] => {
     ) {
       setShowIcon(true);
       setShowAutofillPage(true);
-      return;
+      // return;
     }
 
     if (
@@ -67,12 +67,14 @@ const useWebsiteDetection = (): [boolean, boolean] => {
     }
 
     // // some extra case
-    // if (
-    //   [".battelle.", ".oraclecloud."].some((domain) => url.includes(domain))
-    // ) {
-    //   setShowIcon(true);
-    //   setShowAutofillPage(true);
-    // }
+    if (
+      [".battelle.", ".oraclecloud.", ".fisglobal."].some((domain) =>
+        url.includes(domain)
+      )
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(true);
+    }
   }, []);
 
   return [showIcon, showAutofillPage];

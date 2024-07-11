@@ -97,5 +97,7 @@ export const getJobsFromDice = (dispatch): void => {
   dispatch(setJobSummary([employmentDetailsText, willingToSponsorText]));
 
   dispatch(setJobSource("Dice"));
-  dispatch(setJobFoundStatus(true));
+  if (titleElement) {
+    dispatch(setJobFoundStatus(true));
+  }
 };

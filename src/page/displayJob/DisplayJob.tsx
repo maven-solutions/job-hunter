@@ -31,6 +31,7 @@ const DisplayJob = (props: any) => {
   } = props;
 
   const [saveLoading, setSaveLoading] = useState<Boolean>(false);
+  const [showSummaryPage, setShowSummaryPage] = useState<Boolean>(false);
   const jobSlice: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
@@ -40,13 +41,94 @@ const DisplayJob = (props: any) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // setLoadSkleton(true);
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));
     }
-    // setTimeout(() => {
-    //   setLoadSkleton(false);
-    // }, 1000);
+  }, [window.location.href]);
+
+  useEffect(() => {
+    const URL = window.location.href;
+    console.log("url:::", URL);
+
+    if (
+      URL.toLowerCase().includes("linkedin.") &&
+      URL.toLowerCase().includes("jobs") &&
+      URL.toLowerCase().includes("collections")
+    ) {
+      setShowSummaryPage(true);
+    }
+    if (
+      URL.toLowerCase().includes("linkedin.") &&
+      URL.toLowerCase().includes("jobs") &&
+      URL.toLowerCase().includes("search")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL === "https://www.simplyhired.com/" ||
+      URL === "https://www.simplyhired.com" ||
+      URL === "www.simplyhired.com" ||
+      URL === "www.simplyhired.com/"
+    ) {
+      console.log("simp;yhired--");
+      setShowSummaryPage(true);
+    }
+    if (
+      URL.toLowerCase().includes("simplyhired.") &&
+      URL.toLowerCase().includes("search?q=")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("simplyhired.") &&
+      URL.toLowerCase().includes("job")
+    ) {
+      setShowSummaryPage(true);
+    }
+    if (
+      URL.toLowerCase().includes("indeed.") &&
+      URL.toLowerCase().includes("jk=")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("indeed.") &&
+      URL.toLowerCase().includes("homepage")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("dice.") &&
+      URL.toLowerCase().includes("job-detail")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("ziprecruiter.") &&
+      URL.toLowerCase().includes("jobs") &&
+      !URL.toLowerCase().includes("search")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("builtin.") &&
+      URL.toLowerCase().includes("job")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("glassdoor.") &&
+      URL.toLowerCase().includes("job")
+    ) {
+      setShowSummaryPage(true);
+    }
   }, [window.location.href]);
 
   const savejobs = () => {
@@ -130,11 +212,33 @@ const DisplayJob = (props: any) => {
         alreadySavedInfo={alreadySavedInfo}
         foruser
       />
-      {!jobSlice.title ? (
-        <Skleton />
-      ) : (
+
+      {showSummaryPage && !jobSlice.title && <Skleton />}
+
+      {showSummaryPage && jobSlice.title && (
         <WhiteCard hover onclick={() => setShowPage(SHOW_PAGE.jobDetailPage)}>
           <JobSummary />
+        </WhiteCard>
+      )}
+
+      {!showSummaryPage && (
+        <WhiteCard>
+          <div className="ci__no__job__section">
+            {" "}
+            <h3 className="ci_no_job_found_titile">No Job found </h3>
+            <picture>
+              <source
+                srcSet="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9d0/512.webp"
+                type="image/webp"
+              />
+              <img
+                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9d0/512.gif"
+                alt="🧐"
+                width="32"
+                height="32"
+              />
+            </picture>
+          </div>
         </WhiteCard>
       )}
 
