@@ -10,31 +10,6 @@ const Logo = (props: any) => {
   });
 
   const dispatch = useAppDispatch();
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [startY, setStartY] = useState<number>(0);
-  const [offsetY, setOffsetY] = useState<number>(0);
-  const draggableRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseDown = (e: any) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-    if (draggableRef.current) {
-      setOffsetY(draggableRef.current.offsetTop);
-    }
-  };
-
-  const handleMouseMove = (e: any) => {
-    if (!isDragging) return;
-
-    if (draggableRef.current) {
-      const newOffsetY = offsetY + e.clientY - startY;
-      draggableRef.current.style.top = `${newOffsetY}px`;
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
 
   const loadUser = () => {
     chrome.storage.local.get(["ci_user"]).then((result) => {
@@ -65,11 +40,7 @@ const Logo = (props: any) => {
     <div
       className={`job_circle_button ${jobFound && "ci-shake-logo"}`}
       role="button"
-      // ref={draggableRef}
       onClick={handlePage}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
     >
       {jobFound && <span className="job__post__detected">1</span>}
       <img src={chrome.runtime.getURL("logo.svg")} alt="logo-icon" />

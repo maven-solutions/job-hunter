@@ -29,7 +29,7 @@ export const getJobsFromIndeed = (dispatch): void => {
     );
     // Get the text content from the titleElement
     const text = titleElement?.textContent?.trim();
-    const updatedText = text.replace(" - job post", "");
+    const updatedText = text?.replace(" - job post", "");
 
     if (updatedText) {
       dispatch(setJobTitle(updatedText));
