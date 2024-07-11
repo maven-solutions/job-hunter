@@ -48,9 +48,8 @@ const DisplayJob = (props: any) => {
 
   useEffect(() => {
     const URL = window.location.href;
-    if (jobSlice.stage_data_success) {
-      dispatch(setSelectedStage(jobSlice?.stage_data[0]));
-    }
+    console.log("url:::", URL);
+
     if (
       URL.toLowerCase().includes("linkedin.") &&
       URL.toLowerCase().includes("jobs") &&
@@ -67,9 +66,12 @@ const DisplayJob = (props: any) => {
     }
 
     if (
-      URL.toLowerCase() === "https://www.simplyhired.com" ||
-      URL.toLowerCase() === "www.simplyhired.com"
+      URL === "https://www.simplyhired.com/" ||
+      URL === "https://www.simplyhired.com" ||
+      URL === "www.simplyhired.com" ||
+      URL === "www.simplyhired.com/"
     ) {
+      console.log("simp;yhired--");
       setShowSummaryPage(true);
     }
     if (
@@ -127,7 +129,7 @@ const DisplayJob = (props: any) => {
     ) {
       setShowSummaryPage(true);
     }
-  }, [window.location.href, jobSlice?.title]);
+  }, [window.location.href]);
 
   const savejobs = () => {
     setSaveLoading(true);

@@ -136,7 +136,9 @@ const getJobFromBuiltin = (dispatch, dom?: any, dom2?: any) => {
   }
 
   dispatch(setJobSource("Builtin"));
-  dispatch(setJobFoundStatus(true));
+  if (titleElement) {
+    dispatch(setJobFoundStatus(true));
+  }
 };
 
 const Builtin = (props: any) => {

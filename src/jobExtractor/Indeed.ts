@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useAppDispatch } from "../store/store";
 import {
   clearJobState,
   setJobCompany,
@@ -23,10 +22,9 @@ function containsNumber(sentence: string): boolean {
 }
 export const getJobsFromIndeed = (dispatch): void => {
   dispatch(setJobPostUrl(window.location.href));
+  let titleElement: any = "";
   setTimeout(() => {
-    const titleElement = document?.querySelector(
-      ".jobsearch-JobInfoHeader-title"
-    );
+    titleElement = document?.querySelector(".jobsearch-JobInfoHeader-title");
     // Get the text content from the titleElement
     const text = titleElement?.textContent?.trim();
     const updatedText = text?.replace(" - job post", "");
@@ -102,5 +100,7 @@ export const getJobsFromIndeed = (dispatch): void => {
   dispatch(setJobDesc(about?.innerHTML));
 
   dispatch(setJobSource("Indeed"));
-  dispatch(setJobFoundStatus(true));
+  if (titleElement) {
+    dispatch(setJobFoundStatus(true));
+  }
 };

@@ -62,6 +62,7 @@ const JobDetector = (props: any) => {
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
+  console.log("d::", jobDetailState);
 
   const [showIcon, showAutofillPage] = useWebsiteDetection();
 

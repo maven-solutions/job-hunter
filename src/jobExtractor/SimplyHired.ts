@@ -78,7 +78,10 @@ export const getJobFromSimplyhired = (dispatch): void => {
   dispatch(setJobCulture(workType));
   // dispatch(setJobSummary([payment]));
   dispatch(setSalary(payment));
-  dispatch(setJobFoundStatus(true));
+
+  if (titleElement) {
+    dispatch(setJobFoundStatus(true));
+  }
 
   const jobDescriptionEle = document.querySelector(
     '[data-testid="viewJobBodyJobFullDescriptionContent"]'
