@@ -105,6 +105,28 @@ const DisplayJob = (props: any) => {
     ) {
       setShowSummaryPage(true);
     }
+
+    if (
+      URL.toLowerCase().includes("ziprecruiter.") &&
+      URL.toLowerCase().includes("jobs") &&
+      !URL.toLowerCase().includes("search")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("builtin.") &&
+      URL.toLowerCase().includes("job")
+    ) {
+      setShowSummaryPage(true);
+    }
+
+    if (
+      URL.toLowerCase().includes("glassdoor.") &&
+      URL.toLowerCase().includes("job")
+    ) {
+      setShowSummaryPage(true);
+    }
   }, [window.location.href, jobSlice?.title]);
 
   const savejobs = () => {
