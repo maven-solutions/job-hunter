@@ -329,12 +329,13 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
-      ashbyhq(tempDiv ?? tempDivForFile, applicantData);
+
       textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+      ashbyhq(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();
