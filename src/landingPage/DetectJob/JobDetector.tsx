@@ -181,7 +181,6 @@ const JobDetector = (props: any) => {
   useSimplyhiredGlassdoorNoti();
   useTrackJobsFromWebsite(dispatch, setShowPage);
 
-  console.log({ infoOpen });
   return (
     <div className="content__script__section">
       {showIcon && showPage === "" && (
