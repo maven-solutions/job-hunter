@@ -534,6 +534,7 @@ const JobFrom = (props: any) => {
       recruiterDetails: recruiterDetails,
       companyDetails: companyDetails,
       jobOverview,
+      location,
     };
 
     if (jobStatus) {
