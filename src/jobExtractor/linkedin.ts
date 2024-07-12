@@ -130,7 +130,8 @@ export const getContentFromLinkedInJobs = (
   setCompanyName,
   setCompanyDetails,
   setRecruiterDetails,
-  setJoboverview
+  setJoboverview,
+  setLocation
 ): void => {
   try {
     setPostUrl(window.location.href);
@@ -159,6 +160,39 @@ export const getContentFromLinkedInJobs = (
     }, 500);
 
     // find posted date
+    //location
+    const locationText = document
+      .querySelector(
+        ".job-details-jobs-unified-top-card__primary-description-without-tagline "
+      )
+      ?.textContent?.trim()
+      ?.split("·")[1]
+      .trim();
+    if (locationText) {
+      setLocation(locationText);
+    }
+
+    const location2 = document.querySelector(
+      ".job-details-jobs-unified-top-card__tertiary-description"
+    );
+    const locationtext2: any = location2?.childNodes[1] ?? "";
+    if (locationtext2?.textContent?.trim()) {
+      setLocation(locationtext2?.textContent?.trim());
+    }
+
+    const loaction3Parent = document.querySelector(
+      ".job-details-jobs-unified-top-card__primary-description-container"
+    );
+
+    if (loaction3Parent) {
+      const allList = loaction3Parent.querySelectorAll(".tvm__text");
+      if (allList && allList.length > 0) {
+        const location = allList[0];
+        setLocation(location?.textContent?.trim());
+      }
+    }
+
+    // location end here
 
     const daysAgoEle = document?.querySelector("#job-details");
     const targetElement = document.querySelector("#job-details");

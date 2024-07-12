@@ -18,6 +18,7 @@ const JobFrom = (props: any) => {
   const [loading, setLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
   const [companyName, setCompanyName] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>(
     "<b>Job Description</b>"
@@ -341,7 +342,8 @@ const JobFrom = (props: any) => {
         setCompanyName,
         setCompanyDetails,
         setRecruiterDetails,
-        setJoboverview
+        setJoboverview,
+        setLocation
       );
     }
     if (window.location.href.includes("indeed.")) {
