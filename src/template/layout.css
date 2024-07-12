@@ -1,9 +1,9 @@
-body {
+/* body {
   all: unset;
   margin: 0;
   padding: 0;
   font-family: "Inter", "Montserrat", "monospace", sans-serif;
-}
+} */
 .job__detail__container {
   position: fixed;
   width: 452px !important;
