@@ -1,6 +1,15 @@
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
+function getTodayDateFormatted(): string {
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.toLocaleString("default", { month: "short" });
+  const year = today.getFullYear();
+
+  return `${day} ${month} ${year}`;
+}
+
 const fillGender = async (applicantData: Applicant) => {
   const gender = document.querySelector(
     ".CandidateField__inputWrapper--genderId"
@@ -136,9 +145,18 @@ const fillVeteran = async (applicantData: Applicant) => {
     }
   }
 };
+
+const fillTodayDate = async () => {
+  const date: any = document.querySelector('[name="dateAvailable"]');
+  if (date) {
+    date.value = getTodayDateFormatted();
+    handleValueChanges(date);
+  }
+};
 export const bamboohr = async (tempDiv: any, applicantData: Applicant) => {
   await fillGender(applicantData);
   await fillRace(applicantData);
   await fillDisability(applicantData);
   await fillVeteran(applicantData);
+  await fillTodayDate();
 };
