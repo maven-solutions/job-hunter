@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "../../config/axiosInstance";
-import { BASE_URL, STAGING_WEBSITE_URL } from "../../config/urlconfig";
+import { BASE_URL, WEBSITE_URL } from "../../config/urlconfig";
 import { createSelectOption, formatDateWhileUploading } from "./helper";
 import { uploadPDFPromptCollection } from "./uploadPDFPromptCollection";
 import moment from "moment";
@@ -1053,7 +1053,7 @@ function resumeGPTmainFunction(
                                 console.log({ responseData });
                                 setIsGenerating(false);
                                 window.open(
-                                  `${STAGING_WEBSITE_URL}/editor/${responseData?.data?.id}`,
+                                  `${WEBSITE_URL}/editor/${responseData?.data?.id}`,
                                   "_blank"
                                 );
                               } else {
@@ -1099,7 +1099,7 @@ function resumeGPTmainFunction(
         } else {
           alert("You have to login first");
           setIsGenerating(false);
-          window.open(`${STAGING_WEBSITE_URL}`, "_blank");
+          window.open(`${WEBSITE_URL}`, "_blank");
         }
       }
     };
