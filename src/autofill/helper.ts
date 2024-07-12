@@ -321,19 +321,21 @@ export const detectInputAndFillData = async (
     // careers.gehealthcare a reasearch needed
     if (
       window.location.href.includes(".gehealthcare.") ||
-      window.location.href.includes(".fisglobal.")
+      window.location.href.includes(".fisglobal.") ||
+      window.location.href.includes(".ebayinc.")
     ) {
       await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }
 
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
-      ashbyhq(tempDiv ?? tempDivForFile, applicantData);
+
       textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+      ashbyhq(tempDiv ?? tempDivForFile, applicantData);
     }
 
     stopLoading();

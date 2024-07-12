@@ -216,6 +216,7 @@ export const getJobFromZipRecruiter = (dispatch): void => {
   }
 
   dispatch(setJobSource("ZipRecruiter"));
-
-  dispatch(setJobFoundStatus(true));
+  if (zipDom || zipDom2 || zipDom3) {
+    dispatch(setJobFoundStatus(true));
+  }
 };

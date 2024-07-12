@@ -290,10 +290,62 @@ const fillEducation = async (educationData: Education[]) => {
   }
 };
 
-export const greenHouse = (tempDiv: any, applicantData: Applicant) => {
+const fillCheckobx = (applicantData: Applicant) => {
+  const allLabel: any = document.querySelectorAll("label");
+  if (!allLabel || allLabel.length === 0) {
+    return;
+  }
+  for (const label of allLabel) {
+    // for gender
+    if (
+      fromatStirngInLowerCase(label?.textContent) ===
+      fromatStirngInLowerCase(applicantData.gender)
+    ) {
+      label.click();
+      handleValueChanges(label);
+    }
+
+    // race
+
+    if (
+      fromatStirngInLowerCase(label?.textContent)?.includes(
+        fromatStirngInLowerCase(applicantData.race)
+      )
+    ) {
+      label.click();
+      handleValueChanges(label);
+    }
+
+    // veteran
+    if (
+      fromatStirngInLowerCase(label?.textContent)?.includes(
+        fromatStirngInLowerCase("I am a veteran")
+      ) &&
+      (applicantData.veteran_status === 1 ||
+        applicantData.veteran_status === 3 ||
+        applicantData.veteran_status === 4)
+    ) {
+      label.click();
+      handleValueChanges(label);
+    }
+
+    if (
+      fromatStirngInLowerCase(label?.textContent)?.includes(
+        fromatStirngInLowerCase("I am not a veteran")
+      ) &&
+      (applicantData.veteran_status === 2 || applicantData.veteran_status === 5)
+    ) {
+      label.click();
+      handleValueChanges(label);
+    }
+  }
+};
+
+export const greenHouse = async (tempDiv: any, applicantData: Applicant) => {
   checkAdultAge(applicantData);
   usWorkAuthorization(applicantData);
   sponsorship(applicantData);
   immigrationsponsorship(applicantData);
   fillEducation(applicantData.education);
+  fillCheckobx(applicantData);
 };

@@ -132,7 +132,9 @@ const getJobFromGlassdoor = (dispatch): void => {
   }
 
   dispatch(setJobSource("Glassdoor"));
-  dispatch(setJobFoundStatus(true));
+  if (titleElement || titleElement2) {
+    dispatch(setJobFoundStatus(true));
+  }
 };
 
 const Glassdoor = (props: any) => {

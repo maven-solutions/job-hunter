@@ -139,7 +139,6 @@ const getAddationalInfo = (dispatch) => {
   dispatch(setJobType(workplacetype));
   dispatch(setJobRelatedInfo(firstEle));
   dispatch(setJobSummary([secondLiText]));
-  dispatch(setJobFoundStatus(true));
 };
 
 function sanitizeHtml(description: string): string {
@@ -365,6 +364,10 @@ export const getContentFromLinkedInJobs = (dispatch): void => {
     // for comany details---
     getCompanyDetails(dispatch);
     getHiringTeamDetails(dispatch);
+
+    if (jobsBody[0]?.textContent.trim()) {
+      dispatch(setJobFoundStatus(true));
+    }
     // job - details - jobs - unified - top - card__company - name;
   } catch (error) {
     console.log(error);

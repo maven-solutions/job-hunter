@@ -1,57 +1,6 @@
-.ci_resume_list_section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center !important;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #dbdbdb;
-  padding-bottom: 10px;
-}
-.ci_resume_item_left_section {
-  display: flex;
-  gap: 20px;
-  align-items: center !important;
-}
-.ci_resume_item_left_section input[type="radio"] {
-  /* all: unset !important; */
-  height: 18px !important;
-  width: 18px !important;
-  cursor: pointer;
-  accent-color: #0145fd !important;
-}
-/* .ci_resume_radio_button {
-  all: unset !important;
-  height: 15px;
-  width: 15px;
-  cursor: pointer;
-  accent-color: #0145fd !important;
-} */
-.ci_resume_radio_button_label {
-  color: #000;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-  font-family: "Inter";
-  cursor: pointer;
-}
-.ci_radio_check_circle {
-  height: 18px;
-  width: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0fc100 !important;
-}
-.ci_check_icon {
-  color: #ffffff;
-}
-.ext__uploaded__resumes__wrapper
-  .uploaded__resumes
-  .uploaded__resume:last-child {
-  padding-bottom: 0;
-  margin-bottom: 0;
-  border-bottom: none;
+.ext__tooltip__wrapper {
+  display: flex !important;
+  margin-left: auto !important;
 }
 .ext__tooltip__wrapper .ext__toolip__container {
   margin-left: 10px;
@@ -203,39 +152,14 @@
 .ext__autofill__fields__wrapper {
   margin-top: 18px;
 }
-.handleBorder {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #efefef;
-}
-.ext__autofill__fields__wrapper .autofill__fields__header {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  cursor: pointer;
-  font-family: "Inter", sans-serif;
-}
-.ext__autofill__fields__wrapper .autofill__fields__header p {
-  color: #000;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px;
-  font-family: "Inter", sans-serif;
-}
-.ext__autofill__fields__wrapper .autofill__fields__header span svg {
-  color: #bababa;
-  stroke-width: 1.5px;
-}
+
 .ext__autofill__fields__wrapper .autofill__btn__wrapper {
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.ext__autofill__fields__wrapper .handle__btn__wrapper {
-  margin: 0;
-  margin-top: 18px;
-}
+
 .ext__autofill__fields__wrapper .autofill__btn__wrapper .autofill__btn {
   padding: 8px 25px;
   border-radius: 5px;
@@ -252,31 +176,16 @@
   font-family: "Inter", sans-serif;
 }
 
-.ext__autofill__fields__wrapper .autofill__btn__wrapper .logout__btn {
-  all: unset;
-  cursor: pointer;
-  font-family: "Inter", sans-serif;
-  display: flex;
-  align-items: center;
-  color: #5f5f5f;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px;
-}
-.ext__autofill__fields__wrapper .autofill__btn__wrapper .logout__btn svg {
-  height: 18px;
-  margin-right: 5px;
-}
-.ext__autofill__fields__wrapper .autofill__btn__wrapper .disable {
+.ext__autofill__fields__wrapper
+  .autofill__btn__wrapper
+  .autofill__button__disable {
   cursor: not-allowed;
-  background: #e2e2e2;
-  color: #808080;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
 }
-.ci_form_filling_text {
-  display: block;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 500;
-  color: #000000;
+
+.ext__autofill__fields__wrapper .autofill__btn__wrapper::disable {
+  cursor: not-allowed;
+  background: #e2e2e2 !important;
+  color: #808080 !important;
 }

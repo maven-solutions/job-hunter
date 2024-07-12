@@ -148,19 +148,17 @@ const AutofillFields = (props: any) => {
   };
 
   return (
-    <div className={`ext__autofill__fields__wrapper `}>
-      <div className={`autofill__btn__wrapper  `}>
+    <div className="ext__autofill__fields__wrapper">
+      <div className="autofill__btn__wrapper">
         <button
-          className={`autofill__btn ${resumeList.res_success ? "" : "disable"}`}
+          className={`autofill__btn ${
+            resumeList.res_success ? "" : "autofill__button__disable"
+          }`}
           onClick={() => handleAutofill()}
           disabled={resumeList.res_success ? false : true}
         >
           Auto Fill
         </button>
-
-        {/* <button className={`autofill__btn `} disabled>
-          Save jobs
-        </button> */}
       </div>
     </div>
   );
