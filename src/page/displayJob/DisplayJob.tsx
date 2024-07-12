@@ -225,8 +225,20 @@ const DisplayJob = (props: any) => {
         <WhiteCard>
           <div className="ci__no__job__section">
             {" "}
-            <h3 className="ci_no_job_found_titile">No Job found </h3>
+            {/* <h3 className="ci_no_job_found_titile">No Job found </h3> */}
             <picture>
+              <img
+                src={chrome.runtime.getURL("noJobImage.svg")}
+                alt="no jobs"
+                width="130"
+                // height="auto"
+              />
+            </picture>
+            <p className="ci_no_job_found_p">
+              No jobs detected! <br />
+              Try navigating to jobs page.
+            </p>
+            {/* <picture>
               <source
                 srcSet="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9d0/512.webp"
                 type="image/webp"
@@ -237,106 +249,110 @@ const DisplayJob = (props: any) => {
                 width="32"
                 height="32"
               />
-            </picture>
+            </picture> */}
           </div>
         </WhiteCard>
       )}
 
-      <Height height="15" />
-      <WhiteCard>
-        <span className="ci_job_stage_title_new">
-          <div>Application Stage</div>
-        </span>
-        <div className="aaaaaaaaaa">
-          <Select
-            className="react-select-container"
-            classNamePrefix="react-select"
-            options={jobSlice.stage_data}
-            styles={{
-              control: (baseStyles, state) => ({
-                ...baseStyles,
-                fontSize: 14,
-                padding: "-2px 10px",
-                borderRadius: "5px",
-                width: "100%",
-                cursor: "pointer",
-              }),
-              menu: (provided, state) => ({
-                ...provided,
-                zIndex: 9999, // Increase the z-index if necessary
-              }),
-              menuList: (provided, state) => ({
-                ...provided,
-                maxHeight: "150px", // Adjust the maximum height as needed
-                overflowY: "auto",
-                "&::-webkit-scrollbar": {
-                  width: "10px",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  borderRadius: "10px",
-                  width: "5px",
-                  background: "#e2e2e2", // Adjust as needed
-                },
-                "&::-webkit-scrollbar-track": {
-                  background: "#f8f8f8", // Adjust as needed
-                  borderRadius: "10px",
-                  width: "7px",
-                },
-              }),
-              option: (provided, state) => ({
-                ...provided,
-                fontSize: 14,
-                background: state.isSelected ? "#4339f2" : "white",
-                border: "none",
-                cursor: "pointer",
-              }),
-            }}
-            value={jobSlice?.selectedStage}
-            // defaultValue={jobSlice?.stage_data[0]}
-            placeholder="Select Application Stage"
-            onChange={(option) => {
-              dispatch(setSelectedStage(option));
-            }}
-          />
-        </div>
-      </WhiteCard>
-      <Height height="15" />
-      <div className="ci_job_summary_button_section">
-        <PrimaryButton
-          buttonWidth="145"
-          loading={false}
-          outline
-          text="View Job Board"
-          onclick={viewJobBoard}
-        />
-        <div style={{ margin: "0 5px" }} />
-        {!jobSlice.check_job_res_success && (
-          <PrimaryButton
-            buttonWidth="140"
-            loading={saveLoading}
-            text={jobSlice?.res_success.add_job ? "Saved" : "Save Job"}
-            loadingText="Saving..."
-            onclick={savejobs}
-            disabled={
-              jobSlice?.res_success.add_job ||
-              jobSlice?.loading.add_job ||
-              jobSlice.check_job_res_success ||
-              !jobSlice.title ||
-              !jobSlice.description
-            }
-          />
-        )}
-        {jobSlice.check_job_res_success && (
-          <PrimaryButton
-            buttonWidth="140"
-            loading={saveLoading}
-            text={"Already Saved"}
-            loadingText="Saving..."
-            onclick={savejobs}
-            disabled={true}
-          />
-        )}
-      </div>
+      {showSummaryPage && (
+        <>
+          <Height height="15" />
+          <WhiteCard>
+            <span className="ci_job_stage_title_new">
+              <div>Application Stage</div>
+            </span>
+            <div className="aaaaaaaaaa">
+              <Select
+                className="react-select-container"
+                classNamePrefix="react-select"
+                options={jobSlice.stage_data}
+                styles={{
+                  control: (baseStyles, state) => ({
+                    ...baseStyles,
+                    fontSize: 14,
+                    padding: "-2px 10px",
+                    borderRadius: "5px",
+                    width: "100%",
+                    cursor: "pointer",
+                  }),
+                  menu: (provided, state) => ({
+                    ...provided,
+                    zIndex: 9999, // Increase the z-index if necessary
+                  }),
+                  menuList: (provided, state) => ({
+                    ...provided,
+                    maxHeight: "150px", // Adjust the maximum height as needed
+                    overflowY: "auto",
+                    "&::-webkit-scrollbar": {
+                      width: "10px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      borderRadius: "10px",
+                      width: "5px",
+                      background: "#e2e2e2", // Adjust as needed
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      background: "#f8f8f8", // Adjust as needed
+                      borderRadius: "10px",
+                      width: "7px",
+                    },
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    fontSize: 14,
+                    background: state.isSelected ? "#4339f2" : "white",
+                    border: "none",
+                    cursor: "pointer",
+                  }),
+                }}
+                value={jobSlice?.selectedStage}
+                // defaultValue={jobSlice?.stage_data[0]}
+                placeholder="Select Application Stage"
+                onChange={(option) => {
+                  dispatch(setSelectedStage(option));
+                }}
+              />
+            </div>
+          </WhiteCard>
+          <Height height="15" />
+          <div className="ci_job_summary_button_section">
+            <PrimaryButton
+              buttonWidth="145"
+              loading={false}
+              outline
+              text="View Job Board"
+              onclick={viewJobBoard}
+            />
+            <div style={{ margin: "0 5px" }} />
+            {!jobSlice.check_job_res_success && (
+              <PrimaryButton
+                buttonWidth="140"
+                loading={saveLoading}
+                text={jobSlice?.res_success.add_job ? "Saved" : "Save Job"}
+                loadingText="Saving..."
+                onclick={savejobs}
+                disabled={
+                  jobSlice?.res_success.add_job ||
+                  jobSlice?.loading.add_job ||
+                  jobSlice.check_job_res_success ||
+                  !jobSlice.title ||
+                  !jobSlice.description
+                }
+              />
+            )}
+            {jobSlice.check_job_res_success && (
+              <PrimaryButton
+                buttonWidth="140"
+                loading={saveLoading}
+                text={"Already Saved"}
+                loadingText="Saving..."
+                onclick={savejobs}
+                disabled={true}
+              />
+            )}
+          </div>
+        </>
+      )}
     </Layout>
   );
 };

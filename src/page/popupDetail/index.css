@@ -4,45 +4,118 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  border-top: 1px solid #ffebb9;
-  padding: 15px 0;
-  background: #ffebb9;
+  border-top: 1px solid #dad7fe;
+  padding: 10px 0;
+  /* background: #ffebb9; */
   margin-bottom: 0;
 }
+.ci_popup_footer_icon {
+  border-radius: 6px;
+  padding: 4px 6px;
+  /* transition: all 0.3s ease-in-out; */
+  border: 1px solid transparent;
+}
+.ci_popup_footer_icon:hover,
+.ci_popup_footer_icon--active {
+  color: #4339f2;
+  background-color: #dad7fe;
+}
 .ci_popup_footer_icon_home {
-  width: 25px;
-  color: #ffb200;
+  width: 20px;
+  /* color: #ffb200; */
+
   margin-left: 20px;
   cursor: pointer;
 }
 .ci_popup_footer_icon_user {
-  width: 25px;
+  min-width: 20px;
+  gap: 8px;
   color: #5e5b5b;
   margin-right: 20px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.ci_popup_footer_icon_user span {
+  /* width: 0px;
+  opacity: 0; */
+  display: none;
 }
 .ci_popup_footer_icon_user:hover {
-  color: #ffb200;
+  background-color: transparent !important;
+  border: 1px solid #4339f2;
+}
+.ci_popup_footer_icon_user:hover span {
+  display: block;
+  /* width: fit-content;
+  opacity: 1; */
 }
 .ci_popup_content_section {
-  padding: 15px;
-  background-color: #fff4d9 !important;
+  /* padding: 15px 0; */
+  padding: 10px 0;
+  /* background-color: #fff4d9 !important; */
+}
+.ci_popup_all_list_grid {
+  /* background-color: red; */
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ci_popup_all_list_grid_item {
+  padding: 10px;
+  /* background-color: greenyellow; */
+  background-color: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ci_popup_all_list_grid_item:hover {
+  background-color: #e9f2fe;
+}
+.ci_popup_all_list_grid_item svg {
+  height: 45px;
+  width: 45px;
+  color: #4339f2;
+  /* color: #101828; */
+}
+.ci_popup_all_list_grid_item:hover svg {
+  /* color: #4339f2; */
 }
 .ci_popup_all_list_section {
   border-radius: 8px;
-  border: 1px solid #ffb200;
+  /* border: 1px solid #ffb200; */
+  display: flex;
+  flex-direction: column;
 }
 .ci_popup_list {
+  all: unset;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 400;
   font-family: "Inter", sans-serif;
-  color: #000000;
-  border-bottom: 1px solid #ffb200;
+  color: #101828;
+  /* border-bottom: 1px solid #ffb200; */
   padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
 }
-.ci_popup_list:hover {
-  color: #ffb200;
+.ci_popup_list svg {
+  height: 18px;
+  width: 18px;
+}
+.ci_popup_list:hover,
+.ci_popup_list:hover svg {
+  /* color: #ffb200; */
+  background: #f9fafb;
+  color: #4339f2;
 }
 
 .ci_popup_list_title {

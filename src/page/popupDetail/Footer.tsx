@@ -14,8 +14,14 @@ const Footer = () => {
 
   return (
     <div className="ci_popup_footer_section">
-      <Home className="ci_popup_footer_icon_home" />
-      <User className="ci_popup_footer_icon_user" onClick={hanldeUserClick} />
+      <Home className="ci_popup_footer_icon ci_popup_footer_icon_home ci_popup_footer_icon--active" />
+      <div
+        onClick={hanldeUserClick}
+        className="ci_popup_footer_icon ci_popup_footer_icon_user"
+      >
+        <span> Profile</span>
+        <User />
+      </div>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import "./index.css";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 import Footer from "./Footer";
-import { File, PlusCircle } from "react-feather";
+import { Briefcase, File, FileText, PlusCircle, Scissors } from "react-feather";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import Height from "../../component/height/Height";
 
@@ -14,24 +14,59 @@ const PopUpDetailPage = (props: any) => {
       {" "}
       <Layout setShowPage={setShowPage} popup={popup} popupDetail>
         <div className="ci_popup_content_section">
-          <div className="ci__popup__content__image__section">
+          {/* <div className="ci__popup__content__image__section">
             {" "}
             <img src={chrome.runtime.getURL("jobtrack.svg")} alt="hub-icon" />
-          </div>
+          </div> */}
           {/* <div className="ci_popup_list_section">
             <div className="ci_popup_list_underline">
               <PlusCircle className="ci_popup_list_icon" />
               <span className="ci_popup_list_title"> New Resume</span>{" "}
             </div>
           </div> */}
-          <Height height="15" />
+          {/* <Height height="15" /> */}
+          <div className="ci_popup_all_list_grid">
+            <div className="ci_popup_all_list_grid_item">
+              <FileText />
+              New <br />
+              Resume
+            </div>
+            <div className="ci_popup_all_list_grid_item">
+              <File />
+              New <br />
+              Cover Letter
+            </div>
 
-          <div className="ci_popup_all_list_section">
-            <div className="ci_popup_list">New Cover Letter</div>
-            <div className="ci_popup_list">New Resume</div>
-            <div className="ci_popup_list">Tailor To Job</div>
-            <div className="ci_popup_list">Track Your Job</div>
+            <div className="ci_popup_all_list_grid_item">
+              <Scissors />
+              Tailor
+              <br /> To Job
+            </div>
+            <div className="ci_popup_all_list_grid_item">
+              <Briefcase />
+              Track <br />
+              Your Job
+            </div>
           </div>
+
+          {/* <div className="ci_popup_all_list_section">
+            <div className="ci_popup_list">
+              <File />
+              New Cover Letter
+            </div>
+            <div className="ci_popup_list">
+              <FileText />
+              New Resume
+            </div>
+            <div className="ci_popup_list">
+              <Scissors />
+              Tailor To Job
+            </div>
+            <div className="ci_popup_list">
+              <Briefcase />
+              Track Your Job
+            </div>
+          </div> */}
 
           {/* <PrimaryButton
             type="button"
