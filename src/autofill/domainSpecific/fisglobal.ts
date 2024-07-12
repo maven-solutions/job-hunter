@@ -1,11 +1,11 @@
 import { Applicant } from "../data";
-import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
 const fillDisability = async (applicantData: Applicant) => {
+  await delay(500);
   const disability = document.querySelector(
     '[id="disability_heading_self_identity.disabilityStatus"]'
   );
-
   if (!disability) {
     return;
   }
@@ -18,6 +18,7 @@ const fillDisability = async (applicantData: Applicant) => {
       ) {
         label.click();
         handleValueChanges(label);
+        return;
       }
 
       if (
@@ -26,6 +27,7 @@ const fillDisability = async (applicantData: Applicant) => {
       ) {
         label.click();
         handleValueChanges(label);
+        return;
       }
     }
   }
