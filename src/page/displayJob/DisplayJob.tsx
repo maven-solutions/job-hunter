@@ -204,7 +204,11 @@ const DisplayJob = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage} showPage={showPage}>
+    <Layout
+      setShowPage={setShowPage}
+      showPage={showPage}
+      firstBgWidth={showSummaryPage ? "" : 75}
+    >
       <Notification
         savedNotification={savedNotification}
         setSavedNotification={setSavedNotification}
