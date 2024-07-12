@@ -40,12 +40,17 @@ function handleDomChanges(mutationsList, observer) {
 function resumeGPTmainFunction(
   setIsGenerating: any,
   isGenerating: any,
-  authState: any
+  authState: any,
+  setInfoOpen: any
 ) {
   console.log({ authState });
   function isEmpty(obj: any) {
     return Object.entries(obj).length === 0;
   }
+
+  const handleInfoClick = () => {
+    setInfoOpen(true);
+  };
 
   const checkIfSubscribedOrUnSubscribed = () => {
     const stripeSubscription = authState?.ci_user?.stripeSubscriptionType;
@@ -124,17 +129,14 @@ function resumeGPTmainFunction(
         if (token) {
           setIsGenerating(true);
           try {
-            const listResponse = await fetch(
-             `${BASE_URL}/applicants`,
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Access-Control-Allow-Origin": "*",
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
+            const listResponse = await fetch(`${BASE_URL}/applicants`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                Authorization: `Bearer ${token}`,
+              },
+            });
             // console.log({ listResponse });
             if (listResponse.ok) {
               const responseData = await listResponse.json();
@@ -1198,9 +1200,22 @@ function resumeGPTmainFunction(
         // Add event listener for the button click
         buttonElement.addEventListener("click", handleClick);
 
+        const additionalIcon = document.createElement("img");
+        additionalIcon.src = chrome.runtime.getURL("info-icon.svg"); // Ensure the path to your image is correct
+        additionalIcon.style.width = "28px"; // Adjust size as needed
+        additionalIcon.style.height = "28px";
+        additionalIcon.style.marginLeft = "5px"; // 5px gap between button and new icon
+        additionalIcon.style.cursor = "pointer";
+        additionalIcon.addEventListener("click", handleInfoClick);
+
         // Create a new div element to embed the button
         const newDivElement = document.createElement("div");
+        newDivElement.style.display = "flex"; // Flexbox for alignment
+        newDivElement.style.gap = "3px"; // Flexbox for alignment
+        newDivElement.style.alignItems = "center"; // Center items vertically
+
         newDivElement.appendChild(buttonElement);
+        newDivElement.appendChild(additionalIcon);
 
         // Append the new div element to the target container
         divToEmbedInto.appendChild(newDivElement);

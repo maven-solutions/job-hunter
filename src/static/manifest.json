@@ -66,7 +66,9 @@
         "login.svg",
         "light-loader.svg",
         "dark-loader.svg",
-        "jobtrack.svg"
+        "jobtrack.svg",
+        "info-icon.svg",
+        "icon-cross.png"
       ],
       "matches": ["<all_urls>"]
     }
