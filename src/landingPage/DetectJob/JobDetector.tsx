@@ -44,6 +44,7 @@ import useHpeObserver from "../../hooks/observer/useHpeObserver";
 import useConcentrixObserver from "../../hooks/observer/useConcentrixObserver";
 import useZimmerbiometObserver from "../../hooks/observer/useZimmerbiometObserver";
 import useFisglobalObserver from "../../hooks/observer/useFisglobalObserver";
+import ResumeGptInfoModal from "./GptInfoModal";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -54,6 +55,7 @@ const JobDetector = (props: any) => {
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
   const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const [isGenerating, setIsGenerating] = useState<Boolean>(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -166,8 +168,14 @@ const JobDetector = (props: any) => {
 
   useEffect(() => {
     if (window.location.href.includes("chatgpt.")) {
-      resumeGPTmainFunction(setIsGenerating, isGenerating, authState);
+      resumeGPTmainFunction(
+        setIsGenerating,
+        isGenerating,
+        authState,
+        setInfoOpen
+      );
     }
+    setInfoOpen(false);
   }, [window.location.href, isGenerating]);
   // CUSTOM HOOK TO ADD CUSTOM BUTTON ON WEBSITE
   useSimplyhiredGlassdoorNoti();
@@ -220,6 +228,7 @@ const JobDetector = (props: any) => {
       {website === SUPPORTED_WEBSITE.glassdoor && (
         <Glassdoor setShowPage={setShowPage} />
       )}
+      <ResumeGptInfoModal setInfoOpen={setInfoOpen} infoOpen={infoOpen} />
     </div>
   );
 };

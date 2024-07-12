@@ -1,0 +1,66 @@
+.resume-gpt-container {
+  max-width: 860px;
+  padding: 0px 10px 0px 10px;
+  /* background-color: #fff; */
+  /* border-radius: 8px; */
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+
+  ol,
+  ul {
+    padding: 0px 15px;
+    b {
+      font-size: 16px;
+    }
+  }
+
+  ul {
+    li {
+      list-style: circle;
+    }
+  }
+
+  li {
+    margin: 10px 0;
+    line-height: 1.6;
+  }
+
+  a {
+    color: #0245fd;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .highlight {
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: monospace;
+  }
+
+  .button {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    width: max-content;
+    margin: 20px auto;
+    padding: 13px 20px;
+    background-color: #0245fd;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+
+  .button:hover {
+    background-color: #215bf9;
+    text-decoration: none;
+  }
+}
