@@ -47,7 +47,7 @@ const ResumeGptInfoModal = ({ setInfoOpen, infoOpen }) => {
       padding: "15px 0px",
       color: "#333",
       maxHeight: "90vh",
-      overflowY: "auto",
+      overflowY: "auto" as "auto" | "hidden" | "scroll" | "visible",
     },
   };
 
