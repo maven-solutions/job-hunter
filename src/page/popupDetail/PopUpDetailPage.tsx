@@ -6,9 +6,24 @@ import Footer from "./Footer";
 import { Briefcase, File, FileText, PlusCircle, Scissors } from "react-feather";
 import PrimaryButton from "../../component/primaryButton/PrimaryButton";
 import Height from "../../component/height/Height";
+import { WEBSITE_URL } from "../../config/urlconfig";
 
 const PopUpDetailPage = (props: any) => {
   const { setShowPage, popup } = props;
+
+  const hanldeNewResume = () => {
+    window.open(`${WEBSITE_URL}/select-resume-template/v2`, "_blank");
+  };
+  const hanldeNewCoverLetter = () => {
+    window.open(`${WEBSITE_URL}/select-cover-template/v2`, "_blank");
+  };
+
+  const hanldeJobTracker = () => {
+    window.open(`${WEBSITE_URL}/v2/job-tracker`, "_blank");
+  };
+  const hanldeJobTailor = () => {
+    window.open(`${WEBSITE_URL}/resume/v2`, "_blank");
+  };
   return (
     <>
       {" "}
@@ -26,23 +41,35 @@ const PopUpDetailPage = (props: any) => {
           </div> */}
           {/* <Height height="15" /> */}
           <div className="ci_popup_all_list_grid">
-            <div className="ci_popup_all_list_grid_item">
+            <div
+              className="ci_popup_all_list_grid_item"
+              onClick={hanldeNewResume}
+            >
               <FileText />
               New <br />
               Resume
             </div>
-            <div className="ci_popup_all_list_grid_item">
+            <div
+              className="ci_popup_all_list_grid_item"
+              onClick={hanldeNewCoverLetter}
+            >
               <File />
               New <br />
               Cover Letter
             </div>
 
-            <div className="ci_popup_all_list_grid_item">
+            <div
+              className="ci_popup_all_list_grid_item"
+              onClick={hanldeJobTailor}
+            >
               <Scissors />
               Tailor
               <br /> To Job
             </div>
-            <div className="ci_popup_all_list_grid_item">
+            <div
+              className="ci_popup_all_list_grid_item"
+              onClick={hanldeJobTracker}
+            >
               <Briefcase />
               Track <br />
               Your Job
