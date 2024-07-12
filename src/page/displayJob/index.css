@@ -24,9 +24,11 @@
 }
 .ci__no__job__section {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  padding: 10px;
 }
 .ci_no_job_found_titile {
   all: unset;
@@ -35,4 +37,7 @@
   text-align: center;
   font-weight: 600;
   font-size: 16px;
+}
+.ci_no_job_found_p {
+  text-align: center;
 }
