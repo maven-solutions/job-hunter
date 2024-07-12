@@ -62,7 +62,8 @@ const PopUpDetailPage = (props: any) => {
               className="ci_popup_all_list_grid_item"
               onClick={hanldeJobTailor}
             >
-              <Scissors />
+              {/* <Scissors /> */}
+              <img src={chrome.runtime.getURL("tailoredIcon.svg")} width={45} />
               Tailor
               <br /> To Job
             </div>

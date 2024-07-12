@@ -67,7 +67,8 @@
         "light-loader.svg",
         "dark-loader.svg",
         "jobtrack.svg",
-        "noJobImage.svg"
+        "noJobImage.svg",
+        "tailoredIcon.svg"
       ],
       "matches": ["<all_urls>"]
     }
