@@ -111,7 +111,7 @@ const DisplayJob = (props: any) => {
     if (
       URL.toLowerCase().includes("ziprecruiter.") &&
       URL.toLowerCase().includes("jobs") &&
-      !URL.toLowerCase().includes("search")
+      URL.toLowerCase().includes("jobs-search")
     ) {
       setShowSummaryPage(true);
     }

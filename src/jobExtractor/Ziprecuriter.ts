@@ -105,6 +105,16 @@ const getJobsFromZipRecuriter2 = (dispatch, zipDom: any) => {
 };
 
 const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
+  const titleEle = zipDom.querySelector("a");
+  const title = titleEle?.textContent?.trim() ?? "";
+  dispatch(setJobTitle(title));
+
+  let companyEle = zipDom.querySelector('[data-testid="job-card-company"]');
+  if (companyEle) {
+    const inputString = companyEle?.textContent?.trim();
+    dispatch(setJobCompany(inputString));
+  }
+
   const img = zipDom.querySelector("img");
   if (img) {
     const url = removeDynamicPart(img.src);
@@ -120,6 +130,15 @@ const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
       dispatch(setJobLocation(address));
     }
   }
+
+  // const jobDescriptionEle = zipDom.querySelector(
+  //   ".relative.flex.flex-col.gap-24"
+  // );
+  // if (jobDescriptionEle) {
+  //   const description = jobDescriptionEle?.innerHTML;
+  //   // dispatch(setJobDesc(description));
+  // }
+
   const parentElement = location.parentNode;
   const childNodes = parentElement.childNodes;
 
@@ -198,11 +217,16 @@ const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
 
 export const getJobFromZipRecruiter = (dispatch): void => {
   const zipDom = document.querySelector('[data-testid="right-pane"]');
+  console.log("zipDom::", zipDom);
 
   const zipDom2 = document.querySelector(".job_details");
+  console.log("zipDom2::", zipDom2);
+
   const zipDom3 = document.querySelector(
     ".job_result_wrapper.job_result_selected"
   );
+  console.log("zipDom3::", zipDom3);
+
   if (zipDom) {
     getJobsFromZipRecuriter1(dispatch, zipDom);
   }
