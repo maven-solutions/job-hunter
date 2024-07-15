@@ -322,7 +322,8 @@ export const detectInputAndFillData = async (
     if (
       window.location.href.includes(".gehealthcare.") ||
       window.location.href.includes(".fisglobal.") ||
-      window.location.href.includes(".ebayinc.")
+      window.location.href.includes(".ebayinc.") ||
+      window.location.href.includes(".freedommortgage.")
     ) {
       await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }
