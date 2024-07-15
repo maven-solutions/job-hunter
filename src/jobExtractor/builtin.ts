@@ -11,7 +11,9 @@ export const getJobFromBuiltin = (
   setJobDescription: any,
   setSource: any,
   dom?: any,
-  dom2?: any
+  dom2?: any,
+  setJoboverview?: any,
+  setLocation?: any
 ) => {
   setPostUrl(window.location.href);
 

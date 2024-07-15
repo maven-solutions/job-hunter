@@ -321,7 +321,9 @@ const JobFrom = (props: any) => {
       setJobDescription,
       setSource,
       dom,
-      dom2
+      dom2,
+      setJoboverview,
+      setLocation
     );
   };
 
