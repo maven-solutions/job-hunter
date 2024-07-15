@@ -1,4 +1,4 @@
-const getJobFromSimplyhired = (
+export const getJobFromSimplyhired = (
   setPostUrl,
   setJobstitle,
   setJobDescription,

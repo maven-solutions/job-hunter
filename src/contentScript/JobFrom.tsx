@@ -15,6 +15,7 @@ import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
 import { getJobsFromDice } from "../jobExtractor/dice";
 import { getJobsFromIndeed } from "../jobExtractor/indeed";
 import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
+import { getJobFromSimplyhired } from "../jobExtractor/simplyhired";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
