@@ -56,7 +56,15 @@ export const getJobsFromDice = (
       .querySelector('[data-cy="willingToSponsor"]')
       ?.textContent?.trim() ?? "";
 
-  setJoboverview([employmentDetailsText, willingToSponsorText]);
+  if (employmentDetailsText) {
+    setJoboverview([employmentDetailsText]);
+  }
+  if (willingToSponsorText) {
+    setJoboverview([willingToSponsorText]);
+  }
+  if (employmentDetailsText && willingToSponsorText) {
+    setJoboverview([employmentDetailsText, willingToSponsorText]);
+  }
 
   // Get the HTML element by its data-testid attribute
   const dateElement = document.querySelector("#timeAgo");
