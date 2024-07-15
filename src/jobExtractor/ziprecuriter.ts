@@ -103,6 +103,32 @@ export const getJobFromZipRecruiter = (
     );
   }
 
+  const zipDom3 = document.querySelector(
+    ".job_result_wrapper.job_result_selected"
+  );
+  if (zipDom3) {
+    let flexEle = zipDom.querySelector('div[class="flex flex-col"]');
+
+    let medicalInfo = "";
+    let workCulturalInfo = "";
+    const siblingPTags = flexEle.querySelectorAll(":scope > p");
+    if (siblingPTags.length > 0) {
+      const text = siblingPTags[0]?.textContent?.trim();
+      if (
+        ["time", "contract", "temporary"].some((type) =>
+          text.toLowerCase().includes(type)
+        )
+      ) {
+        workCulturalInfo = text;
+      } else {
+        medicalInfo = text;
+      }
+    }
+    if (medicalInfo) {
+      setJoboverview([medicalInfo]);
+    }
+  }
+
   setPostedDate("n/a");
   setEmployment(null);
   setJobType(null);
