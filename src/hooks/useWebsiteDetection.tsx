@@ -43,6 +43,7 @@ const useWebsiteDetection = (): [boolean, boolean] => {
         ".greenhouse.",
         ".oraclecloud.",
         "paycomonline.",
+        ".gupy.",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
