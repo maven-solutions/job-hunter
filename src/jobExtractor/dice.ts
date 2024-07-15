@@ -12,7 +12,6 @@ export const getJobsFromDice = (
   setEmployment,
   setSource,
   setCompanyName,
-
   setJoboverview,
   setLocation
 ): void => {
