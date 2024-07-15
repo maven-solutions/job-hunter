@@ -85,8 +85,11 @@ export const getJobFromZipRecruiter = (
   clearStateAndCity();
 
   const zipDom = document.querySelector('[data-testid="right-pane"]');
+  console.log("zipDom::", zipDom);
 
   const zipDom2 = document.querySelector(".job_details");
+  console.log("zipDom2::", zipDom2);
+
   if (zipDom) {
     getJobsFromZipRecuriter1(
       zipDom,
@@ -111,6 +114,8 @@ export const getJobFromZipRecruiter = (
   const zipDom3 = document.querySelector(
     ".job_result_wrapper.job_result_selected"
   );
+  console.log("zipDom3::", zipDom3);
+
   if (zipDom3) {
     let flexEle = zipDom.querySelector('div[class="flex flex-col"]');
 
