@@ -33,7 +33,11 @@ const getJobFromSimplyhired = (
     const inputString = companyNameEle?.textContent?.trim();
     setCompanyName(inputString);
   }
-
+  const locationText =
+    document
+      .querySelector('[data-testid="viewJobCompanyLocation"]')
+      ?.textContent?.trim() ?? "";
+  setLocation(locationText);
   setEmployment(null);
   setJobType(null);
   setPostedDate("n/a");
