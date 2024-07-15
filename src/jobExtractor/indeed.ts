@@ -36,6 +36,14 @@ export const getJobsFromIndeed = (
     setCompanyName(companyElement?.textContent.trim());
   }
 
+  const locationEle = document
+    .querySelector('[data-testid="inlineHeader-companyLocation"]')
+    ?.textContent?.trim();
+  if (locationEle) {
+    let locationText = locationEle.split("•")[0] ?? "";
+    setLocation(locationText);
+  }
+
   const about = document.getElementById("jobDescriptionText");
   setJobDescription(about?.innerHTML);
 
