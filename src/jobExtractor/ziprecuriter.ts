@@ -41,7 +41,8 @@ const getJobsFromZipRecuriter2 = (
   setJobstitle,
   setCompanyName,
   setJobDescription,
-  setJoboverview
+  setJoboverview,
+  setLocation
 ) => {
   const titleEle = zipDom.querySelector(".job_title");
   const title = titleEle?.textContent?.trim();
@@ -57,6 +58,9 @@ const getJobsFromZipRecuriter2 = (
     jobCharacterstics.querySelector(".t_benefits")?.textContent?.trim() ?? "";
   setJoboverview([benefits]);
 
+  const locationtext =
+    zipDom.querySelector(".hiring_location")?.textContent?.trim() ?? "";
+  setLocation(locationtext);
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {
     const description = jobDescriptionEle?.innerHTML;
@@ -99,7 +103,8 @@ export const getJobFromZipRecruiter = (
       setJobstitle,
       setCompanyName,
       setJobDescription,
-      setJoboverview
+      setJoboverview,
+      setLocation
     );
   }
 
@@ -126,6 +131,14 @@ export const getJobFromZipRecruiter = (
     }
     if (medicalInfo) {
       setJoboverview([medicalInfo]);
+    }
+
+    const location = zipDom.querySelector('[data-testid="job-card-location"]');
+    if (location) {
+      const address = location.textContent.trim();
+      if (address) {
+        setLocation(address);
+      }
     }
   }
 
