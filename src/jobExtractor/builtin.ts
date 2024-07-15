@@ -41,6 +41,23 @@ export const getJobFromBuiltin = (
     }
   }
 
+  const domBUiltin = document?.querySelector(".block-region-middle");
+  const dom2Builton = document?.querySelector(".block-content");
+  const locationEle = domBUiltin?.querySelector(".company-address");
+  if (locationEle) {
+    // Get the text content from the element
+    const location = locationEle?.textContent?.trim();
+    setLocation(location);
+  }
+  // const remoteWorkType = dom.querySelector(".remote");
+
+  const locationEle2 = dom2Builton?.querySelector(".icon-description");
+  if (locationEle2) {
+    // Get the text content from the element
+    const location = locationEle2?.textContent?.trim();
+    setLocation(location);
+  }
+
   setEmployment(null);
   setJobType(null);
   setPostedDate("n/a");
