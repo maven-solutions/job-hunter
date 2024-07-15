@@ -14,6 +14,7 @@ import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
 import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
 import { getJobsFromDice } from "../jobExtractor/dice";
 import { getJobsFromIndeed } from "../jobExtractor/indeed";
+import { getJobFromZipRecruiter } from "../jobExtractor/ziprecuriter";
 
 const JobFrom = (props: any) => {
   const { setShowForm } = props;
@@ -89,77 +90,6 @@ const JobFrom = (props: any) => {
   }
 
   // Example usage
-
-  const getJobsFromZipRecuriter1 = (zipDom: any) => {
-    const zipDomForLink = document.querySelector(".job_result_selected");
-    if (zipDomForLink) {
-      const link = zipDomForLink.querySelector("a");
-      setPostUrl(link.href);
-    }
-
-    const titleEle = zipDom.querySelector("h1");
-    const title = titleEle?.textContent?.trim();
-    setJobstitle(title);
-    let companyEle = zipDom.querySelector("a");
-    if (companyEle) {
-      const inputString = companyEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-    let jobDescriptionEle: any = "";
-    jobDescriptionEle = zipDom.querySelector(".job_description");
-    if (jobDescriptionEle) {
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-
-    jobDescriptionEle = document.querySelector(
-      'div[class="relative flex flex-col gap-24"]'
-    );
-    if (jobDescriptionEle) {
-      const description = jobDescriptionEle?.innerHTML;
-      if (description) {
-        setJobDescription(description);
-      }
-    }
-  };
-  const getJobsFromZipRecuriter2 = (zipDom: any) => {
-    const titleEle = zipDom.querySelector(".job_title");
-    const title = titleEle?.textContent?.trim();
-    setJobstitle(title);
-
-    let companyEle = zipDom.querySelector(".hiring_company");
-    if (companyEle) {
-      const inputString = companyEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-
-    const jobDescriptionEle = zipDom.querySelector(".job_description");
-    if (jobDescriptionEle) {
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-  };
-
-  const getJobFromZipRecruiter = (): void => {
-    clearStateAndCity();
-
-    const zipDom = document.querySelector('[data-testid="right-pane"]');
-
-    const zipDom2 = document.querySelector(".job_details");
-    if (zipDom) {
-      getJobsFromZipRecuriter1(zipDom);
-    }
-    if (zipDom2) {
-      setPostUrl(window.location.href);
-      getJobsFromZipRecuriter2(zipDom2);
-    }
-
-    setPostedDate("n/a");
-    setEmployment(null);
-    setJobType(null);
-    setEasyApply(null);
-    setSource("Ziprecruiter");
-  };
 
   const getBuiltinDomForJobs = () => {
     const dom = document?.querySelector(".block-region-middle");
@@ -239,7 +169,20 @@ const JobFrom = (props: any) => {
       );
     }
     if (window.location.href.includes("ziprecruiter.")) {
-      getJobFromZipRecruiter();
+      getJobFromZipRecruiter(
+        setPostUrl,
+        clearStateAndCity,
+        setJobstitle,
+        setJobDescription,
+        setPostedDate,
+        setEasyApply,
+        setJobType,
+        setEmployment,
+        setSource,
+        setCompanyName,
+        setJoboverview,
+        setLocation
+      );
     }
     if (
       window.location.href.includes("glassdoor.") &&
