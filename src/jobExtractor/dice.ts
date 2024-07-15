@@ -5,7 +5,6 @@ export const getJobsFromDice = (
   clearStateAndCity,
   setJobstitle,
   setJobDescription,
-  isDateString,
   setPostedDate,
   setEasyApply,
   setJobType,

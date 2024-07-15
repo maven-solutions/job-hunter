@@ -157,7 +157,6 @@ const JobFrom = (props: any) => {
         clearStateAndCity,
         setJobstitle,
         setJobDescription,
-        isDateString,
         setPostedDate,
         setEasyApply,
         setJobType,
