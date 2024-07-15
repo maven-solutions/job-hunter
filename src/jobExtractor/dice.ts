@@ -43,6 +43,23 @@ export const getJobsFromDice = (
     ".job-header_jobDetail__ZGjiQ"
   );
 
+  const locationText = document
+    .querySelector('[data-cy="location"]')
+    .textContent.trim();
+  setLocation(locationText);
+
+  const employmentDetailsText =
+    document
+      .querySelector('[data-cy="employmentDetails"]')
+      ?.textContent?.trim() ?? "";
+
+  const willingToSponsorText =
+    document
+      .querySelector('[data-cy="willingToSponsor"]')
+      ?.textContent?.trim() ?? "";
+
+  setJoboverview([employmentDetailsText, willingToSponsorText]);
+
   // Get the HTML element by its data-testid attribute
   const dateElement = document.querySelector("#timeAgo");
   const date = extractDateFromDiceDom(dateElement);
