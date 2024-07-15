@@ -9,7 +9,7 @@ import { checkJobStatus, saveJobs } from "./api";
 import CloseIcon from "../component/CloseIcon";
 import SaveButton from "../component/SaveButton";
 import { getJobFromBuiltin } from "../jobExtractor/builtin";
-import { getJobFromSimplyhiredLandingPage } from "../jobExtractor/simplyhired";
+
 import { getJobFromGlassdoor } from "../jobExtractor/glassdoor";
 import { getContentFromLinkedInJobs } from "../jobExtractor/linkedin";
 import { getJobsFromDice } from "../jobExtractor/dice";
@@ -195,47 +195,6 @@ const JobFrom = (props: any) => {
     setSource("Ziprecruiter");
   };
 
-  const getJobFromSimplyhired = (): void => {
-    setPostUrl(window.location.href);
-    // this is for the desing where there is tab section in that page
-    const titleElement = document.querySelector('[data-testid="viewJobTitle"]');
-
-    if (titleElement) {
-      // Get the text content from the element
-      const title = titleElement?.textContent?.trim();
-      setJobstitle(title);
-    }
-
-    const companyNameEle = document.querySelector(
-      // '[data-test="employer-name"]'
-      '[data-testid="detailText"]'
-    );
-
-    if (companyNameEle) {
-      // Get the text content from the element
-      const inputString = companyNameEle?.textContent?.trim();
-      setCompanyName(inputString);
-    }
-
-    setEmployment(null);
-    setJobType(null);
-    setPostedDate("n/a");
-    setCity("n/a");
-    setState("n/a");
-    setEasyApply(null);
-
-    const jobDescriptionEle = document.querySelector(
-      '[data-testid="viewJobBodyJobFullDescriptionContent"]'
-    );
-    if (jobDescriptionEle) {
-      // Get the text content from the element
-      const description = jobDescriptionEle?.innerHTML;
-      setJobDescription(description);
-    }
-
-    setSource("Simplyhired");
-  };
-
   const getBuiltinDomForJobs = () => {
     const dom = document?.querySelector(".block-region-middle");
     const dom2 = document?.querySelector(".block-content");
@@ -325,7 +284,21 @@ const JobFrom = (props: any) => {
         "https://www.simplyhired.com/" &&
       window.location.href.includes("simplyhired.")
     ) {
-      getJobFromSimplyhired();
+      getJobFromSimplyhired(
+        setPostUrl,
+        setJobstitle,
+        setJobDescription,
+        setPostedDate,
+        setEasyApply,
+        setJobType,
+        setEmployment,
+        setSource,
+        setCompanyName,
+        setCity,
+        setState,
+        setJoboverview,
+        setLocation
+      );
     }
 
     // if (
