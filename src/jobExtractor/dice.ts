@@ -20,7 +20,7 @@ export const getJobsFromDice = (
   const titleElement = document.querySelector('[data-cy="jobTitle"]');
   if (titleElement) {
     // Get the text content from the element
-    const title = titleElement?.textContent?.trim();
+    const title = titleElement?.textContent?.trim() ?? "";
     setJobstitle(title);
   }
   const companyNameEle = document.querySelector('[data-cy="companyNameLink"]');
@@ -29,10 +29,11 @@ export const getJobsFromDice = (
   );
   if (companyNameEle) {
     // Get the text content from the element
-    const companyName = companyNameEle?.textContent?.trim();
+    const companyName = companyNameEle?.textContent?.trim() ?? "";
     setCompanyName(companyName);
   } else if (companyNameWithNoLinkEle) {
-    const companyNameWithNoLink = companyNameWithNoLinkEle?.textContent?.trim();
+    const companyNameWithNoLink =
+      companyNameWithNoLinkEle?.textContent?.trim() ?? "";
     setCompanyName(companyNameWithNoLink);
   }
 
@@ -41,9 +42,8 @@ export const getJobsFromDice = (
     ".job-header_jobDetail__ZGjiQ"
   );
 
-  const locationText = document
-    .querySelector('[data-cy="location"]')
-    .textContent.trim();
+  const locationText =
+    document.querySelector('[data-cy="location"]')?.textContent?.trim() ?? "";
   setLocation(locationText);
 
   const employmentDetailsText =
