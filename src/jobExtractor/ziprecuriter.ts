@@ -40,7 +40,8 @@ const getJobsFromZipRecuriter2 = (
   zipDom: any,
   setJobstitle,
   setCompanyName,
-  setJobDescription
+  setJobDescription,
+  setJoboverview
 ) => {
   const titleEle = zipDom.querySelector(".job_title");
   const title = titleEle?.textContent?.trim();
@@ -51,6 +52,10 @@ const getJobsFromZipRecuriter2 = (
     const inputString = companyEle?.textContent?.trim();
     setCompanyName(inputString);
   }
+  const jobCharacterstics = zipDom.querySelector(".job_characteristics");
+  const benefits =
+    jobCharacterstics.querySelector(".t_benefits")?.textContent?.trim() ?? "";
+  setJoboverview([benefits]);
 
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {
@@ -93,7 +98,8 @@ export const getJobFromZipRecruiter = (
       zipDom2,
       setJobstitle,
       setCompanyName,
-      setJobDescription
+      setJobDescription,
+      setJoboverview
     );
   }
 
