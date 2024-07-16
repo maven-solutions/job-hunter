@@ -92,6 +92,34 @@ const fillRadioButton = (applicantData: Applicant) => {
       }
     }
 
+    //  for 18 years
+    if (
+      labelQuestion.textContent.trim().toLocaleLowerCase().includes("18 year")
+    ) {
+      const radioLabelAnswerParent: NodeListOf<HTMLLabelElement> =
+        radioLabelSection.querySelectorAll(".apply-flow-input-radio");
+
+      if (!radioLabelAnswerParent || radioLabelAnswerParent.length === 0) {
+        return;
+      }
+
+      for (const radioAnswer of radioLabelAnswerParent) {
+        if (
+          radioAnswer.textContent.trim().toLocaleLowerCase().includes("yes") &&
+          applicantData.is_over_18
+        ) {
+          radioAnswer.click();
+        }
+
+        if (
+          radioAnswer.textContent.trim().toLocaleLowerCase().includes("no") &&
+          !applicantData.is_over_18
+        ) {
+          radioAnswer.click();
+        }
+      }
+    }
+
     // for legally authorized
     if (
       labelQuestion.textContent
@@ -147,7 +175,7 @@ const raceFiller = (applicantData: Applicant) => {
       return;
     }
 
-    // for visa or sponsership
+    // for racea
     if (
       labelQuestion.textContent.trim().toLocaleLowerCase().includes("races")
     ) {
