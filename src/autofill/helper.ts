@@ -47,6 +47,7 @@ import { rippling } from "./domainSpecific/rippling";
 import { bamboohr } from "./domainSpecific/bamboohr";
 import { fisglobal } from "./domainSpecific/fisglobal";
 import { applicantpro } from "./domainSpecific/applicantpro";
+import { cornerstonebuildingbrands } from "./domainSpecific/cornerstonebuildingbrands";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -322,6 +323,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".applicantpro.")) {
       await applicantpro(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".cornerstonebuildingbrands.")) {
+      await cornerstonebuildingbrands(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
