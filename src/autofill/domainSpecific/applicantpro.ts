@@ -12,12 +12,12 @@ const fillAllRadioType = async (applicantData: Applicant) => {
       return;
     }
     // for gender
-    if (fromatStirngInLowerCase(legend?.textContent).includes("gender")) {
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("gender")) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
           if (
-            fromatStirngInLowerCase(label.textContent) === applicantData.gender
+            fromatStirngInLowerCase(label?.textContent) === applicantData.gender
           ) {
             label.click();
           }
@@ -25,12 +25,12 @@ const fillAllRadioType = async (applicantData: Applicant) => {
       }
     }
     // race
-    if (fromatStirngInLowerCase(legend?.textContent).includes("ethnic")) {
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("ethnic")) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
           if (
-            fromatStirngInLowerCase(label.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               fromatStirngInLowerCase(applicantData.race)
             )
           ) {
@@ -41,7 +41,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
     }
 
     // VETERANS
-    if (fromatStirngInLowerCase(legend?.textContent).includes("veterans")) {
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("veterans")) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
@@ -49,7 +49,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
             (applicantData.veteran_status === 1 ||
               applicantData.veteran_status === 3 ||
               applicantData.veteran_status === 4) &&
-            fromatStirngInLowerCase(label.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent).includes(
               fromatStirngInLowerCase("I IDENTIFY AS ONE")
             )
           ) {
@@ -59,7 +59,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
           //----
           if (
             applicantData.veteran_status === 2 &&
-            fromatStirngInLowerCase(label.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               fromatStirngInLowerCase("I AM NOT A")
             )
           ) {
@@ -69,7 +69,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
           // -----
           if (
             applicantData.veteran_status === 5 &&
-            fromatStirngInLowerCase(label.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               fromatStirngInLowerCase("WISH")
             )
           ) {
