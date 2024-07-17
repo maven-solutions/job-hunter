@@ -321,11 +321,7 @@ export const selectDataExtract = (
       }
 
       // for work authorizaion 2
-      if (
-        fromatStirngInLowerCase(labelText).includes(
-          fromatStirngInLowerCase("eligible to work")
-        )
-      ) {
+      if (fromatStirngInLowerCase(labelText)?.includes("eligibletowork")) {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.us_work_authoriztaion &&
