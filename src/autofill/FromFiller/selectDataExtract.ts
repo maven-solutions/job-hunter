@@ -322,7 +322,7 @@ export const selectDataExtract = (
 
       // for work authorizaion 2
       if (
-        fromatStirngInLowerCase(labelElement).includes(
+        fromatStirngInLowerCase(labelText).includes(
           fromatStirngInLowerCase("eligible to work")
         )
       ) {
