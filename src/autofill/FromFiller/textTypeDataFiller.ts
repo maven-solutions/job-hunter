@@ -13,7 +13,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   let phone = false;
 
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
-  // console.log("textInputFields::", textInputFields);
+  console.log("textInputFields::", textInputFields);
 
   textInputFields.forEach((input: any) => {
     // Extract all attributes
@@ -72,7 +72,10 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         return true; // Stop iterating
       }
 
-      if (fromatStirngInLowerCase(labelText) === fieldNames.name) {
+      if (
+        checkIfExist(labelText, fieldNames.name) ||
+        checkIfExist(attribute.value, fieldNames.name)
+      ) {
         input.value = applicantData.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
@@ -82,6 +85,18 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       }
 
       if (fromatStirngInLowerCase(labelText) === "name") {
+        input.value = applicantData.full_name;
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        handleValueChanges(input);
+        return true; // Stop iterating
+      }
+
+      if (
+        fromatStirngInLowerCase(labelText) ===
+        fromatStirngInLowerCase("Your Name:")
+      ) {
         input.value = applicantData.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
