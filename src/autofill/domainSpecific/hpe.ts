@@ -61,8 +61,6 @@ const fillUrl = async (applicantData: Applicant) => {
   );
 
   if (likedin) {
-    console.log("linkedin::", likedin);
-
     likedin.value = applicantData.linkedin_url;
     handleValueChanges(likedin);
   }
