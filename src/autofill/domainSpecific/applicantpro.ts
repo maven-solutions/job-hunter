@@ -49,7 +49,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
             (applicantData.veteran_status === 1 ||
               applicantData.veteran_status === 3 ||
               applicantData.veteran_status === 4) &&
-            fromatStirngInLowerCase(label?.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               fromatStirngInLowerCase("I IDENTIFY AS ONE")
             )
           ) {

@@ -4,7 +4,7 @@ import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
 const fillName = (applicantData: Applicant) => {
   const allLabel = document.querySelectorAll("label");
   for (const label of allLabel) {
-    if (fromatStirngInLowerCase(label.textContent).includes("preferredname")) {
+    if (fromatStirngInLowerCase(label.textContent)?.includes("preferredname")) {
       const input: any = label.nextElementSibling;
       input.value = applicantData.full_name;
       handleValueChanges(input);
@@ -16,7 +16,7 @@ const fillWorkAuthorization = (applicantData: Applicant) => {
   const allLabel = document.querySelectorAll("label");
   for (const label of allLabel) {
     if (
-      fromatStirngInLowerCase(label?.textContent).includes("authorizedtowork")
+      fromatStirngInLowerCase(label?.textContent)?.includes("authorizedtowork")
     ) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId) as HTMLSelectElement;
@@ -51,8 +51,8 @@ const fillVisa = (applicantData: Applicant) => {
   const allLabel = document.querySelectorAll("label");
   for (const label of allLabel) {
     if (
-      fromatStirngInLowerCase(label?.textContent).includes("sponsorship") ||
-      fromatStirngInLowerCase(label?.textContent).includes("visa")
+      fromatStirngInLowerCase(label?.textContent)?.includes("sponsorship") ||
+      fromatStirngInLowerCase(label?.textContent)?.includes("visa")
     ) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId) as HTMLSelectElement;

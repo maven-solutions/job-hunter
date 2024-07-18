@@ -60,14 +60,16 @@ const fillDisability = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll('[role="menuitem"]');
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes("yes") &&
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("yes") &&
       applicantData.disability_status
     ) {
       element.click();
     }
 
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes("noidont") &&
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
+        "noidont"
+      ) &&
       !applicantData.disability_status
     ) {
       element.click();
@@ -96,7 +98,7 @@ const fillRace = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll('[role="menuitem"]');
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
@@ -137,7 +139,7 @@ const fillVeteran = async (applicantData: Applicant) => {
 
       if (
         applicantData.veteran_status === 5 &&
-        fromatStirngInLowerCase(label.textContent).includes("decline")
+        fromatStirngInLowerCase(label.textContent)?.includes("decline")
       ) {
         label.click();
         handleValueChanges(label);

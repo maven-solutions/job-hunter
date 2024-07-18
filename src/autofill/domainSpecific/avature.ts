@@ -16,7 +16,7 @@ const fillEligibility = (applicantData: Applicant) => {
       return;
     }
 
-    if (questionText.includes("legally authorized")) {
+    if (questionText?.includes("legally authorized")) {
       const select = singleField.querySelector("select");
       Array.from(select.options).find((option: any) => {
         if (
@@ -52,7 +52,10 @@ const fillVisa = (applicantData: Applicant) => {
     if (!questionText) {
       return;
     }
-    if (questionText.includes("sponsorship") || questionText.includes("visa")) {
+    if (
+      questionText?.includes("sponsorship") ||
+      questionText?.includes("visa")
+    ) {
       const select = singleField.querySelector("select");
       Array.from(select.options).find((option: any) => {
         if (
