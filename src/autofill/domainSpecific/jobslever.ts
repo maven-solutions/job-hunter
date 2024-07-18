@@ -105,20 +105,51 @@ const fillRace2 = (applicantData: Applicant) => {
 };
 
 const fillUSA = (applicantData: Applicant) => {
-  const wokPermission = document.querySelector(
+  const radioParnetAll = document.querySelectorAll(
     ".application-question.custom-question"
   );
-  if (!wokPermission) {
+  if (!radioParnetAll || radioParnetAll.length === 0) {
     return;
   }
-  const ul: any = wokPermission?.querySelector("ul") ?? "";
-  const yes: any = ul.children[0] ?? "";
-  const no: any = ul.children[1] ?? "";
+  for (const radio of radioParnetAll) {
+    const qn = radio.querySelector(".text");
 
-  if (applicantData.us_work_authoriztaion) {
-    yes?.click();
-  } else {
-    no?.click();
+    if (
+      fromatStirngInLowerCase(qn?.textContent)?.includes("legallyauthorized") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("authorized") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("authorizedtowork") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("eligibletowork") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("towork")
+    ) {
+      const ul: any = radio?.querySelector("ul") ?? "";
+      const yes: any = ul.children[0]?.querySelector("label") ?? "";
+      const no: any = ul.children[1]?.querySelector("label") ?? "";
+
+      if (applicantData.us_work_authoriztaion) {
+        yes?.click();
+      } else {
+        no?.click();
+      }
+    }
+
+    // sponshership
+
+    if (
+      fromatStirngInLowerCase(qn?.textContent)?.includes("sponsorship") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("visa")
+    ) {
+      const ul: any = radio?.querySelector("ul") ?? "";
+      const yes: any = ul.children[0]?.querySelector("label") ?? "";
+      const no: any = ul.children[1]?.querySelector("label") ?? "";
+
+      if (applicantData.sponsorship_required) {
+        yes?.click();
+        handleValueChanges(no);
+      } else {
+        no?.click();
+        handleValueChanges(no);
+      }
+    }
   }
 };
 
