@@ -50,7 +50,7 @@ const fillRace = (applicantData: Applicant) => {
     const labelText = labelElement?.textContent?.trim() ?? "";
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
@@ -93,7 +93,7 @@ const fillRace2 = (applicantData: Applicant) => {
     const labelText = labelElement?.textContent?.trim() ?? "";
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
