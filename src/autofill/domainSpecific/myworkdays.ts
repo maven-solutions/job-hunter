@@ -42,7 +42,7 @@ const fillDeviceType = async (applicantData) => {
 
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         fromatStirngInLowerCase("mobile")
       )
     ) {
@@ -149,15 +149,15 @@ const fillSponshership = async (applicantData: Applicant) => {
     // console.log("select::", select);
     const label = select.getAttribute("aria-label");
     if (
-      label?.toLowerCase().includes("sponsorship") ||
-      label?.toLowerCase().includes("visa")
+      label?.toLowerCase()?.includes("sponsorship") ||
+      label?.toLowerCase()?.includes("visa")
     ) {
       select.click();
       await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
+          fromatStirngInLowerCase(element.textContent.trim())?.includes(
             fromatStirngInLowerCase("no")
           ) &&
           !applicantData.sponsorship_required
@@ -167,7 +167,7 @@ const fillSponshership = async (applicantData: Applicant) => {
         }
 
         if (
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
+          fromatStirngInLowerCase(element.textContent.trim())?.includes(
             fromatStirngInLowerCase("yes")
           ) &&
           applicantData.sponsorship_required
@@ -190,16 +190,16 @@ const authorizedTowork = async (applicantData: Applicant) => {
   for (const select of selectElement) {
     const label = select.getAttribute("aria-label");
     if (
-      label?.toLowerCase().includes("legally") ||
-      label?.toLowerCase().includes("currently authorized") ||
-      label?.toLowerCase().includes("Are you eligible to work in the country")
+      label?.toLowerCase()?.includes("legally") ||
+      label?.toLowerCase()?.includes("currently authorized") ||
+      label?.toLowerCase()?.includes("Are you eligible to work in the country")
     ) {
       select.click();
       await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
+          fromatStirngInLowerCase(element.textContent.trim())?.includes(
             fromatStirngInLowerCase("yes")
           ) &&
           applicantData.us_work_authoriztaion
@@ -221,13 +221,13 @@ const fillisAdult = async (applicantData: Applicant) => {
 
   for (const select of selectElement) {
     const label = select.getAttribute("aria-label");
-    if (label?.toLowerCase().includes("18 years")) {
+    if (label?.toLowerCase()?.includes("18 years")) {
       select.click();
       await delay(500);
       const selectOptions: any = document.querySelectorAll('[role="option"]');
       for (const element of selectOptions) {
         if (
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
+          fromatStirngInLowerCase(element.textContent.trim())?.includes(
             fromatStirngInLowerCase("yes")
           )
         ) {
@@ -254,7 +254,7 @@ const fillFieldSetDataType = (applicantData: Applicant) => {
   }
   for (const label of allLabel) {
     if (
-      fromatStirngInLowerCase(label.textContent.trim()).includes(
+      fromatStirngInLowerCase(label.textContent.trim())?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {

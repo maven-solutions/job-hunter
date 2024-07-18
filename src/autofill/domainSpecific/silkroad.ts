@@ -13,7 +13,7 @@ const fillRadioButton = (applicantData: Applicant) => {
       return;
     }
     // for gender
-    if (fromatStirngInLowerCase(legend?.textContent).includes("gender")) {
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("gender")) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
@@ -26,7 +26,7 @@ const fillRadioButton = (applicantData: Applicant) => {
       }
     }
     // race
-    if (fromatStirngInLowerCase(legend?.textContent).includes("ethnic")) {
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("ethnic")) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {

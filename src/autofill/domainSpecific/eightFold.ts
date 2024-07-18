@@ -26,7 +26,7 @@ const fillCountry = async (applicantData: Applicant) => {
   // console.log("selectOptions::", selectOptions);
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "china"
         // fromatStirngInLowerCase(applicantData.country)
       )

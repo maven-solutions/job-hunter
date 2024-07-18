@@ -10,7 +10,7 @@ const fillDisability = async (applicantData: Applicant) => {
   if (allLabel && allLabel.length > 0)
     for (const label of allLabel) {
       if (
-        fromatStirngInLowerCase(label.textContent).includes("yes") &&
+        fromatStirngInLowerCase(label.textContent)?.includes("yes") &&
         applicantData.disability_status
       ) {
         label.click();
@@ -18,7 +18,7 @@ const fillDisability = async (applicantData: Applicant) => {
       }
 
       if (
-        fromatStirngInLowerCase(label.textContent).includes("no") &&
+        fromatStirngInLowerCase(label.textContent)?.includes("no") &&
         !applicantData.disability_status
       ) {
         label.click();

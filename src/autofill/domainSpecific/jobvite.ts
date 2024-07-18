@@ -72,14 +72,14 @@ const fillAllRadioType = async (applicantData: Applicant) => {
     // for disability
     if (
       fromatStirngInLowerCase(legend?.textContent)?.includes("disability") ||
-      fromatStirngInLowerCase(legend?.textContent).includes("pleasecheckone")
+      fromatStirngInLowerCase(legend?.textContent)?.includes("pleasecheckone")
     ) {
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
           if (
             applicantData.disability_status &&
-            fromatStirngInLowerCase(label?.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               "Yes, I have a disability"
             )
           ) {
@@ -87,7 +87,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
           }
           if (
             !applicantData.disability_status &&
-            fromatStirngInLowerCase(label?.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               "No, I do not have a disability"
             )
           ) {
@@ -109,7 +109,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
             (applicantData.veteran_status === 1 ||
               applicantData.veteran_status === 3 ||
               applicantData.veteran_status === 4) &&
-            fromatStirngInLowerCase(label?.textContent).includes(
+            fromatStirngInLowerCase(label?.textContent)?.includes(
               fromatStirngInLowerCase("I IDENTIFY AS ONE")
             )
           ) {
@@ -159,7 +159,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
       // for work authorization
       if (checkIfExist(labelText, ["legally"])) {
         Array.from(select.options).find((option: any) => {
-          if (fromatStirngInLowerCase(option?.text).includes("yes")) {
+          if (fromatStirngInLowerCase(option?.text)?.includes("yes")) {
             option.selected = true;
             handleValueChanges(option);
             return;
@@ -173,7 +173,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
       ) {
         Array.from(select.options).find((option: any) => {
           if (
-            fromatStirngInLowerCase(option?.text).includes("yes") &&
+            fromatStirngInLowerCase(option?.text)?.includes("yes") &&
             applicantData.disability_status
           ) {
             option.selected = true;
@@ -182,7 +182,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           }
 
           if (
-            fromatStirngInLowerCase(option?.text).includes("no") &&
+            fromatStirngInLowerCase(option?.text)?.includes("no") &&
             !applicantData.disability_status
           ) {
             option.selected = true;
@@ -202,8 +202,8 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 1 &&
             // !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("veteran") ||
-              fromatStirngInLowerCase(option?.text).includes("veteran"))
+            (fromatStirngInLowerCase(option?.text)?.includes("veteran") ||
+              fromatStirngInLowerCase(option?.text)?.includes("veteran"))
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -213,7 +213,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 2 &&
             // !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("nota")
+            fromatStirngInLowerCase(option?.text)?.includes("nota")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -224,7 +224,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 3 &&
             // !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("veteran")
+            fromatStirngInLowerCase(option?.text)?.includes("veteran")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -235,7 +235,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 3 &&
             // !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("veteran")
+            fromatStirngInLowerCase(option?.text)?.includes("veteran")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -246,7 +246,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 4 &&
             // !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("veteran")
+            fromatStirngInLowerCase(option?.text)?.includes("veteran")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -257,7 +257,7 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 1 &&
             // !veteran &&
-            fromatStirngInLowerCase(option?.text).includes("veteran")
+            fromatStirngInLowerCase(option?.text)?.includes("veteran")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -268,10 +268,10 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
           if (
             applicantData.veteran_status === 5 &&
             // !veteran &&
-            (fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
-              fromatStirngInLowerCase(option?.text).includes("dontwish") ||
-              fromatStirngInLowerCase(option?.text).includes("decline") ||
-              fromatStirngInLowerCase(option?.text).includes("notwish"))
+            (fromatStirngInLowerCase(option?.text)?.includes("selfidentify") ||
+              fromatStirngInLowerCase(option?.text)?.includes("dontwish") ||
+              fromatStirngInLowerCase(option?.text)?.includes("decline") ||
+              fromatStirngInLowerCase(option?.text)?.includes("notwish"))
           ) {
             option.selected = true;
             handleValueChanges(option);

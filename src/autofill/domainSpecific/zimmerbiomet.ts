@@ -145,7 +145,7 @@ const fillRace = async (applicantData: Applicant) => {
   Array.from(select.options).find((option: any) => {
     if (
       fromatStirngInLowerCase(option?.text) &&
-      fromatStirngInLowerCase(option?.text).includes(
+      fromatStirngInLowerCase(option?.text)?.includes(
         fromatStirngInLowerCase(applicantData?.race)
       )
     ) {
@@ -167,7 +167,7 @@ const FillDisability = async (applicantData: Applicant) => {
 
   Array.from(select.options).find((option: any) => {
     if (
-      fromatStirngInLowerCase(option?.text).includes("yes") &&
+      fromatStirngInLowerCase(option?.text)?.includes("yes") &&
       applicantData.disability_status
     ) {
       option.selected = true;
@@ -176,7 +176,7 @@ const FillDisability = async (applicantData: Applicant) => {
     }
 
     if (
-      fromatStirngInLowerCase(option?.text).includes("no") &&
+      fromatStirngInLowerCase(option?.text)?.includes("no") &&
       !applicantData.disability_status
     ) {
       option.selected = true;

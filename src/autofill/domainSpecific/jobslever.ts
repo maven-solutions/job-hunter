@@ -64,7 +64,7 @@ const fillRace = (applicantData: Applicant) => {
       (applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 4) &&
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase("I identify as one or more")
       )
     ) {
@@ -75,7 +75,7 @@ const fillRace = (applicantData: Applicant) => {
 
     if (
       applicantData.veteran_status === 2 &&
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase("I am not a protected")
       )
     ) {

@@ -289,7 +289,7 @@ const fillRace = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll('[role="option"]');
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
@@ -320,7 +320,7 @@ const fillHispanic = async (applicantData: Applicant) => {
   for (const [index, element] of selectOptions.entries()) {
     if (
       applicantData.hispanic_or_latino &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("yes")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("yes")
     ) {
       element.click();
       // return true;
@@ -328,7 +328,7 @@ const fillHispanic = async (applicantData: Applicant) => {
 
     if (
       !applicantData.hispanic_or_latino &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("no")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("no")
     ) {
       element.click();
       // return true;
@@ -356,10 +356,10 @@ const fillVeteran = async (applicantData: Applicant) => {
     // for yes
     if (
       applicantData.veteran_status === 1 &&
-      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+      (fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "amaveteran"
       ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "amveteran"
         ))
     ) {
@@ -369,7 +369,7 @@ const fillVeteran = async (applicantData: Applicant) => {
     // for no
     if (
       applicantData.veteran_status === 2 &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("iamnot")
     ) {
       element.click();
     }
@@ -378,7 +378,7 @@ const fillVeteran = async (applicantData: Applicant) => {
       (applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 4) &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasaveteran"
       )
     ) {
@@ -390,7 +390,7 @@ const fillVeteran = async (applicantData: Applicant) => {
       (applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 4) &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasoneormore"
       )
     ) {
@@ -402,7 +402,7 @@ const fillVeteran = async (applicantData: Applicant) => {
       (applicantData.veteran_status === 4 ||
         applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 3) &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasoneormore"
       )
     ) {
@@ -412,7 +412,7 @@ const fillVeteran = async (applicantData: Applicant) => {
     //   for one or more
     if (
       applicantData.veteran_status === 1 &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasoneormore"
       )
     ) {
@@ -423,16 +423,18 @@ const fillVeteran = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 5 &&
       !veteran &&
-      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+      (fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "selfidentify"
       ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "dontwish"
         ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "decline"
         ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes("notwish"))
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
+          "notwish"
+        ))
     ) {
       element.click();
     }
@@ -458,14 +460,16 @@ const fillDisability = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll('[role="option"]');
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes("yes") &&
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("yes") &&
       applicantData.disability_status
     ) {
       element.click();
     }
 
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes("noidont") &&
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
+        "noidont"
+      ) &&
       !applicantData.disability_status
     ) {
       element.click();

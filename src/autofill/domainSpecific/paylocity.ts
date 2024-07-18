@@ -84,7 +84,7 @@ const fillRace = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll('[role="option"]');
   for (const [index, element] of selectOptions.entries()) {
     if (
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         fromatStirngInLowerCase(applicantData.race)
       ) &&
       !race
@@ -110,7 +110,7 @@ const fillDisability = async (applicantData: Applicant) => {
   for (const [index, element] of selectOptions.entries()) {
     if (
       applicantData.disability_status &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("ihavea")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("ihavea")
     ) {
       element.click();
       // return true;
@@ -118,7 +118,7 @@ const fillDisability = async (applicantData: Applicant) => {
 
     if (
       !applicantData.disability_status &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("idonot")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("idonot")
     ) {
       element.click();
       // return true;
@@ -174,10 +174,10 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 1 &&
       !veteran &&
-      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+      (fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "amaveteran"
       ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "amveteran"
         ))
     ) {
@@ -189,7 +189,7 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 2 &&
       !veteran &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes("iamnot")
+      fromatStirngInLowerCase(element.textContent.trim())?.includes("iamnot")
     ) {
       veteran = true;
       element.click();
@@ -198,7 +198,7 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 3 &&
       !veteran &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasaveteran"
       )
     ) {
@@ -211,7 +211,7 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 3 &&
       !veteran &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasoneormore"
       )
     ) {
@@ -225,7 +225,7 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
         applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 4) &&
       !veteran &&
-      fromatStirngInLowerCase(element.textContent.trim()).includes(
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "identifyasoneormore"
       )
     ) {
@@ -237,16 +237,18 @@ const fillVeteranStatus = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 5 &&
       !veteran &&
-      (fromatStirngInLowerCase(element.textContent.trim()).includes(
+      (fromatStirngInLowerCase(element.textContent.trim())?.includes(
         "selfidentify"
       ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "dontwish"
         ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes(
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
           "decline"
         ) ||
-        fromatStirngInLowerCase(element.textContent.trim()).includes("notwish"))
+        fromatStirngInLowerCase(element.textContent.trim())?.includes(
+          "notwish"
+        ))
     ) {
       veteran = true;
       element.click();
