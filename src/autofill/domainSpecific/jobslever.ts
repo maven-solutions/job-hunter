@@ -127,8 +127,10 @@ const fillUSA = (applicantData: Applicant) => {
 
       if (applicantData.us_work_authoriztaion) {
         yes?.click();
+        handleValueChanges(yes);
       } else {
         no?.click();
+        handleValueChanges(no);
       }
     }
 
@@ -144,7 +146,7 @@ const fillUSA = (applicantData: Applicant) => {
 
       if (applicantData.sponsorship_required) {
         yes?.click();
-        handleValueChanges(no);
+        handleValueChanges(yes);
       } else {
         no?.click();
         handleValueChanges(no);
