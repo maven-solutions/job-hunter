@@ -13,7 +13,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   let phone = false;
 
   const textInputFields = tempDiv.querySelectorAll('input[type="text"]');
-  console.log("textInputFields::", textInputFields);
+  // console.log("textInputFields::", textInputFields);
 
   textInputFields.forEach((input: any) => {
     // Extract all attributes

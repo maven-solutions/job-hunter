@@ -6,7 +6,143 @@ import {
   handleValueChanges,
 } from "../helper";
 
+const fillAllRadioType = async (applicantData: Applicant) => {
+  const allFieldset = document.querySelectorAll("fieldset");
+  if (!allFieldset || allFieldset.length === 0) {
+    return;
+  }
+  for (const fieldset of allFieldset) {
+    const legend = fieldset.querySelector("legend");
+    if (!legend) {
+      return;
+    }
+
+    // for gender
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("gender")) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            fromatStirngInLowerCase(label?.textContent) === applicantData.gender
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
+    // for hispanic
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes("hispanicorlatino")
+    ) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.hispanic_or_latino &&
+            fromatStirngInLowerCase(label?.textContent) === "yes"
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.hispanic_or_latino &&
+            fromatStirngInLowerCase(label?.textContent) === "no"
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+    // race
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("race")) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            fromatStirngInLowerCase(label?.textContent)?.includes(
+              fromatStirngInLowerCase(applicantData.race)
+            )
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
+    // for disability
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes("disability") ||
+      fromatStirngInLowerCase(legend?.textContent).includes("pleasecheckone")
+    ) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.disability_status &&
+            fromatStirngInLowerCase(label?.textContent).includes(
+              "Yes, I have a disability"
+            )
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.disability_status &&
+            fromatStirngInLowerCase(label?.textContent).includes(
+              "No, I do not have a disability"
+            )
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
+    // VETERANS
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes("veterans") ||
+      fromatStirngInLowerCase(legend?.textContent)?.includes("chooseone")
+    ) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            (applicantData.veteran_status === 1 ||
+              applicantData.veteran_status === 3 ||
+              applicantData.veteran_status === 4) &&
+            fromatStirngInLowerCase(label?.textContent).includes(
+              fromatStirngInLowerCase("I IDENTIFY AS ONE")
+            )
+          ) {
+            label.click();
+          }
+
+          //----
+          if (
+            applicantData.veteran_status === 2 &&
+            fromatStirngInLowerCase(label?.textContent)?.includes(
+              fromatStirngInLowerCase("I AM NOT A")
+            )
+          ) {
+            label.click();
+          }
+
+          // -----
+          if (
+            applicantData.veteran_status === 5 &&
+            fromatStirngInLowerCase(label?.textContent)?.includes(
+              fromatStirngInLowerCase("DECLINE")
+            )
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+  }
+};
+
 export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
+  await fillAllRadioType(applicantData);
   const selectInputFields = document.querySelectorAll("select");
   if (!selectInputFields || selectInputFields.length === 0) {
     return;
