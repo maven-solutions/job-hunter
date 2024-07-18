@@ -153,10 +153,46 @@ const fillTodayDate = async () => {
     handleValueChanges(date);
   }
 };
+
+const fillAllRadioType = async (applicantData: Applicant) => {
+  const allFieldset = document.querySelectorAll("fieldset.CandidateField");
+  if (!allFieldset || allFieldset.length === 0) {
+    return;
+  }
+  for (const fieldset of allFieldset) {
+    const legend = fieldset.querySelector("legend");
+    if (!legend) {
+      return;
+    }
+
+    // for 18 years
+    if (fromatStirngInLowerCase(legend?.textContent)?.includes("yearsofage")) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.is_over_18 &&
+            fromatStirngInLowerCase(label?.textContent) === "yes"
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.is_over_18 &&
+            fromatStirngInLowerCase(label?.textContent) === "no"
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+  }
+};
+
 export const bamboohr = async (tempDiv: any, applicantData: Applicant) => {
   await fillGender(applicantData);
   await fillRace(applicantData);
   await fillDisability(applicantData);
   await fillVeteran(applicantData);
+  await fillAllRadioType(applicantData);
   await fillTodayDate();
 };
