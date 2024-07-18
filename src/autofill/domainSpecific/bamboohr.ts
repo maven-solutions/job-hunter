@@ -161,14 +161,16 @@ const fillAllRadioType = async (applicantData: Applicant) => {
   if (!allFieldset || allFieldset.length === 0) {
     return;
   }
-  for (const fieldset of allFieldset) {
-    const legend = fieldset.querySelector("legend");
-    if (!legend) {
-      return;
-    }
 
+  for (const fieldset of allFieldset) {
+    let legend: any = fieldset.querySelector("legend");
+    if (!legend) {
+      legend = "";
+    }
     // for 18 years
     if (fromatStirngInLowerCase(legend?.textContent)?.includes("yearsofage")) {
+      console.log(fromatStirngInLowerCase(legend?.textContent));
+
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
@@ -187,6 +189,60 @@ const fillAllRadioType = async (applicantData: Applicant) => {
         }
       }
     }
+
+    // for work auth
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes(
+        "legallyeligible"
+      ) ||
+      fromatStirngInLowerCase(legend?.textContent)?.includes("toworkin")
+    ) {
+      console.log(fromatStirngInLowerCase(legend?.textContent));
+
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(label?.textContent) === "yes"
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(label?.textContent) === "no"
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
+    // for visa
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes("sponsorship") ||
+      fromatStirngInLowerCase(legend?.textContent)?.includes("visa")
+    ) {
+      console.log(fromatStirngInLowerCase(legend?.textContent));
+
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(label?.textContent) === "yes"
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(label?.textContent) === "no"
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
   }
 };
 
@@ -196,5 +252,5 @@ export const bamboohr = async (tempDiv: any, applicantData: Applicant) => {
   await fillDisability(applicantData);
   await fillVeteran(applicantData);
   await fillAllRadioType(applicantData);
-  await fillTodayDate();
+  // await fillTodayDate();
 };
