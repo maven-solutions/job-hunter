@@ -44,6 +44,9 @@ const fillDeviceType = async (applicantData) => {
     if (
       fromatStirngInLowerCase(element.textContent.trim())?.includes(
         fromatStirngInLowerCase("mobile")
+      ) ||
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
+        fromatStirngInLowerCase("cell")
       )
     ) {
       //   phonetype = true;
