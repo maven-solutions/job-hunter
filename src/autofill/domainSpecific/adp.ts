@@ -81,7 +81,7 @@ const fillRace = (applicantData: Applicant) => {
       }
 
       if (
-        fromatStirngInLowerCase(label.textContent).includes(
+        fromatStirngInLowerCase(label.textContent)?.includes(
           fromatStirngInLowerCase(applicantData.race)
         )
       ) {
@@ -107,25 +107,25 @@ const fillVeteran = (applicantData: Applicant) => {
     if (
       (applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 3) &&
-      (fromatStirngInLowerCase(vlabel?.textContent).includes("amaveteran") ||
-        fromatStirngInLowerCase(vlabel?.textContent).includes("amveteran") ||
-        fromatStirngInLowerCase(vlabel?.textContent).includes("amaprotected"))
+      (fromatStirngInLowerCase(vlabel?.textContent)?.includes("amaveteran") ||
+        fromatStirngInLowerCase(vlabel?.textContent)?.includes("amveteran") ||
+        fromatStirngInLowerCase(vlabel?.textContent)?.includes("amaprotected"))
     ) {
       vlabel.click();
     }
     if (
       applicantData.veteran_status === 2 &&
-      fromatStirngInLowerCase(vlabel?.textContent).includes("iamnot")
+      fromatStirngInLowerCase(vlabel?.textContent)?.includes("iamnot")
     ) {
       vlabel.click();
     }
 
     if (
       applicantData.veteran_status === 5 &&
-      (fromatStirngInLowerCase(vlabel?.textContent).includes("selfidentify") ||
-        fromatStirngInLowerCase(vlabel?.textContent).includes("dontwish") ||
-        fromatStirngInLowerCase(vlabel?.textContent).includes("dontwish") ||
-        fromatStirngInLowerCase(vlabel?.textContent).includes("notwish"))
+      (fromatStirngInLowerCase(vlabel?.textContent)?.includes("selfidentify") ||
+        fromatStirngInLowerCase(vlabel?.textContent)?.includes("dontwish") ||
+        fromatStirngInLowerCase(vlabel?.textContent)?.includes("dontwish") ||
+        fromatStirngInLowerCase(vlabel?.textContent)?.includes("notwish"))
     ) {
       vlabel.click();
     }
@@ -143,7 +143,7 @@ const fillDisability = (applicantData: Applicant) => {
   if (allLabel && allLabel.length > 0)
     for (const label of allLabel) {
       if (
-        fromatStirngInLowerCase(label.textContent).includes("yes") &&
+        fromatStirngInLowerCase(label.textContent)?.includes("yes") &&
         applicantData.disability_status
       ) {
         label.click();
@@ -151,7 +151,7 @@ const fillDisability = (applicantData: Applicant) => {
       }
 
       if (
-        fromatStirngInLowerCase(label.textContent).includes("no") &&
+        fromatStirngInLowerCase(label.textContent)?.includes("no") &&
         !applicantData.disability_status
       ) {
         label.click();
@@ -168,7 +168,7 @@ const handleAllQuestion = async (applicantData: Applicant) => {
       const qn = label.textContent.trim();
 
       // for 18 years
-      if (qn.includes("18 years")) {
+      if (qn?.includes("18 years")) {
         const allAnswer = question.querySelectorAll("label");
         if (!allAnswer || allAnswer.length === 0) {
           return;
@@ -185,7 +185,7 @@ const handleAllQuestion = async (applicantData: Applicant) => {
 
       // for us work auth
 
-      if (qn.includes("eligible to work")) {
+      if (qn?.includes("eligible to work")) {
         const allAnswer = question.querySelectorAll("label");
         if (!allAnswer || allAnswer.length === 0) {
           return;
@@ -201,7 +201,7 @@ const handleAllQuestion = async (applicantData: Applicant) => {
       await delay(500);
 
       // for sponshirship
-      if (qn.includes("sponsorship") || qn.includes("visa")) {
+      if (qn?.includes("sponsorship") || qn?.includes("visa")) {
         const allAnswer = question.querySelectorAll("label");
         if (!allAnswer || allAnswer.length === 0) {
           return;

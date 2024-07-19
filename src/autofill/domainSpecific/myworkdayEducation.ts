@@ -200,10 +200,10 @@ const degreeFiller = async (data, index) => {
             if (
               fromatStirngInLowerCase(element.textContent.trim()) ===
                 fromatStirngInLowerCase(data?.degree) ||
-              fromatStirngInLowerCase(element.textContent.trim()).includes(
+              fromatStirngInLowerCase(element.textContent.trim())?.includes(
                 fromatStirngInLowerCase(data?.degree)
               ) ||
-              fromatStirngInLowerCase(data?.degree).includes(
+              fromatStirngInLowerCase(data?.degree)?.includes(
                 fromatStirngInLowerCase(element.textContent.trim())
               )
             ) {

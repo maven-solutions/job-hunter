@@ -320,6 +320,67 @@ export const selectDataExtract = (
         });
       }
 
+      // for work authorizaion 2
+      if (fromatStirngInLowerCase(labelText)?.includes("eligibletowork")) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "yes"
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "no"
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+        });
+      }
+
       // for sponsersship
       if (
         checkIfExist(labelText, fieldNames.sponsorship) ||

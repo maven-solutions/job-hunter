@@ -66,7 +66,7 @@ const fillRadioButton = (applicantData: Applicant) => {
         .trim()
         .toLocaleLowerCase()
         .includes("sponsorship") ||
-      labelQuestion.textContent.trim().toLocaleLowerCase().includes("visa")
+      labelQuestion.textContent.trim().toLocaleLowerCase()?.includes("visa")
     ) {
       const radioLabelAnswerParent: NodeListOf<HTMLLabelElement> =
         radioLabelSection.querySelectorAll(".apply-flow-input-radio");
@@ -77,15 +77,43 @@ const fillRadioButton = (applicantData: Applicant) => {
 
       for (const radioAnswer of radioLabelAnswerParent) {
         if (
-          radioAnswer.textContent.trim().toLocaleLowerCase().includes("yes") &&
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("yes") &&
           applicantData.sponsorship_required
         ) {
           radioAnswer.click();
         }
 
         if (
-          radioAnswer.textContent.trim().toLocaleLowerCase().includes("no") &&
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("no") &&
           !applicantData.sponsorship_required
+        ) {
+          radioAnswer.click();
+        }
+      }
+    }
+
+    //  for 18 years
+    if (
+      labelQuestion.textContent.trim().toLocaleLowerCase()?.includes("18 year")
+    ) {
+      const radioLabelAnswerParent: NodeListOf<HTMLLabelElement> =
+        radioLabelSection.querySelectorAll(".apply-flow-input-radio");
+
+      if (!radioLabelAnswerParent || radioLabelAnswerParent.length === 0) {
+        return;
+      }
+
+      for (const radioAnswer of radioLabelAnswerParent) {
+        if (
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("yes") &&
+          applicantData.is_over_18
+        ) {
+          radioAnswer.click();
+        }
+
+        if (
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("no") &&
+          !applicantData.is_over_18
         ) {
           radioAnswer.click();
         }
@@ -112,14 +140,14 @@ const fillRadioButton = (applicantData: Applicant) => {
 
       for (const radioAnswer of radioLabelAnswerParent) {
         if (
-          radioAnswer.textContent.trim().toLocaleLowerCase().includes("yes") &&
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("yes") &&
           applicantData.us_work_authoriztaion
         ) {
           radioAnswer.click();
         }
 
         if (
-          radioAnswer.textContent.trim().toLocaleLowerCase().includes("no") &&
+          radioAnswer.textContent.trim().toLocaleLowerCase()?.includes("no") &&
           !applicantData.us_work_authoriztaion
         ) {
           radioAnswer.click();
@@ -147,9 +175,9 @@ const raceFiller = (applicantData: Applicant) => {
       return;
     }
 
-    // for visa or sponsership
+    // for racea
     if (
-      labelQuestion.textContent.trim().toLocaleLowerCase().includes("races")
+      labelQuestion.textContent.trim().toLocaleLowerCase()?.includes("races")
     ) {
       const radioLabelAnswerParent: NodeListOf<HTMLLabelElement> =
         checkboxLabelSection.querySelectorAll(".apply-flow-input-checkbox");
@@ -160,7 +188,7 @@ const raceFiller = (applicantData: Applicant) => {
 
       for (const radioAnswer of radioLabelAnswerParent) {
         if (
-          fromatStirngInLowerCase(radioAnswer.textContent.trim()).includes(
+          fromatStirngInLowerCase(radioAnswer.textContent.trim())?.includes(
             fromatStirngInLowerCase(applicantData.race)
           )
         ) {

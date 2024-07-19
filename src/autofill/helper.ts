@@ -46,6 +46,9 @@ import { concentrix } from "./domainSpecific/concentrix";
 import { rippling } from "./domainSpecific/rippling";
 import { bamboohr } from "./domainSpecific/bamboohr";
 import { fisglobal } from "./domainSpecific/fisglobal";
+import { applicantpro } from "./domainSpecific/applicantpro";
+import { cornerstonebuildingbrands } from "./domainSpecific/cornerstonebuildingbrands";
+import { silkroad } from "./domainSpecific/silkroad";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -318,11 +321,26 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".bamboohr.")) {
       await bamboohr(tempDiv ?? tempDivForFile, applicantData);
     }
+
+    if (window.location.href.includes(".applicantpro.")) {
+      await applicantpro(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".cornerstonebuildingbrands.")) {
+      await cornerstonebuildingbrands(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".silkroad.")) {
+      await silkroad(tempDiv ?? tempDivForFile, applicantData);
+    }
+
     // careers.gehealthcare a reasearch needed
     if (
       window.location.href.includes(".gehealthcare.") ||
       window.location.href.includes(".fisglobal.") ||
-      window.location.href.includes(".ebayinc.")
+      window.location.href.includes(".ebayinc.") ||
+      window.location.href.includes(".freedommortgage.") ||
+      window.location.href.includes(".regions.")
     ) {
       await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }

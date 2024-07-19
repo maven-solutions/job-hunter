@@ -24,7 +24,7 @@ const veteranStatus = (applicantData: Applicant) => {
       (applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 4) &&
-      fromatStirngInLowerCase(option?.text).includes("yes")
+      fromatStirngInLowerCase(option?.text)?.includes("yes")
     ) {
       option.selected = true;
       handleValueChanges(select);
@@ -34,7 +34,7 @@ const veteranStatus = (applicantData: Applicant) => {
     if (
       (applicantData.veteran_status === 2 ||
         applicantData.veteran_status === 5) &&
-      fromatStirngInLowerCase(option?.text).includes("no")
+      fromatStirngInLowerCase(option?.text)?.includes("no")
     ) {
       option.selected = true;
       handleValueChanges(select);
@@ -77,7 +77,7 @@ const fillCheckBox = (applicantData: Applicant) => {
         }
 
         if (
-          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes(
+          fromatStirngInLowerCase(radioLabel?.textContent.trim())?.includes(
             "yes"
           )
         ) {
@@ -109,7 +109,7 @@ const fillCheckBox = (applicantData: Applicant) => {
         }
 
         if (
-          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes(
+          fromatStirngInLowerCase(radioLabel?.textContent.trim())?.includes(
             "no"
           ) &&
           !applicantData.sponsorship_required
@@ -118,7 +118,7 @@ const fillCheckBox = (applicantData: Applicant) => {
           handleValueChanges(radioLabel);
         }
         if (
-          fromatStirngInLowerCase(radioLabel?.textContent.trim()).includes(
+          fromatStirngInLowerCase(radioLabel?.textContent.trim())?.includes(
             "yes"
           ) &&
           applicantData.sponsorship_required

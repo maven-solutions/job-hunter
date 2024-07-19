@@ -21,7 +21,7 @@ const handleDisabiblit = async (applicantData: Applicant) => {
     if (
       label &&
       applicantData.disability_status &&
-      fromatStirngInLowerCase(label.textContent).includes("yesihave")
+      fromatStirngInLowerCase(label.textContent)?.includes("yesihave")
     ) {
       label.click();
     }
@@ -29,7 +29,7 @@ const handleDisabiblit = async (applicantData: Applicant) => {
     if (
       label &&
       !applicantData.disability_status &&
-      fromatStirngInLowerCase(label.textContent).includes("idonothave")
+      fromatStirngInLowerCase(label.textContent)?.includes("idonothave")
     ) {
       label.click();
     }
@@ -61,8 +61,6 @@ const fillUrl = async (applicantData: Applicant) => {
   );
 
   if (likedin) {
-    console.log("linkedin::", likedin);
-
     likedin.value = applicantData.linkedin_url;
     handleValueChanges(likedin);
   }

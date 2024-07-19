@@ -15,8 +15,8 @@ const checkAdultAge = (applicantData: Applicant) => {
   if (allLabel.length > 0) {
     for (const label of allLabel) {
       if (
-        label.textContent.trim().toLowerCase().includes("18 years") ||
-        label.textContent.trim().toLowerCase().includes("adult")
+        label.textContent.trim().toLowerCase()?.includes("18 years") ||
+        label.textContent.trim().toLowerCase()?.includes("adult")
       ) {
         const select = label.querySelector("select");
         if (!select) {
@@ -25,7 +25,7 @@ const checkAdultAge = (applicantData: Applicant) => {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.is_over_18 &&
-            fromatStirngInLowerCase(option?.text).includes("yes")
+            fromatStirngInLowerCase(option?.text)?.includes("yes")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -35,7 +35,7 @@ const checkAdultAge = (applicantData: Applicant) => {
 
           if (
             !applicantData.is_over_18 &&
-            fromatStirngInLowerCase(option?.text).includes("no")
+            fromatStirngInLowerCase(option?.text)?.includes("no")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -60,16 +60,16 @@ const usWorkAuthorization = (applicantData: Applicant) => {
       if (
         label.textContent
           .trim()
-          .includes("legally authorized to work in the United States") ||
+          ?.includes("legally authorized to work in the United States") ||
         label.textContent
           .trim()
           .toLowerCase()
-          .includes("legally authorized to work in the united states") ||
+          ?.includes("legally authorized to work in the united states") ||
         label.textContent
           .trim()
           .toLowerCase()
-          .includes("authorized to work in the united states") ||
-        label.textContent.trim().toLowerCase().includes("authorized to work")
+          ?.includes("authorized to work in the united states") ||
+        label.textContent.trim().toLowerCase()?.includes("authorized to work")
       ) {
         const select = label.querySelector("select");
         if (!select) {
@@ -78,7 +78,7 @@ const usWorkAuthorization = (applicantData: Applicant) => {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.us_work_authoriztaion &&
-            fromatStirngInLowerCase(option?.text).includes("yes")
+            fromatStirngInLowerCase(option?.text)?.includes("yes")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -88,7 +88,7 @@ const usWorkAuthorization = (applicantData: Applicant) => {
 
           if (
             !applicantData.us_work_authoriztaion &&
-            fromatStirngInLowerCase(option?.text).includes("no")
+            fromatStirngInLowerCase(option?.text)?.includes("no")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -111,8 +111,8 @@ const sponsorship = (applicantData: Applicant) => {
   if (allLabel.length > 0) {
     for (const label of allLabel) {
       if (
-        label.textContent.trim().toLowerCase().includes("sponsorship") ||
-        label.textContent.trim().toLowerCase().includes("visa")
+        label.textContent.trim().toLowerCase()?.includes("sponsorship") ||
+        label.textContent.trim().toLowerCase()?.includes("visa")
       ) {
         const select = label.querySelector("select");
         if (!select) {
@@ -121,7 +121,7 @@ const sponsorship = (applicantData: Applicant) => {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("yes")
+            fromatStirngInLowerCase(option?.text)?.includes("yes")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -131,7 +131,7 @@ const sponsorship = (applicantData: Applicant) => {
 
           if (
             !applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("no")
+            fromatStirngInLowerCase(option?.text)?.includes("no")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -146,7 +146,7 @@ const sponsorship = (applicantData: Applicant) => {
         label.textContent
           .trim()
           .toLowerCase()
-          .includes("immigration sponsorship")
+          ?.includes("immigration sponsorship")
       ) {
         const select = label.querySelector("select");
         if (!select) {
@@ -155,7 +155,7 @@ const sponsorship = (applicantData: Applicant) => {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("yes")
+            fromatStirngInLowerCase(option?.text)?.includes("yes")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -165,7 +165,7 @@ const sponsorship = (applicantData: Applicant) => {
 
           if (
             !applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("no")
+            fromatStirngInLowerCase(option?.text)?.includes("no")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -188,9 +188,9 @@ const immigrationsponsorship = (applicantData: Applicant) => {
   if (allLabel.length > 0) {
     for (const label of allLabel) {
       if (
-        label.textContent.trim().toLowerCase().includes("h1b") ||
-        label.textContent.trim().toLowerCase().includes("f1") ||
-        label.textContent.trim().toLowerCase().includes("h4")
+        label.textContent.trim().toLowerCase()?.includes("h1b") ||
+        label.textContent.trim().toLowerCase()?.includes("f1") ||
+        label.textContent.trim().toLowerCase()?.includes("h4")
       ) {
         const select = label.querySelector("select");
         if (!select) {
@@ -199,7 +199,7 @@ const immigrationsponsorship = (applicantData: Applicant) => {
         Array.from(select.options).find((option: any) => {
           if (
             applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("yes")
+            fromatStirngInLowerCase(option?.text)?.includes("yes")
           ) {
             option.selected = true;
             handleValueChanges(option);
@@ -208,7 +208,7 @@ const immigrationsponsorship = (applicantData: Applicant) => {
 
           if (
             !applicantData.sponsorship_required &&
-            fromatStirngInLowerCase(option?.text).includes("no")
+            fromatStirngInLowerCase(option?.text)?.includes("no")
           ) {
             option.selected = true;
             handleValueChanges(option);

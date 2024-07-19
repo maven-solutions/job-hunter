@@ -24,7 +24,7 @@ const handleDisabiblit = (applicantData: Applicant) => {
     if (
       label &&
       applicantData.disability_status &&
-      fromatStirngInLowerCase(label.textContent).includes("yesihave")
+      fromatStirngInLowerCase(label.textContent)?.includes("yesihave")
     ) {
       label.click();
     }
@@ -32,7 +32,7 @@ const handleDisabiblit = (applicantData: Applicant) => {
     if (
       label &&
       !applicantData.disability_status &&
-      fromatStirngInLowerCase(label.textContent).includes("idonothave")
+      fromatStirngInLowerCase(label.textContent)?.includes("idonothave")
     ) {
       label.click();
     }
@@ -74,10 +74,10 @@ const degreeFiller = async (data, index) => {
             if (
               fromatStirngInLowerCase(option?.text) ===
                 fromatStirngInLowerCase(data?.degree) ||
-              fromatStirngInLowerCase(option?.text).includes(
+              fromatStirngInLowerCase(option?.text)?.includes(
                 fromatStirngInLowerCase(data?.degree)
               ) ||
-              fromatStirngInLowerCase(data?.degree).includes(
+              fromatStirngInLowerCase(data?.degree)?.includes(
                 fromatStirngInLowerCase(option?.text)
               )
             ) {
@@ -95,10 +95,10 @@ const degreeFiller = async (data, index) => {
             if (
               fromatStirngInLowerCase(option?.text) ===
                 fromatStirngInLowerCase(data?.major) ||
-              fromatStirngInLowerCase(option?.text).includes(
+              fromatStirngInLowerCase(option?.text)?.includes(
                 fromatStirngInLowerCase(data?.major)
               ) ||
-              fromatStirngInLowerCase(data?.major).includes(
+              fromatStirngInLowerCase(data?.major)?.includes(
                 fromatStirngInLowerCase(option?.text)
               )
             ) {

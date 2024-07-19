@@ -17,8 +17,8 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 1 &&
       !veteran &&
-      (fromatStirngInLowerCase(option?.text).includes("amaveteran") ||
-        fromatStirngInLowerCase(option?.text).includes("amveteran"))
+      (fromatStirngInLowerCase(option?.text)?.includes("amaveteran") ||
+        fromatStirngInLowerCase(option?.text)?.includes("amveteran"))
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -28,7 +28,7 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 2 &&
       !veteran &&
-      fromatStirngInLowerCase(option?.text).includes("iamnot")
+      fromatStirngInLowerCase(option?.text)?.includes("iamnot")
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -39,7 +39,7 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 3 &&
       !veteran &&
-      fromatStirngInLowerCase(option?.text).includes("identifyasaveteran")
+      fromatStirngInLowerCase(option?.text)?.includes("identifyasaveteran")
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -50,7 +50,7 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 3 &&
       !veteran &&
-      fromatStirngInLowerCase(option?.text).includes("identifyasoneormore")
+      fromatStirngInLowerCase(option?.text)?.includes("identifyasoneormore")
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -60,7 +60,7 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 4 &&
       !veteran &&
-      fromatStirngInLowerCase(option?.text).includes("identifyasoneormore")
+      fromatStirngInLowerCase(option?.text)?.includes("identifyasoneormore")
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -71,7 +71,7 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 1 &&
       !veteran &&
-      fromatStirngInLowerCase(option?.text).includes("identifyasoneormore")
+      fromatStirngInLowerCase(option?.text)?.includes("identifyasoneormore")
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -82,10 +82,10 @@ const selectFiller = async (applicantData: Applicant) => {
     if (
       applicantData.veteran_status === 5 &&
       !veteran &&
-      (fromatStirngInLowerCase(option?.text).includes("selfidentify") ||
-        fromatStirngInLowerCase(option?.text).includes("dontwish") ||
-        fromatStirngInLowerCase(option?.text).includes("decline") ||
-        fromatStirngInLowerCase(option?.text).includes("notwish"))
+      (fromatStirngInLowerCase(option?.text)?.includes("selfidentify") ||
+        fromatStirngInLowerCase(option?.text)?.includes("dontwish") ||
+        fromatStirngInLowerCase(option?.text)?.includes("decline") ||
+        fromatStirngInLowerCase(option?.text)?.includes("notwish"))
     ) {
       option.selected = true;
       handleValueChanges(option);
@@ -95,7 +95,7 @@ const selectFiller = async (applicantData: Applicant) => {
   const disability: any = document.getElementById("EEOQuestion--3");
   Array.from(disability.options).find((option: any) => {
     if (
-      fromatStirngInLowerCase(option?.text).includes("yes") &&
+      fromatStirngInLowerCase(option?.text)?.includes("yes") &&
       applicantData.disability_status
     ) {
       option.selected = true;
@@ -104,7 +104,7 @@ const selectFiller = async (applicantData: Applicant) => {
     }
 
     if (
-      fromatStirngInLowerCase(option?.text).includes("no") &&
+      fromatStirngInLowerCase(option?.text)?.includes("no") &&
       !applicantData.disability_status
     ) {
       option.selected = true;

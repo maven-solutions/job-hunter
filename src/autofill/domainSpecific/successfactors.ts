@@ -174,7 +174,7 @@ const fillGender = async (applicantData: Applicant) => {
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (text.toLowerCase().includes("gender")) {
+    if (text.toLowerCase()?.includes("gender")) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -208,8 +208,8 @@ const fillRace = async (applicantData: Applicant) => {
     const text = label?.textContent?.trim();
 
     if (
-      text.toLowerCase().includes("race") ||
-      text.toLowerCase().includes("ethnicity")
+      text.toLowerCase()?.includes("race") ||
+      text.toLowerCase()?.includes("ethnicity")
     ) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
@@ -230,7 +230,7 @@ const fillRace = async (applicantData: Applicant) => {
           return;
         }
         if (
-          fromatStirngInLowerCase(answertext).includes(
+          fromatStirngInLowerCase(answertext)?.includes(
             fromatStirngInLowerCase(applicantData.race)
           )
         ) {

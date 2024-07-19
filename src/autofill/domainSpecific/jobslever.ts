@@ -50,7 +50,7 @@ const fillRace = (applicantData: Applicant) => {
     const labelText = labelElement?.textContent?.trim() ?? "";
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
@@ -64,7 +64,7 @@ const fillRace = (applicantData: Applicant) => {
       (applicantData.veteran_status === 1 ||
         applicantData.veteran_status === 3 ||
         applicantData.veteran_status === 4) &&
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase("I identify as one or more")
       )
     ) {
@@ -75,7 +75,7 @@ const fillRace = (applicantData: Applicant) => {
 
     if (
       applicantData.veteran_status === 2 &&
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase("I am not a protected")
       )
     ) {
@@ -93,7 +93,7 @@ const fillRace2 = (applicantData: Applicant) => {
     const labelText = labelElement?.textContent?.trim() ?? "";
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      fromatStirngInLowerCase(labelText)?.includes(
         fromatStirngInLowerCase(applicantData.race)
       )
     ) {
@@ -105,20 +105,53 @@ const fillRace2 = (applicantData: Applicant) => {
 };
 
 const fillUSA = (applicantData: Applicant) => {
-  const wokPermission = document.querySelector(
+  const radioParnetAll = document.querySelectorAll(
     ".application-question.custom-question"
   );
-  if (!wokPermission) {
+  if (!radioParnetAll || radioParnetAll.length === 0) {
     return;
   }
-  const ul: any = wokPermission?.querySelector("ul") ?? "";
-  const yes: any = ul.children[0] ?? "";
-  const no: any = ul.children[1] ?? "";
+  for (const radio of radioParnetAll) {
+    const qn = radio.querySelector(".text");
 
-  if (applicantData.us_work_authoriztaion) {
-    yes?.click();
-  } else {
-    no?.click();
+    if (
+      fromatStirngInLowerCase(qn?.textContent)?.includes("legallyauthorized") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("authorized") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("authorizedtowork") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("eligibletowork") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("towork")
+    ) {
+      const ul: any = radio?.querySelector("ul") ?? "";
+      const yes: any = ul.children[0]?.querySelector("label") ?? "";
+      const no: any = ul.children[1]?.querySelector("label") ?? "";
+
+      if (applicantData.us_work_authoriztaion) {
+        yes?.click();
+        handleValueChanges(yes);
+      } else {
+        no?.click();
+        handleValueChanges(no);
+      }
+    }
+
+    // sponshership
+
+    if (
+      fromatStirngInLowerCase(qn?.textContent)?.includes("sponsorship") ||
+      fromatStirngInLowerCase(qn?.textContent)?.includes("visa")
+    ) {
+      const ul: any = radio?.querySelector("ul") ?? "";
+      const yes: any = ul.children[0]?.querySelector("label") ?? "";
+      const no: any = ul.children[1]?.querySelector("label") ?? "";
+
+      if (applicantData.sponsorship_required) {
+        yes?.click();
+        handleValueChanges(yes);
+      } else {
+        no?.click();
+        handleValueChanges(no);
+      }
+    }
   }
 };
 

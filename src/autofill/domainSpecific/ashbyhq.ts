@@ -56,7 +56,7 @@ const fillRace = async (applicantData: Applicant) => {
   if (allLabel && allLabel.length > 0) {
     for (const label of allLabel) {
       if (
-        fromatStirngInLowerCase(label.textContent).includes(
+        fromatStirngInLowerCase(label.textContent)?.includes(
           fromatStirngInLowerCase(applicantData.race)
         )
       ) {
@@ -83,7 +83,7 @@ const fillVeteran = async (applicantData: Applicant) => {
     for (const label of allLabel) {
       if (
         applicantData.veteran_status === 2 &&
-        fromatStirngInLowerCase(label.textContent).includes(
+        fromatStirngInLowerCase(label.textContent)?.includes(
           fromatStirngInLowerCase("I am not a protected")
         )
       ) {
@@ -94,7 +94,7 @@ const fillVeteran = async (applicantData: Applicant) => {
 
       if (
         applicantData.veteran_status === 5 &&
-        fromatStirngInLowerCase(label.textContent).includes(
+        fromatStirngInLowerCase(label.textContent)?.includes(
           fromatStirngInLowerCase("decline")
         )
       ) {
@@ -107,7 +107,7 @@ const fillVeteran = async (applicantData: Applicant) => {
         (applicantData.veteran_status === 1 ||
           applicantData.veteran_status === 3 ||
           applicantData.veteran_status === 4) &&
-        fromatStirngInLowerCase(label.textContent).includes(
+        fromatStirngInLowerCase(label.textContent)?.includes(
           fromatStirngInLowerCase("I identify as")
         )
       ) {
