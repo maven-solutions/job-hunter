@@ -31,6 +31,30 @@ const fillAllRadioType = async (applicantData: Applicant) => {
       }
     }
 
+    // for sponshership
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes("sponsorship") ||
+      fromatStirngInLowerCase(legend?.textContent)?.includes("visa")
+    ) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(label?.textContent)?.includes("yes")
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(label?.textContent)?.includes("no")
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
     // for hispanic
     if (
       fromatStirngInLowerCase(legend?.textContent)?.includes("hispanicorlatino")
