@@ -45,6 +45,7 @@ const useWebsiteDetection = (): [boolean, boolean] => {
         "paycomonline.",
         ".gupy.",
         ".tracker",
+        ".aquent",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
