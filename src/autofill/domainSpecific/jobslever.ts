@@ -122,6 +122,9 @@ const fillUSA = (applicantData: Applicant) => {
       fromatStirngInLowerCase(qn?.textContent)?.includes("towork")
     ) {
       const ul: any = radio?.querySelector("ul") ?? "";
+      if (!ul) {
+        return;
+      }
       const yes: any = ul.children[0]?.querySelector("label") ?? "";
       const no: any = ul.children[1]?.querySelector("label") ?? "";
 
@@ -155,10 +158,78 @@ const fillUSA = (applicantData: Applicant) => {
   }
 };
 
+const fillSelectData = async (applicantData: Applicant) => {
+  const allLabelForSelect: NodeListOf<HTMLLabelElement> =
+    document.querySelectorAll("label");
+  if (!allLabelForSelect || allLabelForSelect.length === 0) {
+    return;
+  }
+  for (const label of allLabelForSelect) {
+    const question = label?.querySelector(".text") as HTMLSpanElement | null;
+    const select = label?.querySelector("select") as HTMLSelectElement | null;
+    if (question && select) {
+      // for visa
+      if (
+        fromatStirngInLowerCase(question?.textContent)?.includes(
+          "sponsorship"
+        ) ||
+        fromatStirngInLowerCase(question?.textContent)?.includes("visa")
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text) === "yes"
+          ) {
+            option.selected = true;
+            handleValueChanges(select);
+            return true;
+          }
+
+          if (
+            !applicantData.sponsorship_required &&
+            fromatStirngInLowerCase(option?.text) === "no"
+          ) {
+            handleValueChanges(select);
+            return true;
+          }
+        });
+      }
+
+      // for work authorization
+      if (
+        fromatStirngInLowerCase(question?.textContent)?.includes(
+          "legallyeligible"
+        ) ||
+        fromatStirngInLowerCase(question?.textContent)?.includes("toworkin")
+      ) {
+        Array.from(select.options).find((option: any) => {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "yes"
+          ) {
+            option.selected = true;
+            handleValueChanges(select);
+            return true;
+          }
+
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(option?.text) === "no"
+          ) {
+            option.selected = true;
+            handleValueChanges(select);
+            return true;
+          }
+        });
+      }
+    }
+  }
+};
 export const jobsLever = (tempDiv: any, applicantData: Applicant) => {
   fillName(applicantData);
   fillDate(applicantData);
   fillRace(applicantData);
   fillRace2(applicantData);
   fillUSA(applicantData);
+  fillSelectData(applicantData);
 };
