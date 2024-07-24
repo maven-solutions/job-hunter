@@ -45,6 +45,7 @@ import useConcentrixObserver from "../../hooks/observer/useConcentrixObserver";
 import useZimmerbiometObserver from "../../hooks/observer/useZimmerbiometObserver";
 import useFisglobalObserver from "../../hooks/observer/useFisglobalObserver";
 import ResumeGptInfoModal from "./GptInfoModal";
+import Error from "../../page/Error/Error";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -65,7 +66,7 @@ const JobDetector = (props: any) => {
     return store.JobDetailSlice;
   });
 
-  const [showIcon, showAutofillPage] = useWebsiteDetection();
+  const [showIcon, showAutofillPage, showErrorPage] = useWebsiteDetection();
 
   useEffect(() => {
     if (window.location.href.includes("builtin.")) {
@@ -186,6 +187,7 @@ const JobDetector = (props: any) => {
       {showIcon && showPage === "" && (
         <Logo
           showAutofillPage={showAutofillPage}
+          showErrorPage={showErrorPage}
           setShowPage={setShowPage}
           jobFound={jobDetailState?.jobFound || false}
         />
@@ -213,6 +215,16 @@ const JobDetector = (props: any) => {
       )}
       {showPage === SHOW_PAGE.resumeListPage && (
         <ResumeList
+          autoFilling={autoFilling}
+          setAutoFilling={setAutoFilling}
+          setShowPage={setShowPage}
+          content={content}
+          showPage={showPage}
+        />
+      )}
+
+      {showPage === SHOW_PAGE.ErrorPage && (
+        <Error
           autoFilling={autoFilling}
           setAutoFilling={setAutoFilling}
           setShowPage={setShowPage}

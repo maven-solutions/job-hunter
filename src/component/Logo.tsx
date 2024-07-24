@@ -4,7 +4,7 @@ import { RootStore, useAppDispatch, useAppSelector } from "../store/store";
 import { setToken, setUser } from "../store/features/Auth/AuthSlice";
 
 const Logo = (props: any) => {
-  const { setShowPage, jobFound, showAutofillPage } = props;
+  const { setShowPage, jobFound, showAutofillPage, showErrorPage } = props;
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
@@ -29,6 +29,8 @@ const Logo = (props: any) => {
         setShowPage(SHOW_PAGE.resumeListPage);
       } else if (showAutofillPage) {
         setShowPage(SHOW_PAGE.resumeListPage);
+      } else if (showErrorPage) {
+        setShowPage(SHOW_PAGE.ErrorPage);
       } else {
         setShowPage(SHOW_PAGE.summaryPage);
       }

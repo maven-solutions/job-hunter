@@ -1,0 +1,12 @@
+.ci_auofill_error_wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ci_auofill_error_titile {
+  display: block;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  color: #000000;
+}

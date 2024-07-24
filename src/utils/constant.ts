@@ -17,6 +17,7 @@ export const SHOW_PAGE = {
   singupPage: "singup",
   resumeListPage: "resumelist",
   applicantAutofillPage: "applicantAutofillPage",
+  ErrorPage: "errorpage",
 };
 
 export const EXTENSION_ACTION = {

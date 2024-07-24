@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-const useWebsiteDetection = (): [boolean, boolean] => {
+const useWebsiteDetection = (): [boolean, boolean, boolean] => {
   const [showIcon, setShowIcon] = useState<boolean>(false);
   const [showAutofillPage, setShowAutofillPage] = useState<boolean>(false);
+  const [showErrorPage, setShowErrorPage] = useState<boolean>(false);
   useEffect(() => {
     const url = window.location.href.toLowerCase();
 
@@ -78,9 +79,27 @@ const useWebsiteDetection = (): [boolean, boolean] => {
       setShowIcon(true);
       setShowAutofillPage(true);
     }
+
+    // for iframe issue show error
+    if (
+      [
+        "inovalon.",
+        "adaptivebiotech.",
+        "muckrack.",
+        "truelinkfinancial.",
+        "modular.",
+        ".mativ.",
+        "ordergroove.",
+        ".cdwjobs",
+      ].some((domain) => url.includes(domain))
+    ) {
+      setShowIcon(true);
+      setShowAutofillPage(false);
+      setShowErrorPage(true);
+    }
   }, []);
 
-  return [showIcon, showAutofillPage];
+  return [showIcon, showAutofillPage, showErrorPage];
 };
 
 export default useWebsiteDetection;
