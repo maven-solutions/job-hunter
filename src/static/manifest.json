@@ -70,7 +70,8 @@
         "info-icon.svg",
         "icon-cross.png",
         "noJobImage.svg",
-        "tailoredIcon.svg"
+        "tailoredIcon.svg",
+        "error.svg"
       ],
       "matches": ["<all_urls>"]
     }

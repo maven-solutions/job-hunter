@@ -117,6 +117,14 @@ export const detectInputAndFillData = async (
       iframe = iframeList[0];
     }
   }
+  if (iframeList.length > 0) {
+    const iframeDetect = iframeList[0];
+    const src = iframeDetect.src;
+    if (!src.includes(".icims.")) {
+      // show error
+    }
+  }
+
   if (iframe) {
     startLoading();
 

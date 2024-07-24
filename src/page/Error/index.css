@@ -4,8 +4,9 @@
   align-items: center;
 }
 .ci_auofill_error_titile {
-  display: block;
-  font-size: 14px;
+  all: unset !important;
+  display: block !important;
+  font-size: 14px !important;
   font-family: "Inter", sans-serif;
   font-weight: 500;
   color: #000000;

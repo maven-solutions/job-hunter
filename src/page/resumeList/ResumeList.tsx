@@ -57,6 +57,23 @@ const ResumeList = (props: any) => {
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />
+      <>
+        <Height height="-7" />
+
+        <div className="ci_autofill_iframe_error_wrapper">
+          <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
+          <span className="ci_autofill_iframe_error_title">
+            Our autofill functionality is not supported on this page
+          </span>
+
+          <img
+            src={chrome.runtime.getURL("x.svg")}
+            className="ci_autfill_error_noit_button"
+            alt="x-icon"
+          />
+        </div>
+        <Height height="10" />
+      </>
 
       <WhiteCard>
         {!autoFilling && (

@@ -84,19 +84,19 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
     // for iframe issue show error
     if (
       [
-        "inovalon.",
-        "adaptivebiotech.",
-        "muckrack.",
-        "truelinkfinancial.",
-        "modular.",
-        ".mativ.",
-        "ordergroove.",
-        ".cdwjobs",
-        "payitgov.",
-        "kentik.",
-        "unanet.",
-        "ensono.",
-        "unqork.",
+        // "inovalon.",
+        // "adaptivebiotech.",
+        // "muckrack.",
+        // "truelinkfinancial.",
+        // "modular.",
+        // ".mativ.",
+        // "ordergroove.",
+        // ".cdwjobs",
+        // "payitgov.",
+        // "kentik.",
+        // "unanet.",
+        // "ensono.",
+        // "unqork.",
         "grin.",
       ].some((domain) => url.includes(domain))
     ) {
