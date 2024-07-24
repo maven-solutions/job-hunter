@@ -10,8 +10,8 @@ const Error = (props: any) => {
       <WhiteCard>
         <div className="ci_auofill_error_wrapper">
           <span className="ci_auofill_error_titile">
-            {" "}
-            Autofill not work on this page
+            Unfortunately, our autofill functionality is not supported on this
+            page. Please fill in the details manually.
           </span>
         </div>
       </WhiteCard>
