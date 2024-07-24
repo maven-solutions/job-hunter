@@ -94,6 +94,9 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
         "payitgov.",
         "kentik.",
         "unanet.",
+        "ensono.",
+        "unqork.",
+        "grin.",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
