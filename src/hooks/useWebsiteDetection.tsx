@@ -91,6 +91,9 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
         ".mativ.",
         "ordergroove.",
         ".cdwjobs",
+        "payitgov.",
+        "kentik.",
+        "unanet.",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
