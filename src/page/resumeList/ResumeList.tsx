@@ -30,6 +30,7 @@ const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
   const [selectedResume, setSelectedResume] = useState(0);
+  const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -57,23 +58,26 @@ const ResumeList = (props: any) => {
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />
-      <>
-        <Height height="-7" />
+      {showIframeErrorWarning && (
+        <>
+          <Height height="-7" />
 
-        <div className="ci_autofill_iframe_error_wrapper">
-          <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
-          <span className="ci_autofill_iframe_error_title">
-            Our autofill functionality is not supported on this page
-          </span>
+          <div className="ci_autofill_iframe_error_wrapper">
+            <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
+            <span className="ci_autofill_iframe_error_title">
+              Our autofill functionality is not supported on this page
+            </span>
 
-          <img
-            src={chrome.runtime.getURL("x.svg")}
-            className="ci_autfill_error_noit_button"
-            alt="x-icon"
-          />
-        </div>
-        <Height height="10" />
-      </>
+            <img
+              src={chrome.runtime.getURL("x.svg")}
+              className="ci_autfill_error_noit_button"
+              alt="x-icon"
+              onClick={() => setShowIframeErrorWarning(false)}
+            />
+          </div>
+          <Height height="10" />
+        </>
+      )}
 
       <WhiteCard>
         {!autoFilling && (
@@ -129,6 +133,7 @@ const ResumeList = (props: any) => {
               selectedResume={selectedResume}
               content={content}
               setAutoFilling={setAutoFilling}
+              setShowIframeErrorWarning={setShowIframeErrorWarning}
             />
           </div>
         )}

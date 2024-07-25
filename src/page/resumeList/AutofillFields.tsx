@@ -99,7 +99,8 @@ const extractInfo = (resumeData, applicationForm) => {
 };
 
 const AutofillFields = (props: any) => {
-  const { selectedResume, content, setAutoFilling } = props;
+  const { selectedResume, content, setAutoFilling, setShowIframeErrorWarning } =
+    props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -136,7 +137,12 @@ const AutofillFields = (props: any) => {
       JSON.stringify(applicantData)
     );
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
-    detectInputAndFillData(applicantData, startLoading, stopLoading);
+    detectInputAndFillData(
+      applicantData,
+      startLoading,
+      stopLoading,
+      setShowIframeErrorWarning
+    );
   };
 
   const handleAutofill = () => {

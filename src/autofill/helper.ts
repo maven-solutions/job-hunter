@@ -101,7 +101,8 @@ export const detectInputAndFillData = async (
   applicantData: any,
 
   startLoading: any,
-  stopLoading: any
+  stopLoading: any,
+  setShowIframeErrorWarning?: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
   // console.log("iframeList::", iframeList);
@@ -120,8 +121,13 @@ export const detectInputAndFillData = async (
   if (iframeList.length > 0) {
     const iframeDetect = iframeList[0];
     const src = iframeDetect.src;
-    if (!src.includes(".icims.")) {
+    if (
+      src.includes(".greenhouse.") ||
+      src.includes(".ashbyhq.") ||
+      src.includes(".talemetry.")
+    ) {
       // show error
+      setShowIframeErrorWarning(true);
     }
   }
 
