@@ -52,7 +52,6 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
     ) {
       setShowIcon(true);
       setShowAutofillPage(true);
-      // return;
     }
 
     if (
@@ -73,9 +72,13 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
 
     // // some extra case
     if (
-      [".battelle.", ".oraclecloud.", ".fisglobal."].some((domain) =>
-        url.includes(domain)
-      )
+      [
+        ".battelle.",
+        ".oraclecloud.",
+        ".fisglobal.",
+        ".mercy.",
+        ".eightfold.",
+      ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
       setShowAutofillPage(true);
