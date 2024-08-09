@@ -22,12 +22,13 @@ export const getApplicantsData = createAsyncThunk(
 
 export const getApplicantResume = createAsyncThunk(
   "getApplicantResume",
-  async (data: undefined, { dispatch, rejectWithValue }) => {
+  async (tenantId: any, { dispatch, rejectWithValue }) => {
+    if (tenantId) {
+      axiosInstance.defaults.headers["x-tenant-id"] = Number(tenantId);
+    }
+
     try {
-      const res = await axiosInstance.get(
-        `${BASE_URL}/applicants/resumes`,
-        data
-      );
+      const res = await axiosInstance.get(`${BASE_URL}/applicants/resumes`);
       return res.data;
     } catch (error: any) {
       //   errorToastMessage(error.response?.data?.message);

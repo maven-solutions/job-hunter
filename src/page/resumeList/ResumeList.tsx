@@ -40,6 +40,15 @@ const ResumeList = (props: any) => {
 
   const dispatch = useAppDispatch();
   useEffect(() => {
+    // for organization student
+    if (
+      authState.authenticated &&
+      authState?.ci_user?.organizations[0]?.role?.id === 3
+    ) {
+      dispatch(getApplicantResume(authState?.ci_user?.organizations[0].id));
+      return;
+    }
+
     if (authState.authenticated && authState?.ci_user?.userType === "va") {
       if (!resumeList.res_success || resumeList.applicantData.length === 0) {
         // for va user
@@ -48,7 +57,7 @@ const ResumeList = (props: any) => {
     } else {
       // for normal user
       if (!resumeList.res_success) {
-        dispatch(getApplicantResume());
+        dispatch(getApplicantResume(null));
       }
     }
   }, []);
