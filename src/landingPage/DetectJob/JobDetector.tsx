@@ -46,6 +46,7 @@ import useZimmerbiometObserver from "../../hooks/observer/useZimmerbiometObserve
 import useFisglobalObserver from "../../hooks/observer/useFisglobalObserver";
 import ResumeGptInfoModal from "./GptInfoModal";
 import Error from "../../page/Error/Error";
+import ResumeListForVA from "../../page/resumeList/ResumeListForVA";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -62,6 +63,7 @@ const JobDetector = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+  console.log("authState::", authState);
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
@@ -213,8 +215,18 @@ const JobDetector = (props: any) => {
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} showPage={showPage} />
       )}
-      {showPage === SHOW_PAGE.resumeListPage && (
+      {/* {showPage === SHOW_PAGE.resumeListPage && (
         <ResumeList
+          autoFilling={autoFilling}
+          setAutoFilling={setAutoFilling}
+          setShowPage={setShowPage}
+          content={content}
+          showPage={showPage}
+        />
+      )} */}
+
+      {showPage === SHOW_PAGE.resumeListPage && (
+        <ResumeListForVA
           autoFilling={autoFilling}
           setAutoFilling={setAutoFilling}
           setShowPage={setShowPage}

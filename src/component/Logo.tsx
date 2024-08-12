@@ -25,6 +25,8 @@ const Logo = (props: any) => {
   const handlePage = () => {
     loadUser();
     if (authState.authenticated) {
+      // if(authState?.ci_user?.organizations[0]?.role?.id === 3)
+
       if (authState.ci_user.userType === "va") {
         setShowPage(SHOW_PAGE.resumeListPage);
       } else if (showAutofillPage) {

@@ -16,6 +16,7 @@ export const SHOW_PAGE = {
   loginPage: "login",
   singupPage: "singup",
   resumeListPage: "resumelist",
+  resumeListForVAPage: "resumelistforva",
   applicantAutofillPage: "applicantAutofillPage",
   ErrorPage: "errorpage",
 };
