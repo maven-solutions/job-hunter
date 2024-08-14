@@ -146,6 +146,9 @@
   margin-bottom: 8px;
   cursor: pointer;
 }
+.ciautofill_v2_resume_section-active {
+  border: 1px solid #4339f2;
+}
 .ciautofill_v2_resume_section:hover {
   border: 1px solid #4339f2;
 }

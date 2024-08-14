@@ -236,39 +236,66 @@ const ResumeListForVA = (props: any) => {
             <div className="ciautofill__resmelist__wrapper">
               <Height height="-10" />
 
-              {[1, 2, 3, 4, 5, 6, 7].map((item, i) => {
-                return (
-                  <div
-                    className="ciautofill_single_resume_list_container"
-                    key={item}
-                  >
-                    <div className="ciautofill_single_resume_v2">
-                      <div className="ciautofill__radio__button__section">
-                        <div className="ciautofill__radio__checked" />
-                      </div>
-                      <span className="ciautofill_resume_name">Arun Kumar</span>
-                    </div>
-                    <span className="ciautofill_v2_select_title">
-                      {" "}
-                      Select the Resume{" "}
-                    </span>
+              {resumeList.res_success &&
+                resumeList.applicantData.map((item, index) => {
+                  return (
+                    <div
+                      className="ciautofill_single_resume_list_container"
+                      key={item.applicantId}
+                    >
+                      <div
+                        className="ciautofill_single_resume_v2"
+                        onClick={() => handleSelectedIndexforUser(index)}
+                      >
+                        <div className="ciautofill__radio__button__section">
+                          {selectedUserIndex === index && (
+                            <div className="ciautofill__radio__checked" />
+                          )}
+                        </div>
 
-                    <div className="ciautofill_v2_resume_list_container">
-                      {[1, 2, 3, 4, 5].map((i) => {
-                        return (
-                          <div className="ciautofill_v2_resume_section" key={i}>
-                            <span className="ciautofill_v2_resume_name">
-                              {" "}
-                              Graphic Design
-                            </span>{" "}
-                            <Eye size={16} />
+                        <span className="ciautofill_resume_name">
+                          {item?.fullName}
+                        </span>
+                      </div>
+
+                      {selectedUserIndex === index && (
+                        <>
+                          {" "}
+                          <span className="ciautofill_v2_select_title">
+                            {" "}
+                            Select the Resume{" "}
+                          </span>
+                          <div className="ciautofill_v2_resume_list_container">
+                            {userResumeList.length > 0 &&
+                              userResumeList.map((item, index) => {
+                                return (
+                                  <div
+                                    className={`ciautofill_v2_resume_section ${
+                                      index === selectResumeIndex
+                                        ? "ciautofill_v2_resume_section-active"
+                                        : ""
+                                    }`}
+                                    key={item.id}
+                                  >
+                                    <span
+                                      className="ciautofill_v2_resume_name"
+                                      onClick={() =>
+                                        setSelectResumeIndex(index)
+                                      }
+                                    >
+                                      {" "}
+                                      <RenderName item={item} />
+                                    </span>{" "}
+                                    <Eye size={16} />
+                                  </div>
+                                );
+                              })}
                           </div>
-                        );
-                      })}
+                        </>
+                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
         </WhiteCard>
