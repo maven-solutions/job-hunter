@@ -112,7 +112,7 @@ const ResumeListForVA = (props: any) => {
         <AutofillFieldsForVA />
       </WhiteCard> */}
 
-      <WhiteCard>
+      {/* <WhiteCard>
         {!autoFilling && (
           <div className="ciautofill__resmelist__wrapper">
             <Height height="-10" />
@@ -134,7 +134,6 @@ const ResumeListForVA = (props: any) => {
                       onClick={() => setSelectResumeIndex(index)}
                     >
                       <RenderName item={item} />
-                      {/* {item.title} */}
                     </span>
                     {selectResumeIndex === index && (
                       <div className="ciautofill__checkbox__section">
@@ -180,10 +179,10 @@ const ResumeListForVA = (props: any) => {
             </span>
           </>
         )}
-      </WhiteCard>
+      </WhiteCard> */}
       <Height height="20" />
 
-      <WhiteCard>
+      {/* <WhiteCard>
         {!autoFilling && (
           <div className="ciautofill__resmelist__wrapper">
             <Height height="-10" />
@@ -206,10 +205,7 @@ const ResumeListForVA = (props: any) => {
                     <span
                       className="ciautofill_resume_name"
                       onClick={() => handleSelectedIndexforUser(index)}
-                    >
-                      {/* <RenderName item={item} /> */}
-                      {item.fullName}
-                    </span>
+                    ></span>
                     {selectedUserIndex === index && (
                       <div className="ciautofill__checkbox__section">
                         <Check className="ciautofill__check__icon" />
@@ -233,7 +229,59 @@ const ResumeListForVA = (props: any) => {
             </span>
           </>
         )}
-      </WhiteCard>
+      </WhiteCard> */}
+      <div className="ci_resume_list_height_container">
+        <WhiteCard>
+          {!autoFilling && (
+            <div className="ciautofill__resmelist__wrapper">
+              <Height height="-10" />
+
+              {[1, 2, 3, 4, 5, 6, 7].map((item, i) => {
+                return (
+                  <div
+                    className="ciautofill_single_resume_list_container"
+                    key={item}
+                  >
+                    <div className="ciautofill_single_resume_v2">
+                      <div className="ciautofill__radio__button__section">
+                        <div className="ciautofill__radio__checked" />
+                      </div>
+                      <span className="ciautofill_resume_name">Arun Kumar</span>
+                    </div>
+                    <span className="ciautofill_v2_select_title">
+                      {" "}
+                      Select the Resume{" "}
+                    </span>
+
+                    <div className="ciautofill_v2_resume_list_container">
+                      {[1, 2, 3, 4, 5].map((i) => {
+                        return (
+                          <div className="ciautofill_v2_resume_section" key={i}>
+                            <span className="ciautofill_v2_resume_name">
+                              {" "}
+                              Graphic Design
+                            </span>{" "}
+                            <Eye size={16} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </WhiteCard>
+      </div>
+
+      <div className="ciautofill_v2_resume_autofill_button_section">
+        <AutofillFieldsForVA
+          selectedUserIndex={selectedUserIndex}
+          content={content}
+          setAutoFilling={setAutoFilling}
+          setShowIframeErrorWarning={setShowIframeErrorWarning}
+        />
+      </div>
     </Layout>
   );
 };

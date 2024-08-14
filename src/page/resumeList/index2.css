@@ -79,3 +79,83 @@
   /* right: 15px; */
   cursor: pointer;
 }
+.ci_resume_list_height_container {
+  max-height: 280px;
+  overflow: auto;
+}
+.ci_resume_list_height_container::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+.ci_resume_list_height_container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+.ci_resume_list_height_container::-webkit-scrollbar-thumb {
+  background: #d4d9e3;
+  border-radius: 4px;
+}
+
+.ciautofill_single_resume_list_container {
+  border-bottom: 1px solid #dbdbdb;
+  padding: 15px 0;
+}
+.ciautofill_single_resume_v2 {
+  display: flex !important;
+  gap: 15px;
+  /* padding: 15px 0; */
+  align-items: center !important;
+}
+.ciautofill_v2_select_title {
+  font-weight: 400;
+  font-size: 12px;
+  display: block;
+  font-family: "Inter", sans-serif !important;
+  margin: 5px 0 10px 30px !important;
+}
+.ciautofill_v2_resume_list_container {
+  margin-left: 27px;
+  max-height: 130px;
+  overflow: auto;
+  padding-right: 5px;
+}
+
+.ciautofill_v2_resume_list_container::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+.ciautofill_v2_resume_list_container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+.ciautofill_v2_resume_list_container::-webkit-scrollbar-thumb {
+  background: #d4d9e3;
+  border-radius: 3px;
+}
+.ciautofill_v2_resume_section {
+  border: 1px solid #d4d9e3;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 15px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.ciautofill_v2_resume_section:hover {
+  border: 1px solid #4339f2;
+}
+.ciautofill_v2_resume_name {
+  font-family: "Inter", sans-serif !important;
+  font-weight: 400;
+  font-size: 14px;
+}
+.ciautofill_v2_resume_autofill_button_section {
+  display: flex;
+  margin-top: -10px !important;
+  justify-content: flex-end;
+}
