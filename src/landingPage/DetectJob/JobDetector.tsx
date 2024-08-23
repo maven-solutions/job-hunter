@@ -63,7 +63,6 @@ const JobDetector = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  console.log("authState::", authState);
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });

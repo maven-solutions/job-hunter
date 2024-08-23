@@ -9,7 +9,6 @@ import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
 import HeadingTitle from "../../component/heading/HeadingTitle";
-import AutofillFields from "./AutofillFields";
 import "./index.css";
 import "./index2.css";
 import Spinner from "../shared/Spinner";
@@ -42,12 +41,9 @@ const ResumeListForVA = (props: any) => {
   });
 
   const handleSelectedIndexforUser = (index) => {
-    console.log("index::", index);
     setSelectedUserIndex(index);
-    // setUserResumeList;
     const resume = resumeList.applicantData[index].applicants;
     setUserResumeList(resume);
-    // console.log("resume::", resume);
   };
 
   useEffect(() => {
@@ -57,7 +53,6 @@ const ResumeListForVA = (props: any) => {
     }
   }, [resumeList.res_success]);
 
-  console.log("resumeList::", resumeList);
   const dispatch = useAppDispatch();
   useEffect(() => {
     // for organization student
@@ -82,6 +77,10 @@ const ResumeListForVA = (props: any) => {
       }
     }
   }, []);
+
+  const hanldeChildClick = (pdfUrl: string) => {
+    window.open(pdfUrl, "_blank");
+  };
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
@@ -108,134 +107,26 @@ const ResumeListForVA = (props: any) => {
           <Height height="10" />
         </>
       )}
-      {/* <WhiteCard>
-        <AutofillFieldsForVA />
-      </WhiteCard> */}
 
-      {/* <WhiteCard>
-        {!autoFilling && (
-          <div className="ciautofill__resmelist__wrapper">
-            <Height height="-10" />
-
-            {userResumeList.length > 0 &&
-              userResumeList.map((item, index) => {
-                return (
-                  <div className="ciautofill_single_resume" key={item.id}>
-                    <div
-                      className="ciautofill__radio__button__section"
-                      onClick={() => setSelectResumeIndex(index)}
-                    >
-                      {selectResumeIndex === index && (
-                        <div className="ciautofill__radio__checked" />
-                      )}
-                    </div>
-                    <span
-                      className="ciautofill_resume_name"
-                      onClick={() => setSelectResumeIndex(index)}
-                    >
-                      <RenderName item={item} />
-                    </span>
-                    {selectResumeIndex === index && (
-                      <div className="ciautofill__checkbox__section">
-                        <Check className="ciautofill__check__icon" />
-                      </div>
-                    )}
-
-                    <div className="ext__tooltip__wrapper">
-                      <div className="ext__toolip__container">
-                        <div
-                          className="ext__toolip"
-                          onClick={() =>
-                            window.open(item.applicant.pdfUrl, "_blank")
-                          }
-                        >
-                          <Eye size={16} />
-                          <p className="ext__tooltip__text">Preview</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            {resumeList.loading && <ResumeSkleton />}
-            <Height height="10" />
-            <AutofillFieldsForVA
-              selectedUserIndex={selectedUserIndex}
-              content={content}
-              setAutoFilling={setAutoFilling}
-              setShowIframeErrorWarning={setShowIframeErrorWarning}
-            />
-          </div>
-        )}
-
-        {autoFilling && (
-          <>
-            {" "}
-            <div style={{ padding: "10px", paddingTop: "0" }}>
-              <Spinner size={60} />
-            </div>
-            <span className="ci_form_filling_text">
-              Form Filling Please Wait...{" "}
-            </span>
-          </>
-        )}
-      </WhiteCard> */}
       <Height height="20" />
 
-      {/* <WhiteCard>
-        {!autoFilling && (
-          <div className="ciautofill__resmelist__wrapper">
-            <Height height="-10" />
-
-            {resumeList.res_success &&
-              resumeList.applicantData.map((item, index) => {
-                return (
-                  <div
-                    className="ciautofill_single_resume"
-                    key={item.applicantId}
-                  >
-                    <div
-                      className="ciautofill__radio__button__section"
-                      onClick={() => handleSelectedIndexforUser(index)}
-                    >
-                      {selectedUserIndex === index && (
-                        <div className="ciautofill__radio__checked" />
-                      )}
-                    </div>
-                    <span
-                      className="ciautofill_resume_name"
-                      onClick={() => handleSelectedIndexforUser(index)}
-                    ></span>
-                    {selectedUserIndex === index && (
-                      <div className="ciautofill__checkbox__section">
-                        <Check className="ciautofill__check__icon" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            {resumeList.loading && <ResumeSkleton />}
-          </div>
-        )}
-
-        {autoFilling && (
-          <>
-            {" "}
-            <div style={{ padding: "10px", paddingTop: "0" }}>
-              <Spinner size={60} />
-            </div>
-            <span className="ci_form_filling_text">
-              Form Filling Please Wait...{" "}
-            </span>
-          </>
-        )}
-      </WhiteCard> */}
       <div className="ci_resume_list_height_container">
         <WhiteCard>
+          {autoFilling && (
+            <>
+              {" "}
+              <div style={{ padding: "10px", paddingTop: "0" }}>
+                <Spinner size={60} />
+              </div>
+              <span className="ci_form_filling_text">
+                Form Filling Please Wait...{" "}
+              </span>
+            </>
+          )}
           {!autoFilling && (
             <div className="ciautofill__resmelist__wrapper">
               <Height height="-10" />
-
+              {resumeList.loading && <ResumeSkleton />}
               {resumeList.res_success &&
                 resumeList.applicantData.map((item, index) => {
                   return (
@@ -267,29 +158,37 @@ const ResumeListForVA = (props: any) => {
                           </span>
                           <div className="ciautofill_v2_resume_list_container">
                             {userResumeList.length > 0 &&
-                              userResumeList.map((item, index) => {
-                                return (
-                                  <div
-                                    className={`ciautofill_v2_resume_section ${
-                                      index === selectResumeIndex
-                                        ? "ciautofill_v2_resume_section-active"
-                                        : ""
-                                    }`}
-                                    key={item.id}
-                                  >
-                                    <span
-                                      className="ciautofill_v2_resume_name"
-                                      onClick={() =>
-                                        setSelectResumeIndex(index)
-                                      }
+                              userResumeList
+                                .filter((r) => r.pdfUrl)
+                                ?.map((item, index) => {
+                                  return (
+                                    <div
+                                      className={`ciautofill_v2_resume_section ${
+                                        index === selectResumeIndex
+                                          ? "ciautofill_v2_resume_section-active"
+                                          : ""
+                                      }`}
+                                      key={item.id}
                                     >
-                                      {" "}
-                                      <RenderName item={item} />
-                                    </span>{" "}
-                                    <Eye size={16} />
-                                  </div>
-                                );
-                              })}
+                                      <span
+                                        className="ciautofill_v2_resume_name"
+                                        onClick={() =>
+                                          setSelectResumeIndex(index)
+                                        }
+                                      >
+                                        {" "}
+                                        <RenderName item={item} />
+                                      </span>{" "}
+                                      <Eye
+                                        size={16}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          hanldeChildClick(item?.pdfUrl);
+                                        }}
+                                      />
+                                    </div>
+                                  );
+                                })}
                           </div>
                         </>
                       )}

@@ -124,18 +124,17 @@ const AutofillFieldsForVA = (props: any) => {
       resumeList.applicantData[selectedUserIndex].applicants[0],
       resumeList.applicantData[selectedUserIndex].applicationForm
     );
-    console.log("applicantData::", applicantData);
-    // localStorage.setItem(
-    //   LOCALSTORAGE.CI_AUTOFILL_USERINFO,
-    //   JSON.stringify(applicantData)
-    // );
-    // localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
-    // detectInputAndFillData(
-    //   applicantData,
-    //   startLoading,
-    //   stopLoading,
-    //   setShowIframeErrorWarning
-    // );
+    localStorage.setItem(
+      LOCALSTORAGE.CI_AUTOFILL_USERINFO,
+      JSON.stringify(applicantData)
+    );
+    localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
+    detectInputAndFillData(
+      applicantData,
+      startLoading,
+      stopLoading,
+      setShowIframeErrorWarning
+    );
   };
 
   const handleAutofill = () => {
