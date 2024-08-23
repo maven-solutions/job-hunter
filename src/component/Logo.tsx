@@ -28,7 +28,7 @@ const Logo = (props: any) => {
       // if(authState?.ci_user?.organizations[0]?.role?.id === 3)
 
       if (authState.ci_user.userType === "va") {
-        setShowPage(SHOW_PAGE.resumeListPage);
+        setShowPage(SHOW_PAGE.resumeListForVAPage);
       } else if (showAutofillPage) {
         setShowPage(SHOW_PAGE.resumeListPage);
       } else if (showErrorPage) {

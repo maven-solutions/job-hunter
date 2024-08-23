@@ -82,7 +82,6 @@ const ResumeListForVA = (props: any) => {
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
-  console.log(resumeList.applicantData);
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">

@@ -63,6 +63,7 @@ const JobDetector = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+
   const jobDetailState: any = useAppSelector((store: RootStore) => {
     return store.JobDetailSlice;
   });
@@ -214,7 +215,7 @@ const JobDetector = (props: any) => {
       {showPage === SHOW_PAGE.profilePage && (
         <Profile setShowPage={setShowPage} showPage={showPage} />
       )}
-      {/* {showPage === SHOW_PAGE.resumeListPage && (
+      {showPage === SHOW_PAGE.resumeListPage && (
         <ResumeList
           autoFilling={autoFilling}
           setAutoFilling={setAutoFilling}
@@ -222,9 +223,9 @@ const JobDetector = (props: any) => {
           content={content}
           showPage={showPage}
         />
-      )} */}
+      )}
 
-      {showPage === SHOW_PAGE.resumeListPage && (
+      {showPage === SHOW_PAGE.resumeListForVAPage && (
         <ResumeListForVA
           autoFilling={autoFilling}
           setAutoFilling={setAutoFilling}
