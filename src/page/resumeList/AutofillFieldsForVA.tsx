@@ -125,7 +125,6 @@ const AutofillFieldsForVA = (props: any) => {
       resumeList.applicantData[selectedUserIndex].applicants[selectResumeIndex],
       resumeList.applicantData[selectedUserIndex].applicationForm
     );
-    console.log("applicant::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)
