@@ -104,6 +104,7 @@ const AutofillFieldsForVA = (props: any) => {
     content,
     setAutoFilling,
     setShowIframeErrorWarning,
+    selectResumeIndex,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -121,9 +122,10 @@ const AutofillFieldsForVA = (props: any) => {
   const autofillByContentScript = () => {
     const url = window.location.href;
     const applicantData = extractInfo(
-      resumeList.applicantData[selectedUserIndex].applicants[0],
+      resumeList.applicantData[selectedUserIndex].applicants[selectResumeIndex],
       resumeList.applicantData[selectedUserIndex].applicationForm
     );
+    console.log("applicant::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)

@@ -42,6 +42,7 @@ const ResumeListForVA = (props: any) => {
 
   const handleSelectedIndexforUser = (index) => {
     setSelectedUserIndex(index);
+    setSelectResumeIndex(0);
     const resume = resumeList.applicantData[index].applicants;
     setUserResumeList(resume);
   };
@@ -81,6 +82,7 @@ const ResumeListForVA = (props: any) => {
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
+  console.log(resumeList.applicantData);
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
@@ -203,6 +205,7 @@ const ResumeListForVA = (props: any) => {
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA
           selectedUserIndex={selectedUserIndex}
+          selectResumeIndex={selectResumeIndex}
           content={content}
           setAutoFilling={setAutoFilling}
           setShowIframeErrorWarning={setShowIframeErrorWarning}
