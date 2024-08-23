@@ -43,7 +43,6 @@ const ResumeList = createSlice({
       (state, { payload }: PayloadAction<any>) => {
         state.loading = false;
         state.res_success = true;
-
         const filteredData =
           payload.data.filter((data: any) => data.pdfUrl) ?? [];
         state.applicantData = filteredData;
