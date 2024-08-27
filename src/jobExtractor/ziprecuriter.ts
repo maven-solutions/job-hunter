@@ -5,11 +5,11 @@ const getJobsFromZipRecuriter1 = (
   setCompanyName,
   setJobDescription
 ) => {
-  const zipDomForLink = document.querySelector(".job_result_selected");
-  if (zipDomForLink) {
-    const link = zipDomForLink.querySelector("a");
-    setPostUrl(link.href);
-  }
+  // const zipDomForLink = document.querySelector(".job_result_selected");
+  // if (zipDomForLink) {
+  //   const link = zipDomForLink.querySelector("a");
+  // }
+  setPostUrl(window.location.href);
 
   const titleEle = zipDom.querySelector("h1");
   const title = titleEle?.textContent?.trim();
