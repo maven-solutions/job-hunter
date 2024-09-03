@@ -33,11 +33,7 @@ export const fileTypeDataFiller = async (
   }
 
   try {
-    if (
-      applicantData.pdf_url &&
-      !file &&
-      !textInputField.hasAttribute("ci-aria-file-uploaded")
-    ) {
+    if (applicantData.pdf_url) {
       textInputField.setAttribute("ci-aria-file-uploaded", "true");
       // Create file asynchronously
       const designFile = await createFile(
@@ -52,7 +48,6 @@ export const fileTypeDataFiller = async (
       textInputField.dispatchEvent(
         new Event("change", { bubbles: true, cancelable: false })
       );
-      file = true;
     }
   } catch (error) {
     console.error("Error:", error);
