@@ -5,6 +5,7 @@ import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
   getApplicantsData,
+  getDesignations,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -15,17 +16,6 @@ import "./index2.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
-
-const RenderName = (props: any) => {
-  const { item } = props;
-  if (item?.title) {
-    return item.title;
-  }
-  if (item?.name) {
-    return item.name;
-  }
-  return "Untitled Resume";
-};
 
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -41,6 +31,10 @@ const ResumeListForVA = (props: any) => {
     return store.AuthSlice;
   });
   console.log("resumeList", resumeList);
+
+  useEffect(() => {
+    dispatch(getDesignations());
+  }, []);
 
   useEffect(() => {
     if (resumeList.res_success) {
@@ -75,6 +69,21 @@ const ResumeListForVA = (props: any) => {
     }
   }, []);
 
+  const RenderName = (props: any) => {
+    const { item } = props;
+    const role = getRoleById(item.preferredRole);
+
+    const roleString = role ? ` | ${role}` : "";
+
+    if (item?.title) {
+      return `${item.title}${roleString}`;
+    }
+    if (item?.name) {
+      return `${item.name}${roleString}`;
+    }
+    return `Untitled Resume${roleString}`;
+  };
+
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
@@ -99,6 +108,16 @@ const ResumeListForVA = (props: any) => {
       return null;
     }
     return filteredArray[0];
+  };
+
+  const getRoleById = (id) => {
+    const role = resumeList.allRoles.filter((role) => {
+      return role.id === id;
+    });
+    if (!role || role.length === 0) {
+      return null;
+    }
+    return role[0].title;
   };
 
   return (
