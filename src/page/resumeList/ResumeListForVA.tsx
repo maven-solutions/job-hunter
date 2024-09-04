@@ -82,12 +82,42 @@ const ResumeListForVA = (props: any) => {
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
+  const options = [
+    { label: "Product Owner", value: "product owner" },
+    { label: "Scrum Master", value: "scrum master" },
+    { label: "Project Manager", value: "project manager" },
+    { label: "Business Analyst", value: "business analyst" },
+    { label: "Agile Coach", value: "agile coach" },
+    { label: "Product Manager", value: "product manager" },
+  ];
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
       <HeadingTitle title="Applicant List:" />
       <Height height="10" />
+      <Select
+        options={options}
+        className="react-select-container"
+        classNamePrefix="react-select"
+        styles={{
+          control: (baseStyles, state) => ({
+            ...baseStyles,
+            fontSize: 14,
+            padding: "-2px 10px",
+            borderRadius: "5px",
+          }),
+          option: (provided, state) => ({
+            ...provided,
+            fontSize: 14,
+            background: state.isSelected ? "#4339f2" : "#white",
+          }),
+        }}
+        // value={category}
+        defaultValue={null}
+        placeholder="Select category"
+        onChange={(option) => {}}
+      />
       {showIframeErrorWarning && (
         <>
           <Height height="-7" />
