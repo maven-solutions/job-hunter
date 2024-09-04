@@ -100,7 +100,9 @@ const extractInfo = (resumeData, applicationForm) => {
 
 const AutofillFieldsForVA = (props: any) => {
   const {
-    selectedUserIndex,
+    // selectedUserIndex,
+    selectedUserId,
+    getUserDetailsById,
     content,
     setAutoFilling,
     setShowIframeErrorWarning,
@@ -121,9 +123,10 @@ const AutofillFieldsForVA = (props: any) => {
 
   const autofillByContentScript = () => {
     const url = window.location.href;
+    const userdetails = getUserDetailsById(selectedUserId);
     const applicantData = extractInfo(
-      resumeList.applicantData[selectedUserIndex].applicants[selectResumeIndex],
-      resumeList.applicantData[selectedUserIndex].applicationForm
+      userdetails.applicants[selectResumeIndex],
+      userdetails.applicationForm
     );
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,

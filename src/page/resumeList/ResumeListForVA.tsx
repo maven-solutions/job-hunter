@@ -30,7 +30,7 @@ const RenderName = (props: any) => {
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
-  const [selectedUserIndex, setSelectedUserIndex] = useState(2);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
@@ -46,6 +46,7 @@ const ResumeListForVA = (props: any) => {
     if (resumeList.res_success) {
       const resume = resumeList.applicantData[0].applicants;
       setUserResumeList(resume);
+      setSelectedUserId(resumeList.applicantData[0].applicantId);
     }
   }, [resumeList.res_success]);
 
@@ -87,6 +88,17 @@ const ResumeListForVA = (props: any) => {
     const resume = filteredArray[0].applicants;
     setUserResumeList(resume);
     setSelectResumeIndex(0);
+    setSelectedUserId(option.value);
+  };
+
+  const getUserDetailsById = (id) => {
+    const filteredArray = resumeList.applicantData?.filter((data) => {
+      return id === data.applicantId;
+    });
+    if (!filteredArray && filteredArray.length === 0) {
+      return null;
+    }
+    return filteredArray[0];
   };
 
   return (
@@ -194,7 +206,8 @@ const ResumeListForVA = (props: any) => {
 
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA
-          selectedUserIndex={selectedUserIndex}
+          selectedUserId={selectedUserId}
+          getUserDetailsById={getUserDetailsById}
           selectResumeIndex={selectResumeIndex}
           content={content}
           setAutoFilling={setAutoFilling}
