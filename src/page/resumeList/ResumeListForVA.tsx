@@ -44,7 +44,7 @@ const ResumeListForVA = (props: any) => {
 
   useEffect(() => {
     if (resumeList.res_success) {
-      const resume = resumeList.applicantData[2].applicants;
+      const resume = resumeList.applicantData[0].applicants;
       setUserResumeList(resume);
     }
   }, [resumeList.res_success]);
@@ -104,14 +104,16 @@ const ResumeListForVA = (props: any) => {
               fontSize: 14,
               padding: "-2px 10px",
               borderRadius: "5px",
+              cursor: "pointer",
             }),
             option: (provided, state) => ({
               ...provided,
               fontSize: 14,
+              cursor: "pointer",
               background: state.isSelected ? "#4339f2" : "#white",
             }),
           }}
-          // value={category}
+          value={resumeList?.userList[0]}
           defaultValue={null}
           placeholder="Select category"
           onChange={(option) => handleSelectChanges(option)}
