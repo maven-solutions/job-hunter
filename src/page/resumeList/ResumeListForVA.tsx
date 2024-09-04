@@ -21,6 +21,7 @@ const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedUserValue, setSelectedUserValue] = useState(null);
   const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
@@ -40,6 +41,8 @@ const ResumeListForVA = (props: any) => {
       const resume = resumeList.applicantData[0].applicants;
       setUserResumeList(resume);
       setSelectedUserId(resumeList.applicantData[0].applicantId);
+
+      setSelectedUserValue(resumeList?.userList[0]);
     }
   }, [resumeList.res_success]);
 
@@ -72,15 +75,15 @@ const ResumeListForVA = (props: any) => {
     const { item } = props;
     const role = getRoleById(item.preferredRole, item.customPreferredRole);
 
-    const roleString = role ? ` | ${role}` : "";
+    const roleString = role ? `  (${role}) ` : "";
 
     if (item?.title) {
-      return `${item.title}${roleString}`;
+      return `${item.title} ${roleString}`;
     }
     if (item?.name) {
-      return `${item.name}${roleString}`;
+      return `${item.name} ${roleString}`;
     }
-    return `Untitled Resume${roleString}`;
+    return `Untitled Resume ${roleString}`;
   };
 
   const hanldeChildClick = (pdfUrl: string) => {
@@ -97,6 +100,7 @@ const ResumeListForVA = (props: any) => {
     setUserResumeList(resume);
     setSelectResumeIndex(0);
     setSelectedUserId(option.value);
+    setSelectedUserValue(option);
   };
 
   const getUserDetailsById = (id) => {
@@ -130,6 +134,7 @@ const ResumeListForVA = (props: any) => {
       <div className="va_user_select_section_wrapper">
         <HeadingTitle title="Applicant List:" />
         <Select
+          isSearchable={false}
           options={resumeList?.userList}
           className="react-select-container-va"
           classNamePrefix="react-select"
@@ -148,9 +153,8 @@ const ResumeListForVA = (props: any) => {
               background: state.isSelected ? "#4339f2" : "#white",
             }),
           }}
-          value={resumeList?.userList[0]}
-          defaultValue={null}
-          placeholder="Select category"
+          value={selectedUserValue}
+          placeholder="Select Applicant"
           onChange={(option) => handleSelectChanges(option)}
         />
       </div>
