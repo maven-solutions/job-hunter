@@ -86,7 +86,7 @@ const ResumeListForVA = (props: any) => {
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
-      <HeadingTitle title="Resume List" />
+      <HeadingTitle title="Applicant List:" />
       <Height height="10" />
       {showIframeErrorWarning && (
         <>
