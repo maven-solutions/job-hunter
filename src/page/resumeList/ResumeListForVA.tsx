@@ -30,7 +30,6 @@ const ResumeListForVA = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  console.log("resumeList", resumeList);
 
   useEffect(() => {
     dispatch(getDesignations());
@@ -71,7 +70,7 @@ const ResumeListForVA = (props: any) => {
 
   const RenderName = (props: any) => {
     const { item } = props;
-    const role = getRoleById(item.preferredRole);
+    const role = getRoleById(item.preferredRole, item.customPreferredRole);
 
     const roleString = role ? ` | ${role}` : "";
 
@@ -110,14 +109,19 @@ const ResumeListForVA = (props: any) => {
     return filteredArray[0];
   };
 
-  const getRoleById = (id) => {
-    const role = resumeList.allRoles.filter((role) => {
-      return role.id === id;
-    });
-    if (!role || role.length === 0) {
-      return null;
+  const getRoleById = (roleiId, customRole) => {
+    if (roleiId) {
+      const role = resumeList.allRoles.filter((role) => {
+        return role.id === roleiId;
+      });
+      if (!role || role.length === 0) {
+        return null;
+      }
+      return role[0].title;
     }
-    return role[0].title;
+    if (customRole) {
+      return customRole?.label;
+    }
   };
 
   return (
