@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Check, Eye } from "react-feather";
+import { Eye } from "react-feather";
+import Select from "react-select";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
@@ -29,7 +30,7 @@ const RenderName = (props: any) => {
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
-  const [selectedUserIndex, setSelectedUserIndex] = useState(0);
+  const [selectedUserIndex, setSelectedUserIndex] = useState(2);
   const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
@@ -39,17 +40,11 @@ const ResumeListForVA = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
-  const handleSelectedIndexforUser = (index) => {
-    setSelectedUserIndex(index);
-    setSelectResumeIndex(0);
-    const resume = resumeList.applicantData[index].applicants;
-    setUserResumeList(resume);
-  };
+  console.log("resumeList", resumeList);
 
   useEffect(() => {
     if (resumeList.res_success) {
-      const resume = resumeList.applicantData[0].applicants;
+      const resume = resumeList.applicantData[2].applicants;
       setUserResumeList(resume);
     }
   }, [resumeList.res_success]);
@@ -82,46 +77,49 @@ const ResumeListForVA = (props: any) => {
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
-  const options = [
-    { label: "Product Owner", value: "product owner" },
-    { label: "Scrum Master", value: "scrum master" },
-    { label: "Project Manager", value: "project manager" },
-    { label: "Business Analyst", value: "business analyst" },
-    { label: "Agile Coach", value: "agile coach" },
-    { label: "Product Manager", value: "product manager" },
-  ];
+  const handleSelectChanges = (option) => {
+    const filteredArray = resumeList.applicantData?.filter((data) => {
+      return option.value === data.applicantId;
+    });
+    if (!filteredArray && filteredArray.length === 0) {
+      return;
+    }
+    const resume = filteredArray[0].applicants;
+    setUserResumeList(resume);
+    setSelectResumeIndex(0);
+  };
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
-      <HeadingTitle title="Applicant List:" />
-      <Height height="10" />
-      <Select
-        options={options}
-        className="react-select-container"
-        classNamePrefix="react-select"
-        styles={{
-          control: (baseStyles, state) => ({
-            ...baseStyles,
-            fontSize: 14,
-            padding: "-2px 10px",
-            borderRadius: "5px",
-          }),
-          option: (provided, state) => ({
-            ...provided,
-            fontSize: 14,
-            background: state.isSelected ? "#4339f2" : "#white",
-          }),
-        }}
-        // value={category}
-        defaultValue={null}
-        placeholder="Select category"
-        onChange={(option) => {}}
-      />
+      <div className="va_user_select_section_wrapper">
+        <HeadingTitle title="Applicant List:" />
+        <Select
+          options={resumeList?.userList}
+          className="react-select-container-va"
+          classNamePrefix="react-select"
+          styles={{
+            control: (baseStyles, state) => ({
+              ...baseStyles,
+              fontSize: 14,
+              padding: "-2px 10px",
+              borderRadius: "5px",
+            }),
+            option: (provided, state) => ({
+              ...provided,
+              fontSize: 14,
+              background: state.isSelected ? "#4339f2" : "#white",
+            }),
+          }}
+          // value={category}
+          defaultValue={null}
+          placeholder="Select category"
+          onChange={(option) => handleSelectChanges(option)}
+        />
+      </div>
       {showIframeErrorWarning && (
         <>
           <Height height="-7" />
-
           <div className="ci_autofill_iframe_error_wrapper">
             <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
             <span className="ci_autofill_iframe_error_title">
@@ -138,98 +136,59 @@ const ResumeListForVA = (props: any) => {
           <Height height="10" />
         </>
       )}
+      <Height height="15" />
 
-      <Height height="20" />
-
-      <div className="ci_resume_list_height_container">
-        <WhiteCard>
-          {autoFilling && (
-            <>
-              {" "}
-              <div style={{ padding: "10px", paddingTop: "0" }}>
-                <Spinner size={60} />
-              </div>
-              <span className="ci_form_filling_text">
-                Form Filling Please Wait...{" "}
-              </span>
-            </>
-          )}
-          {!autoFilling && (
-            <div className="ciautofill__resmelist__wrapper">
-              <Height height="-10" />
-              {resumeList.loading && <ResumeSkleton />}
-              {resumeList.res_success &&
-                resumeList.applicantData.map((item, index) => {
-                  return (
-                    <div
-                      className="ciautofill_single_resume_list_container"
-                      key={item.applicantId}
-                    >
-                      <div
-                        className="ciautofill_single_resume_v2"
-                        onClick={() => handleSelectedIndexforUser(index)}
-                      >
-                        <div className="ciautofill__radio__button__section">
-                          {selectedUserIndex === index && (
-                            <div className="ciautofill__radio__checked" />
-                          )}
-                        </div>
-
-                        <span className="ciautofill_resume_name">
-                          {item?.fullName}
-                        </span>
-                      </div>
-
-                      {selectedUserIndex === index && (
-                        <>
-                          {" "}
-                          <span className="ciautofill_v2_select_title">
-                            {" "}
-                            Select the Resume{" "}
-                          </span>
-                          <div className="ciautofill_v2_resume_list_container">
-                            {userResumeList.length > 0 &&
-                              userResumeList
-                                .filter((r) => r.pdfUrl)
-                                ?.map((item, index) => {
-                                  return (
-                                    <div
-                                      className={`ciautofill_v2_resume_section ${
-                                        index === selectResumeIndex
-                                          ? "ciautofill_v2_resume_section-active"
-                                          : ""
-                                      }`}
-                                      key={item.id}
-                                    >
-                                      <span
-                                        className="ciautofill_v2_resume_name"
-                                        onClick={() =>
-                                          setSelectResumeIndex(index)
-                                        }
-                                      >
-                                        {" "}
-                                        <RenderName item={item} />
-                                      </span>{" "}
-                                      <Eye
-                                        size={16}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          hanldeChildClick(item?.pdfUrl);
-                                        }}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+      <WhiteCard>
+        {autoFilling && (
+          <>
+            {" "}
+            <div style={{ padding: "10px", paddingTop: "0" }}>
+              <Spinner size={60} />
             </div>
-          )}
-        </WhiteCard>
-      </div>
+            <span className="ci_form_filling_text">
+              Form Filling Please Wait...{" "}
+            </span>
+          </>
+        )}{" "}
+        <span className="ciautofill_v2_select_title">Select the Resume </span>
+        {!autoFilling && (
+          <div className="ciautofill__resmelist__wrapper-va">
+            {resumeList.loading && <ResumeSkleton />}
+            {resumeList.res_success && (
+              <div className="ciautofill_v2_resume_list_container">
+                {userResumeList.length > 0 &&
+                  userResumeList
+                    .filter((r) => r.pdfUrl)
+                    ?.map((item, index) => {
+                      return (
+                        <div
+                          className={`ciautofill_v2_resume_section ${
+                            index === selectResumeIndex
+                              ? "ciautofill_v2_resume_section-active"
+                              : ""
+                          }`}
+                          key={item.id}
+                          onClick={() => setSelectResumeIndex(index)}
+                        >
+                          <span className="ciautofill_v2_resume_name">
+                            {" "}
+                            <RenderName item={item} />
+                          </span>{" "}
+                          <Eye
+                            size={16}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              hanldeChildClick(item?.pdfUrl);
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+              </div>
+            )}
+          </div>
+        )}
+      </WhiteCard>
 
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA

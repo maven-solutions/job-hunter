@@ -4,6 +4,7 @@ const initialState: any = {
   loading: false,
   res_success: false,
   applicantData: [],
+  userList: [],
 };
 
 const ResumeList = createSlice({
@@ -26,6 +27,10 @@ const ResumeList = createSlice({
         state.loading = false;
         state.res_success = true;
         state.applicantData = payload.data;
+        const userList = payload?.data?.map((data) => {
+          return { label: data.fullName, value: data.applicantId };
+        });
+        state.userList = userList;
       }
     );
     builder.addCase(getApplicantsData.rejected, (state) => {

@@ -79,10 +79,7 @@
   /* right: 15px; */
   cursor: pointer;
 }
-.ci_resume_list_height_container {
-  max-height: 280px;
-  overflow: auto;
-}
+
 .ci_resume_list_height_container::-webkit-scrollbar {
   width: 8px;
 }
@@ -113,13 +110,12 @@
   font-size: 12px;
   display: block;
   font-family: "Inter", sans-serif !important;
-  margin: 5px 0 10px 30px !important;
+  /* margin: 5px 0 10px 30px !important; */
+  margin-bottom: 10px;
+  margin-top: -5px;
 }
 .ciautofill_v2_resume_list_container {
-  margin-left: 27px;
-  max-height: 130px;
   overflow: auto;
-  padding-right: 5px;
 }
 
 .ciautofill_v2_resume_list_container::-webkit-scrollbar {
@@ -161,4 +157,15 @@
   display: flex;
   margin-top: -10px !important;
   justify-content: flex-end;
+}
+.va_user_select_section_wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.react-select-container-va {
+  width: 270px;
+  cursor: pointer !important;
+}
+.ciautofill__resmelist__wrapper-va {
 }
