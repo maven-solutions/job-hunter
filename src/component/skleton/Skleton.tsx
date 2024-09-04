@@ -21,6 +21,7 @@ export const ResumeSkleton = () => {
       <Height height="10" />
       <div className="ci--skeleton--subtitle" />
       <div className="ci--skeleton--subtitle" />
+      <div className="ci--skeleton--subtitle" />
     </>
   );
 };
