@@ -27,7 +27,7 @@ const ResumeList = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
+  console.log("resumeList", resumeList);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -35,15 +35,19 @@ const ResumeList = (props: any) => {
   }, []);
   const RenderName = (props: any) => {
     const { item } = props;
-    const role = getRoleById(item.preferredRole, item.customPreferredRole);
+    const role = getRoleById(
+      item?.applicant?.preferredRole,
+      item?.applicant?.customPreferredRole
+    );
 
     const roleString = role ? `  (${role}) ` : "";
 
-    if (item?.title) {
-      return `${item.title} ${roleString}`;
+    if (item?.applicant?.title) {
+      return `${item?.applicant?.title} ${roleString}`;
     }
-    if (item?.name) {
-      return `${item.name} ${roleString}`;
+
+    if (item?.applicant?.name) {
+      return `${item?.applicant?.name} ${roleString}`;
     }
     return `Untitled Resume ${roleString}`;
   };
