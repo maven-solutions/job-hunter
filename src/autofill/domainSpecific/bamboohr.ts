@@ -1,4 +1,5 @@
 import { Applicant } from "../data";
+import { createFile } from "../FromFiller/fileTypeDataFiller";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
 function getTodayDateFormatted(): string {
@@ -246,11 +247,36 @@ const fillAllRadioType = async (applicantData: Applicant) => {
   }
 };
 
+const fileUpload = async (applicantData) => {
+  let textInputField: any = document.querySelectorAll(
+    '[aria-label="file-input"]'
+  );
+  if (textInputField.length === 1) {
+    textInputField = textInputField[0];
+  }
+  if (textInputField.length > 1) {
+    textInputField = textInputField[1];
+  }
+  const designFile = await createFile(
+    applicantData.pdf_url,
+    applicantData.resume_title
+  );
+  // Set file to input field only for the first file input field found
+  const dt = new DataTransfer();
+  dt.items.add(designFile);
+  textInputField.files = dt.files;
+  // Trigger input change event
+  textInputField.dispatchEvent(
+    new Event("change", { bubbles: true, cancelable: false })
+  );
+};
+
 export const bamboohr = async (tempDiv: any, applicantData: Applicant) => {
   await fillGender(applicantData);
   await fillRace(applicantData);
   await fillDisability(applicantData);
   await fillVeteran(applicantData);
   await fillAllRadioType(applicantData);
+  await fileUpload(applicantData);
   // await fillTodayDate();
 };

@@ -1,6 +1,6 @@
 import { Applicant } from "../data";
 
-async function createFile(url, resumetitle) {
+export async function createFile(url, resumetitle) {
   let response = await fetch(url);
   let data = await response.blob();
   let metadata = {
@@ -30,6 +30,9 @@ export const fileTypeDataFiller = async (
   if (window.location.href.includes(".ashbyhq.")) {
     const allInputfield = document.querySelectorAll('input[type="file"]');
     textInputField = allInputfield[1];
+  }
+  if (window.location.href.includes(".bamboohr.")) {
+    return;
   }
 
   try {
