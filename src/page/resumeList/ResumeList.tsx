@@ -4,6 +4,7 @@ import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
   getApplicantsData,
+  getDesignations,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -14,17 +15,6 @@ import "./index.css";
 import "./index2.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
-
-const RenderName = (props: any) => {
-  const { item } = props;
-  if (item?.applicant?.title) {
-    return item.applicant.title;
-  }
-  if (item?.applicant?.name) {
-    return item.applicant.name;
-  }
-  return "Untitled Resume";
-};
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -39,6 +29,39 @@ const ResumeList = (props: any) => {
   });
 
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getDesignations());
+  }, []);
+  const RenderName = (props: any) => {
+    const { item } = props;
+    const role = getRoleById(item.preferredRole, item.customPreferredRole);
+
+    const roleString = role ? `  (${role}) ` : "";
+
+    if (item?.title) {
+      return `${item.title} ${roleString}`;
+    }
+    if (item?.name) {
+      return `${item.name} ${roleString}`;
+    }
+    return `Untitled Resume ${roleString}`;
+  };
+
+  const getRoleById = (roleiId, customRole) => {
+    if (roleiId) {
+      const role = resumeList.allRoles.filter((role) => {
+        return role.id === roleiId;
+      });
+      if (!role || role.length === 0) {
+        return null;
+      }
+      return role[0].title;
+    }
+    if (customRole) {
+      return customRole?.label;
+    }
+  };
   useEffect(() => {
     // for organization student
     if (
