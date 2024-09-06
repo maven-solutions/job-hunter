@@ -49,6 +49,7 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
         ".aquent",
         ".lemonade.",
         "tri-north.",
+        "jobdiva.",
       ].some((domain) => url.includes(domain))
     ) {
       setShowIcon(true);
