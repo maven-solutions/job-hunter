@@ -33,7 +33,9 @@ const ResumeListForVA = (props: any) => {
   });
 
   useEffect(() => {
-    dispatch(getDesignations());
+    if (!resumeList.deg_res_success) {
+      dispatch(getDesignations());
+    }
   }, []);
 
   useEffect(() => {
