@@ -69,6 +69,7 @@ const usWorkAuthorization = (applicantData: Applicant) => {
           .trim()
           .toLowerCase()
           ?.includes("authorized to work in the united states") ||
+        label.textContent.trim().toLowerCase()?.includes("legally eligible") ||
         label.textContent.trim().toLowerCase()?.includes("authorized to work")
       ) {
         const select = label.querySelector("select");

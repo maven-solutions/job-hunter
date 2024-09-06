@@ -35,7 +35,7 @@ const ResumeListForVA = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  console.log(resumeList);
+  // console.log(resumeList);
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());

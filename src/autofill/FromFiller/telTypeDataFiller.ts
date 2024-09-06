@@ -4,7 +4,7 @@ import { fieldNames } from "./fieldsname";
 
 export const telTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   // Extract input fields of type "text"
-  let phone = false;
+
   const textInputFields = tempDiv.querySelectorAll('input[type="tel"]');
   textInputFields.forEach((input) => {
     // console.log(input);
@@ -19,11 +19,9 @@ export const telTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       if (
         (checkIfExist(labelText, fieldNames.phone_number) ||
           checkIfExist(attribute.value, fieldNames.phone_number)) &&
-        applicantData.phone_number &&
-        !phone
+        applicantData.phone_number
       ) {
         input.value = Number(applicantData.phone_number);
-        phone = true;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();

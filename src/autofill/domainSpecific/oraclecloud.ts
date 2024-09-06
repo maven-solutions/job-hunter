@@ -199,8 +199,74 @@ const raceFiller = (applicantData: Applicant) => {
   }
 };
 
+const fillDisablity = async (applicantData: Applicant) => {
+  const allLabel: NodeListOf<HTMLLabelElement> =
+    document.querySelectorAll("label");
+
+  for (const label of allLabel) {
+    const text = label?.textContent;
+    if (text) {
+      if (
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("have a disability")
+        ) &&
+        applicantData.disability_status
+      ) {
+        label.click();
+      }
+
+      if (
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("I do not have a disability")
+        ) &&
+        !applicantData.disability_status
+      ) {
+        label.click();
+      }
+    }
+  }
+};
+
+const fillCheckobox = async (applicantData: Applicant) => {
+  const allLabel: NodeListOf<HTMLLabelElement> =
+    document.querySelectorAll("label");
+
+  for (const label of allLabel) {
+    const text = label?.textContent;
+    if (text) {
+      // for hispamnic
+      if (
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("I am Hispanic or Latino")
+        ) &&
+        applicantData.hispanic_or_latino
+      ) {
+        const btn = label?.querySelector("span");
+        if (btn) {
+          btn.click();
+          handleValueChanges(btn);
+        }
+      }
+      // for ethnic
+      if (
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase(applicantData.race)
+        )
+      ) {
+        const btn = label?.querySelector("span");
+        if (btn) {
+          btn.click();
+          handleValueChanges(btn);
+        }
+      }
+    }
+  }
+};
+
 export const oraclecloud = async (tempDiv: any, applicantData: Applicant) => {
   filltexttype(applicantData);
   fillRadioButton(applicantData);
   raceFiller(applicantData);
+  await fillCheckobox(applicantData);
+  await fillDisablity(applicantData);
 };
