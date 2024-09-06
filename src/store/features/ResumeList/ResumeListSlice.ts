@@ -13,6 +13,8 @@ const initialState: any = {
   applicantData: [],
   userList: [],
   allRoles: [],
+  userIndex: 0,
+  resumeIndex: 0,
 };
 
 const ResumeList = createSlice({
@@ -21,6 +23,12 @@ const ResumeList = createSlice({
   reducers: {
     setResumeResponseToFalse: (state: any) => {
       state.res_success = false;
+    },
+    setUserIndex: (state: any, { payload }: PayloadAction<any>) => {
+      state.userIndex = payload;
+    },
+    setResumeIndex: (state: any, { payload }: PayloadAction<any>) => {
+      state.resumeIndex = payload;
     },
   },
   extraReducers: (builder) => {
@@ -86,6 +94,7 @@ const ResumeList = createSlice({
   },
 });
 
-export const { setResumeResponseToFalse } = ResumeList.actions;
+export const { setResumeResponseToFalse, setUserIndex, setResumeIndex } =
+  ResumeList.actions;
 
 export default ResumeList.reducer;

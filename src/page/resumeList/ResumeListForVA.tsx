@@ -16,13 +16,17 @@ import "./index2.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
+import {
+  setResumeIndex,
+  setUserIndex,
+} from "../../store/features/ResumeList/ResumeListSlice";
 
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserValue, setSelectedUserValue] = useState(null);
-  const [selectResumeIndex, setSelectResumeIndex] = useState(0);
+  // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -31,7 +35,7 @@ const ResumeListForVA = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-
+  console.log(resumeList);
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
@@ -40,11 +44,12 @@ const ResumeListForVA = (props: any) => {
 
   useEffect(() => {
     if (resumeList.res_success) {
-      const resume = resumeList.applicantData[0].applicants;
+      const resume = resumeList.applicantData[resumeList.userIndex].applicants;
       setUserResumeList(resume);
-      setSelectedUserId(resumeList.applicantData[0].applicantId);
-
-      setSelectedUserValue(resumeList?.userList[0]);
+      setSelectedUserId(
+        resumeList.applicantData[resumeList.userIndex].applicantId
+      );
+      setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
     }
   }, [resumeList.res_success]);
 
@@ -95,12 +100,19 @@ const ResumeListForVA = (props: any) => {
     const filteredArray = resumeList.applicantData?.filter((data) => {
       return option.value === data.applicantId;
     });
+    resumeList.applicantData?.map((data, index) => {
+      if (option.value === data.applicantId) {
+        dispatch(setUserIndex(index));
+      }
+    });
+
     if (!filteredArray && filteredArray.length === 0) {
       return;
     }
     const resume = filteredArray[0].applicants;
     setUserResumeList(resume);
-    setSelectResumeIndex(0);
+    // setSelectResumeIndex(resumeList.resumeIndex);
+    dispatch(setResumeIndex(0));
     setSelectedUserId(option.value);
     setSelectedUserValue(option);
   };
@@ -206,12 +218,12 @@ const ResumeListForVA = (props: any) => {
                       return (
                         <div
                           className={`ciautofill_v2_resume_section ${
-                            index === selectResumeIndex
+                            index === resumeList.resumeIndex
                               ? "ciautofill_v2_resume_section-active"
                               : ""
                           }`}
                           key={item.id}
-                          onClick={() => setSelectResumeIndex(index)}
+                          onClick={() => dispatch(setResumeIndex(index))}
                         >
                           <span className="ciautofill_v2_resume_name">
                             {" "}
@@ -237,7 +249,7 @@ const ResumeListForVA = (props: any) => {
         <AutofillFieldsForVA
           selectedUserId={selectedUserId}
           getUserDetailsById={getUserDetailsById}
-          selectResumeIndex={selectResumeIndex}
+          selectResumeIndex={resumeList.resumeIndex}
           content={content}
           setAutoFilling={setAutoFilling}
           setShowIframeErrorWarning={setShowIframeErrorWarning}

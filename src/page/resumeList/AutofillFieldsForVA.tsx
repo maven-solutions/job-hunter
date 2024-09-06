@@ -100,10 +100,8 @@ const extractInfo = (resumeData, applicationForm) => {
 
 const AutofillFieldsForVA = (props: any) => {
   const {
-    // selectedUserIndex,
     selectedUserId,
     getUserDetailsById,
-    content,
     setAutoFilling,
     setShowIframeErrorWarning,
     selectResumeIndex,
