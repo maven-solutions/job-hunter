@@ -364,7 +364,8 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".fisglobal.") ||
       window.location.href.includes(".ebayinc.") ||
       window.location.href.includes(".freedommortgage.") ||
-      window.location.href.includes(".regions.")
+      window.location.href.includes(".regions.") ||
+      window.location.href.includes(".icf.")
     ) {
       await fisglobal(tempDiv ?? tempDivForFile, applicantData);
     }

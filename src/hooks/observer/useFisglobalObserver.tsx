@@ -13,7 +13,8 @@ const useFisglobalObserver = (
       window.location.href.includes(".gehealthcare.") ||
       window.location.href.includes(".ebayinc.") ||
       window.location.href.includes(".freedommortgage.") ||
-      window.location.href.includes(".regions.")
+      window.location.href.includes(".regions.") ||
+      window.location.href.includes(".icf.")
     ) {
       const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_URL);
       if (
