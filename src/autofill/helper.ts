@@ -51,6 +51,7 @@ import { cornerstonebuildingbrands } from "./domainSpecific/cornerstonebuildingb
 import { silkroad } from "./domainSpecific/silkroad";
 import { apploxo } from "./domainSpecific/apploxo";
 import { myomo } from "./domainSpecific/myomo";
+import { sephora } from "./domainSpecific/sephora";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -356,6 +357,9 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".myomo.")) {
       await myomo(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".sephora.")) {
+      await sephora(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
