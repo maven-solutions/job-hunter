@@ -7,19 +7,18 @@ import { LOCALSTORAGE } from "../../utils/constant";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
-
   const {
     firstName,
     lastName,
     email,
-    gender,
+    userGender,
     dob,
     phoneNumber,
     citizenshipStatus,
-    race,
+    userRace,
     portfolio,
     language,
-    veteranStatus,
+    userVeteranStatus,
     covidVaccinationStatus,
     disabilityStatusForExtension,
     userAuthorizationUsa,
@@ -30,6 +29,7 @@ const extractInfo = (resumeData, applicationForm) => {
     country,
     education,
     expectedSalaryRange,
+    willingToTravel,
   } = applicationForm;
 
   // console.log("applicationForm::", applicationForm);
@@ -81,12 +81,12 @@ const extractInfo = (resumeData, applicationForm) => {
     education: education,
     employment_history: employment_history.data ?? null,
     professional_summary: summary?.data?.description ?? null,
-    gender,
+    gender: userGender?.label,
     dob,
     citizenship_status: citizenshipStatus,
-    race,
+    race: userRace?.label,
     language,
-    veteran_status: veteranStatus,
+    veteran_status: userVeteranStatus?.label,
     covid_vaccination_status: covidVaccinationStatus,
     disability_status: disabilityStatusForExtension,
     is_over_18: true,
@@ -95,6 +95,7 @@ const extractInfo = (resumeData, applicationForm) => {
     phone_type: phoneType,
     salary: expectedSalaryRange,
     sponsorship_required: false,
+    willingToTravel,
   };
 };
 
@@ -126,6 +127,8 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicants[selectResumeIndex],
       userdetails.applicationForm
     );
+    // console.log("applicantData::va::", applicantData);
+
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)

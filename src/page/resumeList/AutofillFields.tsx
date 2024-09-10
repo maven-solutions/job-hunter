@@ -12,14 +12,14 @@ const extractInfo = (resumeData, applicationForm) => {
     firstName,
     lastName,
     email,
-    gender,
+    userGender,
     dob,
     phoneNumber,
     citizenshipStatus,
-    race,
+    userRace,
     portfolio,
     language,
-    veteranStatus,
+    userVeteranStatus,
     covidVaccinationStatus,
     disabilityStatusForExtension,
     userAuthorizationUsa,
@@ -30,6 +30,7 @@ const extractInfo = (resumeData, applicationForm) => {
     country,
     education,
     expectedSalaryRange,
+    willingToTravel,
   } = applicationForm;
 
   // console.log("applicationForm::", applicationForm);
@@ -81,12 +82,12 @@ const extractInfo = (resumeData, applicationForm) => {
     education: education,
     employment_history: employment_history.data ?? null,
     professional_summary: summary?.data?.description ?? null,
-    gender,
+    gender: userGender?.label,
     dob,
     citizenship_status: citizenshipStatus,
-    race,
+    race: userRace?.label,
     language,
-    veteran_status: veteranStatus,
+    veteran_status: userVeteranStatus?.label,
     covid_vaccination_status: covidVaccinationStatus,
     disability_status: disabilityStatusForExtension,
     is_over_18: true,
@@ -95,6 +96,7 @@ const extractInfo = (resumeData, applicationForm) => {
     phone_type: phoneType,
     salary: expectedSalaryRange,
     sponsorship_required: false,
+    willingToTravel,
   };
 };
 
@@ -132,7 +134,7 @@ const AutofillFields = (props: any) => {
       resumeList.applicantData[selectedResume].applicant,
       resumeList.applicantData[selectedResume].applicationForm
     );
-    console.log("applicantData::", applicantData);
+    // console.log("applicantData::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)
