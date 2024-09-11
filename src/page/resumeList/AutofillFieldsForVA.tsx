@@ -5,7 +5,7 @@ import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 import { LOCALSTORAGE } from "../../utils/constant";
 
-const extractInfo = (resumeData, applicationForm) => {
+const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
   const {
     firstName,
@@ -125,7 +125,8 @@ const AutofillFieldsForVA = (props: any) => {
     const userdetails = getUserDetailsById(selectedUserId);
     const applicantData = extractInfo(
       userdetails.applicants[selectResumeIndex],
-      userdetails.applicationForm
+      userdetails.applicationForm,
+      selectedUserId
     );
     // console.log("applicantData::va::", applicantData);
 
