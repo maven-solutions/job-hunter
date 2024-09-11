@@ -137,7 +137,6 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicationForm,
       selectedUserId
     );
-    // console.log("applicantData::va::", applicantData);
 
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,

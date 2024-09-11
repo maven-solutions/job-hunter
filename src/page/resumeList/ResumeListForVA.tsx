@@ -205,43 +205,47 @@ const ResumeListForVA = (props: any) => {
             </span>
           </>
         )}{" "}
-        <span className="ciautofill_v2_select_title">Select the Resume </span>
         {!autoFilling && (
-          <div className="ciautofill__resmelist__wrapper-va">
-            {resumeList.loading && <ResumeSkleton />}
-            {resumeList.res_success && (
-              <div className="ciautofill_v2_resume_list_container">
-                {userResumeList.length > 0 &&
-                  userResumeList
-                    .filter((r) => r.pdfUrl)
-                    ?.map((item, index) => {
-                      return (
-                        <div
-                          className={`ciautofill_v2_resume_section ${
-                            index === resumeList.resumeIndex
-                              ? "ciautofill_v2_resume_section-active"
-                              : ""
-                          }`}
-                          key={item.id}
-                          onClick={() => dispatch(setResumeIndex(index))}
-                        >
-                          <span className="ciautofill_v2_resume_name">
-                            {" "}
-                            <RenderName item={item} />
-                          </span>{" "}
-                          <Eye
-                            size={16}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              hanldeChildClick(item?.pdfUrl);
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
-              </div>
-            )}
-          </div>
+          <>
+            <span className="ciautofill_v2_select_title">
+              Select the Resume{" "}
+            </span>
+            <div className="ciautofill__resmelist__wrapper-va">
+              {resumeList.loading && <ResumeSkleton />}
+              {resumeList.res_success && (
+                <div className="ciautofill_v2_resume_list_container">
+                  {userResumeList.length > 0 &&
+                    userResumeList
+                      .filter((r) => r.pdfUrl)
+                      ?.map((item, index) => {
+                        return (
+                          <div
+                            className={`ciautofill_v2_resume_section ${
+                              index === resumeList.resumeIndex
+                                ? "ciautofill_v2_resume_section-active"
+                                : ""
+                            }`}
+                            key={item.id}
+                            onClick={() => dispatch(setResumeIndex(index))}
+                          >
+                            <span className="ciautofill_v2_resume_name">
+                              {" "}
+                              <RenderName item={item} />
+                            </span>{" "}
+                            <Eye
+                              size={16}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                hanldeChildClick(item?.pdfUrl);
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </WhiteCard>
 
