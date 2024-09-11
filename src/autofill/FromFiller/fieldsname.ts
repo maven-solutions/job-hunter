@@ -92,6 +92,7 @@ export const fieldNames = {
     "cellular ",
   ],
   phone_type: ["phonetype", "devicetype", "phone", "device"],
+  password: ["password"],
   race: ["race", "ethnicity"],
   role_description: ["roledescription", "description", "role"],
 

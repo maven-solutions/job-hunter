@@ -52,6 +52,7 @@ import { silkroad } from "./domainSpecific/silkroad";
 import { apploxo } from "./domainSpecific/apploxo";
 import { myomo } from "./domainSpecific/myomo";
 import { sephora } from "./domainSpecific/sephora";
+import { passwordTypeDataFiller } from "./FromFiller/passwordTypeDataFiller";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -151,6 +152,7 @@ export const detectInputAndFillData = async (
 
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -205,6 +207,7 @@ export const detectInputAndFillData = async (
     }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);

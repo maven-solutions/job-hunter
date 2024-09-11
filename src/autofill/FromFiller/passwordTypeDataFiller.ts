@@ -2,11 +2,14 @@ import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
 import { fieldNames } from "./fieldsname";
 
-export const emailTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
+export const passwordTypeDataFiller = (
+  tempDiv: any,
+  applicantData: Applicant
+) => {
   // Extract input fields of type "text"
   // console.log("email::::");
 
-  const textInputFields = tempDiv.querySelectorAll('input[type="email"]');
+  const textInputFields = tempDiv.querySelectorAll('input[type="password"]');
   // console.log("emailtextInputFields::::", textInputFields);
 
   textInputFields.forEach((input) => {
@@ -21,10 +24,10 @@ export const emailTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     // Log all attributes
     attributes.some((attribute) => {
       if (
-        checkIfExist(labelText, fieldNames.email_address) ||
-        checkIfExist(attribute.value, fieldNames.email_address)
+        checkIfExist(labelText, fieldNames.password) ||
+        checkIfExist(attribute.value, fieldNames.password)
       ) {
-        input.value = applicantData.email_address;
+        input.value = applicantData.password;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();

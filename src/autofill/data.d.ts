@@ -37,6 +37,7 @@ export interface Applicant {
   professional_summary?: string | null;
   phone_type?: string | number | null;
   portfolio_url?: string | null;
+  password?: string | null;
 
   race?: string | null;
   resume_title?: string | null;
@@ -48,5 +49,6 @@ export interface Applicant {
   terms_and_condation?: boolean | null;
   us_work_authoriztaion?: boolean | null;
   veteran_status?: number | null;
+  willingToTravel?: string | number | null;
   zip_code?: number | null;
 }

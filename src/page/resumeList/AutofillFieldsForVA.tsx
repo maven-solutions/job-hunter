@@ -5,6 +5,11 @@ import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 import { LOCALSTORAGE } from "../../utils/constant";
 
+const generatePassword = (id) => {
+  const pwd = `P@$$word80${id}`;
+  return pwd;
+};
+
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
   const {
@@ -62,6 +67,9 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
 
   const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
+
+  const password = generatePassword(selectedUserId);
+
   return {
     resume_title: title ?? applicantName,
     full_name: fullName,
@@ -96,6 +104,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     salary: expectedSalaryRange,
     sponsorship_required: false,
     willingToTravel,
+    password,
   };
 };
 
