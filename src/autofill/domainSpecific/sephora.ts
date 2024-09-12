@@ -130,8 +130,22 @@ const relocateSelectfiller = async (applicantData: Applicant) => {
   const selectOptions: any = document.querySelectorAll("li");
   for (const element of selectOptions) {
     if (
+      applicantData.willingToTravel &&
+      Number(applicantData.willingToTravel) > 0 &&
       fromatStirngInLowerCase(element.textContent) ===
-      fromatStirngInLowerCase("yes")
+        fromatStirngInLowerCase("yes")
+    ) {
+      const button = element?.querySelector("button");
+      button?.click();
+      handleValueChanges(button);
+      // return true;
+    }
+
+    if (
+      (!applicantData.willingToTravel ||
+        Number(applicantData.willingToTravel) === 0) &&
+      fromatStirngInLowerCase(element.textContent) ===
+        fromatStirngInLowerCase("no")
     ) {
       const button = element?.querySelector("button");
       button?.click();
