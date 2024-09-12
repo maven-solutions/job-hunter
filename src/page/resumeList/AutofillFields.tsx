@@ -87,7 +87,7 @@ const extractInfo = (resumeData, applicationForm) => {
     citizenship_status: citizenshipStatus,
     race: userRace?.label,
     language,
-    veteran_status: userVeteranStatus?.label,
+    veteran_status: userVeteranStatus?.value,
     covid_vaccination_status: covidVaccinationStatus,
     disability_status: disabilityStatusForExtension,
     is_over_18: true,
