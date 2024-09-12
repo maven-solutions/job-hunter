@@ -150,6 +150,50 @@ const fillVisa = async (applicantData: Applicant) => {
           return;
         }
         if (
+          applicantData.sponsorship_required &&
+          fromatStirngInLowerCase(answertext) === "yes"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+
+        if (
+          !applicantData.sponsorship_required &&
+          fromatStirngInLowerCase(answertext) === "no"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+      }
+    }
+  }
+};
+
+const fillWorkAuthorization = async (applicantData: Applicant) => {
+  const allLabel = document.querySelectorAll("label");
+  for (const label of allLabel) {
+    const text = label?.textContent?.trim();
+
+    if (text.includes("legally authorized") || text.includes("legally")) {
+      const labelId = label.getAttribute("for");
+      const select = document.getElementById(labelId);
+      if (!select) {
+        return;
+      }
+
+      select.click();
+      handleValueChanges(select);
+      await delay(1500);
+      const allOption: any = document.querySelectorAll('li[role="option"]');
+      if (!allOption || allOption.length === 0) {
+        return;
+      }
+      for (const option of allOption) {
+        const answertext = option.textContent;
+        if (!answertext) {
+          return;
+        }
+        if (
           applicantData.us_work_authoriztaion &&
           fromatStirngInLowerCase(answertext) === "yes"
         ) {
@@ -439,6 +483,7 @@ export const successfactors = async (
   await fillBasicInfo(applicantData);
   await fillAge(applicantData);
   await fillVisa(applicantData);
+  await fillWorkAuthorization(applicantData);
   await fillGender(applicantData);
   await fillRace(applicantData);
   if (window.location.href.includes(".successfactors.")) {
