@@ -18,12 +18,17 @@ export const fileTypeDataFiller = async (
   // Extract input fields of type "text"
   let file = false;
   const pathurl = window.location.href.toLocaleLowerCase();
-  const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL);
-  if (pathurl === localurl) {
-    return;
-  } else {
-    localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL, pathurl);
-  }
+  const splitted = pathurl.split("/");
+
+  // if (splitted && splitted.length > 2) {
+  //   const currentWebURL = splitted[2];
+  //   const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL);
+  //   if (currentWebURL === localurl) {
+  //     return;
+  //   } else {
+  //     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL, currentWebURL);
+  //   }
+  // }
 
   const tempDivForFile = document.querySelector("body");
   let textInputField: any = "";
