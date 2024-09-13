@@ -1,3 +1,4 @@
+import { LOCALSTORAGE } from "../../utils/constant";
 import { Applicant } from "../data";
 
 export async function createFile(url, resumetitle) {
@@ -16,6 +17,13 @@ export const fileTypeDataFiller = async (
 ) => {
   // Extract input fields of type "text"
   let file = false;
+  const pathurl = window.location.href.toLocaleLowerCase();
+  const localurl = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL);
+  if (pathurl === localurl) {
+    return;
+  } else {
+    localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_FILE_URL, pathurl);
+  }
 
   const tempDivForFile = document.querySelector("body");
   let textInputField: any = "";

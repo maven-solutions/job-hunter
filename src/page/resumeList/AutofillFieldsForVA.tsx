@@ -100,7 +100,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
     hispanic_or_latino: false,
-    phone_type: phoneType,
+    phone_type: phoneType || "mobile",
     salary: expectedSalaryRange,
     sponsorship_required: false,
     willingToTravel,
