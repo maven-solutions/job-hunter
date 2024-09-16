@@ -174,7 +174,7 @@ const ResumeListForVA = (props: any) => {
       </div>
       {showIframeErrorWarning && (
         <>
-          <Height height="-7" />
+          <Height height="10" />
           <div className="ci_autofill_iframe_error_wrapper">
             <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
             <span className="ci_autofill_iframe_error_title">

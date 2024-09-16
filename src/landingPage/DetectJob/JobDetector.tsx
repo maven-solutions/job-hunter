@@ -92,7 +92,7 @@ const JobDetector = (props: any) => {
       dispatch(chekJobExists({ jobLink: window.location.href }));
     }
     localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_CURRENT_URL);
-    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_CURRENT_URL);
+    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_PDF_URL);
   }, [postUrl]);
 
   // TO INCIDATE LOADING IN AUTOFILL
