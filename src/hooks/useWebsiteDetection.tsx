@@ -56,35 +56,40 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
       setShowAutofillPage(true);
     }
 
-    if (
-      [
-        "linkedin.",
-        "indeed.",
-        "dice.",
-        "ziprecruiter.",
-        "glassdoor.",
-        "simplyhired.",
-        "builtin.",
-        "localhost",
-      ].some((domain) => url.includes(domain))
-    ) {
-      setShowIcon(true);
-      setShowAutofillPage(false);
+    const pathurl = window.location.href.toLocaleLowerCase();
+    const splitted = pathurl.split("/");
+    if (splitted && splitted.length > 2) {
+      const currentWebURL = splitted[2];
+      if (
+        [
+          "linkedin.",
+          "indeed.",
+          "dice.",
+          "ziprecruiter.",
+          "glassdoor.",
+          "simplyhired.",
+          "builtin.",
+          "localhost",
+        ].some((domain) => currentWebURL.includes(domain))
+      ) {
+        setShowIcon(true);
+        setShowAutofillPage(false);
+      }
     }
 
     // // some extra case
-    if (
-      [
-        ".battelle.",
-        ".oraclecloud.",
-        ".fisglobal.",
-        ".mercy.",
-        ".eightfold.",
-      ].some((domain) => url.includes(domain))
-    ) {
-      setShowIcon(true);
-      setShowAutofillPage(true);
-    }
+    // if (
+    //   [
+    //     ".battelle.",
+    //     ".oraclecloud.",
+    //     ".fisglobal.",
+    //     ".mercy.",
+    //     ".eightfold.",
+    //   ].some((domain) => url.includes(domain))
+    // ) {
+    //   setShowIcon(true);
+    //   setShowAutofillPage(true);
+    // }
 
     // for iframe issue show error
     if (
