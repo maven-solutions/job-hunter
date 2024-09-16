@@ -10,6 +10,7 @@ import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   EXTENSION_ACTION,
+  LOCALSTORAGE,
   SHOW_PAGE,
   SUPPORTED_WEBSITE,
 } from "../../utils/constant";
@@ -90,6 +91,8 @@ const JobDetector = (props: any) => {
     if (authState.authenticated) {
       dispatch(chekJobExists({ jobLink: window.location.href }));
     }
+    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_CURRENT_URL);
+    localStorage.removeItem(LOCALSTORAGE.CI_AUTOFILL_CURRENT_URL);
   }, [postUrl]);
 
   // TO INCIDATE LOADING IN AUTOFILL

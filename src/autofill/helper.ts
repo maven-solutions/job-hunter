@@ -55,6 +55,7 @@ import { sephora } from "./domainSpecific/sephora";
 import { passwordTypeDataFiller } from "./FromFiller/passwordTypeDataFiller";
 import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
+import { LOCALSTORAGE } from "../utils/constant";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -197,7 +198,7 @@ export const detectInputAndFillData = async (
     }
 
     localStorage.removeItem("ci_inputid");
-    localStorage.removeItem("times");
+
     if (window.location.href.includes(".myworkdayjobs.")) {
       await myworkDays(tempDiv ?? tempDivForFile, applicantData);
     }
