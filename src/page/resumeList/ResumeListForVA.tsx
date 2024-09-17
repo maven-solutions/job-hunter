@@ -28,6 +28,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
+  const [newUrl, setNewUrl] = useState("");
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -142,9 +143,26 @@ const ResumeListForVA = (props: any) => {
     }
   };
 
+  const addUrl = () => {
+    localStorage.setItem("newUrl", newUrl);
+    chrome.storage.local.set({ newUrl: newUrl }, () => {
+      console.log("Data is stored.");
+      setNewUrl("");
+    });
+  };
+
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
+      <input
+        type="text"
+        value={newUrl}
+        onChange={(e) => setNewUrl(e.target.value)}
+      />
+      <button type="button" onClick={addUrl}>
+        Add
+      </button>
+
       <div className="va_user_select_section_wrapper">
         <HeadingTitle title="Applicant List:" />
         <Select

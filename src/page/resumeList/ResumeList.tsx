@@ -120,6 +120,8 @@ const ResumeList = (props: any) => {
           <div className="ciautofill__resmelist__wrapper">
             <Height height="-10" />
 
+            <input type="text" />
+
             {resumeList.res_success &&
               resumeList.applicantData.map((item, index) => {
                 return (
