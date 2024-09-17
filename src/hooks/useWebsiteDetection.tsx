@@ -12,19 +12,19 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
 
   const getLocalStorage = async (key) => {
     return new Promise((resolve, reject) => {
-      try {
-        const value = localStorage.getItem(key);
-        resolve(value); // Resolve with the retrieved value
-      } catch (error) {
-        reject(error); // Reject if there is an error
-      }
+      chrome.storage.local.get([key], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error("No Data found"));
+        } else {
+          resolve(result[key]); // Resolve with the retrieved value
+        }
+      });
     });
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const newUrl: any = (await getLocalStorage("newUrl")) || "";
-
+      const newUrl: any = await getLocalStorage("newUrl");
       const url = window.location.href.toLowerCase();
 
       // Push the newUrl to the list if it exists
