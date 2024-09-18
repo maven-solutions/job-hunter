@@ -21,6 +21,7 @@ import {
   setUserIndex,
 } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
+import { CHROME_STOGRAGE } from "../../utils/constant";
 
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -29,7 +30,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
-
+  console.log("selectedUserValue::", selectedUserValue);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -51,7 +52,15 @@ const ResumeListForVA = (props: any) => {
       setSelectedUserId(
         resumeList.applicantData[resumeList.userIndex].applicantId
       );
-      setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
+      // setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
+
+      chrome.storage.local.get([CHROME_STOGRAGE.SELECTED_USER], (result) => {
+        if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
+          setSelectedUserValue(result.selectedUser);
+        } else {
+          setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
+        }
+      });
     }
   }, [resumeList.res_success]);
 
@@ -99,6 +108,7 @@ const ResumeListForVA = (props: any) => {
     window.open(pdfUrl, "_blank");
   };
   const handleSelectChanges = (option) => {
+    chrome.storage.local.set({ selectedUser: option }, () => {});
     const filteredArray = resumeList.applicantData?.filter((data) => {
       return option.value === data.applicantId;
     });

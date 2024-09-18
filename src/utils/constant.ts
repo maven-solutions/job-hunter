@@ -38,3 +38,8 @@ export const LOCALSTORAGE = {
   CI_AUTOFILL_CURRENT_URL: "ciautofillcurrenturl",
   CI_AUTOFILL_PDF_URL: "ciautofillpdfurl",
 };
+
+export const CHROME_STOGRAGE = {
+  SELECTED_USER: "selectedUser",
+  SELECTED_RESUME: "selectedUser",
+};
