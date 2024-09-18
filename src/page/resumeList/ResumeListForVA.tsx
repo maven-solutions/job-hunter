@@ -23,6 +23,8 @@ import {
 import AddMissingLink from "./AddMissingLink";
 import { CHROME_STOGRAGE } from "../../utils/constant";
 import RenderName from "./RenderName";
+import IframError from "./IframError";
+import AutofillLoader from "./AutofillLoader";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -205,38 +207,12 @@ const ResumeListForVA = (props: any) => {
         />
       </div>
       {showIframeErrorWarning && (
-        <>
-          <Height height="10" />
-          <div className="ci_autofill_iframe_error_wrapper">
-            <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
-            <span className="ci_autofill_iframe_error_title">
-              Our autofill functionality is not supported on this page
-            </span>
-
-            <img
-              src={chrome.runtime.getURL("x.svg")}
-              className="ci_autfill_error_noit_button"
-              alt="x-icon"
-              onClick={() => setShowIframeErrorWarning(false)}
-            />
-          </div>
-          <Height height="10" />
-        </>
+        <IframError setShowIframeErrorWarning={setShowIframeErrorWarning} />
       )}
       <Height height="15" />
 
       <WhiteCard>
-        {autoFilling && (
-          <>
-            {" "}
-            <div style={{ padding: "10px", paddingTop: "0" }}>
-              <Spinner size={60} />
-            </div>
-            <span className="ci_form_filling_text">
-              Form Filling Please Wait...{" "}
-            </span>
-          </>
-        )}{" "}
+        {autoFilling && <AutofillLoader />}{" "}
         {!autoFilling && (
           <>
             <span className="ciautofill_v2_select_title">
