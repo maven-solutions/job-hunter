@@ -22,6 +22,7 @@ import {
 } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
 import { CHROME_STOGRAGE } from "../../utils/constant";
+import RenderName from "./RenderName";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -31,12 +32,9 @@ interface IChromeResult {
 
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
-
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserValue, setSelectedUserValue] = useState(null);
-  // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
-  // console.log("selectedUserValue::", selectedUserValue);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -44,7 +42,6 @@ const ResumeListForVA = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  // console.log(resumeList);
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
@@ -53,36 +50,6 @@ const ResumeListForVA = (props: any) => {
 
   useEffect(() => {
     if (resumeList.res_success) {
-      // const resume = resumeList.applicantData[resumeList.userIndex].applicants;
-      // setUserResumeList(resume);
-      // setSelectedUserId(
-      //   resumeList.applicantData[resumeList.userIndex].applicantId
-      // );
-      // chrome.storage.local.get(
-      //   [CHROME_STOGRAGE.SELECTED_USER_INDEX],
-      //   (result) => {
-      //     if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX)) {
-      //       const resume =
-      //         resumeList.applicantData[resumeList.result.selectedUserIndex]
-      //           .applicants;
-      //       setUserResumeList(resume);
-      //       setSelectedUserId(
-      //         resumeList.applicantData[resumeList.result.selectedUserIndex]
-      //           .applicantId
-      //       );
-      //     } else {
-      //       const resume =
-      //         resumeList.applicantData[resumeList.userIndex].applicants;
-      //       setUserResumeList(resume);
-      //       setSelectedUserId(
-      //         resumeList.applicantData[resumeList.userIndex].applicantId
-      //       );
-      //     }
-      //   }
-      // );
-
-      // setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
-
       chrome.storage.local.get(
         [
           CHROME_STOGRAGE.SELECTED_USER,
@@ -153,20 +120,7 @@ const ResumeListForVA = (props: any) => {
     }
   }, []);
 
-  const RenderName = (props: any) => {
-    const { item } = props;
-    const role = getRoleById(item.preferredRole, item.customPreferredRole);
-
-    const roleString = role ? `  (${role}) ` : "";
-
-    if (item?.title) {
-      return `${item.title} ${roleString}`;
-    }
-    if (item?.name) {
-      return `${item.name} ${roleString}`;
-    }
-    return `Untitled Resume ${roleString}`;
-  };
+  // const RenderName = (props: any) => {};
 
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
@@ -204,21 +158,6 @@ const ResumeListForVA = (props: any) => {
       return null;
     }
     return filteredArray[0];
-  };
-
-  const getRoleById = (roleiId, customRole) => {
-    if (roleiId) {
-      const role = resumeList.allRoles.filter((role) => {
-        return role.id === roleiId;
-      });
-      if (!role || role.length === 0) {
-        return null;
-      }
-      return role[0].title;
-    }
-    if (customRole) {
-      return customRole?.label;
-    }
   };
 
   const handleSelectedResume = (index) => {
@@ -323,7 +262,7 @@ const ResumeListForVA = (props: any) => {
                           >
                             <span className="ciautofill_v2_resume_name">
                               {" "}
-                              <RenderName item={item} />
+                              <RenderName item={item} resumeList={resumeList} />
                             </span>{" "}
                             <Eye
                               size={16}
