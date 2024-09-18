@@ -23,6 +23,12 @@ import {
 import AddMissingLink from "./AddMissingLink";
 import { CHROME_STOGRAGE } from "../../utils/constant";
 
+interface IChromeResult {
+  selectedUser?: any;
+  selectedResumeIndex?: any;
+  selectedUserIndex?: any;
+}
+
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
@@ -30,7 +36,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
-  console.log("selectedUserValue::", selectedUserValue);
+  // console.log("selectedUserValue::", selectedUserValue);
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -47,20 +53,78 @@ const ResumeListForVA = (props: any) => {
 
   useEffect(() => {
     if (resumeList.res_success) {
-      const resume = resumeList.applicantData[resumeList.userIndex].applicants;
-      setUserResumeList(resume);
-      setSelectedUserId(
-        resumeList.applicantData[resumeList.userIndex].applicantId
-      );
+      // const resume = resumeList.applicantData[resumeList.userIndex].applicants;
+      // setUserResumeList(resume);
+      // setSelectedUserId(
+      //   resumeList.applicantData[resumeList.userIndex].applicantId
+      // );
+      // chrome.storage.local.get(
+      //   [CHROME_STOGRAGE.SELECTED_USER_INDEX],
+      //   (result) => {
+      //     if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX)) {
+      //       const resume =
+      //         resumeList.applicantData[resumeList.result.selectedUserIndex]
+      //           .applicants;
+      //       setUserResumeList(resume);
+      //       setSelectedUserId(
+      //         resumeList.applicantData[resumeList.result.selectedUserIndex]
+      //           .applicantId
+      //       );
+      //     } else {
+      //       const resume =
+      //         resumeList.applicantData[resumeList.userIndex].applicants;
+      //       setUserResumeList(resume);
+      //       setSelectedUserId(
+      //         resumeList.applicantData[resumeList.userIndex].applicantId
+      //       );
+      //     }
+      //   }
+      // );
+
       // setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
 
-      chrome.storage.local.get([CHROME_STOGRAGE.SELECTED_USER], (result) => {
-        if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
-          setSelectedUserValue(result.selectedUser);
-        } else {
-          setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
+      chrome.storage.local.get(
+        [
+          CHROME_STOGRAGE.SELECTED_USER,
+          CHROME_STOGRAGE.SELECTED_RESUME_INDEX,
+          CHROME_STOGRAGE.SELECTED_USER_INDEX,
+        ],
+        (result: IChromeResult) => {
+          if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
+            setSelectedUserValue(result.selectedUser);
+            const filteredArray = resumeList.applicantData?.filter((data) => {
+              return result.selectedUser.value === data.applicantId;
+            });
+            if (!filteredArray && filteredArray.length === 0) {
+              return;
+            }
+            const resume = filteredArray[0].applicants;
+            setUserResumeList(resume);
+          } else {
+            setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
+          }
+
+          if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX)) {
+            const resume =
+              resumeList.applicantData[result.selectedUserIndex].applicants;
+            setUserResumeList(resume);
+            setSelectedUserId(
+              resumeList.applicantData[result.selectedUserIndex].applicantId
+            );
+          } else {
+            const resume =
+              resumeList.applicantData[resumeList.userIndex].applicants;
+            setUserResumeList(resume);
+            setSelectedUserId(
+              resumeList.applicantData[resumeList.userIndex].applicantId
+            );
+          }
+
+          if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_RESUME_INDEX)) {
+            dispatch(setResumeIndex(result.selectedResumeIndex));
+          }
         }
-      });
+      );
     }
   }, [resumeList.res_success]);
 
@@ -107,6 +171,7 @@ const ResumeListForVA = (props: any) => {
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
+
   const handleSelectChanges = (option) => {
     chrome.storage.local.set({ selectedUser: option }, () => {});
     const filteredArray = resumeList.applicantData?.filter((data) => {
@@ -115,6 +180,7 @@ const ResumeListForVA = (props: any) => {
     resumeList.applicantData?.map((data, index) => {
       if (option.value === data.applicantId) {
         dispatch(setUserIndex(index));
+        chrome.storage.local.set({ selectedUserIndex: index });
       }
     });
 
@@ -125,6 +191,7 @@ const ResumeListForVA = (props: any) => {
     setUserResumeList(resume);
     // setSelectResumeIndex(resumeList.resumeIndex);
     dispatch(setResumeIndex(0));
+    chrome.storage.local.set({ selectedResumeIndex: 0 });
     setSelectedUserId(option.value);
     setSelectedUserValue(option);
   };
@@ -152,6 +219,19 @@ const ResumeListForVA = (props: any) => {
     if (customRole) {
       return customRole?.label;
     }
+  };
+
+  const handleSelectedResume = (index) => {
+    chrome.storage.local.set({ selectedResumeIndex: index }).then(() => {
+      console.log("selectedResumeIndexValue is set");
+    });
+
+    chrome.storage.local.get(["selectedResumeIndex"]).then((result) => {
+      console.log(
+        " selectedResumeIndex Value is ::" + result.selectedResumeIndex
+      );
+    });
+    dispatch(setResumeIndex(index));
   };
 
   return (
@@ -239,7 +319,7 @@ const ResumeListForVA = (props: any) => {
                                 : ""
                             }`}
                             key={item.id}
-                            onClick={() => dispatch(setResumeIndex(index))}
+                            onClick={() => handleSelectedResume(index)}
                           >
                             <span className="ciautofill_v2_resume_name">
                               {" "}

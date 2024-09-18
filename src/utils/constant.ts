@@ -41,6 +41,6 @@ export const LOCALSTORAGE = {
 
 export const CHROME_STOGRAGE = {
   SELECTED_USER: "selectedUser",
-  SELECTED_RESUME_INDEX: "selectedUserIndex",
-  SELECTED_USER_INDEX: "selectedResumeIndex",
+  SELECTED_RESUME_INDEX: "selectedResumeIndex",
+  SELECTED_USER_INDEX: "selectedUserIndex",
 };
