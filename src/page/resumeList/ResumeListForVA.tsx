@@ -20,6 +20,7 @@ import {
   setResumeIndex,
   setUserIndex,
 } from "../../store/features/ResumeList/ResumeListSlice";
+import AddMissingLink from "./AddMissingLink";
 
 const ResumeListForVA = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -28,6 +29,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   // const [selectResumeIndex, setSelectResumeIndex] = useState(0);
   const [userResumeList, setUserResumeList] = useState([]);
+
   const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -145,6 +147,7 @@ const ResumeListForVA = (props: any) => {
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
+      <AddMissingLink />
       <div className="va_user_select_section_wrapper">
         <HeadingTitle title="Applicant List:" />
         <Select
