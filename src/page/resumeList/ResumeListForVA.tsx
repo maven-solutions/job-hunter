@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Eye } from "react-feather";
-import Select from "react-select";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
@@ -10,10 +9,6 @@ import {
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
-import HeadingTitle from "../../component/heading/HeadingTitle";
-import "./index.css";
-import "./index2.css";
-import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
 import {
@@ -25,6 +20,9 @@ import { CHROME_STOGRAGE } from "../../utils/constant";
 import RenderName from "./RenderName";
 import IframError from "./IframError";
 import AutofillLoader from "./AutofillLoader";
+import "./index.css";
+import "./index2.css";
+import UserSelectList from "./UserSelectList";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -122,8 +120,6 @@ const ResumeListForVA = (props: any) => {
     }
   }, []);
 
-  // const RenderName = (props: any) => {};
-
   const hanldeChildClick = (pdfUrl: string) => {
     window.open(pdfUrl, "_blank");
   };
@@ -143,6 +139,7 @@ const ResumeListForVA = (props: any) => {
     if (!filteredArray && filteredArray.length === 0) {
       return;
     }
+
     const resume = filteredArray[0].applicants;
     setUserResumeList(resume);
     // setSelectResumeIndex(resumeList.resumeIndex);
@@ -163,15 +160,7 @@ const ResumeListForVA = (props: any) => {
   };
 
   const handleSelectedResume = (index) => {
-    chrome.storage.local.set({ selectedResumeIndex: index }).then(() => {
-      console.log("selectedResumeIndexValue is set");
-    });
-
-    chrome.storage.local.get(["selectedResumeIndex"]).then((result) => {
-      console.log(
-        " selectedResumeIndex Value is ::" + result.selectedResumeIndex
-      );
-    });
+    chrome.storage.local.set({ selectedResumeIndex: index });
     dispatch(setResumeIndex(index));
   };
 
@@ -179,33 +168,11 @@ const ResumeListForVA = (props: any) => {
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <Height height="-10" />
       <AddMissingLink />
-      <div className="va_user_select_section_wrapper">
-        <HeadingTitle title="Applicant List:" />
-        <Select
-          isSearchable={false}
-          options={resumeList?.userList}
-          className="react-select-container-va"
-          classNamePrefix="react-select"
-          styles={{
-            control: (baseStyles, state) => ({
-              ...baseStyles,
-              fontSize: 14,
-              padding: "-2px 10px",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }),
-            option: (provided, state) => ({
-              ...provided,
-              fontSize: 14,
-              cursor: "pointer",
-              background: state.isSelected ? "#4339f2" : "#white",
-            }),
-          }}
-          value={selectedUserValue}
-          placeholder="Select Applicant"
-          onChange={(option) => handleSelectChanges(option)}
-        />
-      </div>
+      <UserSelectList
+        selectedUserValue={selectedUserValue}
+        handleSelectChanges={handleSelectChanges}
+      />
+
       {showIframeErrorWarning && (
         <IframError setShowIframeErrorWarning={setShowIframeErrorWarning} />
       )}
