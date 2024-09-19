@@ -26,7 +26,9 @@ export interface Applicant {
   gpa?: string | number | null;
   gender?: string | null;
   github_url?: string | null;
+
   hispanic_or_latino?: boolean;
+  higher_education?: string | null;
   is_over_18?: boolean | null;
 
   last_name?: string;

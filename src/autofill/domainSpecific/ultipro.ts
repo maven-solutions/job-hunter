@@ -204,8 +204,13 @@ const fillHigherEducation = (applicantData: Applicant) => {
   }
   for (const span of allhigherEducationLabel) {
     const text = span?.textContent;
-    if (fromatStirngInLowerCase(text)?.includes("master")) {
-      const label = span.parentElement as HTMLLabelElement;
+    if (
+      text &&
+      fromatStirngInLowerCase(text)?.includes(
+        fromatStirngInLowerCase(applicantData?.higher_education)
+      )
+    ) {
+      const label = span?.parentElement as HTMLLabelElement;
       label.click();
       handleValueChanges(label);
     }

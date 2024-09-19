@@ -4,11 +4,7 @@ import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 import { LOCALSTORAGE } from "../../utils/constant";
-
-const generatePassword = (id) => {
-  const pwd = `P@$$word80${id}`;
-  return pwd;
-};
+import { generatePassword, getHighestEducation, isAdult } from "./helper";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -37,7 +33,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     willingToTravel,
   } = applicationForm;
 
-  // console.log("applicationForm::", applicationForm);
+  // console.log("education::", education);
 
   // Extracting full name, first name, and last name
 
@@ -50,25 +46,11 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     (sec) => sec.section === "employment-history"
   );
 
-  const isAdult = (dateOfBirth: string): boolean => {
-    if (!dateOfBirth) {
-      return false;
-    }
-    const dob: Date = new Date(dateOfBirth);
-    const today: Date = new Date();
-    const age: number = today.getFullYear() - dob.getFullYear();
-    const monthDiff: number = today.getMonth() - dob.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-      return age - 1 >= 18;
-    }
-    return age >= 18;
-  };
-
   const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
 
   const password = generatePassword(selectedUserId);
+  const higher_education = getHighestEducation(education);
 
   return {
     resume_title: title ?? applicantName,
@@ -100,6 +82,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
     hispanic_or_latino: false,
+    higher_education: higher_education,
     phone_type: phoneType || "mobile",
     salary: expectedSalaryRange,
     sponsorship_required: false,
