@@ -10,6 +10,9 @@ export function sanitizeHTML(htmlString) {
   // Remove all tags except 'p'
   htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
 
+  // Remove &nbsp;
+  htmlString = htmlString.replace(/&nbsp;/g, "");
+
   return htmlString;
 }
 

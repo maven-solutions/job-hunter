@@ -4,12 +4,15 @@ import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
 import { fieldNames } from "./fieldsname";
 import { getMonthFromDate, getYearFromDate } from "./helper";
+
 export function sanitizeHTML(htmlString) {
   // Remove inline styles
   htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
 
   // Remove all tags except 'p'
   htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
+
+  htmlString = htmlString.replace(/&nbsp;/g, "");
 
   return htmlString;
 }
