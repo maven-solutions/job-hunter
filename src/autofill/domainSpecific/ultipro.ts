@@ -10,6 +10,36 @@ const fillAdress = (applicantData: Applicant) => {
   handleValueChanges(input);
 };
 
+const ethnicStatus = (applicantData: Applicant) => {
+  const select: HTMLSelectElement = document.querySelector("#HispanicOrigin");
+  if (!select) {
+    return;
+  }
+  // for veteran
+  Array.from(select.options).find((option: any) => {
+    //for yes
+    if (
+      applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(option?.text) ===
+        fromatStirngInLowerCase("Hispanic/Latino")
+    ) {
+      option.selected = true;
+      handleValueChanges(select);
+      return;
+    }
+
+    if (
+      !applicantData.hispanic_or_latino &&
+      fromatStirngInLowerCase(option?.text) ===
+        fromatStirngInLowerCase("Not Hispanic/Latino")
+    ) {
+      option.selected = true;
+      handleValueChanges(select);
+      return;
+    }
+  });
+};
+
 const veteranStatus = (applicantData: Applicant) => {
   const select: HTMLSelectElement = document.querySelector(
     "#USFederalContractor"
@@ -165,9 +195,28 @@ const fillDisabilityStatus = (applicantData: Applicant) => {
     }
   }
 };
+
+const fillHigherEducation = (applicantData: Applicant) => {
+  const allhigherEducationLabel: NodeListOf<HTMLSpanElement> =
+    document.querySelectorAll(".radio-text");
+  if (!allhigherEducationLabel || allhigherEducationLabel.length === 0) {
+    return;
+  }
+  for (const span of allhigherEducationLabel) {
+    console.log("span::", span);
+    const text = span?.textContent;
+    if (fromatStirngInLowerCase(text)?.includes("master")) {
+      const label = span.parentElement as HTMLLabelElement;
+      label.click();
+      handleValueChanges(label);
+    }
+  }
+};
 export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
   fillAdress(applicantData);
+  ethnicStatus(applicantData);
   fillCheckBox(applicantData);
   fillDisabilityStatus(applicantData);
   veteranStatus(applicantData);
+  fillHigherEducation(applicantData);
 };
