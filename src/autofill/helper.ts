@@ -225,7 +225,10 @@ export const detectInputAndFillData = async (
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
     // handling domain specific condation
-    if (window.location.href.includes("smartrecruiters")) {
+    if (
+      window.location.href.includes("smartrecruiters") ||
+      window.location.href.includes(".ultipro.")
+    ) {
       launchWork = false;
       launcEducation = false;
     }

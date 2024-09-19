@@ -203,7 +203,6 @@ const fillHigherEducation = (applicantData: Applicant) => {
     return;
   }
   for (const span of allhigherEducationLabel) {
-    console.log("span::", span);
     const text = span?.textContent;
     if (fromatStirngInLowerCase(text)?.includes("master")) {
       const label = span.parentElement as HTMLLabelElement;
