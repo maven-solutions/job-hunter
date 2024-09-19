@@ -1,3 +1,4 @@
+import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
 import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
@@ -216,6 +217,91 @@ const fillHigherEducation = (applicantData: Applicant) => {
     }
   }
 };
+
+const fillRadioButton = (applicantData: Applicant) => {
+  const allLabels: NodeListOf<HTMLLabelElement> =
+    document.querySelectorAll("label");
+
+  if (isEmptyArray(allLabels)) {
+    return;
+  }
+  for (const label of allLabels) {
+    const text = label?.textContent;
+
+    // for work authorization
+    if (
+      text &&
+      (fromatStirngInLowerCase(text).includes(
+        fromatStirngInLowerCase("eligible to work")
+      ) ||
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("authorize to work")
+        ))
+    ) {
+      const parentElement: HTMLElement = label?.parentElement;
+      if (parentElement) {
+        const allRadioLabel: NodeListOf<HTMLLabelElement> =
+          parentElement.querySelectorAll("label.radio");
+        if (isEmptyArray(allRadioLabel)) {
+          return;
+        }
+        const yesButton: HTMLLabelElement = allRadioLabel[0];
+        const noButton: HTMLLabelElement = allRadioLabel[1];
+        if (applicantData.us_work_authoriztaion) {
+          yesButton?.click();
+        } else {
+          noButton?.click();
+        }
+      }
+    }
+
+    // for visa
+    if (
+      text &&
+      (fromatStirngInLowerCase(text).includes(
+        fromatStirngInLowerCase("visa")
+      ) ||
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("sponsorship")
+        ))
+    ) {
+      const parentElement: HTMLElement = label?.parentElement;
+      if (parentElement) {
+        const allRadioLabel: NodeListOf<HTMLLabelElement> =
+          parentElement.querySelectorAll("label.radio");
+        if (isEmptyArray(allRadioLabel)) {
+          return;
+        }
+        const yesButton: HTMLLabelElement = allRadioLabel[0];
+        const noButton: HTMLLabelElement = allRadioLabel[1];
+        if (applicantData.sponsorship_required) {
+          yesButton?.click();
+        } else {
+          noButton?.click();
+        }
+      }
+    }
+
+    // for 18 years
+    if (text && text.toLowerCase().includes("18 year")) {
+      const parentElement: HTMLElement = label?.parentElement;
+      if (parentElement) {
+        const allRadioLabel: NodeListOf<HTMLLabelElement> =
+          parentElement.querySelectorAll("label.radio");
+        if (isEmptyArray(allRadioLabel)) {
+          return;
+        }
+        const yesButton: HTMLLabelElement = allRadioLabel[0];
+        const noButton: HTMLLabelElement = allRadioLabel[1];
+        if (applicantData.is_over_18) {
+          yesButton?.click();
+        } else {
+          noButton?.click();
+        }
+      }
+    }
+  }
+};
 export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
   fillAdress(applicantData);
   ethnicStatus(applicantData);
@@ -223,4 +309,5 @@ export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
   fillDisabilityStatus(applicantData);
   veteranStatus(applicantData);
   fillHigherEducation(applicantData);
+  fillRadioButton(applicantData);
 };

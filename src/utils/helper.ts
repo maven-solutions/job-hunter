@@ -9,3 +9,10 @@ export const extractSalaryFromString = (jobInsightText: string) => {
   }
   return null; // Or whatever you want to return if there's no match
 };
+
+export const isEmptyArray = (array) => {
+  if (!array || array.length === 0) {
+    return true;
+  }
+  return false;
+};
