@@ -1,6 +1,45 @@
-import { fileTypeDataFiller } from "../FromFiller/fileTypeDataFiller";
+import {
+  createFile,
+  fileTypeDataFiller,
+} from "../FromFiller/fileTypeDataFiller";
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+
+const countryHandler = (option, applicantData, country) => {
+  if (
+    fromatStirngInLowerCase(option) ===
+      fromatStirngInLowerCase(applicantData.country) &&
+    !country
+  ) {
+    return true;
+  }
+  if (
+    fromatStirngInLowerCase(option) === fromatStirngInLowerCase("america") &&
+    !country
+  ) {
+    return true;
+  }
+  if (
+    fromatStirngInLowerCase(option) === fromatStirngInLowerCase("usa") &&
+    !country
+  ) {
+    return true;
+  }
+  if (
+    fromatStirngInLowerCase(option) ===
+      fromatStirngInLowerCase("unitedstates") &&
+    !country
+  ) {
+    return true;
+  }
+  if (
+    fromatStirngInLowerCase(option?.textContent) ===
+      fromatStirngInLowerCase("unitedstatesofamerica") &&
+    !country
+  ) {
+    return true;
+  }
+};
 
 const uploadResume = async (applicantData) => {
   const acceptButton: any = document.querySelector(
@@ -9,10 +48,28 @@ const uploadResume = async (applicantData) => {
   if (acceptButton) {
     acceptButton.click();
   }
+
   await delay(500);
+  const resumeInput: any = document.querySelector('input[type="file"]');
   let tempDivForFile = document.querySelector("body");
   fileTypeDataFiller(tempDivForFile, applicantData, false);
   await delay(5000);
+
+  if (applicantData.pdf_url) {
+    // Create file asynchronously
+    const designFile = await createFile(
+      applicantData.pdf_url,
+      applicantData.resume_title
+    );
+    // Set file to input field only for the first file input field found
+    const dt = new DataTransfer();
+    dt.items.add(designFile);
+    resumeInput.files = dt.files;
+    // Trigger input change event
+    resumeInput.dispatchEvent(
+      new Event("change", { bubbles: true, cancelable: false })
+    );
+  }
 };
 
 const fillBasicInfo = async (applicantData: Applicant) => {
@@ -42,6 +99,14 @@ const fillBasicInfo = async (applicantData: Applicant) => {
   if (adress) {
     adress.value = applicantData.address;
     handleValueChanges(adress);
+  }
+
+  const adress2: HTMLInputElement = document.querySelector(
+    '[aria-label="Address"]'
+  );
+  if (adress2) {
+    adress2.value = applicantData.address;
+    handleValueChanges(adress2);
   }
 
   const city: HTMLInputElement = document.querySelector('[name="city"]');
@@ -474,6 +539,29 @@ const fillSapsfDisability = async (applicantData: Applicant) => {
   }
 };
 
+const fillPreferrelLocation = async (applicantData: Applicant) => {
+  const preferredLocation: any = document.querySelector(
+    'input[aria-label="Preferred Location"]'
+  );
+  console.log("preferredLocation", preferredLocation);
+
+  if (!preferredLocation) {
+    return;
+  }
+  preferredLocation.click();
+  await delay(1000);
+  let country = false;
+  const selectOptions: any = document.querySelectorAll('li[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (countryHandler(element.textContent.trim(), applicantData, country)) {
+      country = true;
+      element.focus();
+      element.click();
+      await delay(300);
+    }
+  }
+};
+
 export const successfactors = async (
   tempDivs: any,
   applicantData: Applicant
@@ -486,6 +574,7 @@ export const successfactors = async (
   await fillWorkAuthorization(applicantData);
   await fillGender(applicantData);
   await fillRace(applicantData);
+  await fillPreferrelLocation(applicantData);
   if (window.location.href.includes(".successfactors.")) {
     await fillVeteran(applicantData);
   }
