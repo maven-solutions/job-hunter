@@ -5,6 +5,7 @@ import {
 } from "../FromFiller/fileTypeDataFiller";
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { fillBasicInfo, openAllTab } from "./helper/helper.successfactors";
 
 const countryHandler = (option, applicantData, country) => {
   if (
@@ -50,13 +51,10 @@ const uploadResume = async (applicantData) => {
     acceptButton.click();
   }
 
-  await delay(500);
+  await delay(1000);
   const resumeInput: any = document.querySelector('input[type="file"]');
-  let tempDivForFile = document.querySelector("body");
-  fileTypeDataFiller(tempDivForFile, applicantData, false);
-  await delay(5000);
 
-  if (applicantData.pdf_url) {
+  if (resumeInput && applicantData.pdf_url) {
     // Create file asynchronously
     const designFile = await createFile(
       applicantData.pdf_url,
@@ -70,77 +68,8 @@ const uploadResume = async (applicantData) => {
     resumeInput.dispatchEvent(
       new Event("change", { bubbles: true, cancelable: false })
     );
+    await delay(5000);
   }
-};
-
-const fillBasicInfo = async (applicantData: Applicant) => {
-  const firstName: HTMLInputElement =
-    document.querySelector('[name="firstName"]');
-  if (firstName) {
-    firstName.value = applicantData.first_name;
-    handleValueChanges(firstName);
-  }
-
-  const lastName: HTMLInputElement =
-    document.querySelector('[name="lastName"]');
-  if (lastName) {
-    lastName.value = applicantData.last_name;
-    handleValueChanges(lastName);
-  }
-
-  const contactEmail: HTMLInputElement = document.querySelector(
-    '[name="contactEmail"]'
-  );
-  if (contactEmail) {
-    contactEmail.value = applicantData.email_address;
-    handleValueChanges(contactEmail);
-  }
-
-  const adress: HTMLInputElement = document.querySelector('[name="address"]');
-  if (adress) {
-    adress.value = applicantData.address;
-    handleValueChanges(adress);
-  }
-
-  const adress2: HTMLInputElement = document.querySelector(
-    '[aria-label="Address"]'
-  );
-  if (adress2) {
-    adress2.value = applicantData.address;
-    handleValueChanges(adress2);
-  }
-
-  const city: HTMLInputElement = document.querySelector('[name="city"]');
-  if (city) {
-    city.value = applicantData.city;
-    handleValueChanges(city);
-  }
-
-  const zipcode: any = document.querySelector('[name="zip"]');
-  if (zipcode) {
-    zipcode.value = applicantData.zip_code;
-    handleValueChanges(zipcode);
-  }
-
-  const cellPhone: any = document.querySelector('[name="cellPhone"]');
-  if (cellPhone) {
-    cellPhone.value = applicantData.phone_number;
-    handleValueChanges(cellPhone);
-  }
-
-  await delay(1000);
-};
-
-const openAllTab = () => {
-  const div = document.querySelector(".rcmResumeElement");
-  if (!div) {
-    return;
-  }
-  const button = div.querySelector("a");
-  if (!button) {
-    return;
-  }
-  button.click();
 };
 
 const fillAge = async (applicantData: Applicant) => {
@@ -150,7 +79,7 @@ const fillAge = async (applicantData: Applicant) => {
     const text = label?.textContent?.trim();
 
     // for age
-    if (text.includes("18 years")) {
+    if (text?.includes("18 years")) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -161,21 +90,19 @@ const fillAge = async (applicantData: Applicant) => {
       handleValueChanges(select);
       await delay(1500);
       const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
+      if (isEmptyArray(allOption)) return;
+
       for (const option of allOption) {
-        const answertext = option.textContent;
-        if (!answertext) {
-          return;
-        }
+        const answertext = option?.textContent;
+        if (!answertext) return;
+
         if (
           applicantData.is_over_18 &&
           fromatStirngInLowerCase(answertext) === "yes"
         ) {
           option.click();
-          handleValueChanges(option);
-          return;
+          // handleValueChanges(option);
+          break;
         }
 
         if (
@@ -183,10 +110,12 @@ const fillAge = async (applicantData: Applicant) => {
           fromatStirngInLowerCase(answertext) === "no"
         ) {
           option.click();
-          handleValueChanges(option);
-          return;
+          // handleValueChanges(option);
+          break;
         }
       }
+      await delay(1500);
+      break;
     }
   }
 };
@@ -196,28 +125,24 @@ const fillVisa = async (applicantData: Applicant) => {
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (text.includes("sponsorship") || text.includes("visa")) {
+    if (text?.includes("sponsorship") || text?.includes("visa")) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
         return;
       }
 
-      select.click();
+      select?.click();
       handleValueChanges(select);
       await delay(1500);
       const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
+      if (isEmptyArray(allOption)) return;
       for (const option of allOption) {
-        const answertext = option.textContent;
-        if (!answertext) {
-          return;
-        }
+        const answertext = option?.textContent;
+        if (!answertext) return;
         if (
           applicantData.sponsorship_required &&
-          fromatStirngInLowerCase(answertext) === "yes"
+          fromatStirngInLowerCase(answertext)?.includes("yes")
         ) {
           option.click();
           handleValueChanges(option);
@@ -225,12 +150,59 @@ const fillVisa = async (applicantData: Applicant) => {
 
         if (
           !applicantData.sponsorship_required &&
+          !fromatStirngInLowerCase(answertext)?.includes(
+            fromatStirngInLowerCase("No Selection")
+          ) &&
+          fromatStirngInLowerCase(answertext)?.includes("no")
+        ) {
+          option.click();
+
+          handleValueChanges(option);
+        }
+      }
+      await delay(1500);
+    }
+  }
+};
+
+const willingToRelocate = async (applicantData: Applicant) => {
+  const allLabel = document.querySelectorAll("label");
+  for (const label of allLabel) {
+    const text = label?.textContent?.trim();
+
+    if (text?.includes("relocate") || text?.includes("travell")) {
+      const labelId = label.getAttribute("for");
+      const select = document.getElementById(labelId);
+      if (!select) {
+        return;
+      }
+
+      select?.click();
+      handleValueChanges(select);
+      await delay(1500);
+      const allOption: any = document.querySelectorAll('li[role="option"]');
+      if (isEmptyArray(allOption)) return;
+      for (const option of allOption) {
+        const answertext = option?.textContent;
+        if (!answertext) return;
+        if (
+          Number(applicantData.willingToTravel) > 0 &&
+          fromatStirngInLowerCase(answertext) === "yes"
+        ) {
+          option.click();
+          handleValueChanges(option);
+        }
+
+        if (
+          (!applicantData.willingToTravel ||
+            Number(applicantData.willingToTravel) < 1) &&
           fromatStirngInLowerCase(answertext) === "no"
         ) {
           option.click();
           handleValueChanges(option);
         }
       }
+      await delay(1500);
     }
   }
 };
@@ -240,7 +212,7 @@ const fillWorkAuthorization = async (applicantData: Applicant) => {
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (text.includes("legally authorized") || text.includes("legally")) {
+    if (text?.includes("legally authorized") || text?.includes("legally")) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -255,7 +227,7 @@ const fillWorkAuthorization = async (applicantData: Applicant) => {
         return;
       }
       for (const option of allOption) {
-        const answertext = option.textContent;
+        const answertext = option?.textContent;
         if (!answertext) {
           return;
         }
@@ -264,7 +236,8 @@ const fillWorkAuthorization = async (applicantData: Applicant) => {
           fromatStirngInLowerCase(answertext) === "yes"
         ) {
           option.click();
-          handleValueChanges(option);
+          // handleValueChanges(option);
+          break;
         }
 
         if (
@@ -272,9 +245,12 @@ const fillWorkAuthorization = async (applicantData: Applicant) => {
           fromatStirngInLowerCase(answertext) === "no"
         ) {
           option.click();
-          handleValueChanges(option);
+          // handleValueChanges(option);
+          break;
         }
       }
+      await delay(1500);
+      break;
     }
   }
 };
@@ -284,7 +260,7 @@ const fillGender = async (applicantData: Applicant) => {
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (text.toLowerCase()?.includes("gender")) {
+    if (text?.toLowerCase()?.includes("gender")) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -295,19 +271,23 @@ const fillGender = async (applicantData: Applicant) => {
       handleValueChanges(select);
       await delay(1500);
       const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
+      if (isEmptyArray(allOption)) return;
       for (const option of allOption) {
         const answertext = option.textContent;
         if (!answertext) {
           return;
         }
-        if (fromatStirngInLowerCase(answertext) === applicantData.gender) {
+        if (
+          fromatStirngInLowerCase(answertext) ===
+          fromatStirngInLowerCase(applicantData.gender)
+        ) {
           option.click();
-          handleValueChanges(option);
+          // handleValueChanges(option);
+          break;
         }
       }
+      await delay(1500);
+      break;
     }
   }
 };
@@ -331,35 +311,35 @@ const fillRace = async (applicantData: Applicant) => {
       handleValueChanges(select);
       await delay(1500);
       const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
+      if (isEmptyArray(allOption)) return;
       for (const option of allOption) {
         const answertext = option.textContent;
-        if (!answertext) {
-          return;
-        }
+        if (!answertext) return;
         if (
           fromatStirngInLowerCase(answertext)?.includes(
             fromatStirngInLowerCase(applicantData.race)
           )
         ) {
           option.click();
-          handleValueChanges(option);
+          break;
+          // handleValueChanges(option);
         }
       }
+      await delay(1500);
+      break;
     }
   }
 };
 
 const fillVeteran = async (applicantData: Applicant) => {
   const allLabel = document.querySelectorAll("label");
-  let veteran = false;
-  let disability = false;
   for (const label of allLabel) {
     const text = label?.textContent?.trim();
 
-    if (!veteran && fromatStirngInLowerCase(text) === "pleaseselect") {
+    if (
+      fromatStirngInLowerCase(text)?.includes("veteran") ||
+      fromatStirngInLowerCase(text) === "pleaseselect"
+    ) {
       const labelId = label.getAttribute("for");
       const select = document.getElementById(labelId);
       if (!select) {
@@ -381,19 +361,22 @@ const fillVeteran = async (applicantData: Applicant) => {
           (applicantData.veteran_status === 1 ||
             applicantData.veteran_status === 3 ||
             applicantData.veteran_status === 4) &&
-          fromatStirngInLowerCase(answertext) ===
-            "iidentifyasoneormoreoftheclassificationsofprotectedveteranlistedabove"
+          fromatStirngInLowerCase(answertext)?.includes(
+            fromatStirngInLowerCase("I identify as one or more")
+          )
         ) {
           option.click();
-          handleValueChanges(option);
+          break;
         }
 
         if (
           applicantData.veteran_status === 2 &&
-          fromatStirngInLowerCase(answertext) === "iamnotaprotectedveteran"
+          fromatStirngInLowerCase(answertext)?.includes(
+            fromatStirngInLowerCase("I am not a")
+          )
         ) {
           option.click();
-          handleValueChanges(option);
+          break;
         }
 
         if (
@@ -401,28 +384,71 @@ const fillVeteran = async (applicantData: Applicant) => {
           fromatStirngInLowerCase(answertext) === "ichoosenottoselfidentify"
         ) {
           option.click();
-          handleValueChanges(option);
+          break;
         }
+      }
+      await delay(1500);
+      break;
+    }
+  }
+};
 
+const fillDisablity = async (applicantData: Applicant) => {
+  console.log("disablity fired-----------------");
+  const allLabel = document.querySelectorAll("label");
+  for (const label of allLabel) {
+    const text = label?.textContent?.trim();
+    console.log("text-----------------", text);
+
+    if (fromatStirngInLowerCase(text)?.includes("disability")) {
+      const labelId = label.getAttribute("for");
+      const select = document.getElementById(labelId);
+      console.log("select fired-----------------", select);
+
+      if (!select) {
+        return;
+      }
+      select.click();
+      handleValueChanges(select);
+      await delay(1500);
+      const allOption: any = document.querySelectorAll('li[role="option"]');
+      if (!allOption || allOption.length === 0) {
+        return;
+      }
+      for (const option of allOption) {
+        const answertext = option?.textContent;
+        console.log("answertext::", answertext);
         // for disability
-
         if (
-          !applicantData.disability_status &&
-          fromatStirngInLowerCase(answertext) === "nodisability"
+          (!applicantData.disability_status ||
+            !fromatStirngInLowerCase(answertext)?.includes(
+              fromatStirngInLowerCase("No Selection")
+            )) &&
+          (fromatStirngInLowerCase(answertext)?.includes(
+            fromatStirngInLowerCase("No, I don't have a disability")
+          ) ||
+            fromatStirngInLowerCase(answertext) === "nodisability")
         ) {
+          console.log("no disabliry");
           option.click();
-          handleValueChanges(option);
+          break;
         }
 
         if (
           applicantData.disability_status &&
-          fromatStirngInLowerCase(answertext) ===
-            "yeswithadisabilityorpreviouslyhadadisability"
+          (fromatStirngInLowerCase(answertext)?.includes(
+            fromatStirngInLowerCase("Yes, I have a disability")
+          ) ||
+            fromatStirngInLowerCase(answertext) ===
+              "yeswithadisabilityorpreviouslyhadadisability")
         ) {
+          console.log("yes disabliry");
           option.click();
-          handleValueChanges(option);
+          break;
         }
       }
+      await delay(1500);
+      break;
     }
   }
 };
@@ -607,13 +633,13 @@ const fillAllRadioButtton = async (applicantData: Applicant) => {
     // for us work authorization`
     if (
       text &&
-      (fromatStirngInLowerCase(text).includes(
+      (fromatStirngInLowerCase(text)?.includes(
         fromatStirngInLowerCase("authorized to work")
       ) ||
-        fromatStirngInLowerCase(text).includes(
+        fromatStirngInLowerCase(text)?.includes(
           fromatStirngInLowerCase("authorize to work")
         ) ||
-        fromatStirngInLowerCase(text).includes(
+        fromatStirngInLowerCase(text)?.includes(
           fromatStirngInLowerCase("eligible to work")
         ))
     ) {
@@ -646,8 +672,8 @@ const fillAllRadioButtton = async (applicantData: Applicant) => {
     // for sponsorship
     if (
       text &&
-      (fromatStirngInLowerCase(text).includes("sponsorship") ||
-        fromatStirngInLowerCase(text).includes("visa"))
+      (fromatStirngInLowerCase(text)?.includes("sponsorship") ||
+        fromatStirngInLowerCase(text)?.includes("visa"))
     ) {
       const answerLabel = questionSection?.querySelectorAll("label");
       if (isEmptyArray(answerLabel)) return;
@@ -691,6 +717,7 @@ const selectGender = async (applicantData: Applicant) => {
       )
     ) {
       label?.click();
+      break;
     }
   }
 };
@@ -699,23 +726,37 @@ export const successfactors = async (
   tempDivs: any,
   applicantData: Applicant
 ) => {
-  openAllTab();
+  await openAllTab();
   await uploadResume(applicantData);
   await fillBasicInfo(applicantData);
-  await fillAge(applicantData);
-  await fillVisa(applicantData);
-  await fillWorkAuthorization(applicantData);
-  await fillGender(applicantData);
-  await fillRace(applicantData);
+
+  // for apply through registration page
   await fillPreferrelLocation(applicantData);
+  // for apply through registration page
   await fillAllRadioButtton(applicantData);
-  await selectGender(applicantData);
-  if (window.location.href.includes(".successfactors.")) {
-    await fillVeteran(applicantData);
-  }
+
+  //  for .sapsf website
   if (window.location.href.includes(".sapsf.")) {
     await fillSapsfVeteran(applicantData);
     await fillSapsfDisability(applicantData);
   }
+
+  await fillAge(applicantData);
+  await fillWorkAuthorization(applicantData);
+  await fillVisa(applicantData);
+  await willingToRelocate(applicantData);
+  await fillRace(applicantData);
+  // for apply through registration page
+  //  radio gender
+  await selectGender(applicantData);
+  // select gender
+  await fillGender(applicantData);
+
+  await fillDisablity(applicantData);
+
+  if (window.location.href.includes(".successfactors.")) {
+    await fillVeteran(applicantData);
+  }
+
   fillCheckBox();
 };
