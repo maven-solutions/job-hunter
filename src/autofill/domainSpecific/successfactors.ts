@@ -1,3 +1,4 @@
+import { isEmptyArray } from "../../utils/helper";
 import {
   createFile,
   fileTypeDataFiller,
@@ -543,21 +544,153 @@ const fillPreferrelLocation = async (applicantData: Applicant) => {
   const preferredLocation: any = document.querySelector(
     'input[aria-label="Preferred Location"]'
   );
-  console.log("preferredLocation", preferredLocation);
 
   if (!preferredLocation) {
     return;
   }
-  preferredLocation.click();
+  preferredLocation?.click();
   await delay(1000);
   let country = false;
   const selectOptions: any = document.querySelectorAll('li[role="option"]');
+  if (isEmptyArray(selectOptions)) return;
   for (const [index, element] of selectOptions.entries()) {
     if (countryHandler(element.textContent.trim(), applicantData, country)) {
       country = true;
       element.focus();
       element.click();
       await delay(300);
+    }
+  }
+};
+
+const fillAllRadioButtton = async (applicantData: Applicant) => {
+  const radioButtonSection: HTMLElement =
+    document.querySelector('ol[id="questions"]');
+  if (!radioButtonSection) {
+    return;
+  }
+  const raioButtonEachSection: NodeListOf<HTMLLIElement> =
+    document.querySelectorAll(".clear_all");
+  if (isEmptyArray(raioButtonEachSection)) return;
+
+  for (const questionSection of raioButtonEachSection) {
+    const questions = questionSection.querySelector(".questionFieldLabel");
+    if (!questions) return;
+    const text = questions?.textContent;
+    // for 18 years
+    if (text && text?.toLowerCase()?.includes("18 year")) {
+      const answerLabel = questionSection?.querySelectorAll("label");
+      if (isEmptyArray(answerLabel)) return;
+
+      for (const label of answerLabel) {
+        const text = label?.textContent;
+        // for yes
+        if (
+          applicantData.sponsorship_required &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("yes")
+        ) {
+          label?.click();
+        }
+
+        // for no
+        if (
+          !applicantData.sponsorship_required &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("no")
+        ) {
+          label?.click();
+        }
+      }
+    }
+
+    // for us work authorization`
+    if (
+      text &&
+      (fromatStirngInLowerCase(text).includes(
+        fromatStirngInLowerCase("authorized to work")
+      ) ||
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("authorize to work")
+        ) ||
+        fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("eligible to work")
+        ))
+    ) {
+      const answerLabel = questionSection?.querySelectorAll("label");
+      if (isEmptyArray(answerLabel)) return;
+
+      for (const label of answerLabel) {
+        const text = label?.textContent;
+        // for yes
+
+        if (
+          applicantData.us_work_authoriztaion &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("yes")
+        ) {
+          label?.click();
+        }
+
+        // for no
+        if (
+          !applicantData.us_work_authoriztaion &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("no")
+        ) {
+          label?.click();
+        }
+      }
+    }
+
+    // for sponsorship
+    if (
+      text &&
+      (fromatStirngInLowerCase(text).includes("sponsorship") ||
+        fromatStirngInLowerCase(text).includes("visa"))
+    ) {
+      const answerLabel = questionSection?.querySelectorAll("label");
+      if (isEmptyArray(answerLabel)) return;
+
+      for (const label of answerLabel) {
+        const text = label?.textContent;
+        // for yes
+        if (
+          applicantData.sponsorship_required &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("yes")
+        ) {
+          label?.click();
+        }
+
+        // for no
+        if (
+          !applicantData.sponsorship_required &&
+          text &&
+          fromatStirngInLowerCase(text)?.includes("no")
+        ) {
+          label?.click();
+        }
+      }
+    }
+  }
+};
+
+const selectGender = async (applicantData: Applicant) => {
+  const genderSection = document.querySelector("#gender_radioBtns");
+  if (!genderSection) return;
+  const answerLabel = genderSection?.querySelectorAll("label");
+  if (isEmptyArray(answerLabel)) return;
+  for (const label of answerLabel) {
+    const text = label?.textContent;
+    // for yes
+    if (
+      text &&
+      fromatStirngInLowerCase(text)?.includes(
+        fromatStirngInLowerCase(applicantData.gender)
+      )
+    ) {
+      label?.click();
     }
   }
 };
@@ -575,6 +708,8 @@ export const successfactors = async (
   await fillGender(applicantData);
   await fillRace(applicantData);
   await fillPreferrelLocation(applicantData);
+  await fillAllRadioButtton(applicantData);
+  await selectGender(applicantData);
   if (window.location.href.includes(".successfactors.")) {
     await fillVeteran(applicantData);
   }

@@ -235,6 +235,9 @@ const fillRadioButton = (applicantData: Applicant) => {
         fromatStirngInLowerCase("eligible to work")
       ) ||
         fromatStirngInLowerCase(text).includes(
+          fromatStirngInLowerCase("authorized to work")
+        ) ||
+        fromatStirngInLowerCase(text).includes(
           fromatStirngInLowerCase("authorize to work")
         ))
     ) {
