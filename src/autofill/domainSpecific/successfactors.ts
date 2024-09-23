@@ -14,10 +14,15 @@ import {
 import {
   fillAllRadioButtton,
   fillBasicInfo,
+  fillCheckBox,
   fillPreferrelLocation,
+  fillSapsfDisability,
+  fillSapsfVeteran,
   openAllTab,
   selectGender,
 } from "./helper/helper.successfactors";
+import { educationDatafiller } from "./helper/succesfactors.educationfiller";
+import { workExperienceDatafiller } from "./helper/succesfactors.workexperienceFiller";
 
 const uploadResume = async (applicantData) => {
   const acceptButton: any = document.querySelector(
@@ -429,129 +434,16 @@ const fillDisablity = async (applicantData: Applicant) => {
   }
 };
 
-const fillCheckBox = () => {
-  const allcheckobx: any = document.querySelectorAll('input[type="CHECKBOX"]');
-  if (!allcheckobx && allcheckobx.length === 0) {
-    return;
-  }
-  for (const checkobx of allcheckobx) {
-    checkobx.checked;
-    checkobx.click();
-  }
-};
-
-const fillSapsfVeteran = async (applicantData: Applicant) => {
-  const allLabel = document.querySelectorAll("label");
-  let veteran = false;
-  for (const label of allLabel) {
-    const text = label?.textContent?.trim();
-
-    if (!veteran && fromatStirngInLowerCase(text) === "protectedveteran") {
-      const labelId = label.getAttribute("for");
-      const select = document.getElementById(labelId);
-      if (!select) {
-        return;
-      }
-      select.click();
-      handleValueChanges(select);
-      await delay(1500);
-      const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
-      for (const option of allOption) {
-        const answertext = option?.textContent;
-        // for veteran
-
-        if (
-          (applicantData.veteran_status === 1 ||
-            applicantData.veteran_status === 3 ||
-            applicantData.veteran_status === 4) &&
-          fromatStirngInLowerCase(answertext) ===
-            "iidentifyasoneormoreoftheclassificationsofprotectedveteranlistedabove"
-        ) {
-          option.click();
-          handleValueChanges(option);
-        }
-
-        if (
-          applicantData.veteran_status === 2 &&
-          fromatStirngInLowerCase(answertext) === "iamnotaprotectedveteran"
-        ) {
-          option.click();
-          handleValueChanges(option);
-        }
-
-        if (
-          applicantData.veteran_status === 5 &&
-          fromatStirngInLowerCase(answertext) === "idontwishtoanswer"
-        ) {
-          option.click();
-          handleValueChanges(option);
-        }
-      }
-    }
-  }
-};
-
-const fillSapsfDisability = async (applicantData: Applicant) => {
-  const allLabel = document.querySelectorAll("label");
-  for (const label of allLabel) {
-    const text = label?.textContent?.trim();
-
-    if (
-      fromatStirngInLowerCase(text)?.includes(
-        "pleaseselectoneoftheoptionsbelow"
-      )
-    ) {
-      const labelId = label.getAttribute("for");
-      const select = document.getElementById(labelId);
-      if (!select) {
-        return;
-      }
-      select.click();
-      handleValueChanges(select);
-      await delay(1500);
-      const allOption: any = document.querySelectorAll('li[role="option"]');
-      if (!allOption || allOption.length === 0) {
-        return;
-      }
-      for (const option of allOption) {
-        const answertext = option?.textContent;
-        // for disability
-
-        if (
-          !applicantData.disability_status &&
-          fromatStirngInLowerCase(answertext) ===
-            "noidonthaveadisabilityorahistoryrecordofhavingadisability"
-        ) {
-          option.click();
-          handleValueChanges(option);
-        }
-
-        if (
-          applicantData.disability_status &&
-          fromatStirngInLowerCase(answertext) ===
-            "yesihaveadisabilityorhaveahistoryrecordofhavingadisability"
-        ) {
-          option.click();
-          handleValueChanges(option);
-        }
-      }
-    }
-  }
-};
-
 const findEducationButtonId = async () => {
   const allButton = document.querySelectorAll("button");
   let educationButtonId: any = "";
   if (isEmptyArray(allButton)) return;
   for (const button of allButton) {
     const text = button?.textContent;
-    if (text && fromatStirngInLowerCase(text).includes("education")) {
-      const id = button.getAttribute("id");
+    if (text && fromatStirngInLowerCase(text)?.includes("education")) {
+      const id = button?.getAttribute("id");
       if (id) {
-        const arr = id.split(":");
+        const arr = id?.split(":");
         if (isEmptyArray(arr)) return;
         educationButtonId = arr[0];
         break;
@@ -561,151 +453,39 @@ const findEducationButtonId = async () => {
   return educationButtonId;
 };
 
-const getAllinputId = () => {
-  const ids = localStorage.getItem("ci_inputid");
-  return ids;
-};
-const setIdToLocalstorage = (id: any) => {
-  let allInputId = [];
-  const ids = localStorage.getItem("ci_inputid");
-  if (ids) {
-    const allIds = JSON.parse(ids);
-    allInputId = [...allIds, id];
-  } else {
-    allInputId[id];
-  }
-  localStorage.setItem("ci_inputid", JSON.stringify(allInputId));
-};
-
-const degreeFiller = async (data, index, id, input) => {
-  const selectOptions: any = document.querySelectorAll('li[role="option"]');
-  for (const [index, element] of selectOptions.entries()) {
-    if (
-      fromatStirngInLowerCase(element.textContent.trim()) ===
-        fromatStirngInLowerCase(data?.degree) ||
-      fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase(data?.degree)
-      ) ||
-      fromatStirngInLowerCase(data?.degree)?.includes(
-        fromatStirngInLowerCase(element.textContent.trim())
-      )
-    ) {
-      setIdToLocalstorage(id);
-      input.setAttribute("ci_date_filled", index);
-      element.click();
-    }
-  }
-  await delay(1500);
-};
-
-const fieldOfStudy = async (data, index, id, input) => {
-  const selectOptions: any = document.querySelectorAll('li[role="option"]');
-  for (const [index, element] of selectOptions.entries()) {
-    if (
-      fromatStirngInLowerCase(element.textContent.trim()) ===
-        fromatStirngInLowerCase(data?.major) ||
-      fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase(data?.major)
-      ) ||
-      fromatStirngInLowerCase(data?.major)?.includes(
-        fromatStirngInLowerCase(element.textContent.trim())
-      )
-    ) {
-      setIdToLocalstorage(id);
-      input.setAttribute("ci_date_filled", index);
-      element.click();
-    }
-  }
-  await delay(1500);
-};
-
-const educationDatafiller = async (
-  tempDiv: HTMLElement,
-  applicantData: Applicant,
-  data: any,
-  index: number
-) => {
-  const textInputFields =
-    tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
-  console.log("textInputFields::", textInputFields);
-
-  // console.log("inputid", localStorage.getItem("ci_inputid"));
-  for (const [inputIndex, input] of textInputFields.entries()) {
-    // console.log("input::", input);
-    // Log all attributes
-    const inputId = input?.getAttribute("id") ?? "";
-    const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
-    const labelText = labelElement?.textContent?.trim() ?? "";
-
-    if (labelText === "Educational Institution" && input.value === "") {
-      console.log("labelText::", labelText);
-      const id = input.getAttribute("id");
-      const allInputId = getAllinputId();
-      if (!allInputId?.includes(id)) {
-        console.log("schoolna name 1");
-        setIdToLocalstorage(id);
-        input.focus(); // Autofocus on the input field
-        input.click();
-        input.select();
-        input.value = data.school;
-        await delay(100);
-        handleValueChanges(input);
-        console.log("schoolna name fired");
-        // await delay(100);
-        // break;
-      }
-    }
-
-    if (labelText === "Field of Study" && input.value === "") {
-      const id = input.getAttribute("id");
-      const allInputId = getAllinputId();
-      if (!allInputId?.includes(id)) {
-        console.log("schoolna level fired 1");
-
-        setIdToLocalstorage(id);
-        input.focus(); // Autofocus on the input field
-        input.click();
-        console.log("schoolna level fired");
-        await delay(1000);
-        await fieldOfStudy(data, index, id, input);
-      }
-    }
-
-    if (labelText === "Educational Level" && input.value === "") {
-      const id = input.getAttribute("id");
-      const allInputId = getAllinputId();
-      if (!allInputId?.includes(id)) {
-        console.log("schoolna level fired 1");
-
-        setIdToLocalstorage(id);
-        input.focus(); // Autofocus on the input field
-        input.click();
-        console.log("schoolna level fired");
-        await delay(1000);
-        await degreeFiller(data, index, id, input);
+const findWorkExperienceButtonId = async () => {
+  const allButton = document.querySelectorAll("button");
+  let educationButtonId: any = "";
+  if (isEmptyArray(allButton)) return;
+  for (const button of allButton) {
+    const text = button?.textContent;
+    if (text && fromatStirngInLowerCase(text)?.includes("previousemployment")) {
+      const id = button?.getAttribute("id");
+      if (id) {
+        const arr = id?.split(":");
+        if (isEmptyArray(arr)) return;
+        educationButtonId = arr[0];
+        break;
       }
     }
   }
-
-  // workDaysdateFiller(data, index);
+  return educationButtonId;
 };
 
 const fillEducation = async (applicantData: Applicant) => {
   const educationButtonId = await findEducationButtonId();
   const addEducationButtonId = `${educationButtonId}:_addRowBtn`;
-  console.log("addEducationButtonId::", addEducationButtonId);
 
   const educationContentSectionId = `${educationButtonId}:sectionContent`;
 
   const educationContentSection: any = document.querySelector(
     `[id="${educationContentSectionId}"]`
   );
-  console.log("educationContentSection::", educationContentSection);
+  if (!educationContentSection) return;
+
   const addEducationButton: any = document.querySelector(
     `[id="${addEducationButtonId}"]`
   );
-
-  console.log("addEducationButton::", addEducationButton);
 
   if (!addEducationButton) return;
 
@@ -723,43 +503,81 @@ const fillEducation = async (applicantData: Applicant) => {
   }
 };
 
+const fillWorkExperience = async (applicantData: Applicant) => {
+  const workButtonId = await findWorkExperienceButtonId();
+  const addWorkButtonId = `${workButtonId}:_addRowBtn`;
+
+  const workContentSectionId = `${workButtonId}:sectionContent`;
+
+  const workContentSection: any = document.querySelector(
+    `[id="${workContentSectionId}"]`
+  );
+  if (!workContentSection) return;
+  const addworkButton: any = document.querySelector(
+    `[id="${addWorkButtonId}"]`
+  );
+
+  if (!addworkButton) return;
+
+  if (
+    applicantData.employment_history &&
+    applicantData.employment_history.length > 0
+  ) {
+    for await (const [
+      index,
+      element,
+    ] of applicantData.employment_history.entries()) {
+      addworkButton.click();
+      await delay(500);
+      await workExperienceDatafiller(
+        workContentSection,
+        applicantData,
+        element,
+        index
+      );
+    }
+  }
+};
+
 export const successfactors = async (
   tempDivs: any,
   applicantData: Applicant
 ) => {
   await openAllTab();
-  // await uploadResume(applicantData);
-  // await fillBasicInfo(applicantData);
+  await uploadResume(applicantData);
+  await fillBasicInfo(applicantData);
 
-  // // for apply through registration page
-  // await fillPreferrelLocation(applicantData);
-  // // for apply through registration page
-  // await fillAllRadioButtton(applicantData);
+  // for apply through registration page
+  await fillPreferrelLocation(applicantData);
+  // for apply through registration page
+  await fillAllRadioButtton(applicantData);
 
-  // //  for .sapsf website
-  // if (window.location.href.includes(".sapsf.")) {
-  //   await fillSapsfVeteran(applicantData);
-  //   await fillSapsfDisability(applicantData);
-  // }
+  //  for .sapsf website
+  if (window.location.href.includes(".sapsf.")) {
+    await fillSapsfVeteran(applicantData);
+    await fillSapsfDisability(applicantData);
+  }
 
-  // await fillAge(applicantData);
-  // await fillWorkAuthorization(applicantData);
-  // await fillVisa(applicantData);
-  // await willingToRelocate(applicantData);
-  // await fillRace(applicantData);
-  // // for apply through registration page
-  // //  radio gender
-  // await selectGender(applicantData);
-  // // select gender
-  // await fillGender(applicantData);
+  await fillAge(applicantData);
+  await fillWorkAuthorization(applicantData);
+  await fillVisa(applicantData);
+  await willingToRelocate(applicantData);
+  await fillRace(applicantData);
+  // for apply through registration page
+  //  radio gender
+  await selectGender(applicantData);
+  // select gender
+  await fillGender(applicantData);
 
-  // await fillDisablity(applicantData);
+  await fillDisablity(applicantData);
 
-  // if (window.location.href.includes(".successfactors.")) {
-  //   await fillVeteran(applicantData);
-  // }
+  if (window.location.href.includes(".successfactors.")) {
+    await fillVeteran(applicantData);
+  }
 
-  // fillCheckBox();
+  fillCheckBox();
 
-  // await fillEducation(applicantData);
+  await fillWorkExperience(applicantData);
+  await delay(1000);
+  await fillEducation(applicantData);
 };
