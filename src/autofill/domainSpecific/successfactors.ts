@@ -1,47 +1,23 @@
 import { isEmptyArray } from "../../utils/helper";
+import { fieldNames } from "../FromFiller/fieldsname";
 import {
   createFile,
   fileTypeDataFiller,
 } from "../FromFiller/fileTypeDataFiller";
 import { Applicant } from "../data";
-import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import { fillBasicInfo, openAllTab } from "./helper/helper.successfactors";
-
-const countryHandler = (option, applicantData, country) => {
-  if (
-    fromatStirngInLowerCase(option) ===
-      fromatStirngInLowerCase(applicantData.country) &&
-    !country
-  ) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(option) === fromatStirngInLowerCase("america") &&
-    !country
-  ) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(option) === fromatStirngInLowerCase("usa") &&
-    !country
-  ) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(option) ===
-      fromatStirngInLowerCase("unitedstates") &&
-    !country
-  ) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(option?.textContent) ===
-      fromatStirngInLowerCase("unitedstatesofamerica") &&
-    !country
-  ) {
-    return true;
-  }
-};
+import {
+  checkIfExist,
+  delay,
+  fromatStirngInLowerCase,
+  handleValueChanges,
+} from "../helper";
+import {
+  fillAllRadioButtton,
+  fillBasicInfo,
+  fillPreferrelLocation,
+  openAllTab,
+  selectGender,
+} from "./helper/helper.successfactors";
 
 const uploadResume = async (applicantData) => {
   const acceptButton: any = document.querySelector(
@@ -566,158 +542,108 @@ const fillSapsfDisability = async (applicantData: Applicant) => {
   }
 };
 
-const fillPreferrelLocation = async (applicantData: Applicant) => {
-  const preferredLocation: any = document.querySelector(
-    'input[aria-label="Preferred Location"]'
+const findEducationButtonId = async () => {
+  const allButton = document.querySelectorAll("button");
+  let educationButtonId: any = "";
+  if (isEmptyArray(allButton)) return;
+  for (const button of allButton) {
+    const text = button?.textContent;
+    if (text && fromatStirngInLowerCase(text).includes("education")) {
+      const id = button.getAttribute("id");
+      if (id) {
+        const arr = id.split(":");
+        if (isEmptyArray(arr)) return;
+        educationButtonId = arr[0];
+        break;
+      }
+    }
+  }
+  return educationButtonId;
+};
+
+const getAllinputId = () => {
+  const ids = localStorage.getItem("ci_inputid");
+  return ids;
+};
+const setIdToLocalstorage = (id: any) => {
+  let allInputId = [];
+  const ids = localStorage.getItem("ci_inputid");
+  if (ids) {
+    const allIds = JSON.parse(ids);
+    allInputId = [...allIds, id];
+  } else {
+    allInputId[id];
+  }
+  localStorage.setItem("ci_inputid", JSON.stringify(allInputId));
+};
+const educationDatafiller = async (
+  tempDiv: HTMLElement,
+  applicantData: Applicant,
+  data: any,
+  index: number
+) => {
+  const textInputFields =
+    tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
+  // console.log("data::", index, "::", data);
+  // console.log("inputid", localStorage.getItem("ci_inputid"));
+  for (const [inputIndex, input] of textInputFields.entries()) {
+    const attributes: any = Array.from(input.attributes);
+    // console.log("input::", input);
+    // Log all attributes
+    const inputId = input?.getAttribute("id") ?? "";
+    const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
+    const labelText = labelElement?.textContent?.trim() ?? "";
+
+    for (const attribute of attributes) {
+      if (
+        labelText.toLowerCase === "educational institution" &&
+        input.value === ""
+      ) {
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          setIdToLocalstorage(id);
+          input.focus(); // Autofocus on the input field
+          input.click();
+          input.select();
+          input.value = data.school;
+          await delay(100);
+          handleValueChanges(input);
+          // await delay(100);
+          break;
+        }
+      }
+    }
+  }
+
+  // degreeFiller(data, index);
+  // workDaysdateFiller(data, index);
+};
+
+const fillEducation = async (applicantData: Applicant) => {
+  const educationButtonId = await findEducationButtonId();
+  const addEducationButtonId = `${educationButtonId}:_addRowBtn`;
+  const educationContentSectionId = `${educationButtonId}:sectionContent`;
+
+  const educationContentSection: any = document.querySelector(
+    `[id="${educationContentSectionId}"]`
+  );
+  const addEducationButton: any = document.querySelector(
+    `[id="${addEducationButtonId}"]`
   );
 
-  if (!preferredLocation) {
-    return;
-  }
-  preferredLocation?.click();
-  await delay(1000);
-  let country = false;
-  const selectOptions: any = document.querySelectorAll('li[role="option"]');
-  if (isEmptyArray(selectOptions)) return;
-  for (const [index, element] of selectOptions.entries()) {
-    if (countryHandler(element.textContent.trim(), applicantData, country)) {
-      country = true;
-      element.focus();
-      element.click();
-      await delay(300);
-    }
-  }
-};
+  if (!addEducationButton) return;
 
-const fillAllRadioButtton = async (applicantData: Applicant) => {
-  const radioButtonSection: HTMLElement =
-    document.querySelector('ol[id="questions"]');
-  if (!radioButtonSection) {
-    return;
-  }
-  const raioButtonEachSection: NodeListOf<HTMLLIElement> =
-    document.querySelectorAll(".clear_all");
-  if (isEmptyArray(raioButtonEachSection)) return;
-
-  for (const questionSection of raioButtonEachSection) {
-    const questions = questionSection.querySelector(".questionFieldLabel");
-    if (!questions) return;
-    const text = questions?.textContent;
-    // for 18 years
-    if (text && text?.toLowerCase()?.includes("18 year")) {
-      const answerLabel = questionSection?.querySelectorAll("label");
-      if (isEmptyArray(answerLabel)) return;
-
-      for (const label of answerLabel) {
-        const text = label?.textContent;
-        // for yes
-        if (
-          applicantData.sponsorship_required &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("yes")
-        ) {
-          label?.click();
-        }
-
-        // for no
-        if (
-          !applicantData.sponsorship_required &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("no")
-        ) {
-          label?.click();
-        }
-      }
-    }
-
-    // for us work authorization`
-    if (
-      text &&
-      (fromatStirngInLowerCase(text)?.includes(
-        fromatStirngInLowerCase("authorized to work")
-      ) ||
-        fromatStirngInLowerCase(text)?.includes(
-          fromatStirngInLowerCase("authorize to work")
-        ) ||
-        fromatStirngInLowerCase(text)?.includes(
-          fromatStirngInLowerCase("eligible to work")
-        ))
-    ) {
-      const answerLabel = questionSection?.querySelectorAll("label");
-      if (isEmptyArray(answerLabel)) return;
-
-      for (const label of answerLabel) {
-        const text = label?.textContent;
-        // for yes
-
-        if (
-          applicantData.us_work_authoriztaion &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("yes")
-        ) {
-          label?.click();
-        }
-
-        // for no
-        if (
-          !applicantData.us_work_authoriztaion &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("no")
-        ) {
-          label?.click();
-        }
-      }
-    }
-
-    // for sponsorship
-    if (
-      text &&
-      (fromatStirngInLowerCase(text)?.includes("sponsorship") ||
-        fromatStirngInLowerCase(text)?.includes("visa"))
-    ) {
-      const answerLabel = questionSection?.querySelectorAll("label");
-      if (isEmptyArray(answerLabel)) return;
-
-      for (const label of answerLabel) {
-        const text = label?.textContent;
-        // for yes
-        if (
-          applicantData.sponsorship_required &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("yes")
-        ) {
-          label?.click();
-        }
-
-        // for no
-        if (
-          !applicantData.sponsorship_required &&
-          text &&
-          fromatStirngInLowerCase(text)?.includes("no")
-        ) {
-          label?.click();
-        }
-      }
-    }
-  }
-};
-
-const selectGender = async (applicantData: Applicant) => {
-  const genderSection = document.querySelector("#gender_radioBtns");
-  if (!genderSection) return;
-  const answerLabel = genderSection?.querySelectorAll("label");
-  if (isEmptyArray(answerLabel)) return;
-  for (const label of answerLabel) {
-    const text = label?.textContent;
-    // for yes
-    if (
-      text &&
-      fromatStirngInLowerCase(text)?.includes(
-        fromatStirngInLowerCase(applicantData.gender)
-      )
-    ) {
-      label?.click();
-      break;
+  if (applicantData.education && applicantData.education.length > 0) {
+    for await (const [index, element] of applicantData.education.entries()) {
+      addEducationButton.click();
+      await delay(500);
+      await educationDatafiller(
+        educationContentSection,
+        applicantData,
+        element,
+        index
+      );
     }
   }
 };
@@ -727,36 +653,38 @@ export const successfactors = async (
   applicantData: Applicant
 ) => {
   await openAllTab();
-  await uploadResume(applicantData);
-  await fillBasicInfo(applicantData);
+  // await uploadResume(applicantData);
+  // await fillBasicInfo(applicantData);
 
-  // for apply through registration page
-  await fillPreferrelLocation(applicantData);
-  // for apply through registration page
-  await fillAllRadioButtton(applicantData);
+  // // for apply through registration page
+  // await fillPreferrelLocation(applicantData);
+  // // for apply through registration page
+  // await fillAllRadioButtton(applicantData);
 
-  //  for .sapsf website
-  if (window.location.href.includes(".sapsf.")) {
-    await fillSapsfVeteran(applicantData);
-    await fillSapsfDisability(applicantData);
-  }
+  // //  for .sapsf website
+  // if (window.location.href.includes(".sapsf.")) {
+  //   await fillSapsfVeteran(applicantData);
+  //   await fillSapsfDisability(applicantData);
+  // }
 
-  await fillAge(applicantData);
-  await fillWorkAuthorization(applicantData);
-  await fillVisa(applicantData);
-  await willingToRelocate(applicantData);
-  await fillRace(applicantData);
-  // for apply through registration page
-  //  radio gender
-  await selectGender(applicantData);
-  // select gender
-  await fillGender(applicantData);
+  // await fillAge(applicantData);
+  // await fillWorkAuthorization(applicantData);
+  // await fillVisa(applicantData);
+  // await willingToRelocate(applicantData);
+  // await fillRace(applicantData);
+  // // for apply through registration page
+  // //  radio gender
+  // await selectGender(applicantData);
+  // // select gender
+  // await fillGender(applicantData);
 
-  await fillDisablity(applicantData);
+  // await fillDisablity(applicantData);
 
-  if (window.location.href.includes(".successfactors.")) {
-    await fillVeteran(applicantData);
-  }
+  // if (window.location.href.includes(".successfactors.")) {
+  //   await fillVeteran(applicantData);
+  // }
 
-  fillCheckBox();
+  // fillCheckBox();
+
+  await fillEducation(applicantData);
 };
