@@ -576,6 +576,49 @@ const setIdToLocalstorage = (id: any) => {
   }
   localStorage.setItem("ci_inputid", JSON.stringify(allInputId));
 };
+
+const degreeFiller = async (data, index, id, input) => {
+  const selectOptions: any = document.querySelectorAll('li[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()) ===
+        fromatStirngInLowerCase(data?.degree) ||
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
+        fromatStirngInLowerCase(data?.degree)
+      ) ||
+      fromatStirngInLowerCase(data?.degree)?.includes(
+        fromatStirngInLowerCase(element.textContent.trim())
+      )
+    ) {
+      setIdToLocalstorage(id);
+      input.setAttribute("ci_date_filled", index);
+      element.click();
+    }
+  }
+  await delay(1500);
+};
+
+const fieldOfStudy = async (data, index, id, input) => {
+  const selectOptions: any = document.querySelectorAll('li[role="option"]');
+  for (const [index, element] of selectOptions.entries()) {
+    if (
+      fromatStirngInLowerCase(element.textContent.trim()) ===
+        fromatStirngInLowerCase(data?.major) ||
+      fromatStirngInLowerCase(element.textContent.trim())?.includes(
+        fromatStirngInLowerCase(data?.major)
+      ) ||
+      fromatStirngInLowerCase(data?.major)?.includes(
+        fromatStirngInLowerCase(element.textContent.trim())
+      )
+    ) {
+      setIdToLocalstorage(id);
+      input.setAttribute("ci_date_filled", index);
+      element.click();
+    }
+  }
+  await delay(1500);
+};
+
 const educationDatafiller = async (
   tempDiv: HTMLElement,
   applicantData: Applicant,
@@ -584,53 +627,85 @@ const educationDatafiller = async (
 ) => {
   const textInputFields =
     tempDiv.querySelectorAll<HTMLInputElement>('input[type="text"]');
-  // console.log("data::", index, "::", data);
+  console.log("textInputFields::", textInputFields);
+
   // console.log("inputid", localStorage.getItem("ci_inputid"));
   for (const [inputIndex, input] of textInputFields.entries()) {
-    const attributes: any = Array.from(input.attributes);
     // console.log("input::", input);
     // Log all attributes
     const inputId = input?.getAttribute("id") ?? "";
     const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
 
-    for (const attribute of attributes) {
-      if (
-        labelText.toLowerCase === "educational institution" &&
-        input.value === ""
-      ) {
-        const id = input.getAttribute("id");
-        const allInputId = getAllinputId();
-        if (!allInputId?.includes(id)) {
-          setIdToLocalstorage(id);
-          input.focus(); // Autofocus on the input field
-          input.click();
-          input.select();
-          input.value = data.school;
-          await delay(100);
-          handleValueChanges(input);
-          // await delay(100);
-          break;
-        }
+    if (labelText === "Educational Institution" && input.value === "") {
+      console.log("labelText::", labelText);
+      const id = input.getAttribute("id");
+      const allInputId = getAllinputId();
+      if (!allInputId?.includes(id)) {
+        console.log("schoolna name 1");
+        setIdToLocalstorage(id);
+        input.focus(); // Autofocus on the input field
+        input.click();
+        input.select();
+        input.value = data.school;
+        await delay(100);
+        handleValueChanges(input);
+        console.log("schoolna name fired");
+        // await delay(100);
+        // break;
+      }
+    }
+
+    if (labelText === "Field of Study" && input.value === "") {
+      const id = input.getAttribute("id");
+      const allInputId = getAllinputId();
+      if (!allInputId?.includes(id)) {
+        console.log("schoolna level fired 1");
+
+        setIdToLocalstorage(id);
+        input.focus(); // Autofocus on the input field
+        input.click();
+        console.log("schoolna level fired");
+        await delay(1000);
+        await fieldOfStudy(data, index, id, input);
+      }
+    }
+
+    if (labelText === "Educational Level" && input.value === "") {
+      const id = input.getAttribute("id");
+      const allInputId = getAllinputId();
+      if (!allInputId?.includes(id)) {
+        console.log("schoolna level fired 1");
+
+        setIdToLocalstorage(id);
+        input.focus(); // Autofocus on the input field
+        input.click();
+        console.log("schoolna level fired");
+        await delay(1000);
+        await degreeFiller(data, index, id, input);
       }
     }
   }
 
-  // degreeFiller(data, index);
   // workDaysdateFiller(data, index);
 };
 
 const fillEducation = async (applicantData: Applicant) => {
   const educationButtonId = await findEducationButtonId();
   const addEducationButtonId = `${educationButtonId}:_addRowBtn`;
+  console.log("addEducationButtonId::", addEducationButtonId);
+
   const educationContentSectionId = `${educationButtonId}:sectionContent`;
 
   const educationContentSection: any = document.querySelector(
     `[id="${educationContentSectionId}"]`
   );
+  console.log("educationContentSection::", educationContentSection);
   const addEducationButton: any = document.querySelector(
     `[id="${addEducationButtonId}"]`
   );
+
+  console.log("addEducationButton::", addEducationButton);
 
   if (!addEducationButton) return;
 
@@ -686,5 +761,5 @@ export const successfactors = async (
 
   // fillCheckBox();
 
-  await fillEducation(applicantData);
+  // await fillEducation(applicantData);
 };
