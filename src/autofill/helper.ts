@@ -56,6 +56,7 @@ import { passwordTypeDataFiller } from "./FromFiller/passwordTypeDataFiller";
 import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { LOCALSTORAGE } from "../utils/constant";
+import { taleo } from "./domainSpecific/taleo";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -220,7 +221,7 @@ export const detectInputAndFillData = async (
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
-    selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
+    await selectDataExtract(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller(tempDiv ?? tempDivForFile, applicantData, false);
     customSelectFiller2(tempDiv ?? tempDivForFile, applicantData, false);
 
@@ -375,6 +376,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes("jobs.abbott")) {
       await jobsabbott(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes(".taleo.")) {
+      await taleo(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed

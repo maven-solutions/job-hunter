@@ -1,6 +1,7 @@
 import { Applicant } from "../data";
 import {
   checkIfExist,
+  delay,
   fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
@@ -43,7 +44,59 @@ export const countryHandler = (option, applicantData, country) => {
   }
 };
 
-export const selectDataExtract = (
+const fillState = async (applicantData: Applicant) => {
+  const selectInputFields = document.querySelectorAll("select");
+  if (!selectInputFields || selectInputFields.length === 0) {
+    return;
+  }
+  for (const select of selectInputFields) {
+    const selectid = select.getAttribute("id");
+    const labelElement = document.querySelector(`[for="${selectid}"]`);
+
+    const labelText = labelElement?.textContent?.trim();
+    const attributes: any = Array.from(select.attributes);
+    attributes.some((attribute) => {
+      // for gender
+      if (
+        checkIfExist(labelText, fieldNames.state) ||
+        checkIfExist(attribute.value, fieldNames.state)
+      ) {
+        // filling state data
+        Array.from(select.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+            fromatStirngInLowerCase(applicantData.state)
+          ) {
+            option.selected = true;
+            select.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            select.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
+            select.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return true;
+          }
+        });
+      }
+    });
+  }
+};
+
+export const selectDataExtract = async (
   tempDiv: any,
   applicantData: Applicant,
   iframe: boolean
@@ -128,53 +181,6 @@ export const selectDataExtract = (
         return true;
       }
     });
-
-    // filling  degree data
-    // Ensure applicantData is defined
-    // if (
-    //   applicantData &&
-    //   applicantData.education &&
-    //   applicantData.education.length > 0
-    // ) {
-    //   // Ensure education array has at least one item
-    //   const maxEducation = applicantData.education[0];
-    //   const school = applicantData.education[0]?.school;
-    //   if (maxEducation) {
-    //     const educationField = maxEducation.field;
-    //     Array.from(input.options).find((option: any) => {
-    //       if (
-    //         option &&
-    //         fromatStirngInLowerCase(option.text) ===
-    //           fromatStirngInLowerCase(educationField) &&
-    //         !degree
-    //       ) {
-    //         option.selected = true;
-    //         handleValueChanges(option);
-    //         degree = true;
-    //         return true;
-    //       }
-    //     });
-    //   }
-
-    //   if (school) {
-    //     Array.from(input.options).find((option: any) => {
-    //       if (
-    //         option &&
-    //         fromatStirngInLowerCase(option.text) ===
-    //           fromatStirngInLowerCase(school) &&
-    //         !collage
-    //       ) {
-    //         // console.log("options--", option);
-    //         // console.log("text--", option.text);
-    //         // console.log("value--", option.value);
-    //         option.selected = true;
-    //         handleValueChanges(option);
-    //         collage = true;
-    //         return true;
-    //       }
-    //     });
-    //   }
-    // }
   });
 
   for (const select of selectInputFields) {
@@ -841,4 +847,6 @@ export const selectDataExtract = (
       }
     });
   }
+  await delay(1500);
+  await fillState(applicantData);
 };
