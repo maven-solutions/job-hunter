@@ -55,7 +55,7 @@
 .ci_autofill_iframe_error_wrapper {
   border: 1px solid #f44336;
   padding: 0 10px !important;
-  height: 60px !important;
+  height: 40px !important;
   background-color: #fff6f8;
   border-radius: 4px;
   display: flex !important;

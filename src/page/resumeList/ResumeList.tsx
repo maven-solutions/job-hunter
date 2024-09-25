@@ -15,6 +15,9 @@ import "./index.css";
 import "./index2.css";
 import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
+import IframError from "./IframError";
+import AutofillLoader from "./AutofillLoader";
+import RenderName from "./RenderName";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -33,24 +36,6 @@ const ResumeList = (props: any) => {
   useEffect(() => {
     dispatch(getDesignations());
   }, []);
-  const RenderName = (props: any) => {
-    const { item } = props;
-    const role = getRoleById(
-      item?.applicant?.preferredRole,
-      item?.applicant?.customPreferredRole
-    );
-
-    const roleString = role ? `  (${role}) ` : "";
-
-    if (item?.applicant?.title) {
-      return `${item?.applicant?.title} ${roleString}`;
-    }
-
-    if (item?.applicant?.name) {
-      return `${item?.applicant?.name} ${roleString}`;
-    }
-    return `Untitled Resume ${roleString}`;
-  };
 
   const getRoleById = (roleiId, customRole) => {
     if (roleiId) {
@@ -95,24 +80,7 @@ const ResumeList = (props: any) => {
       <HeadingTitle title="Resume List" />
       <Height height="10" />
       {showIframeErrorWarning && (
-        <>
-          <Height height="-7" />
-
-          <div className="ci_autofill_iframe_error_wrapper">
-            <img src={chrome.runtime.getURL("error.svg")} alt="error-icon" />
-            <span className="ci_autofill_iframe_error_title">
-              Our autofill functionality is not supported on this page
-            </span>
-
-            <img
-              src={chrome.runtime.getURL("x.svg")}
-              className="ci_autfill_error_noit_button"
-              alt="x-icon"
-              onClick={() => setShowIframeErrorWarning(false)}
-            />
-          </div>
-          <Height height="10" />
-        </>
+        <IframError setShowIframeErrorWarning={setShowIframeErrorWarning} />
       )}
 
       <WhiteCard>
@@ -139,7 +107,7 @@ const ResumeList = (props: any) => {
                       className="ciautofill_resume_name"
                       onClick={() => setSelectedResume(index)}
                     >
-                      <RenderName item={item} />
+                      <RenderName item={item} resumeList={resumeList} />
                     </span>
                     {selectedResume === index && (
                       <div className="ciautofill__checkbox__section">
@@ -173,18 +141,7 @@ const ResumeList = (props: any) => {
             />
           </div>
         )}
-
-        {autoFilling && (
-          <>
-            {" "}
-            <div style={{ padding: "10px", paddingTop: "0" }}>
-              <Spinner size={60} />
-            </div>
-            <span className="ci_form_filling_text">
-              Form Filling Please Wait...{" "}
-            </span>
-          </>
-        )}
+        {autoFilling && <AutofillLoader />}{" "}
       </WhiteCard>
     </Layout>
   );
