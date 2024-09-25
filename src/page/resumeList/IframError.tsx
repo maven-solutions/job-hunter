@@ -2,7 +2,7 @@ import React from "react";
 import Height from "../../component/height/Height";
 
 const IframError = (props: any) => {
-  const { setShowIframeErrorWarning } = props;
+  const { setIframeUrl } = props;
   return (
     <>
       <Height height="10" />
@@ -16,7 +16,7 @@ const IframError = (props: any) => {
           src={chrome.runtime.getURL("x.svg")}
           className="ci_autfill_error_noit_button"
           alt="x-icon"
-          onClick={() => setShowIframeErrorWarning(false)}
+          onClick={() => setIframeUrl("")}
         />
       </div>
       <Height height="10" />

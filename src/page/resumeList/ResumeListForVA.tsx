@@ -35,7 +35,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   const [userResumeList, setUserResumeList] = useState([]);
-  const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState("");
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -173,8 +173,16 @@ const ResumeListForVA = (props: any) => {
         handleSelectChanges={handleSelectChanges}
       />
 
-      {showIframeErrorWarning && (
-        <IframError setShowIframeErrorWarning={setShowIframeErrorWarning} />
+      {iframeUrl && (
+        <>
+          <span
+            className="ci_autofill_add_missing_sites"
+            onClick={() => window.open(iframeUrl, "_blank")}
+          >
+            Open In Another Tab
+          </span>
+          <IframError setIframeUrl={setIframeUrl} />
+        </>
       )}
       <Height height="15" />
 
@@ -231,7 +239,7 @@ const ResumeListForVA = (props: any) => {
           selectResumeIndex={resumeList.resumeIndex}
           content={content}
           setAutoFilling={setAutoFilling}
-          setShowIframeErrorWarning={setShowIframeErrorWarning}
+          setIframeUrl={setIframeUrl}
         />
       </div>
     </Layout>

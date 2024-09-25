@@ -96,7 +96,7 @@ const AutofillFieldsForVA = (props: any) => {
     selectedUserId,
     getUserDetailsById,
     setAutoFilling,
-    setShowIframeErrorWarning,
+    setIframeUrl,
     selectResumeIndex,
   } = props;
 
@@ -130,7 +130,7 @@ const AutofillFieldsForVA = (props: any) => {
       applicantData,
       startLoading,
       stopLoading,
-      setShowIframeErrorWarning
+      setIframeUrl
     );
   };
 

@@ -23,7 +23,8 @@ const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
 
   const [selectedResume, setSelectedResume] = useState(0);
-  const [showIframeErrorWarning, setShowIframeErrorWarning] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState("");
+
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -79,9 +80,7 @@ const ResumeList = (props: any) => {
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />
-      {showIframeErrorWarning && (
-        <IframError setShowIframeErrorWarning={setShowIframeErrorWarning} />
-      )}
+      {iframeUrl && <IframError setIframeUrl={setIframeUrl} />}
 
       <WhiteCard>
         {!autoFilling && (
@@ -137,7 +136,7 @@ const ResumeList = (props: any) => {
               selectedResume={selectedResume}
               content={content}
               setAutoFilling={setAutoFilling}
-              setShowIframeErrorWarning={setShowIframeErrorWarning}
+              setIframeUrl={setIframeUrl}
             />
           </div>
         )}

@@ -54,3 +54,9 @@ export interface Applicant {
   willingToTravel?: string | number | null;
   zip_code?: number | null;
 }
+
+// https://www.truelinkfinancial.com/about-us/careers
+// https://careers.mativ.com/jobs/14964695-market-development-intern
+
+//  issue in ui
+// https://www.kentik.com/careers/jobs/?gh_jid=4445210005

@@ -101,8 +101,7 @@ const extractInfo = (resumeData, applicationForm) => {
 };
 
 const AutofillFields = (props: any) => {
-  const { selectedResume, content, setAutoFilling, setShowIframeErrorWarning } =
-    props;
+  const { selectedResume, content, setAutoFilling, setIframeUrl } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -144,7 +143,7 @@ const AutofillFields = (props: any) => {
       applicantData,
       startLoading,
       stopLoading,
-      setShowIframeErrorWarning
+      setIframeUrl
     );
   };
 

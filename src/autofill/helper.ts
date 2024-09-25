@@ -57,6 +57,7 @@ import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { LOCALSTORAGE } from "../utils/constant";
 import { taleo } from "./domainSpecific/taleo";
+import { isEmptyArray } from "../utils/helper";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -107,10 +108,9 @@ export function delay(ms) {
 }
 export const detectInputAndFillData = async (
   applicantData: any,
-
   startLoading: any,
   stopLoading: any,
-  setShowIframeErrorWarning?: any
+  setIframeUrl?: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
   // console.log("iframeList::", iframeList);
@@ -127,15 +127,17 @@ export const detectInputAndFillData = async (
     }
   }
   if (iframeList.length > 0) {
-    const iframeDetect = iframeList[0];
-    const src = iframeDetect.src;
-    if (
-      src.includes(".greenhouse.") ||
-      src.includes(".ashbyhq.") ||
-      src.includes(".talemetry.")
-    ) {
-      // show error
-      setShowIframeErrorWarning(true);
+    for (const iframe of iframeList) {
+      const src = iframe?.src;
+      if (
+        src?.includes(".greenhouse.") ||
+        src?.includes(".ashbyhq.") ||
+        src?.includes(".talemetry.")
+      ) {
+        // show error
+        setIframeUrl(src);
+        break;
+      }
     }
   }
 
