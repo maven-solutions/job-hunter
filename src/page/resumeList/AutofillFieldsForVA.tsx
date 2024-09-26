@@ -10,6 +10,7 @@ import {
 } from "../../utils/constant";
 import { generatePassword, getHighestEducation, isAdult } from "./helper";
 import { useDebounce } from "use-debounce";
+import AutofillButton from "./AutofillButton";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -104,6 +105,7 @@ const AutofillFieldsForVA = (props: any) => {
     setIframeUrl,
     selectResumeIndex,
     iframeUrl,
+    setShowAddWebsite,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -140,7 +142,8 @@ const AutofillFieldsForVA = (props: any) => {
     );
   };
 
-  const handleAutofill = () => {
+  const handleAutofill = (addMissingLink) => {
+    console.log("addMissingLink::", addMissingLink);
     if (iframeUrl) {
       window.open(
         `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
@@ -166,25 +169,35 @@ const AutofillFieldsForVA = (props: any) => {
   const [debouncedSearchTerm] = useDebounce(autofill, 3000);
 
   useEffect(() => {
-    // loadUser();
     if (debouncedSearchTerm === AUTOFILL_TOKEN_FROM_CAREERAI) {
       autofillByContentScript();
     }
   }, [debouncedSearchTerm]);
 
+  const openMissngLink = () => {
+    setShowAddWebsite(true);
+  };
+
   return (
-    <div className="ext__autofill__fields__wrapper">
-      <div className="autofill__btn__wrapper">
-        <button
-          className={`autofill__btn ${
-            resumeList.res_success ? "" : "autofill__button__disable"
-          }`}
-          onClick={() => handleAutofill()}
-          disabled={resumeList.res_success ? false : true}
-        >
-          {iframeUrl ? "Proceed" : "Auto Fill"}
-        </button>
-      </div>
+    <div className="ci_va_two_button_section">
+      {!iframeUrl && cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
+        <AutofillButton
+          onClick={openMissngLink}
+          iframeUrl={iframeUrl}
+          resumeList={resumeList}
+          addMissingLink
+          text="Add Site to Autofill"
+        />
+      ) : (
+        <span />
+      )}
+
+      <AutofillButton
+        onClick={handleAutofill}
+        iframeUrl={iframeUrl}
+        resumeList={resumeList}
+        text={iframeUrl ? "Proceed" : "Auto Fill"}
+      />
     </div>
   );
 };

@@ -37,6 +37,7 @@ const ResumeListForVA = (props: any) => {
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   const [userResumeList, setUserResumeList] = useState([]);
   const [iframeUrl, setIframeUrl] = useState("");
+  const [showAddWebsite, setShowAddWebsite] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -234,7 +235,9 @@ const ResumeListForVA = (props: any) => {
           </>
         )}
       </WhiteCard>
-      <Height height="10" />
+      <Height height="15" />
+      {!iframeUrl && showAddWebsite && <AddMissingLink />}
+      {/* <AddMissingLink /> */}
       {iframeUrl && <IframeProceed />}
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA
@@ -245,6 +248,7 @@ const ResumeListForVA = (props: any) => {
           setAutoFilling={setAutoFilling}
           setIframeUrl={setIframeUrl}
           iframeUrl={iframeUrl}
+          setShowAddWebsite={setShowAddWebsite}
         />
       </div>
     </Layout>
