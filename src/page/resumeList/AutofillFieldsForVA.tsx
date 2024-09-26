@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
 import { LOCALSTORAGE } from "../../utils/constant";
 import { generatePassword, getHighestEducation, isAdult } from "./helper";
+import { useDebounce } from "use-debounce";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -137,6 +138,27 @@ const AutofillFieldsForVA = (props: any) => {
   const handleAutofill = () => {
     autofillByContentScript();
   };
+  const [autofill, setAutofill] = useState("");
+  const currentUrl = window.location.href;
+
+  const urlObj = new URL(currentUrl);
+
+  // Get the 'ciref' parameter
+  let cirefValue = urlObj?.searchParams?.get("ciref");
+  useEffect(() => {
+    if (cirefValue) {
+      setAutofill(cirefValue);
+    }
+  }, [cirefValue]);
+
+  const [debouncedSearchTerm] = useDebounce(autofill, 3000);
+
+  useEffect(() => {
+    // loadUser();
+    if (debouncedSearchTerm) {
+      handleAutofill();
+    }
+  }, [debouncedSearchTerm]);
 
   return (
     <div className="ext__autofill__fields__wrapper">

@@ -177,7 +177,9 @@ const ResumeListForVA = (props: any) => {
         <>
           <span
             className="ci_autofill_add_missing_sites"
-            onClick={() => window.open(iframeUrl, "_blank")}
+            onClick={() =>
+              window.open(`${iframeUrl}&ciref=autofill_from_careerai`, "_blank")
+            }
           >
             Open In Another Tab
           </span>

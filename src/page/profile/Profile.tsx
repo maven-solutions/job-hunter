@@ -11,7 +11,6 @@ const Profile = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  console.log("authstate::", authState);
   const dispatch = useAppDispatch();
 
   const handleLogOut = () => {

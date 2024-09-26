@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useDebounce } from "use-debounce";
 import "./index.css";
 import Logo from "../../component/Logo";
 import LoginFrom from "../../auth/LoginForm/LoginFrom";
@@ -59,6 +59,14 @@ const JobDetector = (props: any) => {
   const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const [isGenerating, setIsGenerating] = useState<Boolean>(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [autofill, setAutofill] = useState("");
+  const currentUrl = window.location.href;
+
+  // Create a URL object
+  const urlObj = new URL(currentUrl);
+
+  // Get the 'ciref' parameter
+  let cirefValue = urlObj?.searchParams?.get("ciref");
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -171,6 +179,23 @@ const JobDetector = (props: any) => {
 
     // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {});
   }, []);
+
+  useEffect(() => {
+    if (cirefValue) {
+      setAutofill(cirefValue);
+    }
+  }, [cirefValue]);
+
+  const [debouncedSearchTerm] = useDebounce(autofill, 2000);
+
+  useEffect(() => {
+    // loadUser();
+    if (debouncedSearchTerm) {
+      if (authState.ci_user.userType === "va") {
+        setShowPage(SHOW_PAGE.resumeListForVAPage);
+      }
+    }
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     if (window.location.href.includes("chatgpt.")) {

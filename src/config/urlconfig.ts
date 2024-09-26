@@ -2,6 +2,7 @@ export const STAGING_WEBSITE_URL = "https://resumebuilder.joinswiftly.com";
 export const LIVE_WEBSITE_URL = "https://app.careerai.io";
 
 // state handler
+
 // two state should be always false
 export const EXTENSION_IN_LOCAL = false;
 export const EXTENSION_IN_STAGING = true;

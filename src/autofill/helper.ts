@@ -113,7 +113,7 @@ export const detectInputAndFillData = async (
   setIframeUrl?: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
-  // console.log("iframeList::", iframeList);
+  console.log("iframeList::", iframeList);
   let iframe: any = "";
 
   // for icims  = [0]
@@ -129,14 +129,20 @@ export const detectInputAndFillData = async (
   if (iframeList.length > 0) {
     for (const iframe of iframeList) {
       const src = iframe?.src;
-      if (
-        src?.includes(".greenhouse.") ||
-        src?.includes(".ashbyhq.") ||
-        src?.includes(".talemetry.")
-      ) {
-        // show error
-        setIframeUrl(src);
-        break;
+
+      const splitted = src?.split("/");
+
+      if (splitted && splitted.length >= 2) {
+        const currentWebURL = splitted[2];
+        if (
+          currentWebURL?.includes(".greenhouse.") ||
+          currentWebURL?.includes(".ashbyhq.") ||
+          currentWebURL?.includes(".talemetry.")
+        ) {
+          // show error
+          setIframeUrl(currentWebURL);
+          break;
+        }
       }
     }
   }
