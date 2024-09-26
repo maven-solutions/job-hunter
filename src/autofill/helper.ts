@@ -139,8 +139,7 @@ export const detectInputAndFillData = async (
           currentWebURL?.includes(".ashbyhq.") ||
           currentWebURL?.includes(".talemetry.")
         ) {
-          // show error
-          setIframeUrl(currentWebURL);
+          setIframeUrl(src);
           break;
         }
       }

@@ -9,6 +9,8 @@ import JobDetail from "../../page/jobDetail/JobDetail";
 import MenuPopUp from "../../component/menuPopup/MenuPopUp";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
+  AUTOFILL_TOKEN_FROM_CAREERAI,
+  CAREERAI_TOKEN_REF,
   EXTENSION_ACTION,
   LOCALSTORAGE,
   SHOW_PAGE,
@@ -66,7 +68,7 @@ const JobDetector = (props: any) => {
   const urlObj = new URL(currentUrl);
 
   // Get the 'ciref' parameter
-  let cirefValue = urlObj?.searchParams?.get("ciref");
+  let cirefValue = urlObj?.searchParams?.get(CAREERAI_TOKEN_REF);
 
   const dispatch = useAppDispatch();
   const authState: any = useAppSelector((store: RootStore) => {
@@ -181,7 +183,7 @@ const JobDetector = (props: any) => {
   }, []);
 
   useEffect(() => {
-    if (cirefValue) {
+    if (cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI) {
       setAutofill(cirefValue);
     }
   }, [cirefValue]);
@@ -190,7 +192,7 @@ const JobDetector = (props: any) => {
 
   useEffect(() => {
     // loadUser();
-    if (debouncedSearchTerm) {
+    if (debouncedSearchTerm === AUTOFILL_TOKEN_FROM_CAREERAI) {
       if (authState.ci_user.userType === "va") {
         setShowPage(SHOW_PAGE.resumeListForVAPage);
       }

@@ -169,3 +169,22 @@
 }
 .ciautofill__resmelist__wrapper-va {
 }
+
+.ci_iframe_gradient_box {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-image: linear-gradient(white, white),
+    linear-gradient(to right, #3ed, #ff00ff);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  padding: 10px;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 
+  max-width: 600px; */
+  /* text-align: left; */
+}

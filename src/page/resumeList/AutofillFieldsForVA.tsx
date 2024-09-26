@@ -3,7 +3,11 @@ import React, { useEffect, useState } from "react";
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
-import { LOCALSTORAGE } from "../../utils/constant";
+import {
+  AUTOFILL_TOKEN_FROM_CAREERAI,
+  CAREERAI_TOKEN_REF,
+  LOCALSTORAGE,
+} from "../../utils/constant";
 import { generatePassword, getHighestEducation, isAdult } from "./helper";
 import { useDebounce } from "use-debounce";
 
@@ -99,6 +103,7 @@ const AutofillFieldsForVA = (props: any) => {
     setAutoFilling,
     setIframeUrl,
     selectResumeIndex,
+    iframeUrl,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -136,17 +141,24 @@ const AutofillFieldsForVA = (props: any) => {
   };
 
   const handleAutofill = () => {
-    autofillByContentScript();
+    if (iframeUrl) {
+      window.open(
+        `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
+        "_blank"
+      );
+    } else {
+      autofillByContentScript();
+    }
   };
+
   const [autofill, setAutofill] = useState("");
   const currentUrl = window.location.href;
 
   const urlObj = new URL(currentUrl);
-
   // Get the 'ciref' parameter
-  let cirefValue = urlObj?.searchParams?.get("ciref");
+  let cirefValue = urlObj?.searchParams?.get(CAREERAI_TOKEN_REF);
   useEffect(() => {
-    if (cirefValue) {
+    if (cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI) {
       setAutofill(cirefValue);
     }
   }, [cirefValue]);
@@ -155,8 +167,8 @@ const AutofillFieldsForVA = (props: any) => {
 
   useEffect(() => {
     // loadUser();
-    if (debouncedSearchTerm) {
-      handleAutofill();
+    if (debouncedSearchTerm === AUTOFILL_TOKEN_FROM_CAREERAI) {
+      autofillByContentScript();
     }
   }, [debouncedSearchTerm]);
 
@@ -170,7 +182,7 @@ const AutofillFieldsForVA = (props: any) => {
           onClick={() => handleAutofill()}
           disabled={resumeList.res_success ? false : true}
         >
-          Auto Fill
+          {iframeUrl ? "Proceed" : "Auto Fill"}
         </button>
       </div>
     </div>

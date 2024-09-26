@@ -44,3 +44,6 @@ export const CHROME_STOGRAGE = {
   SELECTED_RESUME_INDEX: "selectedResumeIndex",
   SELECTED_USER_INDEX: "selectedUserIndex",
 };
+
+export const AUTOFILL_TOKEN_FROM_CAREERAI = "autofill_token_from_careerai";
+export const CAREERAI_TOKEN_REF = "citokenref";

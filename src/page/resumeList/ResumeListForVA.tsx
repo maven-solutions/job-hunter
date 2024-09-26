@@ -23,6 +23,7 @@ import AutofillLoader from "./AutofillLoader";
 import "./index.css";
 import "./index2.css";
 import UserSelectList from "./UserSelectList";
+import IframeProceed from "./IframeProceed";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -166,26 +167,26 @@ const ResumeListForVA = (props: any) => {
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
-      <Height height="-10" />
-      <AddMissingLink />
+      {/* <Height height="-10" />
+      <AddMissingLink /> */}
       <UserSelectList
         selectedUserValue={selectedUserValue}
         handleSelectChanges={handleSelectChanges}
       />
 
-      {iframeUrl && (
+      {/* {iframeUrl && (
         <>
           <span
             className="ci_autofill_add_missing_sites"
             onClick={() =>
-              window.open(`${iframeUrl}&ciref=autofill_from_careerai`, "_blank")
+              window.open(`${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`, "_blank")
             }
           >
             Open In Another Tab
           </span>
           <IframError setIframeUrl={setIframeUrl} />
         </>
-      )}
+      )} */}
       <Height height="15" />
 
       <WhiteCard>
@@ -233,7 +234,8 @@ const ResumeListForVA = (props: any) => {
           </>
         )}
       </WhiteCard>
-
+      <Height height="10" />
+      {iframeUrl && <IframeProceed />}
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA
           selectedUserId={selectedUserId}
@@ -242,6 +244,7 @@ const ResumeListForVA = (props: any) => {
           content={content}
           setAutoFilling={setAutoFilling}
           setIframeUrl={setIframeUrl}
+          iframeUrl={iframeUrl}
         />
       </div>
     </Layout>
