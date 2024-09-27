@@ -39,13 +39,21 @@ const ResumeList = (props: any) => {
 
   const RenderName = (props: any) => {
     const { item } = props;
+    const role = getRoleById(
+      item?.applicant?.preferredRole,
+      item?.applicant?.customPreferredRole
+    );
+
+    const roleString = role ? `  (${role}) ` : "";
+
     if (item?.applicant?.title) {
-      return item.applicant.title;
+      return `${item?.applicant?.title} ${roleString}`;
     }
+
     if (item?.applicant?.name) {
-      return item.applicant.name;
+      return `${item?.applicant?.name} ${roleString}`;
     }
-    return "Untitled Resume";
+    return `Untitled Resume ${roleString}`;
   };
 
   const getRoleById = (roleiId, customRole) => {
