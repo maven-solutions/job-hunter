@@ -17,7 +17,6 @@ import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 import IframError from "./IframError";
 import AutofillLoader from "./AutofillLoader";
-import RenderName from "./RenderName";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -37,6 +36,17 @@ const ResumeList = (props: any) => {
   useEffect(() => {
     dispatch(getDesignations());
   }, []);
+
+  const RenderName = (props: any) => {
+    const { item } = props;
+    if (item?.applicant?.title) {
+      return item.applicant.title;
+    }
+    if (item?.applicant?.name) {
+      return item.applicant.name;
+    }
+    return "Untitled Resume";
+  };
 
   const getRoleById = (roleiId, customRole) => {
     if (roleiId) {
