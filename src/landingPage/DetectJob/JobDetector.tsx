@@ -203,18 +203,32 @@ const JobDetector = (props: any) => {
 
   useEffect(() => {
     if (window.location.href.includes("chatgpt.")) {
-      resumeGPTmainFunction(
-        setIsGenerating,
-        isGenerating,
-        authState,
-        setInfoOpen
-      );
+      if (isGenerating) {
+        setTimeout(() => {
+          resumeGPTmainFunction(
+            setIsGenerating,
+            isGenerating,
+            authState,
+            setInfoOpen
+          );
+        }, 100);
+      } else {
+        setTimeout(() => {
+          resumeGPTmainFunction(
+            setIsGenerating,
+            isGenerating,
+            authState,
+            setInfoOpen
+          );
+        }, 1500);
+      }
     }
     setInfoOpen(false);
   }, [window.location.href, isGenerating]);
   // CUSTOM HOOK TO ADD CUSTOM BUTTON ON WEBSITE
   useSimplyhiredGlassdoorNoti();
   useTrackJobsFromWebsite(dispatch, setShowPage);
+  // useGPTButton(window.location.href);
 
   return (
     <div className="content__script__section">
