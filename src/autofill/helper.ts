@@ -58,6 +58,7 @@ import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { LOCALSTORAGE } from "../utils/constant";
 import { taleo } from "./domainSpecific/taleo";
 import { isEmptyArray } from "../utils/helper";
+import { talemetry } from "./domainSpecific/talemetry";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -386,6 +387,10 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes(".taleo.")) {
       await taleo(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes(".talemetry.")) {
+      await talemetry(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
