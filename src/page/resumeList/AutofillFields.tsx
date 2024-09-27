@@ -145,6 +145,7 @@ const AutofillFields = (props: any) => {
       JSON.stringify(applicantData)
     );
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
+
     detectInputAndFillData(
       applicantData,
       startLoading,
@@ -155,10 +156,14 @@ const AutofillFields = (props: any) => {
 
   const handleAutofill = () => {
     if (iframeUrl) {
-      window.open(
-        `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
-        "_blank"
-      );
+      if (iframeUrl.includes(".greenhouse.")) {
+        window.open(
+          `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
+          "_blank"
+        );
+      } else {
+        window.open(iframeUrl, "_blank");
+      }
     } else {
       autofillByContentScript();
     }

@@ -52,11 +52,11 @@ const useWebsiteDetection = (): [boolean, boolean, boolean] => {
       }
 
       // Check for iframe issue domains and show the error page if necessary
-      if (IFRAME_ISSUE_WEBSITES.some((domain) => url.includes(domain))) {
-        setShowIcon(true);
-        setShowAutofillPage(false);
-        setShowErrorPage(true);
-      }
+      // if (IFRAME_ISSUE_WEBSITES.some((domain) => url.includes(domain))) {
+      //   setShowIcon(true);
+      //   setShowAutofillPage(false);
+      //   setShowErrorPage(true);
+      // }
     };
 
     // Execute fetchData and ensure it runs before the rest
