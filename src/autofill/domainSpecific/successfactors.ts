@@ -49,7 +49,7 @@ const uploadResume = async (applicantData) => {
     resumeInput.dispatchEvent(
       new Event("change", { bubbles: true, cancelable: false })
     );
-    await delay(5000);
+    await delay(3500);
   }
 };
 
