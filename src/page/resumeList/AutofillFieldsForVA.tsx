@@ -142,8 +142,7 @@ const AutofillFieldsForVA = (props: any) => {
     );
   };
 
-  const handleAutofill = (addMissingLink) => {
-    console.log("addMissingLink::", addMissingLink);
+  const handleAutofill = () => {
     if (iframeUrl) {
       window.open(
         `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,

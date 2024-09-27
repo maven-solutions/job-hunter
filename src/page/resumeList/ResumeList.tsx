@@ -17,6 +17,7 @@ import Spinner from "../shared/Spinner";
 import { ResumeSkleton } from "../../component/skleton/Skleton";
 import IframError from "./IframError";
 import AutofillLoader from "./AutofillLoader";
+import IframeProceed from "./IframeProceed";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -98,7 +99,7 @@ const ResumeList = (props: any) => {
       <Height height="-10" />
       <HeadingTitle title="Resume List" />
       <Height height="10" />
-      {iframeUrl && <IframError setIframeUrl={setIframeUrl} />}
+      {/* {iframeUrl && <IframError setIframeUrl={setIframeUrl} />} */}
 
       <WhiteCard>
         {!autoFilling && (
@@ -149,17 +150,22 @@ const ResumeList = (props: any) => {
                 );
               })}
             {resumeList.loading && <ResumeSkleton />}
-            <Height height="10" />
-            <AutofillFields
-              selectedResume={selectedResume}
-              content={content}
-              setAutoFilling={setAutoFilling}
-              setIframeUrl={setIframeUrl}
-            />
           </div>
         )}
         {autoFilling && <AutofillLoader />}{" "}
       </WhiteCard>
+
+      <Height height="10" />
+      {iframeUrl && <IframeProceed />}
+      <div className="ciautofill_v2_resume_autofill_button_section">
+        <AutofillFields
+          selectedResume={selectedResume}
+          content={content}
+          setAutoFilling={setAutoFilling}
+          setIframeUrl={setIframeUrl}
+          iframeUrl={iframeUrl}
+        />
+      </div>
     </Layout>
   );
 };

@@ -168,28 +168,11 @@ const ResumeListForVA = (props: any) => {
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
-      {/* <Height height="-10" />
-      <AddMissingLink /> */}
       <UserSelectList
         selectedUserValue={selectedUserValue}
         handleSelectChanges={handleSelectChanges}
       />
-
-      {/* {iframeUrl && (
-        <>
-          <span
-            className="ci_autofill_add_missing_sites"
-            onClick={() =>
-              window.open(`${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`, "_blank")
-            }
-          >
-            Open In Another Tab
-          </span>
-          <IframError setIframeUrl={setIframeUrl} />
-        </>
-      )} */}
       <Height height="15" />
-
       <WhiteCard>
         {autoFilling && <AutofillLoader />}{" "}
         {!autoFilling && (
@@ -237,7 +220,6 @@ const ResumeListForVA = (props: any) => {
       </WhiteCard>
       <Height height="15" />
       {!iframeUrl && showAddWebsite && <AddMissingLink />}
-      {/* <AddMissingLink /> */}
       {iframeUrl && <IframeProceed />}
       <div className="ciautofill_v2_resume_autofill_button_section">
         <AutofillFieldsForVA

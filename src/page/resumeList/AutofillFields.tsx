@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppSelector } from "../../store/store";
-import { LOCALSTORAGE } from "../../utils/constant";
+import {
+  AUTOFILL_TOKEN_FROM_CAREERAI,
+  CAREERAI_TOKEN_REF,
+  LOCALSTORAGE,
+} from "../../utils/constant";
+import { useDebounce } from "use-debounce";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -101,7 +106,8 @@ const extractInfo = (resumeData, applicationForm) => {
 };
 
 const AutofillFields = (props: any) => {
-  const { selectedResume, content, setAutoFilling, setIframeUrl } = props;
+  const { selectedResume, content, setAutoFilling, setIframeUrl, iframeUrl } =
+    props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -148,25 +154,52 @@ const AutofillFields = (props: any) => {
   };
 
   const handleAutofill = () => {
-    if (content) {
-      autofillByContentScript();
+    if (iframeUrl) {
+      window.open(
+        `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
+        "_blank"
+      );
     } else {
-      autofillByPopUp();
+      autofillByContentScript();
     }
   };
 
+  const [autofill, setAutofill] = useState("");
+  const currentUrl = window.location.href;
+
+  const urlObj = new URL(currentUrl);
+  // Get the 'ciref' parameter
+  let cirefValue = urlObj?.searchParams?.get(CAREERAI_TOKEN_REF);
+  useEffect(() => {
+    if (cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI) {
+      setAutofill(cirefValue);
+    }
+  }, [cirefValue]);
+
+  const [debouncedSearchTerm] = useDebounce(autofill, 3000);
+
+  useEffect(() => {
+    if (debouncedSearchTerm === AUTOFILL_TOKEN_FROM_CAREERAI) {
+      autofillByContentScript();
+    }
+  }, [debouncedSearchTerm]);
+
   return (
-    <div className="ext__autofill__fields__wrapper">
-      <div className="autofill__btn__wrapper">
-        <button
-          className={`autofill__btn ${
-            resumeList.res_success ? "" : "autofill__button__disable"
-          }`}
-          onClick={() => handleAutofill()}
-          disabled={resumeList.res_success ? false : true}
-        >
-          Auto Fill
-        </button>
+    <div className="ci_va_two_button_section">
+      <span />
+      <div className="ext__autofill__fields__wrapper">
+        <div className="autofill__btn__wrapper">
+          <button
+            className={`autofill__btn ${
+              resumeList.res_success ? "" : "autofill__button__disable"
+            }`}
+            onClick={() => handleAutofill()}
+            disabled={resumeList.res_success ? false : true}
+          >
+            {/* Auto Fill */}
+            {iframeUrl ? "Proceed" : "Auto Fill"}
+          </button>
+        </div>
       </div>
     </div>
   );
