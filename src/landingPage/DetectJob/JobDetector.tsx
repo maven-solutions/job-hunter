@@ -193,7 +193,7 @@ const JobDetector = (props: any) => {
   useEffect(() => {
     // loadUser();
     if (debouncedSearchTerm === AUTOFILL_TOKEN_FROM_CAREERAI) {
-      if (authState.authenticated.userType === "va") {
+      if (authState.ci_user.userType === "va") {
         setShowPage(SHOW_PAGE.resumeListForVAPage);
       } else {
         setShowPage(SHOW_PAGE.resumeListPage);
