@@ -144,10 +144,14 @@ const AutofillFieldsForVA = (props: any) => {
 
   const handleAutofill = () => {
     if (iframeUrl) {
-      window.open(
-        `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
-        "_blank"
-      );
+      if (iframeUrl.includes(".greenhouse.")) {
+        window.open(
+          `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
+          "_blank"
+        );
+      } else {
+        window.open(iframeUrl, "_blank");
+      }
     } else {
       autofillByContentScript();
     }
