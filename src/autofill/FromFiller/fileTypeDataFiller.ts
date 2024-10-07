@@ -52,6 +52,9 @@ export const fileTypeDataFiller = async (
   if (window.location.href.includes(".bamboohr.")) {
     return;
   }
+  if (window.location.href.includes(".myworkdayjobs.")) {
+    return;
+  }
 
   try {
     if (applicantData.pdf_url) {

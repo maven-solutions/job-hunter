@@ -1,4 +1,5 @@
 import { Applicant } from "../data";
+import { createFile } from "../FromFiller/fileTypeDataFiller";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import { clickWorkdayEducationButton } from "./myworkdayEducation";
 import { clickWorkdayWorkExperienceButton } from "./myworkdayWork";
@@ -295,6 +296,30 @@ const fillNo = () => {
   }
 };
 
+const fillResume = async (applicantData: Applicant) => {
+  let textInputField: any = document.querySelector('input[type="file"]');
+  try {
+    if (applicantData.pdf_url && textInputField) {
+      textInputField.setAttribute("ci-aria-file-uploaded", "true");
+      // Create file asynchronously
+      const designFile = await createFile(
+        applicantData.pdf_url,
+        applicantData.resume_title
+      );
+      // Set file to input field only for the first file input field found
+      const dt = new DataTransfer();
+      dt.items.add(designFile);
+      textInputField.files = dt.files;
+      // Trigger input change event
+      textInputField.dispatchEvent(
+        new Event("change", { bubbles: true, cancelable: false })
+      );
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
@@ -307,4 +332,5 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await fillisAdult(applicantData);
   await fillFieldSetDataType(applicantData);
   await deleteResume();
+  await fillResume(applicantData);
 };
