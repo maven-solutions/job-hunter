@@ -16,3 +16,32 @@ export const isEmptyArray = (array) => {
   }
   return false;
 };
+
+export const getAllinputId = () => {
+  const ids = localStorage.getItem("ci_inputid");
+  return ids;
+};
+export const setIdToLocalstorage = (id: any) => {
+  let allInputId = [];
+  const ids = localStorage.getItem("ci_inputid");
+  if (ids) {
+    const allIds = JSON.parse(ids);
+    allInputId = [...allIds, id];
+  } else {
+    allInputId[id];
+  }
+  localStorage.setItem("ci_inputid", JSON.stringify(allInputId));
+};
+
+export function sanitizeHTML(htmlString) {
+  // Remove inline styles
+  htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
+
+  // Remove all tags except 'p'
+  htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
+
+  // Remove &nbsp;
+  htmlString = htmlString.replace(/&nbsp;/g, "");
+
+  return htmlString;
+}

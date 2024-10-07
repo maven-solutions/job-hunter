@@ -255,12 +255,12 @@ export const detectInputAndFillData = async (
       launcEducation = false;
     }
 
-    if (launchWork) {
-      await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
-    }
-    if (launcEducation) {
-      await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
-    }
+    // if (launchWork) {
+    //   await clickWorkExperienceButton(tempDiv ?? tempDivForFile, applicantData);
+    // }
+    // if (launcEducation) {
+    //   await clickEducationButton(tempDiv ?? tempDivForFile, applicantData);
+    // }
 
     // for domain specific
     if (window.location.href.includes(".greenhouse.")) {
