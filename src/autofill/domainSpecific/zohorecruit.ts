@@ -1,4 +1,4 @@
-import { sanitizeHTML } from "../FromFiller/clickWorkExperienceButton";
+import { sanitizeHTML } from "../../utils/helper";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { checkIfExist, delay, handleValueChanges } from "../helper";
 

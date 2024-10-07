@@ -37,11 +37,36 @@ export function sanitizeHTML(htmlString) {
   // Remove inline styles
   htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
 
+  // Replace 'li' tags with bullet point only if there's content inside
+  htmlString = htmlString.replace(
+    /<li[^>]*>(.*?)<\/li>/gi,
+    function (match, content) {
+      // Trim content to remove leading/trailing whitespace
+      const trimmedContent = content?.trim();
+      // Only add bullet point if there's actual content
+      if (trimmedContent) {
+        return "• " + trimmedContent;
+      }
+      return "";
+    }
+  );
+
   // Remove all tags except 'p'
-  htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
+  htmlString = htmlString?.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
+
+  // Replace closing </p> tags with a newline character
+  htmlString = htmlString?.replace(/<\/p>/g, "\n");
+
+  // Remove opening <p> tags
+  htmlString = htmlString?.replace(/<p[^>]*>/g, "");
 
   // Remove &nbsp;
-  htmlString = htmlString.replace(/&nbsp;/g, "");
+  htmlString = htmlString?.replace(/&nbsp;/g, "");
+
+  // Remove extra spaces and extra newlines
+  htmlString = htmlString?.replace(/\s{2,}/g, " "); // Replace multiple spaces with a single space
+  htmlString = htmlString?.replace(/\n{2,}/g, "\n"); // Replace multiple newlines with a single newline
+  htmlString = htmlString?.trim(); // Trim leading and trailing spaces or newlines
 
   return htmlString;
 }

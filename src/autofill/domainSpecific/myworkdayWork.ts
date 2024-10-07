@@ -1,20 +1,8 @@
+import { sanitizeHTML } from "../../utils/helper";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { getMonthFromDate, getYearFromDate } from "../FromFiller/helper";
 import { Applicant } from "../data";
 import { checkIfExist, handleValueChanges } from "../helper";
-
-export function sanitizeHTML(htmlString) {
-  // Remove inline styles
-  htmlString = htmlString.replace(/<[^>]+? style="[^"]*?"/gi, "");
-
-  // Remove all tags except 'p'
-  htmlString = htmlString.replace(/<(\/)?(?!p\b)\w+[^>]*?>/g, "");
-
-  // Remove &nbsp;
-  htmlString = htmlString.replace(/&nbsp;/g, "");
-
-  return htmlString;
-}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
