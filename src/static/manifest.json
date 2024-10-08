@@ -1,9 +1,9 @@
 {
-  "name": "CareerAI - Search, Track and Autofill Jobs",
-  "description": "Streamline your job hunt with CareerAI: Easily search and track jobs, autofill applications, and create resumes and cover letters.",
-  "version": "1.1.1",
+  "name": "Fill Data In Immersity Ai",
+  "description": "Fill Data In Immersity Ai",
+  "version": "1.0",
   "manifest_version": 3,
-  "key": "3a6f42e646cbcbb2eb917a35d6aae1b0033b9b5014e967778b9005ee0546903d",
+  "key": "b52c75123406063a2abf0a89cc0c554a182388cb5545d37c6da9313aa539d93b",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
@@ -12,7 +12,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "CareerAI - Search, Track and Autofill Jobs",
+    "default_title": "Ai Filler",
     "default_icon": "icon.png"
   },
   "permissions": ["storage"],

@@ -23,22 +23,7 @@ const Logo = (props: any) => {
   };
 
   const handlePage = () => {
-    loadUser();
-    if (authState.authenticated) {
-      // if(authState?.ci_user?.organizations[0]?.role?.id === 3)
-
-      if (authState.ci_user.userType === "va") {
-        setShowPage(SHOW_PAGE.resumeListForVAPage);
-      } else if (showAutofillPage) {
-        setShowPage(SHOW_PAGE.resumeListPage);
-      } else if (showErrorPage) {
-        setShowPage(SHOW_PAGE.ErrorPage);
-      } else {
-        setShowPage(SHOW_PAGE.summaryPage);
-      }
-    } else {
-      setShowPage(SHOW_PAGE.loginPage);
-    }
+    setShowPage(SHOW_PAGE.resumeListPage);
   };
   return (
     <div
