@@ -4,9 +4,11 @@ export const mailinator = async () => {
   const input: any = document.getElementById("inbox_field");
   if (input) {
     chrome.storage.local.get(["aiemail"]).then((result) => {
-      const data = result.aiemail;
-      input.value = data;
-      handleValueChanges(data);
+      const data = result?.aiemail;
+      if (data) {
+        input.value = data;
+        handleValueChanges(data);
+      }
     });
   }
   await delay(1000);

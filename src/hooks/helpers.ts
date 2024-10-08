@@ -1,4 +1,4 @@
-export const AUTOFILL_WEBSITES: string[] = ["immersity"];
+export const AUTOFILL_WEBSITES: string[] = ["immersity", "mailinator"];
 
 export const JOB_SAVING_WEBSITES = [
   "linkedin.",
