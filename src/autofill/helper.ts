@@ -1,7 +1,5 @@
 import { buttonFilder } from "./FromFiller/buttonFinder";
 import { checkboxTypeDataFiller } from "./FromFiller/checkboxFiller";
-import { clickEducationButton } from "./FromFiller/clickEducationButton";
-import { clickWorkExperienceButton } from "./FromFiller/clickWorkExperienceButton";
 import { customSelectFiller } from "./FromFiller/customSelectFiller";
 import { customSelectFiller2 } from "./FromFiller/customSelectFiller2";
 import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
@@ -52,12 +50,9 @@ import { silkroad } from "./domainSpecific/silkroad";
 import { apploxo } from "./domainSpecific/apploxo";
 import { myomo } from "./domainSpecific/myomo";
 import { sephora } from "./domainSpecific/sephora";
-import { passwordTypeDataFiller } from "./FromFiller/passwordTypeDataFiller";
 import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
-import { LOCALSTORAGE } from "../utils/constant";
 import { taleo } from "./domainSpecific/taleo";
-import { isEmptyArray } from "../utils/helper";
 import { talemetry } from "./domainSpecific/talemetry";
 
 export const setLocalStorageData = (key: any, value: any): void => {
@@ -164,7 +159,6 @@ export const detectInputAndFillData = async (
 
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -219,7 +213,7 @@ export const detectInputAndFillData = async (
     }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);

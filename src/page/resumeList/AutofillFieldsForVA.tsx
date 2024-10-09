@@ -37,6 +37,9 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     education,
     expectedSalaryRange,
     willingToTravel,
+    password,
+    address,
+    hispanicOrLatino,
   } = applicationForm;
 
   // console.log("education::", education);
@@ -45,7 +48,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
 
   const fullName = firstName + " " + lastName;
 
-  const address = `${city?.label}, ${state?.label}`;
+  // const address = `${city?.label}, ${state?.label}`;
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
@@ -55,7 +58,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
 
-  const password = generatePassword(selectedUserId);
+  // const password = generatePassword(selectedUserId);
   const higher_education = getHighestEducation(education);
 
   return {
@@ -87,7 +90,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     disability_status: disabilityStatusForExtension,
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
-    hispanic_or_latino: false,
+    hispanic_or_latino: hispanicOrLatino?.value ?? false,
     higher_education: higher_education,
     phone_type: phoneType || "mobile",
     salary: expectedSalaryRange,
