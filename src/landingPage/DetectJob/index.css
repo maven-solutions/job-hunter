@@ -667,3 +667,8 @@ button.generate-resume-button {
   display: flex;
   gap: 10px;
 }
+
+textarea[data-automation-id="description"] {
+  /* Your styles here */
+  height: 250px !important;
+}
