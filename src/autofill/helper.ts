@@ -122,6 +122,9 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes("careers-berrydunn.icims.com")) {
       iframe = iframeList[0];
     }
+    if (window.location.href.includes("careers-eimagine.icims")) {
+      iframe = iframeList[1];
+    }
   }
   if (iframeList.length > 0) {
     for (const iframe of iframeList) {
