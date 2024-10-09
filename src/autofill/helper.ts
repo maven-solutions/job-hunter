@@ -50,6 +50,7 @@ import { silkroad } from "./domainSpecific/silkroad";
 import { apploxo } from "./domainSpecific/apploxo";
 import { myomo } from "./domainSpecific/myomo";
 import { sephora } from "./domainSpecific/sephora";
+import { passwordTypeDataFiller } from "./FromFiller/passwordTypeDataFiller";
 import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { taleo } from "./domainSpecific/taleo";
@@ -159,6 +160,7 @@ export const detectInputAndFillData = async (
 
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -213,7 +215,7 @@ export const detectInputAndFillData = async (
     }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-
+    passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);

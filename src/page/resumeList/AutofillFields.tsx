@@ -9,6 +9,7 @@ import {
   LOCALSTORAGE,
 } from "../../utils/constant";
 import { useDebounce } from "use-debounce";
+import { getHighestEducation } from "./helper";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -36,37 +37,21 @@ const extractInfo = (resumeData, applicationForm) => {
     education,
     expectedSalaryRange,
     willingToTravel,
+    address,
+    hispanicOrLatino,
   } = applicationForm;
-
-  // console.log("applicationForm::", applicationForm);
 
   // Extracting full name, first name, and last name
 
   const fullName = firstName + " " + lastName;
-
-  const address = `${city?.label}, ${state?.label}`;
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
     (sec) => sec.section === "employment-history"
   );
 
-  const isAdult = (dateOfBirth: string): boolean => {
-    if (!dateOfBirth) {
-      return false;
-    }
-    const dob: Date = new Date(dateOfBirth);
-    const today: Date = new Date();
-    const age: number = today.getFullYear() - dob.getFullYear();
-    const monthDiff: number = today.getMonth() - dob.getMonth();
+  const higher_education = getHighestEducation(education);
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-      return age - 1 >= 18;
-    }
-    return age >= 18;
-  };
-
-  const isOver18: boolean = isAdult(dob);
   // Returning the extracted information
   return {
     resume_title: title ?? applicantName,
@@ -97,8 +82,9 @@ const extractInfo = (resumeData, applicationForm) => {
     disability_status: disabilityStatusForExtension,
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
-    hispanic_or_latino: false,
-    phone_type: phoneType,
+    higher_education: higher_education,
+    hispanic_or_latino: hispanicOrLatino?.value ?? false,
+    phone_type: phoneType || "mobile",
     salary: expectedSalaryRange,
     sponsorship_required: false,
     willingToTravel,
@@ -119,18 +105,6 @@ const AutofillFields = (props: any) => {
 
   const stopLoading = () => {
     setAutoFilling(false);
-  };
-  const autofillByPopUp = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const activeTab = tabs[0];
-      chrome.tabs.sendMessage(activeTab.id, {
-        message: "updateFields",
-        data: extractInfo(
-          resumeList.applicantData[selectedResume].applicant,
-          resumeList.applicantData[selectedResume].applicationForm
-        ),
-      });
-    });
   };
 
   const autofillByContentScript = () => {

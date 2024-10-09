@@ -42,21 +42,14 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     hispanicOrLatino,
   } = applicationForm;
 
-  // console.log("education::", education);
-
   // Extracting full name, first name, and last name
 
   const fullName = firstName + " " + lastName;
-
-  // const address = `${city?.label}, ${state?.label}`;
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
     (sec) => sec.section === "employment-history"
   );
-
-  const isOver18: boolean = isAdult(dob);
-  // Returning the extracted information
 
   // const password = generatePassword(selectedUserId);
   const higher_education = getHighestEducation(education);

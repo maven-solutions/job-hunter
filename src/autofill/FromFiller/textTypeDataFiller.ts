@@ -7,6 +7,11 @@ import {
 } from "../helper";
 import { fieldNames } from "./fieldsname";
 
+const getAllinputId = () => {
+  const ids = localStorage.getItem("ci_inputid");
+  return ids;
+};
+
 export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   // Extract input fields of type "text"
   let address = false;
@@ -28,7 +33,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.first_name) ||
         checkIfExist(attribute.value, fieldNames.first_name)
       ) {
-        input.value = applicantData.first_name;
+        input.value = applicantData?.first_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -52,7 +57,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.last_name) ||
         checkIfExist(attribute.value, fieldNames.last_name)
       ) {
-        input.value = applicantData.last_name;
+        input.value = applicantData?.last_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -64,7 +69,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.full_name) ||
         checkIfExist(attribute.value, fieldNames.full_name)
       ) {
-        input.value = applicantData.full_name;
+        input.value = applicantData?.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -76,7 +81,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.name) ||
         checkIfExist(attribute.value, fieldNames.name)
       ) {
-        input.value = applicantData.full_name;
+        input.value = applicantData?.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -85,7 +90,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       }
 
       if (fromatStirngInLowerCase(labelText) === "name") {
-        input.value = applicantData.full_name;
+        input.value = applicantData?.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -97,7 +102,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         fromatStirngInLowerCase(labelText) ===
         fromatStirngInLowerCase("Your Name:")
       ) {
-        input.value = applicantData.full_name;
+        input.value = applicantData?.full_name;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -108,7 +113,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, ["username"]) ||
         checkIfExist(attribute.value, ["username"])
       ) {
-        input.value = applicantData.email_address;
+        input.value = applicantData?.email_address;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -120,7 +125,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.email_address) ||
         checkIfExist(attribute.value, fieldNames.email_address)
       ) {
-        input.value = applicantData.email_address;
+        input.value = applicantData?.email_address;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -132,7 +137,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.zip_code) ||
         checkIfExist(attribute.value, fieldNames.zip_code)
       ) {
-        input.value = applicantData.zip_code;
+        input.value = applicantData?.zip_code;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -145,7 +150,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
           checkIfExist(attribute.value, fieldNames.phone_number_text)) &&
         !phone
       ) {
-        input.value = applicantData.phone_number;
+        input.value = applicantData?.phone_number;
         phone = true;
         input.focus(); // Autofocus on the input field
         input.click();
@@ -158,7 +163,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.city) ||
         checkIfExist(attribute.value, fieldNames.city)
       ) {
-        input.value = applicantData.city;
+        input.value = applicantData?.city;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -169,22 +174,27 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       if (
         (checkIfExist(labelText, fieldNames.address) ||
           checkIfExist(attribute.value, fieldNames.address)) &&
-        !address
+        !address &&
+        input.value === ""
       ) {
-        input.value = applicantData.address;
-        input.focus(); // Autofocus on the input field
-        input.click();
-        input.select();
-        handleValueChanges(input);
-        address = true;
-        return true; // Stop iterating
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          input.value = applicantData?.address;
+          input.focus(); // Autofocus on the input field
+          input.click();
+          input.select();
+          handleValueChanges(input);
+          address = true;
+          return true; // Stop iterating
+        }
       }
 
       if (
         checkIfExist(labelText, fieldNames.country) ||
         checkIfExist(attribute.value, fieldNames.country)
       ) {
-        input.value = applicantData.country;
+        input.value = applicantData?.country;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -197,7 +207,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       //   checkIfExist(labelText, fieldNames.salary) ||
       //   checkIfExist(attribute.value, fieldNames.salary)
       // ) {
-      //   input.value = applicantData.salary;
+      //   input.value = applicantData?.salary;
       //   input.focus(); // Autofocus on the input field
       //   input.click();
       //   input.select();
@@ -210,7 +220,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.portfolio) ||
         checkIfExist(attribute.value, fieldNames.portfolio)
       ) {
-        input.value = applicantData.portfolio_url;
+        input.value = applicantData?.portfolio_url;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -223,7 +233,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.github) ||
         checkIfExist(attribute.value, fieldNames.github)
       ) {
-        input.value = applicantData.github_url;
+        input.value = applicantData?.github_url;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -235,7 +245,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.state) ||
         checkIfExist(attribute.value, fieldNames.state)
       ) {
-        input.value = applicantData.state;
+        input.value = applicantData?.state;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -247,7 +257,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         checkIfExist(labelText, fieldNames.country) ||
         checkIfExist(attribute.value, fieldNames.country)
       ) {
-        input.value = applicantData.country;
+        input.value = applicantData?.country;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -258,9 +268,9 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       if (
         (checkIfExist(labelText, fieldNames.linkedin_url) ||
           checkIfExist(attribute.value, fieldNames.linkedin_url)) &&
-        applicantData.linkedin_url
+        applicantData?.linkedin_url
       ) {
-        input.value = applicantData.linkedin_url;
+        input.value = applicantData?.linkedin_url;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
@@ -269,7 +279,7 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
       }
       // for workdays
       if (checkNationForWorkDays(attribute.value, fieldNames.workday_country)) {
-        input.value = applicantData.country;
+        input.value = applicantData?.country;
         input.focus(); // Autofocus on the input field
         input.click();
         input.select();
