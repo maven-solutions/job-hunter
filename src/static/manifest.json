@@ -1,9 +1,8 @@
 {
   "name": "CareerAI - Search, Track and Autofill Jobs",
   "description": "Streamline your job hunt with CareerAI: Easily search and track jobs, autofill applications, and create resumes and cover letters.",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "manifest_version": 3,
-  "key": "3a6f42e646cbcbb2eb917a35d6aae1b0033b9b5014e967778b9005ee0546903d",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
@@ -16,8 +15,8 @@
     "default_icon": "icon.png"
   },
   "permissions": ["storage"],
-  "homepage_url": "https://resumebuilder.joinswiftly.com",
-  "host_permissions": ["https://resumebuilder.joinswiftly.com/*"],
+  "homepage_url": "https://app.careerai.io",
+  "host_permissions": ["https://app.careerai.io/*"],
 
   "background": {
     "service_worker": "background.js"
