@@ -37,7 +37,7 @@ const deleteAllHistory = async () => {
   if (isEmptyArray(deleteButtons)) return;
   for await (const deleteButton of deleteButtons) {
     deleteButton.click();
-    await delay(1500);
+    await delay(1000);
     const buttons = document?.querySelectorAll("button");
     if (isEmptyArray(buttons)) return;
     // Filter buttons to find the ones whose textContent is exactly "Yes"
@@ -45,9 +45,9 @@ const deleteAllHistory = async () => {
       (button) => button?.textContent?.trim()?.toLowerCase() === "yes"
     );
     yesButton?.click();
-    await delay(1500);
+    await delay(1000);
   }
-  await delay(1500);
+  await delay(1000);
 };
 
 const getWorkButton = () => {
@@ -57,6 +57,8 @@ const getWorkButton = () => {
   const workButton = Array.from(buttons)?.find((button) =>
     button?.textContent?.trim()?.toLowerCase().includes("work history")
   );
+  console.log("work button called");
+
   return workButton;
 };
 
@@ -72,8 +74,10 @@ const addWorkExperience = async (applicantData: Applicant) => {
       index,
       element,
     ] of applicantData.employment_history.entries()) {
-      workButton.click();
-      await delay(3500);
+      const workButton = getWorkButton();
+      if (!workButton) return;
+      workButton?.click();
+      await delay(2000);
       await talemetryWorkExperienceDatafiller(
         workButton,
         applicantData,

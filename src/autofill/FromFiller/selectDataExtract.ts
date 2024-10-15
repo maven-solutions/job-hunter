@@ -10,7 +10,7 @@ import { fieldNames } from "./fieldsname";
 export const countryHandler = (option, applicantData, country) => {
   if (
     fromatStirngInLowerCase(option?.text) ===
-      fromatStirngInLowerCase(applicantData.country) &&
+      fromatStirngInLowerCase(applicantData?.country) &&
     !country
   ) {
     return true;
@@ -18,12 +18,14 @@ export const countryHandler = (option, applicantData, country) => {
   if (
     fromatStirngInLowerCase(option?.text) ===
       fromatStirngInLowerCase("america") &&
+    fromatStirngInLowerCase(applicantData?.country)?.includes("unitedstates") &&
     !country
   ) {
     return true;
   }
   if (
     fromatStirngInLowerCase(option?.text) === fromatStirngInLowerCase("usa") &&
+    fromatStirngInLowerCase(applicantData?.country)?.includes("unitedstates") &&
     !country
   ) {
     return true;
@@ -31,6 +33,7 @@ export const countryHandler = (option, applicantData, country) => {
   if (
     fromatStirngInLowerCase(option?.text) ===
       fromatStirngInLowerCase("unitedstates") &&
+    fromatStirngInLowerCase(applicantData?.country)?.includes("unitedstates") &&
     !country
   ) {
     return true;
@@ -38,6 +41,7 @@ export const countryHandler = (option, applicantData, country) => {
   if (
     fromatStirngInLowerCase(option?.text) ===
       fromatStirngInLowerCase("unitedstatesofamerica") &&
+    fromatStirngInLowerCase(applicantData?.country)?.includes("unitedstates") &&
     !country
   ) {
     return true;
