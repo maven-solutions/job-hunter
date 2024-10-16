@@ -216,6 +216,12 @@ export const detectInputAndFillData = async (
       stopLoading();
       return;
     }
+
+    if (window.location.href.includes(".ultipro.")) {
+      await ultipro(tempDiv ?? tempDivForFile, applicantData);
+      stopLoading();
+      return;
+    }
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -314,9 +320,6 @@ export const detectInputAndFillData = async (
       await oraclecloud(tempDiv ?? tempDivForFile, applicantData);
     }
 
-    if (window.location.href.includes(".ultipro.")) {
-      await ultipro(tempDiv ?? tempDivForFile, applicantData);
-    }
     if (window.location.href.includes(".workable.")) {
       await workable(tempDiv ?? tempDivForFile, applicantData);
     }

@@ -1,17 +1,30 @@
 import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
-import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { createFile } from "../FromFiller/fileTypeDataFiller";
+import { countryHandler } from "../FromFiller/selectDataExtract";
+import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
-const fillAdress = (applicantData: Applicant) => {
+const fillAdress = async (applicantData: Applicant) => {
   const input: HTMLInputElement = document.querySelector("#AddressLine1");
   if (!input) {
     return;
   }
   input.value = applicantData.address;
   handleValueChanges(input);
+  await delay(200);
 };
 
-const ethnicStatus = (applicantData: Applicant) => {
+const fillCity = async (applicantData: Applicant) => {
+  const input: HTMLInputElement = document.querySelector("#City");
+  if (!input) {
+    return;
+  }
+  input.value = applicantData.address;
+  handleValueChanges(input);
+  await delay(200);
+};
+
+const ethnicStatus = async (applicantData: Applicant) => {
   const select: HTMLSelectElement = document.querySelector("#HispanicOrigin");
   if (!select) {
     return;
@@ -39,9 +52,61 @@ const ethnicStatus = (applicantData: Applicant) => {
       return;
     }
   });
+
+  await delay(200);
 };
 
-const veteranStatus = (applicantData: Applicant) => {
+const fillGender = async (applicantData: Applicant) => {
+  const select: HTMLSelectElement = document.querySelector("#Gender");
+  if (!select) {
+    return;
+  }
+  // for veteran
+  Array.from(select.options).find((option: any) => {
+    //for yes
+    if (
+      fromatStirngInLowerCase(option?.text)?.includes(
+        fromatStirngInLowerCase(applicantData.gender)
+      ) ||
+      fromatStirngInLowerCase(applicantData.gender)?.includes(
+        fromatStirngInLowerCase(option?.text)
+      )
+    ) {
+      option.selected = true;
+      handleValueChanges(select);
+      return;
+    }
+  });
+
+  await delay(200);
+};
+
+const fillRace = async (applicantData: Applicant) => {
+  const select: HTMLSelectElement = document.querySelector("#EthnicOrigin");
+  if (!select) {
+    return;
+  }
+  // for veteran
+  Array.from(select.options).find((option: any) => {
+    //for yes
+    if (
+      fromatStirngInLowerCase(option?.text)?.includes(
+        fromatStirngInLowerCase(applicantData.race)
+      ) ||
+      fromatStirngInLowerCase(applicantData.race)?.includes(
+        fromatStirngInLowerCase(option?.text)
+      )
+    ) {
+      option.selected = true;
+      handleValueChanges(select);
+      return;
+    }
+  });
+
+  await delay(200);
+};
+
+const veteranStatus = async (applicantData: Applicant) => {
   const select: HTMLSelectElement = document.querySelector(
     "#USFederalContractor"
   );
@@ -72,9 +137,11 @@ const veteranStatus = (applicantData: Applicant) => {
       return;
     }
   });
+
+  await delay(200);
 };
 
-const fillCheckBox = (applicantData: Applicant) => {
+const fillCheckBox = async (applicantData: Applicant) => {
   const allLabel: NodeListOf<HTMLLabelElement> = document.querySelectorAll(
     'label[data-automation="question-title"]'
   );
@@ -160,9 +227,10 @@ const fillCheckBox = (applicantData: Applicant) => {
       }
     }
   }
+  await delay(200);
 };
 
-const fillDisabilityStatus = (applicantData: Applicant) => {
+const fillDisabilityStatus = async (applicantData: Applicant) => {
   const disabilityLabel: HTMLLabelElement = document.querySelector(
     'label[data-automation="disability-status-question-label"]'
   );
@@ -195,9 +263,10 @@ const fillDisabilityStatus = (applicantData: Applicant) => {
       return;
     }
   }
+  await delay(200);
 };
 
-const fillHigherEducation = (applicantData: Applicant) => {
+const fillHigherEducation = async (applicantData: Applicant) => {
   const allhigherEducationLabel: NodeListOf<HTMLSpanElement> =
     document.querySelectorAll(".radio-text");
   if (!allhigherEducationLabel || allhigherEducationLabel.length === 0) {
@@ -216,9 +285,10 @@ const fillHigherEducation = (applicantData: Applicant) => {
       handleValueChanges(label);
     }
   }
+  await delay(200);
 };
 
-const fillRadioButton = (applicantData: Applicant) => {
+const fillRadioButton = async (applicantData: Applicant) => {
   const allLabels: NodeListOf<HTMLLabelElement> =
     document.querySelectorAll("label");
 
@@ -304,13 +374,104 @@ const fillRadioButton = (applicantData: Applicant) => {
       }
     }
   }
+  await delay(200);
 };
+
+const fileFiller = async (applicantData: Applicant) => {
+  let textInputField: any = document.querySelector('input[type="file"]');
+
+  try {
+    if (applicantData.pdf_url) {
+      textInputField.setAttribute("ci-aria-file-uploaded", "true");
+      // Create file asynchronously
+      const designFile = await createFile(
+        applicantData.pdf_url,
+        applicantData.resume_title
+      );
+      // Set file to input field only for the first file input field found
+      const dt = new DataTransfer();
+      dt.items.add(designFile);
+      textInputField.files = dt.files;
+      // Trigger input change event
+      textInputField.dispatchEvent(
+        new Event("change", { bubbles: true, cancelable: false })
+      );
+      await delay(6000);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+const fillCountry = async (applicantData: Applicant) => {
+  const select: HTMLSelectElement = document.querySelector("#Country");
+  if (!select) {
+    return;
+  }
+  let country = false;
+  Array.from(select.options).find((option: any) => {
+    if (countryHandler(option, applicantData, country)) {
+      option.selected = true;
+      handleValueChanges(select);
+      // handleValueChanges(option);
+      country = true;
+      return true;
+    }
+  });
+
+  await delay(500);
+};
+
+const fillState = async (applicantData: Applicant) => {
+  const select: HTMLSelectElement = document.querySelector("#State");
+  if (!select) {
+    return;
+  }
+  // filling state data
+  Array.from(select.options).find((option: any) => {
+    if (
+      fromatStirngInLowerCase(option?.text) ===
+      fromatStirngInLowerCase(applicantData.state)
+    ) {
+      option.selected = true;
+      handleValueChanges(select);
+
+      return true;
+    }
+  });
+
+  await delay(200);
+};
+
+const fillZipcode = async (applicantData: Applicant) => {
+  const input: HTMLInputElement = document.querySelector("#PostalCode");
+  if (!input) {
+    return;
+  }
+  input.value = String(applicantData.zip_code);
+  handleValueChanges(input);
+  await delay(200);
+};
+
 export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
-  fillAdress(applicantData);
-  ethnicStatus(applicantData);
-  fillCheckBox(applicantData);
-  fillDisabilityStatus(applicantData);
-  veteranStatus(applicantData);
-  fillHigherEducation(applicantData);
-  fillRadioButton(applicantData);
+  await fileFiller(applicantData);
+  await fillCountry(applicantData);
+  await fillAdress(applicantData);
+  await fillCity(applicantData);
+  await fillState(applicantData);
+  await fillZipcode(applicantData);
+
+  // us work auth and visa check
+  await fillCheckBox(applicantData);
+
+  await ethnicStatus(applicantData);
+  //
+  await fillGender(applicantData);
+  await fillRace(applicantData);
+
+  await veteranStatus(applicantData);
+
+  await fillDisabilityStatus(applicantData);
+  await fillHigherEducation(applicantData);
+  await fillRadioButton(applicantData);
 };
