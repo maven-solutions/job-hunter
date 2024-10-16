@@ -3,6 +3,7 @@ import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
 import { countryHandler } from "../FromFiller/selectDataExtract";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { UltiworkExperienceDatafiller } from "./helper/helper.ultipro";
 
 const fillAdress = async (applicantData: Applicant) => {
   const input: HTMLInputElement = document.querySelector("#AddressLine1");
@@ -474,4 +475,7 @@ export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
   await fillDisabilityStatus(applicantData);
   await fillHigherEducation(applicantData);
   await fillRadioButton(applicantData);
+
+  await UltiworkExperienceDatafiller(applicantData);
+  console.log("called");
 };

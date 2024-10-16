@@ -217,7 +217,11 @@ export const detectInputAndFillData = async (
       return;
     }
 
-    if (window.location.href.includes(".ultipro.")) {
+    if (
+      window.location.href.includes(".ultipro.") &&
+      !window.location.href.toLocaleLowerCase().includes("signin") &&
+      !window.location.href.toLocaleLowerCase().includes("register")
+    ) {
       await ultipro(tempDiv ?? tempDivForFile, applicantData);
       stopLoading();
       return;
