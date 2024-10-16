@@ -232,6 +232,7 @@ export const talemetryWorkExperienceDatafiller = async (
         setIdToLocalstorage(id);
         input.focus(); // Autofocus on the input field
         const cleanedHtml = sanitizeHTML(data?.description ?? "");
+        await delay(300);
         input.value = cleanedHtml;
         await delay(1000);
         handleValueChanges(input);
