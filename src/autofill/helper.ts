@@ -110,7 +110,7 @@ export const detectInputAndFillData = async (
   setIframeUrl?: any
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
-  console.log("iframeList::", iframeList);
+  // console.log("iframeList::", iframeList);
   let iframe: any = "";
 
   // for icims  = [0]
@@ -159,7 +159,7 @@ export const detectInputAndFillData = async (
     const tempDivForFile = iframeDocument.querySelector("body");
     // console.log("tempDivForFile::", tempDivForFile);
 
-    console.log("iframe::");
+    // console.log("iframe::");
 
     buttonFilder();
     textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -184,7 +184,7 @@ export const detectInputAndFillData = async (
     // console.log("ended::");
   } else {
     startLoading();
-    console.log("no-iframe::");
+    // console.log("no-iframe::");
     let launchWork = true;
     let launcEducation = true;
     let tempDiv: any = document.querySelector("form");
