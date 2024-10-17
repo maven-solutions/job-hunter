@@ -1,6 +1,11 @@
 import { isEmptyArray, sanitizeHTML } from "../../../utils/helper";
 import { Applicant } from "../../data";
-import { delay, handleValueChanges } from "../../helper";
+import { getMonthShortForm, getYearFromDate } from "../../FromFiller/helper";
+import {
+  delay,
+  fromatStirngInLowerCase,
+  handleValueChanges,
+} from "../../helper";
 
 const deletePreviousWorkExpereince = async () => {
   const allDeleteButton: any = document.querySelectorAll(
@@ -113,9 +118,62 @@ const fillDescription = async (applicantData) => {
         input.focus(); // Autofocus on the input field
         input.click();
         input.value = cleanedHtml;
-
         // Delay to simulate any asynchronous UI updates
         await delay(200);
+      }
+    }
+  }
+};
+
+const fillDate = async (applicantData) => {
+  const AllfromDate: any = document.querySelectorAll(
+    'label[data-i18n="Model.WorkExperience.FromMonth.Label"]'
+  );
+
+  const AllToDate = document.querySelectorAll(
+    'label[data-i18n="Model.WorkExperience.ToMonth.Label"]'
+  );
+  await delay(500);
+  if (
+    applicantData.employment_history &&
+    applicantData.employment_history.length > 0
+  ) {
+    for (const [index, data] of applicantData.employment_history.entries()) {
+      if (!isEmptyArray(AllfromDate)) {
+        const fromDateLabel = AllfromDate[index];
+        const parentOfAll = fromDateLabel?.parentElement;
+        const yearInput = parentOfAll?.querySelector("input");
+        yearInput.value = getYearFromDate(data?.startDate);
+        yearInput.focus(); // Autofocus on the input field
+        yearInput.click();
+        const monthSelect = parentOfAll?.querySelector("select");
+        const month = getMonthShortForm(data?.startDate);
+        Array.from(monthSelect.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+            fromatStirngInLowerCase(month)
+          ) {
+            option.selected = true;
+          }
+        });
+      }
+      if (!isEmptyArray(AllToDate)) {
+        const toDateLabel = AllToDate[index];
+        const patentOfToLabel = toDateLabel?.parentElement;
+        const toYearInput = patentOfToLabel?.querySelector("input");
+        toYearInput.value = getYearFromDate(data?.endDate);
+        toYearInput.focus(); // Autofocus on the input field
+        toYearInput.click();
+        const toMonthSelect = patentOfToLabel?.querySelector("select");
+        const tomonth = getMonthShortForm(data?.endDate);
+        Array.from(toMonthSelect.options).find((option: any) => {
+          if (
+            fromatStirngInLowerCase(option?.text) ===
+            fromatStirngInLowerCase(tomonth)
+          ) {
+            option.selected = true;
+          }
+        });
       }
     }
   }
@@ -130,4 +188,5 @@ export const UltiworkExperienceDatafiller = async (
   await fillCompany(applicantData);
   await fillLocation(applicantData);
   await fillDescription(applicantData);
+  await fillDate(applicantData);
 };

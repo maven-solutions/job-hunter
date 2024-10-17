@@ -23,3 +23,35 @@ export const formatDateInDDMMYY = (inputDate: string): string => {
     return "";
   }
 };
+
+export function getMonthShortForm(
+  dateString: string | null | undefined
+): string {
+  if (!dateString) {
+    return ""; // Return empty string if input is null, undefined or empty
+  }
+
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    return ""; // Return empty string if the date is invalid
+  }
+
+  const monthShortNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const monthIndex = date.getUTCMonth(); // Get the month index (0-11)
+
+  return monthShortNames[monthIndex];
+}
