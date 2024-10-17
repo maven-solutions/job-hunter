@@ -51,6 +51,8 @@ const fillJobtitle = async (applicantData) => {
         input.value = data.jobTitle ?? "";
         input.focus(); // Autofocus on the input field
         input.click();
+        handleValueChanges(input);
+
         await delay(200);
       }
     }
@@ -69,6 +71,8 @@ const fillCompany = async (applicantData) => {
         input.value = data.employeer ?? "";
         input.focus(); // Autofocus on the input field
         input.click();
+        handleValueChanges(input);
+
         await delay(200);
       }
     }
@@ -92,6 +96,8 @@ const fillLocation = async (applicantData) => {
         input.value = data?.city?.label ?? "";
         input.focus(); // Autofocus on the input field
         input.click();
+        handleValueChanges(input);
+
         // Add a delay to ensure the UI reacts accordingly
         await delay(200);
       }
@@ -118,6 +124,7 @@ const fillDescription = async (applicantData) => {
         input.focus(); // Autofocus on the input field
         input.click();
         input.value = cleanedHtml;
+        handleValueChanges(input);
         // Delay to simulate any asynchronous UI updates
         await delay(200);
       }
@@ -144,6 +151,7 @@ const fillDate = async (applicantData) => {
         const parentOfAll = fromDateLabel?.parentElement;
         const yearInput = parentOfAll?.querySelector("input");
         yearInput.value = getYearFromDate(data?.startDate);
+        handleValueChanges(yearInput);
         yearInput.focus(); // Autofocus on the input field
         yearInput.click();
         const monthSelect = parentOfAll?.querySelector("select");
@@ -154,6 +162,21 @@ const fillDate = async (applicantData) => {
             fromatStirngInLowerCase(month)
           ) {
             option.selected = true;
+            monthSelect.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            monthSelect.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            monthSelect.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            monthSelect.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            monthSelect.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
           }
         });
       }
@@ -162,6 +185,7 @@ const fillDate = async (applicantData) => {
         const patentOfToLabel = toDateLabel?.parentElement;
         const toYearInput = patentOfToLabel?.querySelector("input");
         toYearInput.value = getYearFromDate(data?.endDate);
+        handleValueChanges(toYearInput);
         toYearInput.focus(); // Autofocus on the input field
         toYearInput.click();
         const toMonthSelect = patentOfToLabel?.querySelector("select");
@@ -172,6 +196,21 @@ const fillDate = async (applicantData) => {
             fromatStirngInLowerCase(tomonth)
           ) {
             option.selected = true;
+            toMonthSelect.dispatchEvent(
+              new Event("change", { bubbles: true, cancelable: false })
+            );
+            toMonthSelect.dispatchEvent(
+              new Event("input", { bubbles: true, cancelable: false })
+            );
+            toMonthSelect.dispatchEvent(
+              new Event("focus", { bubbles: true, cancelable: false })
+            );
+            toMonthSelect.dispatchEvent(
+              new Event("click", { bubbles: true, cancelable: false })
+            );
+            toMonthSelect.dispatchEvent(
+              new Event("blur", { bubbles: true, cancelable: false })
+            );
           }
         });
       }
