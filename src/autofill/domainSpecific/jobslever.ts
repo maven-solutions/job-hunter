@@ -1,3 +1,4 @@
+import { saveJobLeverData } from "../../dataExtractor/jobLever.data";
 import { Applicant } from "../data";
 import {
   checkIfExist,
@@ -225,11 +226,12 @@ const fillSelectData = async (applicantData: Applicant) => {
     }
   }
 };
-export const jobsLever = (tempDiv: any, applicantData: Applicant) => {
+export const jobsLever = async (tempDiv: any, applicantData: Applicant) => {
   fillName(applicantData);
   fillDate(applicantData);
   fillRace(applicantData);
   fillRace2(applicantData);
   fillUSA(applicantData);
   fillSelectData(applicantData);
+  await saveJobLeverData();
 };
