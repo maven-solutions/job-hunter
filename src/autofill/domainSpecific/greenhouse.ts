@@ -1,3 +1,4 @@
+import { saveGreenhouseData } from "../../dataExtractor/greenhouse.data";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { Applicant, Education } from "../data";
 import {
@@ -349,4 +350,5 @@ export const greenHouse = async (tempDiv: any, applicantData: Applicant) => {
   immigrationsponsorship(applicantData);
   fillEducation(applicantData.education);
   fillCheckobx(applicantData);
+  await saveGreenhouseData();
 };

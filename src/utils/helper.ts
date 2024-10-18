@@ -70,3 +70,13 @@ export function sanitizeHTML(htmlString) {
 
   return htmlString;
 }
+
+export const getDomainName = () => {
+  const pathurl = window.location.href.toLocaleLowerCase();
+  const splitted = pathurl.split("/");
+  if (splitted && splitted.length > 2) {
+    const currentWebURL = splitted[2];
+    return currentWebURL;
+  }
+  return "";
+};
