@@ -1,3 +1,4 @@
+import { saveAudofillJob } from "../utils/autofillJobSavApi";
 import { getDomainName, isEmptyArray } from "../utils/helper";
 function getFirstWord(input) {
   // Check if input is null or not a string, return empty string if true
@@ -33,7 +34,8 @@ export const saveJobLeverData = async () => {
   const jobTitleElement: any = header?.querySelector("h2") ?? "";
   const locationElement: any =
     header?.querySelector(".posting-categories") ?? "";
-  const allLocationChild = locationElement.children;
+
+  const allLocationChild = locationElement?.children;
   if (!isEmptyArray(allLocationChild)) {
     const loc = allLocationChild[0];
     if (loc) {
@@ -47,5 +49,8 @@ export const saveJobLeverData = async () => {
     source: getDomainName(),
     url: window.location.href,
   };
-  console.log("data::", data);
+
+  if (jobTitleElement?.textContent?.trim()) {
+    await saveAudofillJob(data);
+  }
 };

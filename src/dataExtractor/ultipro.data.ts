@@ -1,3 +1,4 @@
+import { saveAudofillJob } from "../utils/autofillJobSavApi";
 import { getDomainName } from "../utils/helper";
 
 export const saveUltiproData = async () => {
@@ -9,5 +10,8 @@ export const saveUltiproData = async () => {
     source: getDomainName(),
     url: window.location.href,
   };
+  if (jobTitleElement?.textContent?.trim()) {
+    await saveAudofillJob(data);
+  }
   console.log("data::", data);
 };
