@@ -37,6 +37,7 @@ export const LOCALSTORAGE = {
   CI_AUTOFILL_URL: "ciautofillurl",
   CI_AUTOFILL_CURRENT_URL: "ciautofillcurrenturl",
   CI_AUTOFILL_PDF_URL: "ciautofillpdfurl",
+  JOB_APPLIED: "jobapplied",
 };
 
 export const CHROME_STOGRAGE = {

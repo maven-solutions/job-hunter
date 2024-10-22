@@ -1,3 +1,5 @@
+import { saveMyworkdayjobsData } from "../../dataExtractor/myworkdayjobs";
+import { LOCALSTORAGE } from "../../utils/constant";
 import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
@@ -333,4 +335,8 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await fillFieldSetDataType(applicantData);
   await deleteResume();
   await fillResume(applicantData);
+  const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
+  if (localurl !== window.location.href) {
+    await saveMyworkdayjobsData();
+  }
 };
