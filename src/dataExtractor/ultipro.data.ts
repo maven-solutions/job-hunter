@@ -13,5 +13,4 @@ export const saveUltiproData = async () => {
   if (jobTitleElement?.textContent?.trim()) {
     await saveAudofillJob(data);
   }
-  console.log("data::", data);
 };
