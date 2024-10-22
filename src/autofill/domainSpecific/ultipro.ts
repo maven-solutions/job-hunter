@@ -1,3 +1,4 @@
+import { saveUltiproData } from "../../dataExtractor/ultipro.data";
 import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
@@ -481,5 +482,5 @@ export const ultipro = async (tempDiv: any, applicantData: Applicant) => {
 
   await UltiworkExperienceDatafiller(applicantData);
   await UltiEducationDatafiller(applicantData);
-  console.log("called");
+  await saveUltiproData();
 };

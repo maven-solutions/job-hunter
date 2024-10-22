@@ -1,4 +1,4 @@
-import { saveMyworkdayjobsData } from "../../dataExtractor/myworkdayjobs";
+import { saveMyworkdayjobsData } from "../../dataExtractor/myworkdayjobs.data";
 import { LOCALSTORAGE } from "../../utils/constant";
 import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
