@@ -719,38 +719,6 @@ export const selectDataExtract = async (
             veteran = true;
           }
 
-          // for yes
-          if (
-            applicantData.veteran_status === 3 &&
-            !veteran &&
-            fromatStirngInLowerCase(option?.text)?.includes(
-              "identifyasoneormore"
-            )
-          ) {
-            option.selected = true;
-            select.dispatchEvent(
-              new Event("change", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("input", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("focus", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("click", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("blur", { bubbles: true, cancelable: false })
-            );
-            select.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-              inline: "nearest",
-            });
-            veteran = true;
-          }
-
           //for one or more
           if (
             applicantData.veteran_status === 4 &&
@@ -783,37 +751,6 @@ export const selectDataExtract = async (
             veteran = true;
           }
           // for yes---
-
-          if (
-            applicantData.veteran_status === 1 &&
-            !veteran &&
-            fromatStirngInLowerCase(option?.text)?.includes(
-              "identifyasoneormore"
-            )
-          ) {
-            option.selected = true;
-            select.dispatchEvent(
-              new Event("change", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("input", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("focus", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("click", { bubbles: true, cancelable: false })
-            );
-            select.dispatchEvent(
-              new Event("blur", { bubbles: true, cancelable: false })
-            );
-            select.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-              inline: "nearest",
-            });
-            veteran = true;
-          }
 
           //for decline
           if (

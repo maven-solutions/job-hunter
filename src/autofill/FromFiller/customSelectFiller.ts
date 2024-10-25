@@ -229,31 +229,7 @@ export const customSelectFiller = async (tempDiv1, applicantData, iframe) => {
 
         //for one or more
         if (
-          applicantData.veteran_status === 3 &&
-          !veteran &&
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
-            "identifyasoneormore"
-          )
-        ) {
-          veteran = true;
-          element.click();
-        }
-
-        //for one or more
-        if (
           applicantData.veteran_status === 4 &&
-          !veteran &&
-          fromatStirngInLowerCase(element.textContent.trim()).includes(
-            "identifyasoneormore"
-          )
-        ) {
-          veteran = true;
-          element.click();
-        }
-
-        //   for one or more
-        if (
-          applicantData.veteran_status === 1 &&
           !veteran &&
           fromatStirngInLowerCase(element.textContent.trim()).includes(
             "identifyasoneormore"
