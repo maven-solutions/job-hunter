@@ -27,7 +27,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     language,
     userVeteranStatus,
     covidVaccinationStatus,
-    disabilityStatusForExtension,
+    disabilityStatus,
     userAuthorizationUsa,
     phoneType,
     zipCode,
@@ -80,7 +80,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     language,
     veteran_status: userVeteranStatus?.value,
     covid_vaccination_status: covidVaccinationStatus,
-    disability_status: disabilityStatusForExtension,
+    disability_status: Number(disabilityStatus),
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
     hispanic_or_latino: hispanicOrLatino?.value ?? false,
@@ -124,7 +124,7 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicationForm,
       selectedUserId
     );
-    // console.log("vadata::", applicantData);
+    console.log("vadata::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)
