@@ -1,5 +1,6 @@
 import { saveMyworkdayjobsData } from "../../dataExtractor/myworkdayjobs.data";
 import { LOCALSTORAGE } from "../../utils/constant";
+import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
@@ -322,6 +323,23 @@ const fillResume = async (applicantData: Applicant) => {
   }
 };
 
+const getHelp = async () => {
+  // Selects input elements where the value contains "product" (case insensitive)
+  const productInputs: any = document.querySelectorAll(
+    'input[type="text"][value="PRODUCT KING"]'
+  );
+  if (isEmptyArray(productInputs)) return;
+  for (const productInput of productInputs) {
+    productInput.value = "Product Owner";
+    productInput.focus(); // Autofocus on the productInput field
+    productInput.click();
+    productInput.select();
+    await delay(100);
+    // handleValueChanges(productInput);
+    // await delay(100);
+  }
+};
+
 export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   filltodayDate();
   await fillcountry(applicantData);
@@ -335,6 +353,7 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await fillFieldSetDataType(applicantData);
   await deleteResume();
   await fillResume(applicantData);
+  await getHelp();
   const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
   if (localurl !== window.location.href) {
     await saveMyworkdayjobsData();

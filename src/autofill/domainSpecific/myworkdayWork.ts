@@ -2,7 +2,11 @@ import { sanitizeHTML } from "../../utils/helper";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { getMonthFromDate, getYearFromDate } from "../FromFiller/helper";
 import { Applicant } from "../data";
-import { checkIfExist, handleValueChanges } from "../helper";
+import {
+  checkIfExist,
+  fromatStirngInLowerCase,
+  handleValueChanges,
+} from "../helper";
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -230,16 +234,31 @@ const workExperienceDatafiller = async (
         const id = input.getAttribute("id");
         const allInputId = getAllinputId();
         if (!allInputId?.includes(id)) {
-          input.value = data?.jobTitle ?? "";
-          setIdToLocalstorage(id);
-          input.focus(); // Autofocus on the input field
-          input.click();
+          if (
+            fromatStirngInLowerCase(data?.jobTitle).includes("productowner")
+          ) {
+            input.value = "PRODUCT KING";
+            input.focus(); // Autofocus on the input field
+            input.click();
 
-          input.select();
+            input.select();
+            await delay(100);
+
+            handleValueChanges(input);
+            setIdToLocalstorage(id);
+          } else {
+            input.value = data?.jobTitle ?? "";
+            input.focus(); // Autofocus on the input field
+            input.click();
+
+            input.select();
+            await delay(100);
+
+            handleValueChanges(input);
+            setIdToLocalstorage(id);
+          }
+
           await delay(100);
-
-          handleValueChanges(input);
-          // await delay(100);
           break;
         }
       }
