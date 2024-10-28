@@ -40,6 +40,7 @@ const DisplayJob = (props: any) => {
   });
   const dispatch = useAppDispatch();
 
+  console.log("jobSlice::", jobSlice);
   useEffect(() => {
     if (jobSlice.stage_data_success) {
       dispatch(setSelectedStage(jobSlice?.stage_data[0]));

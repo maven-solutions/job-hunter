@@ -26,14 +26,61 @@ const getJobsFromZipRecuriter1 = (dispatch, zipDom: any) => {
   const title = titleEle?.textContent?.trim();
 
   dispatch(setJobTitle(title));
-  let companyEle = zipDom.querySelector("a");
+  let companyEle: any = zipDom.querySelector("a");
   if (companyEle) {
     const inputString = companyEle?.textContent?.trim();
     dispatch(setJobCompany(inputString));
   }
+
+  // for location
+  let locEle: any = zipDom.querySelector(
+    "p.text-black.normal-case.text-body-md"
+  );
+
+  const getLocation = (text) => {
+    if (!text) {
+      return "";
+    }
+    const parts = text.split("•");
+    if (parts.length === 1) {
+      return text;
+    }
+    if (parts.length > 1) {
+      return parts[0];
+    }
+  };
+
+  const getWorkType = (text) => {
+    if (!text) {
+      return "";
+    }
+    const parts = text.split("•");
+    if (parts.length === 1) {
+      return "Onsite";
+    }
+    if (parts.length > 1) {
+      return parts[1];
+    }
+  };
+  if (locEle) {
+    const text = locEle?.textContent?.trim();
+    const locationText = getLocation(text);
+    dispatch(setJobLocation(locationText));
+    const workType = getWorkType(text);
+    dispatch(setJobType(workType));
+  }
+
   const jobDescriptionEle = zipDom.querySelector(".job_description");
   if (jobDescriptionEle) {
     const description = jobDescriptionEle?.innerHTML;
+    dispatch(setJobDesc(description));
+  }
+
+  const jobDescriptionEle2 = zipDom.querySelector(
+    ".text-black.whitespace-pre-line.break-words"
+  );
+  if (jobDescriptionEle2) {
+    const description = jobDescriptionEle2?.innerHTML;
     dispatch(setJobDesc(description));
   }
 };
@@ -217,15 +264,15 @@ const getJobsFromZipRecuriter3 = (dispatch, zipDom: any) => {
 
 export const getJobFromZipRecruiter = (dispatch): void => {
   const zipDom = document.querySelector('[data-testid="right-pane"]');
-  console.log("zipDom::", zipDom);
+  // console.log("zipDom::", zipDom);
 
   const zipDom2 = document.querySelector(".job_details");
-  console.log("zipDom2::", zipDom2);
+  // console.log("zipDom2::", zipDom2);
 
   const zipDom3 = document.querySelector(
     ".job_result_wrapper.job_result_selected"
   );
-  console.log("zipDom3::", zipDom3);
+  // console.log("zipDom3::", zipDom3);
 
   if (zipDom) {
     getJobsFromZipRecuriter1(dispatch, zipDom);
