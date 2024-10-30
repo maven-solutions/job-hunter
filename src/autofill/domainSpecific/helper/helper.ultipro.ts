@@ -22,9 +22,16 @@ const deletePreviousWorkExpereince = async () => {
 };
 
 const openWorkExperience = async (applicantData) => {
-  const addButtton: any = document.querySelector(
+  let addButtton: any = document.querySelector(
     'button[aria-label="Add experience"]'
   );
+  if (!addButtton) {
+    addButtton = document.querySelector('button[aria-label="Add Experience"]');
+  }
+  if (!addButtton) {
+    addButtton = document.querySelector('button[aria-label="add experience"]');
+  }
+
   if (!addButtton) {
     return;
   }
@@ -234,9 +241,16 @@ const deletePreviousEducation = async () => {
 };
 
 const openEducation = async (applicantData) => {
-  const addButtton: any = document.querySelector(
+  let addButtton: any = document.querySelector(
     'button[aria-label="Add education"]'
   );
+
+  if (!addButtton) {
+    addButtton = document.querySelector('button[aria-label="Add Education"]');
+  }
+  if (!addButtton) {
+    addButtton = document.querySelector('button[aria-label="add education"]');
+  }
   if (!addButtton) {
     return;
   }
