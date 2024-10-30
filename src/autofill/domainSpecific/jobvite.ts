@@ -1,3 +1,4 @@
+import { savejobviteData } from "../../dataExtractor/jobvite.data";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { Applicant } from "../data";
 import {
@@ -165,8 +166,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
   }
 };
 
-export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
-  await fillAllRadioType(applicantData);
+const fillSelect = async (tempDiv, applicantData: Applicant) => {
   const selectInputFields = document.querySelectorAll("select");
   if (!selectInputFields || selectInputFields.length === 0) {
     return;
@@ -305,7 +305,9 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
       }
     });
   }
+};
 
+const fillCheckBox = async () => {
   const checkBox: HTMLInputElement = document.querySelector(
     '[ng-model="linkedInRecruiter.statusSync"]'
   );
@@ -314,4 +316,11 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
     checkBox.checked;
     handleValueChanges(checkBox);
   }
+};
+
+export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
+  await fillAllRadioType(applicantData);
+  await fillSelect(tempDiv, applicantData);
+  await fillCheckBox();
+  await savejobviteData();
 };
