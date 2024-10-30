@@ -237,7 +237,7 @@ const workExperienceDatafiller = async (
           if (
             fromatStirngInLowerCase(data?.jobTitle).includes("productowner")
           ) {
-            input.value = "PRODUCT KING";
+            input.value = "PRODUCT MANAGER";
             input.focus(); // Autofocus on the input field
             input.click();
 

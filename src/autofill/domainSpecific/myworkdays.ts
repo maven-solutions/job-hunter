@@ -326,7 +326,7 @@ const fillResume = async (applicantData: Applicant) => {
 const getHelp = async () => {
   // Selects input elements where the value contains "product" (case insensitive)
   const productInputs: any = document.querySelectorAll(
-    'input[type="text"][value="PRODUCT KING"]'
+    'input[type="text"][value="PRODUCT MANAGER"]'
   );
   if (isEmptyArray(productInputs)) return;
   for (const productInput of productInputs) {
