@@ -1,4 +1,3 @@
-import { saveJobLeverData } from "../../dataExtractor/jobLever.data";
 import { Applicant } from "../data";
 import {
   checkIfExist,
@@ -233,5 +232,4 @@ export const jobsLever = async (tempDiv: any, applicantData: Applicant) => {
   fillRace2(applicantData);
   fillUSA(applicantData);
   fillSelectData(applicantData);
-  await saveJobLeverData();
 };

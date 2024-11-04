@@ -11,6 +11,9 @@ import {
 import { generatePassword, getHighestEducation, isAdult } from "./helper";
 import { useDebounce } from "use-debounce";
 import AutofillButton from "./AutofillButton";
+import { getDomainName } from "../../utils/helper";
+import { saveAudofillJob } from "../../utils/autofillJobSavApi";
+import { dataTracker } from "../../autofill/data.tracker";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -116,7 +119,7 @@ const AutofillFieldsForVA = (props: any) => {
     setAutoFilling(false);
   };
 
-  const autofillByContentScript = () => {
+  const autofillByContentScript = async () => {
     const url = window.location.href;
     const userdetails = getUserDetailsById(selectedUserId);
     const applicantData = extractInfo(
@@ -136,6 +139,7 @@ const AutofillFieldsForVA = (props: any) => {
       stopLoading,
       setIframeUrl
     );
+    await dataTracker();
   };
 
   const handleAutofill = () => {

@@ -1,4 +1,3 @@
-import { savejobviteData } from "../../dataExtractor/jobvite.data";
 import { fieldNames } from "../FromFiller/fieldsname";
 import { Applicant } from "../data";
 import {
@@ -322,5 +321,4 @@ export const jobvite = async (tempDiv: any, applicantData: Applicant) => {
   await fillAllRadioType(applicantData);
   await fillSelect(tempDiv, applicantData);
   await fillCheckBox();
-  await savejobviteData();
 };
