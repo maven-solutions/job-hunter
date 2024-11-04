@@ -25,7 +25,7 @@ export const saveMyworkdayjobsData = async () => {
   };
 
   if (title) {
-    await saveAudofillJob(data);
+    // await saveAudofillJob(data);
   }
 
   localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);

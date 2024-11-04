@@ -11,6 +11,6 @@ export const saveUltiproData = async () => {
     url: window.location.href,
   };
   if (jobTitleElement?.textContent?.trim()) {
-    await saveAudofillJob(data);
+    // await saveAudofillJob(data);
   }
 };

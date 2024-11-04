@@ -13,7 +13,7 @@ import { useDebounce } from "use-debounce";
 import AutofillButton from "./AutofillButton";
 import { getDomainName } from "../../utils/helper";
 import { saveAudofillJob } from "../../utils/autofillJobSavApi";
-import { dataTracker } from "../../autofill/data.tracker";
+import { dataTrackerHandler } from "../../autofill/data.tracker";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -139,7 +139,7 @@ const AutofillFieldsForVA = (props: any) => {
       stopLoading,
       setIframeUrl
     );
-    await dataTracker();
+    await dataTrackerHandler();
   };
 
   const handleAutofill = () => {

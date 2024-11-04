@@ -15,7 +15,7 @@ export const saveGreenhouseData = async () => {
     source: getDomainName(),
     url: window.location.href,
   };
-  if (jobTitleElement?.textContent?.trim()) {
-    await saveAudofillJob(data);
-  }
+  // if (jobTitleElement?.textContent?.trim()) {
+  //   await saveAudofillJob(data);
+  // }
 };
