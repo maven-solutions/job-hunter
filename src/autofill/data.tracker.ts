@@ -11,6 +11,11 @@ const dataTracker = async () => {
   await saveAudofillJob(data);
 };
 
+function getBaseUrl(url) {
+  const [baseUrl] = url.split("&step=");
+  return baseUrl;
+}
+
 export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
   // handle my workdays condation
   if (
@@ -40,7 +45,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     window.location.href.includes(".icf.")
   ) {
     const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
-    if (localurl !== window.location.href) {
+    if (localurl !== getBaseUrl(window.location.href)) {
       try {
         await dataTracker();
         setShowJobTrackedAlert(true);
@@ -48,7 +53,10 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
         setShowJobTrackedAlert(false);
       }
     }
-    localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
+    localStorage.setItem(
+      LOCALSTORAGE.JOB_APPLIED,
+      getBaseUrl(window.location.href)
+    );
     return;
   }
 
@@ -69,6 +77,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
 
   if (!JOB_TRACK_FOR_MULTIPLE_CLICK.some((domain) => url.includes(domain))) {
     try {
+      console.log("fired--222");
       await dataTracker();
       setShowJobTrackedAlert(true);
     } catch (error) {
