@@ -24,6 +24,7 @@ import "./index.css";
 import "./index2.css";
 import UserSelectList from "./UserSelectList";
 import IframeProceed from "./IframeProceed";
+import JobSavedNotification from "../../contentScript/JobSaved";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -38,6 +39,7 @@ const ResumeListForVA = (props: any) => {
   const [userResumeList, setUserResumeList] = useState([]);
   const [iframeUrl, setIframeUrl] = useState("");
   const [showAddWebsite, setShowAddWebsite] = useState(false);
+  const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -173,8 +175,12 @@ const ResumeListForVA = (props: any) => {
         handleSelectChanges={handleSelectChanges}
       />
       <Height height="15" />
+      {showJobTrackedAlert && (
+        <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
+      )}
       <WhiteCard>
-        {autoFilling && <AutofillLoader />}{" "}
+        {autoFilling && <AutofillLoader />}
+
         {!autoFilling && (
           <>
             <span className="ciautofill_v2_select_title">
@@ -231,6 +237,7 @@ const ResumeListForVA = (props: any) => {
           setIframeUrl={setIframeUrl}
           iframeUrl={iframeUrl}
           setShowAddWebsite={setShowAddWebsite}
+          setShowJobTrackedAlert={setShowJobTrackedAlert}
         />
       </div>
     </Layout>

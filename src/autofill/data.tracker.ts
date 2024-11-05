@@ -1,3 +1,4 @@
+import { JOB_TRACK_FOR_MULTIPLE_CLICK } from "../hooks/helpers";
 import { saveAudofillJob } from "../utils/autofillJobSavApi";
 import { LOCALSTORAGE } from "../utils/constant";
 import { getDomainName } from "../utils/helper";
@@ -10,12 +11,20 @@ const dataTracker = async () => {
   await saveAudofillJob(data);
 };
 
-export const dataTrackerHandler = async () => {
+export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
   // handle my workdays condation
-  if (window.location.href.includes(".myworkdayjobs.")) {
+  if (
+    window.location.href.includes(".myworkdayjobs.") &&
+    !window.location.href.includes("login")
+  ) {
     const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
     if (localurl !== window.location.href) {
-      await dataTracker();
+      try {
+        await dataTracker();
+        setShowJobTrackedAlert(true);
+      } catch (error) {
+        setShowJobTrackedAlert(false);
+      }
     }
     localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
     return;
@@ -32,7 +41,12 @@ export const dataTrackerHandler = async () => {
   ) {
     const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
     if (localurl !== window.location.href) {
-      await dataTracker();
+      try {
+        await dataTracker();
+        setShowJobTrackedAlert(true);
+      } catch (error) {
+        setShowJobTrackedAlert(false);
+      }
     }
     localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
     return;
@@ -49,5 +63,23 @@ export const dataTrackerHandler = async () => {
 
   if (window.location.href.includes("zimmerbiomet")) {
   }
-  await dataTracker();
+
+  // Check if the current URL matches any in the listOfWebsite
+  const url = window.location.href.toLowerCase();
+
+  if (!JOB_TRACK_FOR_MULTIPLE_CLICK.some((domain) => url.includes(domain))) {
+    try {
+      await dataTracker();
+      setShowJobTrackedAlert(true);
+    } catch (error) {
+      setShowJobTrackedAlert(false);
+    }
+  }
+
+  // try {
+  //   await dataTracker();
+  //   setShowJobTrackedAlert(true);
+  // } catch (error) {
+  //   setShowJobTrackedAlert(false);
+  // }
 };

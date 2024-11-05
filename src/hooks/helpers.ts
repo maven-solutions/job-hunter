@@ -72,3 +72,17 @@ export const IFRAME_ISSUE_WEBSITES: string[] = [
   "alloy.",
   "alixpartners.",
 ];
+
+export const JOB_TRACK_FOR_MULTIPLE_CLICK: string[] = [
+  "myworkdayjobs.",
+  "gehealthcare.",
+  "fisglobal.",
+  "ebayinc.",
+  "freedommortgage.",
+  ".regions.",
+  "icf.",
+  ".concentrix",
+  "hpe.",
+  "magellanhealth.",
+  "zimmerbiomet.",
+];
