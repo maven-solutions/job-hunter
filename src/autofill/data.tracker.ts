@@ -42,7 +42,11 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     window.location.href.includes(".ebayinc.") ||
     window.location.href.includes(".freedommortgage.") ||
     window.location.href.includes(".regions.") ||
-    window.location.href.includes(".icf.")
+    window.location.href.includes(".icf.") ||
+    window.location.href.includes(".concentrix.") ||
+    window.location.href.includes(".hpe.") ||
+    window.location.href.includes(".magellanhealth.") ||
+    window.location.href.includes(".zimmerbiomet.")
   ) {
     const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
     if (localurl !== getBaseUrl(window.location.href)) {
@@ -60,16 +64,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     return;
   }
 
-  if (window.location.href.includes(".concentrix.")) {
-  }
-
-  if (window.location.href.includes(".hpe.")) {
-  }
-
-  if (window.location.href.includes(".magellanhealth.")) {
-  }
-
-  if (window.location.href.includes("zimmerbiomet")) {
+  if (window.location.href.includes("icims")) {
   }
 
   // Check if the current URL matches any in the listOfWebsite
