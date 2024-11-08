@@ -165,6 +165,16 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
     );
   }
   if (!button) {
+    button = document.querySelector(
+      'button[aria-label="Add Professional Experience"]'
+    );
+  }
+  if (!button) {
+    button = document.querySelector(
+      'button[aria-label="Add Another Professional Experience"]'
+    );
+  }
+  if (!button) {
     return;
   }
 
