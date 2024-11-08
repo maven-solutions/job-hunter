@@ -121,7 +121,6 @@ const AutofillFieldsForVA = (props: any) => {
   };
 
   const autofillByContentScript = async () => {
-    console.log("cliecked---");
     const url = window.location.href;
     const userdetails = getUserDetailsById(selectedUserId);
     const applicantData = extractInfo(
