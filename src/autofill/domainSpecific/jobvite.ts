@@ -23,7 +23,8 @@ const fillAllRadioType = async (applicantData: Applicant) => {
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
           if (
-            fromatStirngInLowerCase(label?.textContent) === applicantData.gender
+            fromatStirngInLowerCase(label?.textContent) ===
+            fromatStirngInLowerCase(applicantData.gender)
           ) {
             label.click();
           }
