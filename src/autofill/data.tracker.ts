@@ -16,6 +16,7 @@ function getBaseUrl(url) {
   return baseUrl;
 }
 
+// for my workdays only
 export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
   // handle my workdays condation
   if (
@@ -35,6 +36,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     return;
   }
 
+  // when multiple url and multiple from
   // careers.gehealthcare a reasearch needed
   if (
     window.location.href.includes(".gehealthcare.") ||
@@ -77,7 +79,11 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     return;
   }
 
-  if (window.location.href.includes(".paylocity.")) {
+  // when url is same and multiple form load
+  if (
+    window.location.href.includes(".paylocity.") ||
+    window.location.href.includes(".jobvite.")
+  ) {
     const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
     if (localurl !== window.location.href) {
       try {
@@ -93,7 +99,6 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
 
   // Check if the current URL matches any in the listOfWebsite
   const url = window.location.href.toLowerCase();
-
   if (!JOB_TRACK_FOR_MULTIPLE_CLICK.some((domain) => url.includes(domain))) {
     try {
       await dataTracker();
