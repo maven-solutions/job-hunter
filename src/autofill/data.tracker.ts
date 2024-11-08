@@ -64,7 +64,16 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     return;
   }
 
-  if (window.location.href.includes("icims")) {
+  if (
+    window.location.href.includes("icims") &&
+    window.location.href.includes("from=login")
+  ) {
+    try {
+      await dataTracker();
+      setShowJobTrackedAlert(true);
+    } catch (error) {
+      setShowJobTrackedAlert(false);
+    }
   }
 
   // Check if the current URL matches any in the listOfWebsite
