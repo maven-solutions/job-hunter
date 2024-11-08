@@ -74,6 +74,21 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
     } catch (error) {
       setShowJobTrackedAlert(false);
     }
+    return;
+  }
+
+  if (window.location.href.includes(".paylocity.")) {
+    const localurl = localStorage.getItem(LOCALSTORAGE.JOB_APPLIED);
+    if (localurl !== window.location.href) {
+      try {
+        await dataTracker();
+        setShowJobTrackedAlert(true);
+      } catch (error) {
+        setShowJobTrackedAlert(false);
+      }
+    }
+    localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
+    return;
   }
 
   // Check if the current URL matches any in the listOfWebsite
