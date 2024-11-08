@@ -85,4 +85,6 @@ export const JOB_TRACK_FOR_MULTIPLE_CLICK: string[] = [
   "hpe.",
   "magellanhealth.",
   "zimmerbiomet.",
+  ".icims.",
+  ".paylocity.",
 ];

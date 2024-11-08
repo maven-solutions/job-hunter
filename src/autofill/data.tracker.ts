@@ -96,7 +96,6 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
 
   if (!JOB_TRACK_FOR_MULTIPLE_CLICK.some((domain) => url.includes(domain))) {
     try {
-      console.log("fired--222");
       await dataTracker();
       setShowJobTrackedAlert(true);
     } catch (error) {
