@@ -60,6 +60,7 @@ const JobDetector = (props: any) => {
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
   const [autoFilling, setAutoFilling] = useState<Boolean>(false);
   const [isGenerating, setIsGenerating] = useState<Boolean>(false);
+  const [errorINCountSave, setErrorINCountSave] = useState<Boolean>(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [autofill, setAutofill] = useState("");
   const currentUrl = window.location.href;
@@ -278,6 +279,8 @@ const JobDetector = (props: any) => {
           setShowPage={setShowPage}
           content={content}
           showPage={showPage}
+          errorINCountSave={errorINCountSave}
+          setErrorINCountSave={setErrorINCountSave}
         />
       )}
 

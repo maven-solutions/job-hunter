@@ -34,7 +34,15 @@ interface IChromeResult {
 }
 
 const ResumeListForVA = (props: any) => {
-  const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
+  const {
+    setShowPage,
+    content,
+    autoFilling,
+    setAutoFilling,
+    showPage,
+    errorINCountSave,
+    setErrorINCountSave,
+  } = props;
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserValue, setSelectedUserValue] = useState(null);
   const [userResumeList, setUserResumeList] = useState([]);
@@ -179,7 +187,9 @@ const ResumeListForVA = (props: any) => {
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
       )}
-      <JobNotSavedError setShowJobTrackedAlert={setShowJobTrackedAlert} />
+      {errorINCountSave && (
+        <JobNotSavedError setShowJobTrackedAlert={setErrorINCountSave} />
+      )}
       <WhiteCard>
         {autoFilling && <AutofillLoader />}
 
@@ -240,6 +250,7 @@ const ResumeListForVA = (props: any) => {
           iframeUrl={iframeUrl}
           setShowAddWebsite={setShowAddWebsite}
           setShowJobTrackedAlert={setShowJobTrackedAlert}
+          setErrorINCountSave={setErrorINCountSave}
         />
       </div>
     </Layout>

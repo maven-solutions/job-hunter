@@ -106,6 +106,7 @@ const AutofillFieldsForVA = (props: any) => {
     iframeUrl,
     setShowAddWebsite,
     setShowJobTrackedAlert,
+    setErrorINCountSave,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -140,7 +141,7 @@ const AutofillFieldsForVA = (props: any) => {
       stopLoading,
       setIframeUrl
     );
-    await dataTrackerHandler(setShowJobTrackedAlert);
+    await dataTrackerHandler(setShowJobTrackedAlert, setErrorINCountSave);
   };
 
   const handleAutofill = () => {

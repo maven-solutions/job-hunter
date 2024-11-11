@@ -17,7 +17,10 @@ function getBaseUrl(url) {
 }
 
 // for my workdays only
-export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
+export const dataTrackerHandler = async (
+  setShowJobTrackedAlert,
+  setErrorINCountSave
+) => {
   // handle my workdays condation
   if (
     window.location.href.includes(".myworkdayjobs.") &&
@@ -30,6 +33,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
         setShowJobTrackedAlert(true);
       } catch (error) {
         setShowJobTrackedAlert(false);
+        setErrorINCountSave(true);
       }
     }
     localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
@@ -57,6 +61,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
         setShowJobTrackedAlert(true);
       } catch (error) {
         setShowJobTrackedAlert(false);
+        setErrorINCountSave(true);
       }
     }
     localStorage.setItem(
@@ -75,6 +80,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
       setShowJobTrackedAlert(true);
     } catch (error) {
       setShowJobTrackedAlert(false);
+      setErrorINCountSave(true);
     }
     return;
   }
@@ -91,6 +97,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
         setShowJobTrackedAlert(true);
       } catch (error) {
         setShowJobTrackedAlert(false);
+        setErrorINCountSave(true);
       }
     }
     localStorage.setItem(LOCALSTORAGE.JOB_APPLIED, window.location.href);
@@ -105,6 +112,7 @@ export const dataTrackerHandler = async (setShowJobTrackedAlert) => {
       setShowJobTrackedAlert(true);
     } catch (error) {
       setShowJobTrackedAlert(false);
+      setErrorINCountSave(true);
     }
   }
 
