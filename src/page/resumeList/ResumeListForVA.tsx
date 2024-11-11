@@ -25,6 +25,7 @@ import "./index2.css";
 import UserSelectList from "./UserSelectList";
 import IframeProceed from "./IframeProceed";
 import JobSavedNotification from "../../contentScript/JobSaved";
+import JobNotSavedError from "../../contentScript/JobNotSavedError";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -178,6 +179,7 @@ const ResumeListForVA = (props: any) => {
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
       )}
+      <JobNotSavedError setShowJobTrackedAlert={setShowJobTrackedAlert} />
       <WhiteCard>
         {autoFilling && <AutofillLoader />}
 
