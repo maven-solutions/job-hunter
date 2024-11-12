@@ -27,6 +27,15 @@ export const clickWorkdayEducationButton = async (applicantData) => {
     }
   }
 
+  if (window.location.href.includes("ferguson.wd1.myworkdayjobs.com")) {
+    const parentdiv = document.querySelector(
+      '[aria-labelledby="Education-section"]'
+    );
+    if (parentdiv) {
+      button = parentdiv?.querySelector("button");
+    }
+  }
+
   if (!button) {
     return;
   }
