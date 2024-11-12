@@ -134,6 +134,7 @@ const AutofillFieldsForVA = (props: any) => {
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)
     );
+
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
     detectInputAndFillData(
       applicantData,
@@ -141,6 +142,7 @@ const AutofillFieldsForVA = (props: any) => {
       stopLoading,
       setIframeUrl
     );
+
     await dataTrackerHandler(setShowJobTrackedAlert, setErrorINCountSave);
   };
 
