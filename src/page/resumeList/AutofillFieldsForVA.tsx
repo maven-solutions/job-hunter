@@ -143,7 +143,30 @@ const AutofillFieldsForVA = (props: any) => {
       setIframeUrl
     );
 
-    await dataTrackerHandler(setShowJobTrackedAlert, setErrorINCountSave);
+    let executeDataTracker = true;
+    const iframeList: any = document.querySelectorAll("iframe");
+    if (iframeList.length > 0) {
+      for (const iframe of iframeList) {
+        const src = iframe?.src;
+
+        const splitted = src?.split("/");
+
+        if (splitted && splitted.length >= 2) {
+          const currentWebURL = splitted[2];
+          if (
+            currentWebURL?.includes(".greenhouse.") ||
+            currentWebURL?.includes(".ashbyhq.") ||
+            currentWebURL?.includes(".talemetry.") ||
+            currentWebURL?.includes("jobs.jobvite.")
+          ) {
+            executeDataTracker = false;
+          }
+        }
+      }
+    }
+    if (executeDataTracker) {
+      await dataTrackerHandler(setShowJobTrackedAlert, setErrorINCountSave);
+    }
   };
 
   const handleAutofill = () => {
