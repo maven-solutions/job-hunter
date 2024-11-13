@@ -36,6 +36,20 @@ export const clickWorkdayEducationButton = async (applicantData) => {
     }
   }
 
+  if (window.location.href.includes("dentsuaegis.wd3.myworkdayjobs.com")) {
+    let parentdiv = document.querySelector(
+      '[aria-labelledby="Education-section"]'
+    );
+    if (!parentdiv) {
+      parentdiv = document.querySelector(
+        '[aria-labelledby="Education-(Optional)-section"]'
+      );
+    }
+    if (parentdiv) {
+      button = parentdiv?.querySelector("button");
+    }
+  }
+
   if (!button) {
     return;
   }

@@ -178,6 +178,22 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
     const parentdiv = document.querySelector(
       '[aria-labelledby="Work-Experience-section"]'
     );
+
+    if (parentdiv) {
+      button = parentdiv?.querySelector("button");
+    }
+  }
+
+  if (window.location.href.includes("dentsuaegis.wd3.myworkdayjobs.com")) {
+    let parentdiv = document.querySelector(
+      '[aria-labelledby="Work-Experience-section"]'
+    );
+    if (!parentdiv) {
+      parentdiv = document.querySelector(
+        '[aria-labelledby="Work-History-(Optional)-section"]'
+      );
+    }
+
     if (parentdiv) {
       button = parentdiv?.querySelector("button");
     }
