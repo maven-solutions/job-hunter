@@ -276,7 +276,7 @@ const workExperienceDatafiller = async (
             input.click();
 
             input.select();
-            await delay(100);
+            await delay(500);
 
             handleValueChanges(input);
             setIdToLocalstorage(id);
@@ -292,7 +292,7 @@ const workExperienceDatafiller = async (
             setIdToLocalstorage(id);
           }
 
-          await delay(100);
+          await delay(500);
           break;
         }
       }
@@ -310,7 +310,7 @@ const workExperienceDatafiller = async (
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          await delay(100);
+          await delay(500);
           handleValueChanges(input);
           // await delay(100);
           break;
@@ -330,7 +330,7 @@ const workExperienceDatafiller = async (
           input.click();
           input.select();
 
-          await delay(100);
+          await delay(500);
 
           handleValueChanges(input);
           // await delay(100);
@@ -369,7 +369,7 @@ const workExperienceDatafiller = async (
           input.select();
           const cleanedHtml = sanitizeHTML(data?.description ?? "");
           input.value = cleanedHtml;
-          await delay(100);
+          await delay(500);
           handleValueChanges(input);
           // await delay(100);
           break;
