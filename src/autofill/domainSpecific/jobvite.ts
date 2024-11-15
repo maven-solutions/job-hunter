@@ -56,6 +56,32 @@ const fillAllRadioType = async (applicantData: Applicant) => {
       }
     }
 
+    // for work auth
+    if (
+      fromatStirngInLowerCase(legend?.textContent)?.includes(
+        "authorizedtowork"
+      ) ||
+      fromatStirngInLowerCase(legend?.textContent)?.includes("authorizetowork")
+    ) {
+      const allLabel = fieldset.querySelectorAll("label");
+      if (allLabel && allLabel.length > 0) {
+        for (const label of allLabel) {
+          if (
+            applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(label?.textContent)?.includes("yes")
+          ) {
+            label.click();
+          }
+          if (
+            !applicantData.us_work_authoriztaion &&
+            fromatStirngInLowerCase(label?.textContent)?.includes("no")
+          ) {
+            label.click();
+          }
+        }
+      }
+    }
+
     // for hispanic
     if (
       fromatStirngInLowerCase(legend?.textContent)?.includes("hispanicorlatino")

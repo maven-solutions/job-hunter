@@ -672,3 +672,9 @@ textarea[data-automation-id="description"] {
   /* Your styles here */
   height: 250px !important;
 }
+
+/*  for malwarebytes, to add custom scroll */
+.jv-page-content {
+  height: 100vh !important;
+  overflow-y: scroll !important;
+}
