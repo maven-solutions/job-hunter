@@ -251,6 +251,7 @@ const ResumeListForVA = (props: any) => {
           setShowAddWebsite={setShowAddWebsite}
           setShowJobTrackedAlert={setShowJobTrackedAlert}
           setErrorINCountSave={setErrorINCountSave}
+          autoFilling={autoFilling}
         />
       </div>
     </Layout>

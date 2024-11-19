@@ -107,6 +107,7 @@ const AutofillFieldsForVA = (props: any) => {
     setShowAddWebsite,
     setShowJobTrackedAlert,
     setErrorINCountSave,
+    autoFilling,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -210,7 +211,9 @@ const AutofillFieldsForVA = (props: any) => {
 
   return (
     <div className="ci_va_two_button_section">
-      {!iframeUrl && cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
+      {!autoFilling &&
+      !iframeUrl &&
+      cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
         <AutofillButton
           onClick={openMissngLink}
           iframeUrl={iframeUrl}
@@ -222,12 +225,14 @@ const AutofillFieldsForVA = (props: any) => {
         <span />
       )}
 
-      <AutofillButton
-        onClick={handleAutofill}
-        iframeUrl={iframeUrl}
-        resumeList={resumeList}
-        text={iframeUrl ? "Proceed" : "Auto Fill"}
-      />
+      {!autoFilling && (
+        <AutofillButton
+          onClick={handleAutofill}
+          iframeUrl={iframeUrl}
+          resumeList={resumeList}
+          text={iframeUrl ? "Proceed" : "Auto Fill"}
+        />
+      )}
     </div>
   );
 };
