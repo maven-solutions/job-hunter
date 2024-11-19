@@ -198,6 +198,16 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
       button = parentdiv?.querySelector("button");
     }
   }
+
+  if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    const parentdiv = document.querySelector(
+      '[aria-labelledby="Work-Experience-section"]'
+    );
+
+    if (parentdiv) {
+      button = parentdiv?.querySelector("button");
+    }
+  }
   if (!button) {
     return;
   }
@@ -206,7 +216,11 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
     applicantData.employment_history &&
     applicantData.employment_history.length > 0
   ) {
-    const jobtitle = document.querySelector('[data-automation-id="jobTitle"]');
+    let jobtitle = document.querySelector('[data-automation-id="jobTitle"]');
+
+    if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+      jobtitle = document.querySelector('[name="jobTitle"]');
+    }
     for await (const [
       index,
       element,
@@ -219,9 +233,19 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
       if (jobtitle) {
         if (!delte) {
           await delay(500);
-          const delteButton: any = document.querySelector(
+          let delteButton: any = document.querySelector(
             'button[aria-label="Delete Work Experience 1"]'
           );
+
+          if (
+            window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
+          ) {
+            const delteButtonParent = document.querySelector(
+              '[aria-labelledby="Work-Experience-2-panel"]'
+            );
+            delteButton = delteButtonParent?.querySelector("button");
+          }
+
           if (delteButton) {
             delteButton.click();
             delte = true;
@@ -237,7 +261,7 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
       });
 
       await delay(500);
-      console.log("workExperienceDatafiller called");
+      // console.log("workExperienceDatafiller called");
       await workExperienceDatafiller(tempDiv, applicantData, element, index);
 
       // await delay(500);
