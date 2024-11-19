@@ -20,7 +20,14 @@ export const fieldNames = {
   company: ["company", "employer"],
   company_location: ["location"],
   currently_work_here: ["currentlyworkhere"],
-  collage: ["school", "university", "institute", "educational", "institution"],
+  collage: [
+    "school",
+    "university",
+    "institute",
+    "educational",
+    "institution",
+    "schoolname",
+  ],
   country: ["country", "countryid", "nation"],
 
   degree: ["degree"],

@@ -50,14 +50,27 @@ export const clickWorkdayEducationButton = async (applicantData) => {
     }
   }
 
+  if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    const parentdiv = document.querySelector(
+      '[aria-labelledby="Education-section"]'
+    );
+
+    if (parentdiv) {
+      button = parentdiv?.querySelector('[data-automation-id="add-button"]');
+    }
+  }
+
   if (!button) {
     return;
   }
 
   if (applicantData.education && applicantData.education.length > 0) {
-    const degreeDected = document.querySelector(
-      '[data-automation-id="degree"]'
-    );
+    let degreeDected = document.querySelector('[data-automation-id="degree"]');
+
+    if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+      degreeDected = document.querySelector('[name="degree"]');
+    }
+
     for await (const [index, element] of applicantData.education.entries()) {
       // console.log("Processing employment history element:", element);
 
@@ -66,9 +79,18 @@ export const clickWorkdayEducationButton = async (applicantData) => {
       if (degreeDected) {
         if (!delte) {
           await delay(500);
-          const delteButton: any = document.querySelector(
+          let delteButton: any = document.querySelector(
             'button[aria-label="Delete Education 1"]'
           );
+
+          if (
+            window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
+          ) {
+            const delteButtonParent = document.querySelector(
+              '[aria-labelledby="Education-2-panel"]'
+            );
+            delteButton = delteButtonParent?.querySelector("button");
+          }
           if (!delteButton) {
             return;
           }
@@ -79,7 +101,7 @@ export const clickWorkdayEducationButton = async (applicantData) => {
         }
       }
 
-      // console.log("Button clicked");
+      // console.log("ed -- Button clicked");
       // Attach click event handler instead of directly invoking click()
       await new Promise((resolve) => {
         button.addEventListener("click", resolve, { once: true });
