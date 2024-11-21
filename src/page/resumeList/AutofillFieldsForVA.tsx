@@ -158,7 +158,8 @@ const AutofillFieldsForVA = (props: any) => {
             currentWebURL?.includes(".greenhouse.") ||
             currentWebURL?.includes(".ashbyhq.") ||
             currentWebURL?.includes(".talemetry.") ||
-            currentWebURL?.includes("jobs.jobvite.")
+            currentWebURL?.includes("jobs.jobvite.") ||
+            currentWebURL?.includes("comeet.")
           ) {
             executeDataTracker = false;
           }

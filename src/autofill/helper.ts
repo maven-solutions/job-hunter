@@ -140,7 +140,8 @@ export const detectInputAndFillData = async (
           currentWebURL?.includes(".greenhouse.") ||
           currentWebURL?.includes(".ashbyhq.") ||
           currentWebURL?.includes(".talemetry.") ||
-          currentWebURL?.includes("jobs.jobvite.")
+          currentWebURL?.includes("jobs.jobvite.") ||
+          currentWebURL?.includes("comeet.")
         ) {
           setIframeUrl(src);
           break;
