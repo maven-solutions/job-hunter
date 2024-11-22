@@ -111,7 +111,7 @@ export const detectInputAndFillData = async (
 ) => {
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
-
+  console.log("iframeList::", iframeList);
   // for icims  = [0]
   if (iframeList.length > 0 && window.location.href.includes("icims")) {
     iframe = iframeList[0];
@@ -126,6 +126,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes("careers-adspipe.icims")) {
       iframe = iframeList[2];
+    }
+    if (window.location.href.includes("careers-c1.icims.com")) {
+      iframe = iframeList[1];
     }
   }
   if (iframeList.length > 0) {
