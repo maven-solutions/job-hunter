@@ -217,10 +217,13 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
     applicantData.employment_history.length > 0
   ) {
     let jobtitle = document.querySelector('[data-automation-id="jobTitle"]');
-
-    if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    if (!jobtitle) {
       jobtitle = document.querySelector('[name="jobTitle"]');
     }
+
+    // if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    //   jobtitle = document.querySelector('[name="jobTitle"]');
+    // }
     for await (const [
       index,
       element,
@@ -237,12 +240,16 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
             'button[aria-label="Delete Work Experience 1"]'
           );
 
-          if (
-            window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
-          ) {
-            const delteButtonParent = document.querySelector(
-              '[aria-labelledby="Work-Experience-2-panel"]'
-            );
+          // if (
+          //   window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
+          // ) {
+
+          // }
+
+          const delteButtonParent = document?.querySelector(
+            '[aria-labelledby="Work-Experience-2-panel"]'
+          );
+          if (delteButtonParent) {
             delteButton = delteButtonParent?.querySelector("button");
           }
 
