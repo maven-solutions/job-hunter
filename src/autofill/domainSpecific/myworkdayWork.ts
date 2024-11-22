@@ -174,15 +174,15 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
       'button[aria-label="Add Another Professional Experience"]'
     );
   }
-  if (window.location.href.includes("ferguson.wd1.myworkdayjobs.com")) {
-    const parentdiv = document.querySelector(
-      '[aria-labelledby="Work-Experience-section"]'
-    );
+  // if (window.location.href.includes("ferguson.wd1.myworkdayjobs.com")) {
+  const parentdiv = document.querySelector(
+    '[aria-labelledby="Work-Experience-section"]'
+  );
 
-    if (parentdiv) {
-      button = parentdiv?.querySelector("button");
-    }
+  if (parentdiv) {
+    button = parentdiv?.querySelector("button");
   }
+  // }
 
   if (window.location.href.includes("dentsuaegis.wd3.myworkdayjobs.com")) {
     let parentdiv = document.querySelector(
