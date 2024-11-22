@@ -50,15 +50,20 @@ export const clickWorkdayEducationButton = async (applicantData) => {
     }
   }
 
-  if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
-    const parentdiv = document.querySelector(
-      '[aria-labelledby="Education-section"]'
-    );
+  // if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+  const parentdiv2 = document.querySelector(
+    '[aria-labelledby="Education-section"]'
+  );
 
-    if (parentdiv) {
+  if (parentdiv2) {
+    const button2 = parentdiv?.querySelector(
+      '[data-automation-id="add-button"]'
+    );
+    if (button2) {
       button = parentdiv?.querySelector('[data-automation-id="add-button"]');
     }
   }
+  // }
 
   if (!button) {
     return;
@@ -67,7 +72,10 @@ export const clickWorkdayEducationButton = async (applicantData) => {
   if (applicantData.education && applicantData.education.length > 0) {
     let degreeDected = document.querySelector('[data-automation-id="degree"]');
 
-    if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    // if (window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")) {
+    //   degreeDected = document.querySelector('[name="degree"]');
+    // }
+    if (!degreeDected) {
       degreeDected = document.querySelector('[name="degree"]');
     }
 
@@ -83,14 +91,21 @@ export const clickWorkdayEducationButton = async (applicantData) => {
             'button[aria-label="Delete Education 1"]'
           );
 
-          if (
-            window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
-          ) {
-            const delteButtonParent = document.querySelector(
-              '[aria-labelledby="Education-2-panel"]'
-            );
+          // if (
+          //   window.location.href.includes("sourcewell.wd1.myworkdayjobs.com")
+          // ) {
+          //   const delteButtonParent = document.querySelector(
+          //     '[aria-labelledby="Education-2-panel"]'
+          //   );
+          //   delteButton = delteButtonParent?.querySelector("button");
+          // }
+          const delteButtonParent = document.querySelector(
+            '[aria-labelledby="Education-2-panel"]'
+          );
+          if (delteButtonParent) {
             delteButton = delteButtonParent?.querySelector("button");
           }
+
           if (!delteButton) {
             return;
           }
