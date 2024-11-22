@@ -166,7 +166,7 @@ export const detectInputAndFillData = async (
     // console.log("iframe::");
 
     buttonFilder();
-    textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    // textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -231,7 +231,7 @@ export const detectInputAndFillData = async (
       return;
     }
     buttonFilder();
-    textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+    await textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     passwordTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
@@ -418,7 +418,7 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes(".ashbyhq.")) {
       // re calling to fill the entire from
 
-      textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
+      // textTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       emailTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       numberTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
       telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);

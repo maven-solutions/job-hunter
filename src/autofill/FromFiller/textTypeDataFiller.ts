@@ -2,6 +2,7 @@ import { Applicant } from "../data";
 import {
   checkIfExist,
   checkNationForWorkDays,
+  delay,
   fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
@@ -12,7 +13,10 @@ const getAllinputId = () => {
   return ids;
 };
 
-export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
+export const textTypeDataFiller = async (
+  tempDiv: any,
+  applicantData: Applicant
+) => {
   // Extract input fields of type "text"
   let address = false;
   let phone = false;
@@ -55,7 +59,8 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
       if (
         checkIfExist(labelText, fieldNames.last_name) ||
-        checkIfExist(attribute.value, fieldNames.last_name)
+        (checkIfExist(attribute.value, fieldNames.last_name) &&
+          !checkIfExist(attribute.value, ["schoolname"]))
       ) {
         input.value = applicantData?.last_name;
         input.focus(); // Autofocus on the input field
@@ -292,4 +297,6 @@ export const textTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     });
     // You can do whatever you want with each input field here
   });
+
+  await delay(1000);
 };
