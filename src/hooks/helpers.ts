@@ -41,6 +41,7 @@ export const AUTOFILL_WEBSITES: string[] = [
   "tri-north.",
   "jobdiva.",
   "pitchlabs.",
+  ".prizepicks.",
 ];
 
 export const JOB_SAVING_WEBSITES = [
