@@ -47,7 +47,14 @@ export const fileTypeDataFiller = async (
   }
   if (window.location.href.includes(".ashbyhq.")) {
     const allInputfield = document.querySelectorAll('input[type="file"]');
-    textInputField = allInputfield[1];
+    if (allInputfield.length > 1) {
+      textInputField = allInputfield[1];
+    } else {
+      textInputField = allInputfield[0];
+    }
+    if (!textInputField) {
+      return;
+    }
   }
   if (window.location.href.includes(".bamboohr.")) {
     return;
