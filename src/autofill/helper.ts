@@ -130,6 +130,9 @@ export const detectInputAndFillData = async (
     if (window.location.href.includes("careers-c1.icims.com")) {
       iframe = iframeList[1];
     }
+    if (window.location.href.includes("careers-hwkaufman.icims.com")) {
+      iframe = iframeList[4];
+    }
   }
   if (iframeList.length > 0) {
     for (const iframe of iframeList) {
