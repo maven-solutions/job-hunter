@@ -55,6 +55,7 @@ import { brassring } from "./domainSpecific/brassring";
 import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { taleo } from "./domainSpecific/taleo";
 import { talemetry } from "./domainSpecific/talemetry";
+import { recruitcrm } from "./domainSpecific/recruitcrm";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -407,6 +408,9 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes(".talemetry.")) {
       await talemetry(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes("recruitcrm.")) {
+      await recruitcrm(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
