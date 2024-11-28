@@ -49,9 +49,9 @@ const useWorkDaysObserver = (
           removeMyWorkdaysAutofillButton();
           changeMyWorkdaysButtonText();
         }
-        if (majorChangeDetected) {
-          handleMajorDOMChangesInMyworkdays(startLoading, stopLoading);
-        }
+        // if (majorChangeDetected) {
+        //   handleMajorDOMChangesInMyworkdays(startLoading, stopLoading);
+        // }
       });
 
       // Start observing the body for changes

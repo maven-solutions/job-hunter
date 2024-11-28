@@ -164,6 +164,7 @@ const ResumeList = (props: any) => {
           setAutoFilling={setAutoFilling}
           setIframeUrl={setIframeUrl}
           iframeUrl={iframeUrl}
+          autoFilling={autoFilling}
         />
       </div>
     </Layout>

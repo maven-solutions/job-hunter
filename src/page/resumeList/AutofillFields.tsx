@@ -92,8 +92,14 @@ const extractInfo = (resumeData, applicationForm) => {
 };
 
 const AutofillFields = (props: any) => {
-  const { selectedResume, content, setAutoFilling, setIframeUrl, iframeUrl } =
-    props;
+  const {
+    selectedResume,
+    content,
+    setAutoFilling,
+    setIframeUrl,
+    iframeUrl,
+    autoFilling,
+  } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
@@ -168,16 +174,18 @@ const AutofillFields = (props: any) => {
       <span />
       <div className="ext__autofill__fields__wrapper">
         <div className="autofill__btn__wrapper">
-          <button
-            className={`autofill__btn ${
-              resumeList.res_success ? "" : "autofill__button__disable"
-            }`}
-            onClick={() => handleAutofill()}
-            disabled={resumeList.res_success ? false : true}
-          >
-            {/* Auto Fill */}
-            {iframeUrl ? "Proceed" : "Auto Fill"}
-          </button>
+          {!autoFilling && (
+            <button
+              className={`autofill__btn ${
+                resumeList.res_success ? "" : "autofill__button__disable"
+              }`}
+              onClick={() => handleAutofill()}
+              disabled={resumeList.res_success ? false : true}
+            >
+              {/* Auto Fill */}
+              {iframeUrl ? "Proceed" : "Auto Fill"}
+            </button>
+          )}
         </div>
       </div>
     </div>
