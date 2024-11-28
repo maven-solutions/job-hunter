@@ -28,6 +28,6 @@ export const handleMajorDOMChangesInMyworkdays = (
   if (localUrl === window.location.href) {
     const getUser = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
     const applicantData = JSON.parse(getUser);
-    detectInputAndFillData(applicantData, startLoading, stopLoading);
+    // detectInputAndFillData(applicantData, startLoading, stopLoading);
   }
 };

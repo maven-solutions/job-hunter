@@ -78,6 +78,8 @@ export const workDaysdateFiller = async (data, index) => {
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
+          // await delay(1000);
+
           handleValueChanges(input);
           // break;
         }
@@ -103,6 +105,8 @@ export const workDaysdateFiller = async (data, index) => {
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
+          // await delay(1000);
+
           handleValueChanges(input);
           // break;
         }
@@ -126,6 +130,8 @@ export const workDaysdateFiller = async (data, index) => {
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
+          // await delay(1000);
+
           handleValueChanges(input);
           break;
         }
@@ -146,6 +152,8 @@ export const workDaysdateFiller = async (data, index) => {
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
+          // await delay(1000);
+
           handleValueChanges(input);
           break;
         }
@@ -230,12 +238,12 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
     ] of applicantData.employment_history.entries()) {
       // console.log("Processing employment history element:", element);
 
-      await delay(500);
+      await delay(1000);
       button.click();
 
       if (jobtitle) {
         if (!delte) {
-          await delay(500);
+          await delay(1000);
           let delteButton: any = document.querySelector(
             'button[aria-label="Delete Work Experience 1"]'
           );
@@ -256,7 +264,7 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
           if (delteButton) {
             delteButton.click();
             delte = true;
-            // await delay(500);
+            // await delay(1000);
           }
         }
       }
@@ -267,11 +275,11 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
         button.dispatchEvent(new MouseEvent("click"));
       });
 
-      await delay(500);
+      await delay(1000);
       // console.log("workExperienceDatafiller called");
       await workExperienceDatafiller(tempDiv, applicantData, element, index);
 
-      // await delay(500);
+      // await delay(1000);
       // console.log("Processed element:", index);
     }
   }
@@ -307,7 +315,7 @@ const workExperienceDatafiller = async (
             input.click();
 
             input.select();
-            await delay(500);
+            await delay(1000);
 
             handleValueChanges(input);
             setIdToLocalstorage(id);
@@ -315,15 +323,13 @@ const workExperienceDatafiller = async (
             input.value = data?.jobTitle ?? "";
             input.focus(); // Autofocus on the input field
             input.click();
-
-            input.select();
-            await delay(100);
-
+            input.click();
+            await delay(1000);
             handleValueChanges(input);
             setIdToLocalstorage(id);
           }
 
-          await delay(500);
+          await delay(1000);
           break;
         }
       }
@@ -336,12 +342,11 @@ const workExperienceDatafiller = async (
         const allInputId = getAllinputId();
         if (!allInputId?.includes(id)) {
           setIdToLocalstorage(id);
-
           input.value = data?.employeer ?? "";
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          await delay(500);
+          await delay(1000);
           handleValueChanges(input);
           // await delay(100);
           break;
@@ -361,7 +366,7 @@ const workExperienceDatafiller = async (
           input.click();
           input.select();
 
-          await delay(500);
+          await delay(1000);
 
           handleValueChanges(input);
           // await delay(100);
@@ -395,12 +400,13 @@ const workExperienceDatafiller = async (
         const allInputId = getAllinputId();
         if (!allInputId?.includes(id)) {
           setIdToLocalstorage(id);
+
+          const cleanedHtml = sanitizeHTML(data?.description ?? "");
+          input.value = cleanedHtml;
           input.focus(); // Autofocus on the input field
           input.click();
           input.select();
-          const cleanedHtml = sanitizeHTML(data?.description ?? "");
-          input.value = cleanedHtml;
-          await delay(500);
+          await delay(1000);
           handleValueChanges(input);
           // await delay(100);
           break;

@@ -130,7 +130,7 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicationForm,
       selectedUserId
     );
-    // console.log("vadata::", applicantData);
+    console.log("vadata::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData)

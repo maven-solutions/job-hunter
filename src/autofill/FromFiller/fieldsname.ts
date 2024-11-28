@@ -6,7 +6,7 @@ export const fieldNames = {
     "residence",
     "place",
     "addressstreet1",
-    "location",
+    // "location",
   ],
   attach_file: ["attachfile", "attachresume"],
   city: [

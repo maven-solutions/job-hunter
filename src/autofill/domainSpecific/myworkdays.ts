@@ -7,9 +7,12 @@ import { clickWorkdayEducationButton } from "./myworkdayEducation";
 import { clickWorkdayWorkExperienceButton } from "./myworkdayWork";
 
 const fillcountry = async (applicantData) => {
-  const countryDropDown: any = document.querySelector(
+  let countryDropDown: any = document.querySelector(
     '[data-automation-id="countryDropdown"]'
   );
+  if (!countryDropDown) {
+    countryDropDown = document.querySelector('[name="country"]');
+  }
   if (!countryDropDown) {
     return;
   }
@@ -22,20 +25,23 @@ const fillcountry = async (applicantData) => {
   }
 
   countryDropDown.click();
-  await delay(500);
+  await delay(1000);
   const selectOptions: any = document.querySelectorAll('[role="option"]');
   for (const [index, element] of selectOptions.entries()) {
     if (countryHandler(element.textContent.trim(), applicantData)) {
       element.click();
     }
   }
-  await delay(2000);
+  await delay(3000);
 };
 
 const fillDeviceType = async (applicantData) => {
-  const phoneElement: any = document.querySelector(
+  let phoneElement: any = document.querySelector(
     '[data-automation-id="phone-device-type"]'
   );
+  if (!phoneElement) {
+    phoneElement = document.querySelector('[name="phoneType"]');
+  }
   if (!phoneElement) {
     return;
   }
