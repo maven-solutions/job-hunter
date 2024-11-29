@@ -69,12 +69,8 @@ const fillGender = async (applicantData: Applicant) => {
   Array.from(select.options).find((option: any) => {
     //for yes
     if (
-      fromatStirngInLowerCase(option?.text)?.includes(
-        fromatStirngInLowerCase(applicantData.gender)
-      ) ||
-      fromatStirngInLowerCase(applicantData.gender)?.includes(
-        fromatStirngInLowerCase(option?.text)
-      )
+      fromatStirngInLowerCase(option?.text) ===
+      fromatStirngInLowerCase(applicantData.gender)
     ) {
       option.selected = true;
       handleValueChanges(select);
