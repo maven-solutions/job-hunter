@@ -56,6 +56,7 @@ import { jobsabbott } from "./domainSpecific/jobsabbott";
 import { taleo } from "./domainSpecific/taleo";
 import { talemetry } from "./domainSpecific/talemetry";
 import { recruitcrm } from "./domainSpecific/recruitcrm";
+import { mvpworks } from "./domainSpecific/mvpworks";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -211,7 +212,8 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".rec.pro.") ||
       window.location.href.includes(".successfactors.") ||
       window.location.href.includes("paycomonline.") ||
-      window.location.href.includes(".amazon.jobs")
+      window.location.href.includes(".amazon.jobs") ||
+      window.location.href.includes("mvpworks.")
     ) {
       tempDiv = document.querySelector("body");
     }
@@ -411,6 +413,9 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes("recruitcrm.")) {
       await recruitcrm(tempDiv ?? tempDivForFile, applicantData);
+    }
+    if (window.location.href.includes("mvpworks.")) {
+      await mvpworks(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
