@@ -213,7 +213,8 @@ export const detectInputAndFillData = async (
       window.location.href.includes(".successfactors.") ||
       window.location.href.includes("paycomonline.") ||
       window.location.href.includes(".amazon.jobs") ||
-      window.location.href.includes("mvpworks.")
+      window.location.href.includes("mvpworks.") ||
+      window.location.href.includes("iso-gruppe.")
     ) {
       tempDiv = document.querySelector("body");
     }
