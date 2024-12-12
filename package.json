@@ -1,7 +1,7 @@
 {
-  "name": "weather-extension",
+  "name": "careerai",
   "version": "1.0.0",
-  "description": "React Weather Extension",
+  "description": "CareerAi Extension",
   "scripts": {
     "start": "webpack --watch --progress --config webpack.dev.js",
     "build": "webpack --watch --progress --config webpack.prod.js"
