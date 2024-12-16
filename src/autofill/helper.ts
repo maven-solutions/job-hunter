@@ -4,7 +4,6 @@ import { customSelectFiller } from "./FromFiller/customSelectFiller";
 import { customSelectFiller2 } from "./FromFiller/customSelectFiller2";
 import { dateTypeDataFiller } from "./FromFiller/dateTypeFiller";
 import { emailTypeDataFiller } from "./FromFiller/emailTypeDataFiller";
-import { fancyRadiotypeFiller } from "./FromFiller/fancyRadiotypeFiller";
 import { fileTypeDataFiller } from "./FromFiller/fileTypeDataFiller";
 import { numberTypeDataFiller } from "./FromFiller/numberTypeDataFiller";
 import { radioTypeDataFiller } from "./FromFiller/radiotypefiller";
@@ -57,6 +56,7 @@ import { taleo } from "./domainSpecific/taleo";
 import { talemetry } from "./domainSpecific/talemetry";
 import { recruitcrm } from "./domainSpecific/recruitcrm";
 import { mvpworks } from "./domainSpecific/mvpworks";
+import { trinethire } from "./domainSpecific/trinethire";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -181,7 +181,6 @@ export const detectInputAndFillData = async (
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, true);
@@ -248,7 +247,6 @@ export const detectInputAndFillData = async (
     telTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     urlTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     radioTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
-    fancyRadiotypeFiller(tempDiv ?? tempDivForFile, applicantData);
     dateTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     checkboxTypeDataFiller(tempDiv ?? tempDivForFile, applicantData);
     fileTypeDataFiller(tempDivForFile, applicantData, false);
@@ -417,6 +415,10 @@ export const detectInputAndFillData = async (
     }
     if (window.location.href.includes("mvpworks.")) {
       await mvpworks(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes("trinethire")) {
+      await trinethire(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed

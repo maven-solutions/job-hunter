@@ -30,6 +30,7 @@ export const radioTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
         (checkIfExist(attribute.value, ["male"]) &&
           fromatStirngInLowerCase(applicantData.gender)) === "male"
       ) {
+        console.log("");
         input.focus(); // Autofocus on the input field
         input.click();
         input.checked = true;
