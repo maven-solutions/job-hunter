@@ -45,7 +45,10 @@ export const fileTypeDataFiller = async (
   if (!textInputField) {
     return;
   }
-  if (window.location.href.includes(".ashbyhq.")) {
+  if (
+    window.location.href.includes(".ashbyhq.") ||
+    window.location.href.includes(".gnahiring.")
+  ) {
     const allInputfield = document.querySelectorAll('input[type="file"]');
     if (allInputfield.length > 1) {
       textInputField = allInputfield[1];
@@ -56,6 +59,10 @@ export const fileTypeDataFiller = async (
       return;
     }
   }
+
+  // if (window.location.href.includes(".gnahiring.")) {
+  //   return;
+  // }
   if (window.location.href.includes(".bamboohr.")) {
     return;
   }

@@ -57,6 +57,7 @@ import { talemetry } from "./domainSpecific/talemetry";
 import { recruitcrm } from "./domainSpecific/recruitcrm";
 import { mvpworks } from "./domainSpecific/mvpworks";
 import { trinethire } from "./domainSpecific/trinethire";
+import { gnahiring } from "./domainSpecific/gnahiring";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -419,6 +420,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes("trinethire")) {
       await trinethire(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes("gnahiring")) {
+      await gnahiring(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
