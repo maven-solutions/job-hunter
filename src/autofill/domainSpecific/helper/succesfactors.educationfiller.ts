@@ -77,7 +77,11 @@ export const educationDatafiller = async (
     const labelElement: any = tempDiv.querySelector(`[for="${inputId}"]`) ?? "";
     const labelText = labelElement?.textContent?.trim() ?? "";
 
-    if (labelText === "Educational Institution" && input.value === "") {
+    if (
+      (labelText === "Educational Institution" ||
+        labelText === "College/University") &&
+      input.value === ""
+    ) {
       const id = input.getAttribute("id");
       const allInputId = getAllinputId();
       if (!allInputId?.includes(id)) {
@@ -91,7 +95,10 @@ export const educationDatafiller = async (
       }
     }
 
-    if (labelText === "Field of Study" && input.value === "") {
+    if (
+      (labelText === "Field of Study" || labelText === "Area of Study") &&
+      input.value === ""
+    ) {
       const id = input.getAttribute("id");
       const allInputId = getAllinputId();
       if (!allInputId?.includes(id)) {
@@ -103,7 +110,10 @@ export const educationDatafiller = async (
       }
     }
 
-    if (labelText === "Educational Level" && input.value === "") {
+    if (
+      (labelText === "Educational Level" || labelText === "Degree") &&
+      input.value === ""
+    ) {
       const id = input.getAttribute("id");
       const allInputId = getAllinputId();
       if (!allInputId?.includes(id)) {

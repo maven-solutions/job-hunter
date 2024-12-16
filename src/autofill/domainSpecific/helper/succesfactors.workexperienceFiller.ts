@@ -36,9 +36,12 @@ export const workExperienceDatafiller = async (
     const labelText = labelElement?.textContent?.trim() ?? "";
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      (fromatStirngInLowerCase(labelText).includes(
         fromatStirngInLowerCase("Employer")
-      ) &&
+      ) ||
+        fromatStirngInLowerCase(labelText).includes(
+          fromatStirngInLowerCase("Company Name")
+        )) &&
       input.value === ""
     ) {
       const id = input.getAttribute("id");
@@ -70,9 +73,12 @@ export const workExperienceDatafiller = async (
     }
 
     if (
-      fromatStirngInLowerCase(labelText).includes(
+      (fromatStirngInLowerCase(labelText).includes(
         fromatStirngInLowerCase("Job Title")
-      ) &&
+      ) ||
+        fromatStirngInLowerCase(labelText).includes(
+          fromatStirngInLowerCase("Title")
+        )) &&
       input.value === ""
     ) {
       const id = input.getAttribute("id");
