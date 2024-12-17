@@ -17,20 +17,21 @@ export const getJobsFromIndeed = (
 
   setTimeout(() => {
     const titleElement = document?.querySelector(
-      ".jobsearch-JobInfoHeader-title"
+      'h2[data-testid="simpler-jobTitle"]'
     );
+
     // Get the text content from the titleElement
     const text = titleElement?.textContent?.trim();
-    // Extract "React.js Developer"
-    const jobTitle = text?.split(" - ")[0];
-    if (jobTitle) {
-      setJobstitle(jobTitle);
+
+    if (text) {
+      setJobstitle(text);
     }
   }, 1000);
 
   const companyElement = document.querySelector(
-    '[data-testid="inlineHeader-companyName"]'
+    ".jobsearch-JobInfoHeader-companyNameLink"
   );
+  console.log("companyElement::", companyElement);
 
   if (companyElement) {
     setCompanyName(companyElement?.textContent.trim());
