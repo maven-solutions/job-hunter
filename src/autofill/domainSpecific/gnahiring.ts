@@ -1,3 +1,4 @@
+import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
 import { delay, handleValueChanges } from "../helper";
 
@@ -48,7 +49,6 @@ const fillBasicInfo = async (applicantData: Applicant) => {
 
   const adress: any = document.querySelector('[name="user.address1"]');
   if (adress) {
-    console.log("applicantData.address::", applicantData.address);
     adress.value = applicantData.address;
     handleValueChanges(adress);
   }
@@ -56,38 +56,71 @@ const fillBasicInfo = async (applicantData: Applicant) => {
 
   const adress2: any = document.querySelector('[name="user.address2"]');
   if (adress2) {
-    console.log("applicantData.address::", applicantData.address);
     adress2.value = applicantData.address;
     handleValueChanges(adress2);
   }
 };
-const fillResume = (applicantData: Applicant) => {
-  //   try {
-  //     const tempDivForFile = document.querySelector("body");
-  //     if (applicantData.pdf_url) {
-  //       textInputField.setAttribute("ci-aria-file-uploaded", "true");
-  //       // Create file asynchronously
-  //       const designFile = await createFile(
-  //         applicantData.pdf_url,
-  //         applicantData.resume_title
-  //       );
-  //       // Set file to input field only for the first file input field found
-  //       const dt = new DataTransfer();
-  //       dt.items.add(designFile);
-  //       textInputField.files = dt.files;
-  //       // Trigger input change event
-  //       textInputField.dispatchEvent(
-  //         new Event("change", { bubbles: true, cancelable: false })
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
+
+const fillSponshership = (applicantData: Applicant) => {
+  const allQuestionLable: any = document.querySelectorAll("label");
+  if (isEmptyArray(allQuestionLable)) return;
+  for (const question of allQuestionLable) {
+    if (question) {
+      const text = question?.textContent;
+      if (text && text?.includes("require employment visa sponsorship")) {
+        const parentDiv = question.parentElement;
+        if (parentDiv) {
+          const answerDiv = parentDiv?.querySelector(".form-input-container ");
+          const allAnswer = answerDiv?.querySelectorAll(
+            ".checkbox-option-label"
+          );
+
+          if (allAnswer.length > 1) {
+            const ans1 = allAnswer[0];
+            const ans2 = allAnswer[1];
+            if (applicantData.sponsorship_required) {
+              ans1?.click();
+            }
+            if (!applicantData.sponsorship_required) {
+              ans2?.click();
+            }
+          }
+        }
+      }
+    }
+  }
 };
 
+const fillUsWorkPermission = (applicantData: Applicant) => {
+  const allQuestionLable: any = document.querySelectorAll("label");
+  if (isEmptyArray(allQuestionLable)) return;
+  for (const question of allQuestionLable) {
+    if (question) {
+      const text = question?.textContent;
+      if (text && text?.includes("authorized to work")) {
+        const parentDiv = question.parentElement;
+        if (parentDiv) {
+          const answerDiv = parentDiv?.querySelector(".form-input-container ");
+          const allAnswer = answerDiv?.querySelectorAll(".radio-option-label");
+
+          if (allAnswer.length > 1) {
+            const ans1 = allAnswer[0];
+            const ans2 = allAnswer[1];
+            if (applicantData.us_work_authoriztaion) {
+              ans1?.click();
+            }
+            if (!applicantData.us_work_authoriztaion) {
+              ans2?.click();
+            }
+          }
+        }
+      }
+    }
+  }
+};
 export const gnahiring = async (tempDiv: any, applicantData: Applicant) => {
   await fillBasicInfo(applicantData);
+  await fillSponshership(applicantData);
+  await fillUsWorkPermission(applicantData);
   ///
-
-  fillResume(applicantData);
 };
