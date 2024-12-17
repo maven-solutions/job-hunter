@@ -1,3 +1,5 @@
+import { BASE_URL } from "../config/config";
+
 export const checkJobStatus = async (
   postUrl,
   setAlreadySavedStatus,
@@ -11,9 +13,7 @@ export const checkJobStatus = async (
     return;
   }
 
-  // const url = "https://backend.careerai.io/public/jobs/check-job-status";
-  const url =
-    "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs/check-job-status";
+  const url = `${BASE_URL}/jobs/check-job-status`;
 
   const settings = {
     method: "POST",
@@ -56,8 +56,7 @@ export const saveJobs = async (
   postUrl,
   setAlreadySavedStatus
 ) => {
-  const url = "https://d2fa6tipx2eq6v.cloudfront.net/public/jobs";
-  // const url = "https://backend.careerai.io/public/jobs";
+  const url = `${BASE_URL}/jobs`;
 
   const settings = {
     method: "POST",
