@@ -15,18 +15,19 @@ export const getJobsFromIndeed = (
   setPostUrl(window.location.href);
   clearStateAndCity();
 
-  setTimeout(() => {
-    const titleElement = document?.querySelector(
-      'h2[data-testid="simpler-jobTitle"]'
-    );
+  // setTimeout(() => {
+  const titleElement = document?.querySelector(
+    'h2[data-testid="simpler-jobTitle"]'
+  );
+  console.log("called---");
 
-    // Get the text content from the titleElement
-    const text = titleElement?.textContent?.trim();
+  // Get the text content from the titleElement
+  const text = titleElement?.textContent?.trim();
 
-    if (text) {
-      setJobstitle(text);
-    }
-  }, 1000);
+  if (text) {
+    setJobstitle(text);
+  }
+  // }, 1000);
 
   const companyElement = document.querySelector(
     ".jobsearch-JobInfoHeader-companyNameLink"
@@ -35,6 +36,16 @@ export const getJobsFromIndeed = (
 
   if (companyElement) {
     setCompanyName(companyElement?.textContent.trim());
+  }
+  if (!companyElement) {
+    const companyEle = document.querySelector(
+      ".jobsearch-JobInfoHeader-companyNameSimple"
+    );
+    console.log("companyEle::", companyEle);
+
+    if (companyEle) {
+      setCompanyName(companyEle?.textContent.trim());
+    }
   }
 
   const locationEle = document
