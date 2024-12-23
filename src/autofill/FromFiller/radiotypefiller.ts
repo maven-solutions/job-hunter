@@ -4,7 +4,6 @@ import {
   fromatStirngInLowerCase,
   handleValueChanges,
 } from "../helper";
-import { fieldNames } from "./fieldsname";
 
 export const radioTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
   // Extract input fields of type "text"
@@ -26,11 +25,10 @@ export const radioTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
     attributes.some((attribute) => {
       // for male
       if (
-        checkIfExist(labelText, ["male"]) ||
-        (checkIfExist(attribute.value, ["male"]) &&
-          fromatStirngInLowerCase(applicantData.gender)) === "male"
+        (checkIfExist(labelText, ["male"]) ||
+          checkIfExist(attribute.value, ["male"])) &&
+        fromatStirngInLowerCase(applicantData.gender) === "male"
       ) {
-        console.log("");
         input.focus(); // Autofocus on the input field
         input.click();
         input.checked = true;
@@ -40,9 +38,9 @@ export const radioTypeDataFiller = (tempDiv: any, applicantData: Applicant) => {
 
       // for female
       if (
-        checkIfExist(labelText, ["female"]) ||
-        (checkIfExist(attribute.value, ["female"]) &&
-          fromatStirngInLowerCase(applicantData.gender)) === "female"
+        (checkIfExist(labelText, ["female"]) ||
+          checkIfExist(attribute.value, ["female"])) &&
+        fromatStirngInLowerCase(applicantData.gender) === "female"
       ) {
         input.focus(); // Autofocus on the input field
         input.click();
