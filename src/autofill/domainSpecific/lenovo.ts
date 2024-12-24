@@ -1,4 +1,8 @@
-import { getAllinputId, setIdToLocalstorage } from "../../utils/helper";
+import {
+  getAllinputId,
+  isEmptyArray,
+  setIdToLocalstorage,
+} from "../../utils/helper";
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
@@ -327,8 +331,69 @@ const fillEducation = async (applicantData: Applicant) => {
   }
 };
 
+const fillDisability = async (applicantData: Applicant) => {
+  const allSelect = document.querySelectorAll("select");
+  if (isEmptyArray(allSelect)) return;
+  for (const select of allSelect) {
+    Array.from(select.options).find((option: any) => {
+      if (
+        applicantData.disability_status &&
+        fromatStirngInLowerCase(option?.text)?.includes("ihaveadisability")
+      ) {
+        option.selected = true;
+        handleValueChanges(select);
+      }
+      if (
+        !applicantData.disability_status &&
+        fromatStirngInLowerCase(option?.text)?.includes("idonothaveadisability")
+      ) {
+        option.selected = true;
+        handleValueChanges(select);
+      }
+    });
+    await delay(1000);
+  }
+};
+
+const fillVeteran = async (applicantData: Applicant) => {
+  const allSelect = document.querySelectorAll("select");
+  if (isEmptyArray(allSelect)) return;
+  for (const select of allSelect) {
+    Array.from(select.options).find((option: any) => {
+      if (
+        (applicantData.veteran_status === 1 ||
+          applicantData.veteran_status === 3 ||
+          applicantData.veteran_status === 4) &&
+        fromatStirngInLowerCase(option?.text)?.includes("iidentifyasoneormore")
+      ) {
+        option.selected = true;
+        handleValueChanges(select);
+      }
+      if (
+        applicantData.veteran_status === 2 &&
+        fromatStirngInLowerCase(option?.text)?.includes(
+          "iamnotaprotectedveteran"
+        )
+      ) {
+        option.selected = true;
+        handleValueChanges(select);
+      }
+
+      if (
+        applicantData.veteran_status === 5 &&
+        fromatStirngInLowerCase(option?.text)?.includes("iprefernottoanswer")
+      ) {
+        option.selected = true;
+        handleValueChanges(select);
+      }
+    });
+    await delay(1000);
+  }
+};
+
 export const lenovo = async (tempDiv: any, applicantData: Applicant) => {
-  console.log("applocantdata::", applicantData);
   await fillWorkExperience(applicantData);
   await fillEducation(applicantData);
+  await fillDisability(applicantData);
+  await fillVeteran(applicantData);
 };
