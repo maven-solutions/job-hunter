@@ -2,29 +2,6 @@ import { getAllinputId, setIdToLocalstorage } from "../../utils/helper";
 import { Applicant } from "../data";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
-const fillWorkExperience = async (applicantData: Applicant) => {
-  const workExpTitle = document.querySelector('[aria-label="Work Experience"]');
-
-  if (!workExpTitle) return;
-  const addButton: any = document.querySelector(
-    '[aria-label="add new entry to Work history"]'
-  );
-  if (!addButton) return;
-  await delay(1000);
-
-  for await (const [
-    index,
-    element,
-  ] of applicantData.employment_history.entries()) {
-    if (index > 0) {
-      await delay(1000);
-      addButton.click();
-    }
-
-    await workExperienceDatafiller(applicantData, element, index);
-  }
-};
-
 function formatDateToYYYYMM(dateString: Date): string {
   if (!dateString) {
     return "";
@@ -172,7 +149,186 @@ const workExperienceDatafiller = async (
   }
 };
 
+const educationDatafiller = async (
+  applicantData: Applicant,
+  data: any,
+  index: number
+) => {
+  const labelFields = document.querySelectorAll<HTMLLabelElement>("label");
+
+  for (const label of labelFields) {
+    const text = label?.textContent;
+    // for compay
+    if (text && fromatStirngInLowerCase(text)?.includes("degreename")) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const input: any = document.getElementById(inputId);
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          if (input) {
+            input.value = data?.major ?? "";
+            input.focus(); // Autofocus on the input field
+            input.click();
+            input.click();
+            await delay(1000);
+            handleValueChanges(input);
+            setIdToLocalstorage(inputId);
+          }
+        }
+      }
+    }
+
+    // for collage
+    if (text && fromatStirngInLowerCase(text)?.includes("university")) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const input: any = document.getElementById(inputId);
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          if (input) {
+            input.value = data?.school ?? "";
+            input.focus(); // Autofocus on the input field
+            input.click();
+            input.click();
+            await delay(1000);
+            handleValueChanges(input);
+            setIdToLocalstorage(inputId);
+          }
+        }
+      }
+    }
+
+    // for degree type
+
+    if (text && fromatStirngInLowerCase(text)?.includes("degreetype")) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const select: any = document.getElementById(inputId);
+        const id = select.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          if (select) {
+            // filling state data
+            Array.from(select.options).find((option: any) => {
+              if (
+                fromatStirngInLowerCase(option?.text) ===
+                  fromatStirngInLowerCase(data?.degree) ||
+                fromatStirngInLowerCase(option?.text)?.includes(
+                  fromatStirngInLowerCase(data?.degree)
+                ) ||
+                fromatStirngInLowerCase(data?.degree)?.includes(
+                  fromatStirngInLowerCase(option?.text)
+                )
+              ) {
+                option.selected = true;
+                handleValueChanges(select);
+              }
+            });
+            await delay(1000);
+            handleValueChanges(select);
+            setIdToLocalstorage(inputId);
+          }
+        }
+      }
+    }
+
+    // for start date
+    if (text && fromatStirngInLowerCase(text)?.includes("start")) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const input: any = document.getElementById(inputId);
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          if (input) {
+            input.value = formatDateToYYYYMM(data.startDate);
+            input.focus(); // Autofocus on the input field
+            input.click();
+            input.click();
+            await delay(1000);
+            handleValueChanges(input);
+            setIdToLocalstorage(inputId);
+          }
+        }
+      }
+    }
+
+    // end data
+
+    // for start date
+    if (
+      !data.isCurrent &&
+      text &&
+      fromatStirngInLowerCase(text)?.includes("end")
+    ) {
+      const inputId = label.getAttribute("for");
+      if (inputId) {
+        const input: any = document.getElementById(inputId);
+        const id = input.getAttribute("id");
+        const allInputId = getAllinputId();
+        if (!allInputId?.includes(id)) {
+          if (input) {
+            input.value = formatDateToYYYYMM(data.endDate);
+            input.focus(); // Autofocus on the input field
+            input.click();
+            input.click();
+            await delay(1000);
+            handleValueChanges(input);
+            setIdToLocalstorage(inputId);
+          }
+        }
+      }
+    }
+  }
+};
+
+const fillWorkExperience = async (applicantData: Applicant) => {
+  const workExpTitle = document.querySelector('[aria-label="Work Experience"]');
+
+  if (!workExpTitle) return;
+  const addButton: any = document.querySelector(
+    '[aria-label="add new entry to Work history"]'
+  );
+  if (!addButton) return;
+  await delay(1000);
+
+  for await (const [
+    index,
+    element,
+  ] of applicantData.employment_history.entries()) {
+    if (index > 0) {
+      await delay(1000);
+      addButton.click();
+    }
+
+    await workExperienceDatafiller(applicantData, element, index);
+  }
+};
+
+const fillEducation = async (applicantData: Applicant) => {
+  const workExpTitle = document.querySelector('[aria-label="Work Experience"]');
+
+  if (!workExpTitle) return;
+  const addButton: any = document.querySelector(
+    '[aria-label="add new entry to Education NO Campus"]'
+  );
+  if (!addButton) return;
+  await delay(1000);
+
+  for await (const [index, element] of applicantData.education.entries()) {
+    if (index > 0) {
+      await delay(1000);
+      addButton.click();
+    }
+
+    await educationDatafiller(applicantData, element, index);
+  }
+};
+
 export const lenovo = async (tempDiv: any, applicantData: Applicant) => {
-  //
+  console.log("applocantdata::", applicantData);
   await fillWorkExperience(applicantData);
+  await fillEducation(applicantData);
 };
