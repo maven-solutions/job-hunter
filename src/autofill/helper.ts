@@ -59,6 +59,7 @@ import { mvpworks } from "./domainSpecific/mvpworks";
 import { trinethire } from "./domainSpecific/trinethire";
 import { gnahiring } from "./domainSpecific/gnahiring";
 import { lenovo } from "./domainSpecific/lenovo";
+import { thyssenkrupp } from "./domainSpecific/thyssenkrupp";
 
 export const setLocalStorageData = (key: any, value: any): void => {
   chrome.storage.local.set({
@@ -430,6 +431,10 @@ export const detectInputAndFillData = async (
 
     if (window.location.href.includes("lenovo")) {
       await lenovo(tempDiv ?? tempDivForFile, applicantData);
+    }
+
+    if (window.location.href.includes("thyssenkrupp")) {
+      await thyssenkrupp(tempDiv ?? tempDivForFile, applicantData);
     }
 
     // careers.gehealthcare a reasearch needed
