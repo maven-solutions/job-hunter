@@ -69,6 +69,9 @@ export const fileTypeDataFiller = async (
   if (window.location.href.includes(".myworkdayjobs.")) {
     return;
   }
+  if (window.location.href.includes(".thyssenkrupp.")) {
+    return;
+  }
 
   try {
     if (applicantData.pdf_url) {
