@@ -15,7 +15,10 @@ export const changeMyWorkdaysButtonText = () => {
   const manualApplyButton = document.querySelector<HTMLElement>(
     '[data-automation-id="applyManually"]'
   );
-  if (manualApplyButton) {
+  if (
+    manualApplyButton &&
+    manualApplyButton.textContent !== "Apply with CareerAI"
+  ) {
     manualApplyButton.textContent = "Apply with CareerAI";
   }
 };
