@@ -54,6 +54,7 @@ const AllInputField = (props: any) => {
     { label: "Agile Coach", value: "agile coach" },
     { label: "Product Manager", value: "product manager" },
     { label: "Clinical Research", value: "clinical research" },
+    { label: "Program Manager", value: "program manager" },
   ];
   const employmentOptions = [
     { value: "part-time", label: "Part-time" },
