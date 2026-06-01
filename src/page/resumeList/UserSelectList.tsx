@@ -4,16 +4,17 @@ import HeadingTitle from "../../component/heading/HeadingTitle";
 import { RootStore, useAppSelector } from "../../store/store";
 
 const UserSelectList = (props: any) => {
-  const { selectedUserValue, handleSelectChanges } = props;
+  const { selectedUserValue, handleSelectChanges, options, title } = props;
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
+  const selectOptions = options ?? resumeList?.userList;
   return (
     <div className="va_user_select_section_wrapper">
-      <HeadingTitle title="Applicant List:" />
+      <HeadingTitle title={title ?? "Applicant List:"} />
       <Select
         isSearchable={false}
-        options={resumeList?.userList}
+        options={selectOptions}
         className="react-select-container-va"
         classNamePrefix="react-select"
         styles={{

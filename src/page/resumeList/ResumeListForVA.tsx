@@ -44,11 +44,12 @@ const ResumeListForVA = (props: any) => {
     setErrorINCountSave,
   } = props;
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [selectedUserValue, setSelectedUserValue] = useState(null);
+  const [selectedUserValue, setSelectedUserValue] = useState<any>(null);
   const [userResumeList, setUserResumeList] = useState([]);
   const [iframeUrl, setIframeUrl] = useState("");
   const [showAddWebsite, setShowAddWebsite] = useState(false);
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
+  const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -162,13 +163,60 @@ const ResumeListForVA = (props: any) => {
     setSelectedUserValue(option);
   };
 
-  const getUserDetailsById = (id) => {
-    const filteredArray = resumeList.applicantData?.filter((data) => {
-      return id === data.applicantId;
-    });
-    if (!filteredArray && filteredArray.length === 0) {
-      return null;
+  const handleIndividualSelectChanges = (option: any) => {
+		const filteredArray = resumeList.individualApplicantData?.filter(
+			(data: any) => {
+				return option.value === data.applicantId;
+			},
+		);
+		if (!filteredArray || filteredArray.length === 0) return;
+		setUserResumeList(filteredArray[0].applicants);
+		setSelectedUserId(option.value);
+		setSelectedUserValue(option);
+		dispatch(setResumeIndex(0));
+  };
+
+  const handleModeSwitch = (mode: "va" | "individual") => {
+    setApplicantMode(mode);
+    dispatch(setResumeIndex(0));
+    if (mode === "individual") {
+      const first = resumeList.individualApplicantData?.[0];
+      if (first) {
+        setSelectedUserId(first.applicantId);
+        setSelectedUserValue({
+          label: first.fullName,
+          value: first.applicantId,
+        });
+        setUserResumeList(first.applicants ?? []);
+      } else {
+        setSelectedUserId(null);
+        setSelectedUserValue(null);
+        setUserResumeList([]);
+      }
+    } else {
+      const first = resumeList.applicantData?.[resumeList.userIndex];
+      if (first) {
+        setSelectedUserId(first.applicantId);
+        setSelectedUserValue({
+          label: first.fullName,
+          value: first.applicantId,
+        });
+        setUserResumeList(first.applicants ?? []);
+      } else {
+        setSelectedUserId(null);
+        setSelectedUserValue(null);
+        setUserResumeList([]);
+      }
     }
+  };
+
+  const getUserDetailsById = (id) => {
+    const pool =
+		applicantMode === "individual"
+			? resumeList.individualApplicantData
+			: resumeList.applicantData;
+	const filteredArray = pool?.filter((data: any) => id === data.applicantId);
+	if (!filteredArray || filteredArray.length === 0) return null;
     return filteredArray[0];
   };
 
@@ -178,83 +226,121 @@ const ResumeListForVA = (props: any) => {
   };
 
   return (
-    <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
-      <UserSelectList
-        selectedUserValue={selectedUserValue}
-        handleSelectChanges={handleSelectChanges}
-      />
-      <Height height="15" />
-      {showJobTrackedAlert && (
-        <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
-      )}
-      {errorINCountSave && (
-        <JobNotSavedError setShowJobTrackedAlert={setErrorINCountSave} />
-      )}
-      <WhiteCard>
-        {autoFilling && <AutofillLoader />}
+		<Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
+			<div className="ciautofill_v2_mode_toggle">
+				<button
+					className={`ciautofill_v2_mode_btn ${applicantMode === "va" ? "ciautofill_v2_mode_btn--active" : ""}`}
+					onClick={() => handleModeSwitch("va")}
+				>
+					Organization Applicants
+				</button>
+				<button
+					className={`ciautofill_v2_mode_btn ${applicantMode === "individual" ? "ciautofill_v2_mode_btn--active" : ""}`}
+					onClick={() => handleModeSwitch("individual")}
+				>
+					Individual Applicants
+				</button>
+			</div>
+			{applicantMode === "va" ? (
+				<UserSelectList
+					selectedUserValue={selectedUserValue}
+					handleSelectChanges={handleSelectChanges}
+				/>
+			) : (
+				<UserSelectList
+					selectedUserValue={selectedUserValue}
+					handleSelectChanges={handleIndividualSelectChanges}
+					options={resumeList.individualUserList}
+				/>
+			)}
+			<Height height="15" />
+			{showJobTrackedAlert && (
+				<JobSavedNotification
+					setShowJobTrackedAlert={setShowJobTrackedAlert}
+				/>
+			)}
+			{errorINCountSave && (
+				<JobNotSavedError
+					setShowJobTrackedAlert={setErrorINCountSave}
+				/>
+			)}
+			<WhiteCard>
+				{autoFilling && <AutofillLoader />}
 
-        {!autoFilling && (
-          <>
-            <span className="ciautofill_v2_select_title">
-              Select the Resume{" "}
-            </span>
-            <div className="ciautofill__resmelist__wrapper-va">
-              {resumeList.loading && <ResumeSkleton />}
-              {resumeList.res_success && (
-                <div className="ciautofill_v2_resume_list_container">
-                  {userResumeList.length > 0 &&
-                    userResumeList
-                      .filter((r) => r.pdfUrl)
-                      ?.map((item, index) => {
-                        return (
-                          <div
-                            className={`ciautofill_v2_resume_section ${
-                              index === resumeList.resumeIndex
-                                ? "ciautofill_v2_resume_section-active"
-                                : ""
-                            }`}
-                            key={item.id}
-                            onClick={() => handleSelectedResume(index)}
-                          >
-                            <span className="ciautofill_v2_resume_name">
-                              {" "}
-                              <RenderName item={item} resumeList={resumeList} />
-                            </span>{" "}
-                            <Eye
-                              size={16}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                hanldeChildClick(item?.pdfUrl);
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </WhiteCard>
-      <Height height="15" />
-      {!iframeUrl && showAddWebsite && <AddMissingLink />}
-      {iframeUrl && <IframeProceed />}
-      <div className="ciautofill_v2_resume_autofill_button_section">
-        <AutofillFieldsForVA
-          selectedUserId={selectedUserId}
-          getUserDetailsById={getUserDetailsById}
-          selectResumeIndex={resumeList.resumeIndex}
-          content={content}
-          setAutoFilling={setAutoFilling}
-          setIframeUrl={setIframeUrl}
-          iframeUrl={iframeUrl}
-          setShowAddWebsite={setShowAddWebsite}
-          setShowJobTrackedAlert={setShowJobTrackedAlert}
-          setErrorINCountSave={setErrorINCountSave}
-          autoFilling={autoFilling}
-        />
-      </div>
-    </Layout>
+				{!autoFilling && (
+					<>
+						<span className="ciautofill_v2_select_title">
+							Select the Resume{" "}
+						</span>
+						<div className="ciautofill__resmelist__wrapper-va">
+							{resumeList.loading && <ResumeSkleton />}
+							{resumeList.res_success && (
+								<div className="ciautofill_v2_resume_list_container">
+									{userResumeList.length > 0 &&
+										userResumeList
+											.filter((r) => r.pdfUrl)
+											?.map((item, index) => {
+												return (
+													<div
+														className={`ciautofill_v2_resume_section ${
+															index ===
+															resumeList.resumeIndex
+																? "ciautofill_v2_resume_section-active"
+																: ""
+														}`}
+														key={item.id}
+														onClick={() =>
+															handleSelectedResume(
+																index,
+															)
+														}
+													>
+														<span className="ciautofill_v2_resume_name">
+															{" "}
+															<RenderName
+																item={item}
+																resumeList={
+																	resumeList
+																}
+															/>
+														</span>{" "}
+														<Eye
+															size={16}
+															onClick={(e) => {
+																e.stopPropagation();
+																hanldeChildClick(
+																	item?.pdfUrl,
+																);
+															}}
+														/>
+													</div>
+												);
+											})}
+								</div>
+							)}
+						</div>
+					</>
+				)}
+			</WhiteCard>
+			<Height height="15" />
+			{!iframeUrl && showAddWebsite && <AddMissingLink />}
+			{iframeUrl && <IframeProceed />}
+			<div className="ciautofill_v2_resume_autofill_button_section">
+				<AutofillFieldsForVA
+					selectedUserId={selectedUserId}
+					getUserDetailsById={getUserDetailsById}
+					selectResumeIndex={resumeList.resumeIndex}
+					content={content}
+					setAutoFilling={setAutoFilling}
+					setIframeUrl={setIframeUrl}
+					iframeUrl={iframeUrl}
+					setShowAddWebsite={setShowAddWebsite}
+					setShowJobTrackedAlert={setShowJobTrackedAlert}
+					setErrorINCountSave={setErrorINCountSave}
+					autoFilling={autoFilling}
+				/>
+			</div>
+		</Layout>
   );
 };
 

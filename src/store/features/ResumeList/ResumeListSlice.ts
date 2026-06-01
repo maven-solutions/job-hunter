@@ -12,6 +12,8 @@ const initialState: any = {
 
   applicantData: [],
   userList: [],
+  individualApplicantData: [],
+  individualUserList: [],
   allRoles: [],
   userIndex: 0,
   resumeIndex: 0,
@@ -42,11 +44,15 @@ const ResumeList = createSlice({
       (state, { payload }: PayloadAction<any>) => {
         state.loading = false;
         state.res_success = true;
-        state.applicantData = payload.data;
-        const userList = payload?.data?.map((data) => {
-          return { label: data.fullName, value: data.applicantId };
-        });
-        state.userList = userList;
+        state.applicantData = payload.data.applicants ?? [];
+        state.individualApplicantData = payload.data.individualApplicants ?? [];
+        state.userList = (payload.data.applicants ?? []).map((data) => ({
+          label: data.fullName,
+          value: data.applicantId,
+        }));
+        state.individualUserList = (
+          payload.data.individualApplicants ?? []
+        ).map((data) => ({ label: data.fullName, value: data.applicantId }));
       }
     );
     builder.addCase(getApplicantsData.rejected, (state) => {
