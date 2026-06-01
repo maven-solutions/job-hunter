@@ -7,6 +7,8 @@
   padding: 15px;
   transition: border-color 0.3s ease;
   border: 1px solid transparent;
+  max-height: 500px !important;
+  overflow-y: auto;
 }
 
 .ci-white-card-hover:hover {
