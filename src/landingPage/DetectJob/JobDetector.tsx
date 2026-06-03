@@ -202,30 +202,30 @@ const JobDetector = (props: any) => {
     }
   }, [debouncedSearchTerm]);
 
-  useEffect(() => {
-    if (window.location.href.includes("chatgpt.")) {
-      if (isGenerating) {
-        setTimeout(() => {
-          resumeGPTmainFunction(
-            setIsGenerating,
-            isGenerating,
-            authState,
-            setInfoOpen
-          );
-        }, 100);
-      } else {
-        setTimeout(() => {
-          resumeGPTmainFunction(
-            setIsGenerating,
-            isGenerating,
-            authState,
-            setInfoOpen
-          );
-        }, 1500);
-      }
-    }
-    setInfoOpen(false);
-  }, [window.location.href, isGenerating]);
+  // useEffect(() => {
+  //   if (window.location.href.includes("chatgpt.")) {
+  //     if (isGenerating) {
+  //       setTimeout(() => {
+  //         resumeGPTmainFunction(
+  //           setIsGenerating,
+  //           isGenerating,
+  //           authState,
+  //           setInfoOpen
+  //         );
+  //       }, 100);
+  //     } else {
+  //       setTimeout(() => {
+  //         resumeGPTmainFunction(
+  //           setIsGenerating,
+  //           isGenerating,
+  //           authState,
+  //           setInfoOpen
+  //         );
+  //       }, 1500);
+  //     }
+  //   }
+  //   setInfoOpen(false);
+  // }, [window.location.href, isGenerating]);
   // CUSTOM HOOK TO ADD CUSTOM BUTTON ON WEBSITE
   useSimplyhiredGlassdoorNoti();
   useTrackJobsFromWebsite(dispatch, setShowPage);
