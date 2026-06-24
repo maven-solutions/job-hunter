@@ -3,7 +3,7 @@ export const STAGING_WEBSITE_URL =
 export const LIVE_WEBSITE_URL = "https://backend.careerai.io/public";
 
 // two state should be always false
-export const EXTENSION_IN_LIVE = true;
+export const EXTENSION_IN_LIVE = false;
 
 export const BASE_URL = EXTENSION_IN_LIVE
   ? LIVE_WEBSITE_URL
