@@ -48,6 +48,32 @@ chrome.runtime.onMessageExternal.addListener(function (
   }
 });
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request?.action !== EXTENSION_ACTION.CAPTURE_VISIBLE_TAB) {
+    return false;
+  }
+
+  chrome.tabs.captureVisibleTab(
+    sender.tab?.windowId,
+    { format: "png" },
+    (dataUrl) => {
+      if (chrome.runtime.lastError || !dataUrl) {
+        sendResponse({
+          success: false,
+          error:
+            chrome.runtime.lastError?.message ||
+            "Unable to capture visible tab",
+        });
+        return;
+      }
+
+      sendResponse({ success: true, dataUrl });
+    },
+  );
+
+  return true;
+});
+
 // chrome.runtime.onMessageExternal.addListener(function (
 //   request,
 //   sender,

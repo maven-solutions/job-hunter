@@ -6,6 +6,7 @@ import { RootStore, useAppSelector } from "../../store/store";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
+  EXTENSION_ACTION,
   LOCALSTORAGE,
 } from "../../utils/constant";
 import { useDebounce } from "use-debounce";
@@ -169,8 +170,102 @@ const AutofillFields = (props: any) => {
     }
   }, [debouncedSearchTerm]);
 
-  const handleScreenshot = () => {
-    console.log("Screenshot");
+  const wait = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const captureVisibleTab = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { action: EXTENSION_ACTION.CAPTURE_VISIBLE_TAB },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          if (!response?.success || !response?.dataUrl) {
+            reject(new Error(response?.error || "Capture failed"));
+            return;
+          }
+          resolve(response.dataUrl);
+        },
+      );
+    });
+  };
+
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Failed to load image"));
+      image.src = src;
+    });
+  };
+
+  const handleScreenshot = async () => {
+    const scrollElement =
+      document.scrollingElement || document.documentElement || document.body;
+    const originalX = window.scrollX;
+    const originalY = window.scrollY;
+
+    try {
+      const fullWidth = Math.max(
+        scrollElement.scrollWidth,
+        document.documentElement.scrollWidth,
+        document.body.scrollWidth,
+        window.innerWidth,
+      );
+      const fullHeight = Math.max(
+        scrollElement.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight,
+        window.innerHeight,
+      );
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const stitchedCanvas = document.createElement("canvas");
+      stitchedCanvas.width = fullWidth;
+      stitchedCanvas.height = fullHeight;
+      const ctx = stitchedCanvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Canvas context unavailable");
+      }
+
+      for (let y = 0; y < fullHeight; y += viewportHeight) {
+        window.scrollTo(0, y);
+        await wait(350);
+
+        const dataUrl = await captureVisibleTab();
+        const screenshot = await loadImage(dataUrl);
+
+        const sliceHeight = Math.min(viewportHeight, fullHeight - y);
+        const scaleX = screenshot.width / viewportWidth;
+        const scaleY = screenshot.height / viewportHeight;
+
+        ctx.drawImage(
+          screenshot,
+          0,
+          0,
+          Math.round(viewportWidth * scaleX),
+          Math.round(sliceHeight * scaleY),
+          0,
+          y,
+          viewportWidth,
+          sliceHeight,
+        );
+      }
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = stitchedCanvas.toDataURL("image/png");
+      downloadLink.download = `careerai-fullpage-${Date.now()}.png`;
+      downloadLink.click();
+    } catch (error) {
+      console.error("Unable to capture full-page screenshot:", error);
+      alert("Unable to capture full-page screenshot on this page.");
+    } finally {
+      window.scrollTo(originalX, originalY);
+    }
   };
 
   return (
