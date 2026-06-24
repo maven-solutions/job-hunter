@@ -53,23 +53,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return false;
   }
 
-  chrome.tabs.captureVisibleTab(
-    sender.tab?.windowId,
-    { format: "png" },
-    (dataUrl) => {
-      if (chrome.runtime.lastError || !dataUrl) {
+  const respondWithCapture = (windowId: number | undefined) => {
+    chrome.tabs.captureVisibleTab(windowId, { format: "png" }, (dataUrl) => {
+      const errorMessage = chrome.runtime.lastError?.message;
+      if (errorMessage || !dataUrl) {
+        // Fallback to current window when sender tab window is unavailable.
+        if (windowId !== undefined) {
+          respondWithCapture(undefined);
+          return;
+        }
         sendResponse({
           success: false,
-          error:
-            chrome.runtime.lastError?.message ||
-            "Unable to capture visible tab",
+          error: errorMessage || "Unable to capture visible tab",
         });
         return;
       }
 
       sendResponse({ success: true, dataUrl });
-    },
-  );
+    });
+  };
+
+  respondWithCapture(sender.tab?.windowId);
 
   return true;
 });

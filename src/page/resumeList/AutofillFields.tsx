@@ -262,7 +262,11 @@ const AutofillFields = (props: any) => {
       downloadLink.click();
     } catch (error) {
       console.error("Unable to capture full-page screenshot:", error);
-      alert("Unable to capture full-page screenshot on this page.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to capture full-page screenshot on this page.";
+      alert(`Unable to capture full-page screenshot: ${message}`);
     } finally {
       window.scrollTo(originalX, originalY);
     }
