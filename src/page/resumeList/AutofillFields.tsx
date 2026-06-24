@@ -47,7 +47,7 @@ const extractInfo = (resumeData, applicationForm) => {
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
-    (sec) => sec.section === "employment-history"
+    (sec) => sec.section === "employment-history",
   );
 
   const higher_education = getHighestEducation(education);
@@ -117,12 +117,12 @@ const AutofillFields = (props: any) => {
     const url = window.location.href;
     const applicantData = extractInfo(
       resumeList.applicantData[selectedResume].applicant,
-      resumeList.applicantData[selectedResume].applicationForm
+      resumeList.applicantData[selectedResume].applicationForm,
     );
     // console.log("applicantData::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
-      JSON.stringify(applicantData)
+      JSON.stringify(applicantData),
     );
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
 
@@ -130,7 +130,7 @@ const AutofillFields = (props: any) => {
       applicantData,
       startLoading,
       stopLoading,
-      setIframeUrl
+      setIframeUrl,
     );
   };
 
@@ -139,7 +139,7 @@ const AutofillFields = (props: any) => {
       if (iframeUrl.includes(".greenhouse.")) {
         window.open(
           `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
-          "_blank"
+          "_blank",
         );
       } else {
         window.open(iframeUrl, "_blank");
@@ -169,6 +169,10 @@ const AutofillFields = (props: any) => {
     }
   }, [debouncedSearchTerm]);
 
+  const handleScreenshot = () => {
+    console.log("Screenshot");
+  };
+
   return (
     <div className="ci_va_two_button_section">
       <span />
@@ -186,6 +190,12 @@ const AutofillFields = (props: any) => {
               {iframeUrl ? "Proceed" : "Auto Fill"}
             </button>
           )}
+          <button
+            className={`screenshot__btn `}
+            onClick={() => handleScreenshot()}
+          >
+            Screeshot
+          </button>
         </div>
       </div>
     </div>
