@@ -43,14 +43,14 @@ const getCompanyDetails = (setCompanyDetails) => {
 
   // Get company name and link
   const atag = companyDetailsEle.querySelector<HTMLAnchorElement>(
-    ".artdeco-entity-lockup__content a"
+    ".artdeco-entity-lockup__content a",
   );
   if (atag?.textContent) {
     companyDetails.name = atag.textContent.trim();
   }
   if (atag?.href) {
     companyDetails.link = `https://www.linkedin.com${atag.getAttribute(
-      "href"
+      "href",
     )}`;
   }
 
@@ -68,7 +68,7 @@ const getCompanyDetails = (setCompanyDetails) => {
 
   // Get company description
   const desc = companyDetailsEle.querySelector<HTMLElement>(
-    ".jobs-company__company-description > *:first-child"
+    ".jobs-company__company-description > *:first-child",
   );
   if (desc?.innerHTML) {
     const sanitizedDescription = sanitizeHtml(desc.innerHTML);
@@ -82,7 +82,7 @@ const getCompanyDetails = (setCompanyDetails) => {
 const getHiringTeamDetails = (setRecruiterDetails) => {
   let recruiterDetails: RecruiterDetails = {};
   const hiringSectionEle = document.querySelector(
-    ".hirer-card__hirer-information"
+    ".hirer-card__hirer-information",
   );
 
   if (!hiringSectionEle) {
@@ -90,7 +90,7 @@ const getHiringTeamDetails = (setRecruiterDetails) => {
   }
 
   const nameTag = hiringSectionEle.querySelector<HTMLElement>(
-    ".jobs-poster__name strong"
+    ".jobs-poster__name strong",
   );
   if (nameTag?.textContent) {
     recruiterDetails.name = nameTag.textContent.trim();
@@ -108,7 +108,7 @@ const getHiringTeamDetails = (setRecruiterDetails) => {
   }
 
   const detailsEle = hiringSectionEle.querySelector<HTMLElement>(
-    ".hirer-card__hirer-information .text-body-small"
+    ".hirer-card__hirer-information .text-body-small",
   );
   if (detailsEle?.textContent) {
     recruiterDetails.title = detailsEle.textContent.trim();
@@ -131,21 +131,21 @@ export const getContentFromLinkedInJobs = (
   setCompanyDetails,
   setRecruiterDetails,
   setJoboverview,
-  setLocation
+  setLocation,
 ): void => {
   try {
     setPostUrl(window.location.href);
     clearStateAndCity();
 
     const jobsBody = document?.getElementsByClassName(
-      "job-details-jobs-unified-top-card__job-title"
+      "job-details-jobs-unified-top-card__job-title",
     );
     if (jobsBody[0]) {
       setJobstitle(jobsBody[0]?.textContent.trim());
     }
 
     const secondLiElement = document?.querySelectorAll(
-      ".job-details-jobs-unified-top-card__job-insight"
+      ".job-details-jobs-unified-top-card__job-insight",
     )[1];
     const secondLiText = secondLiElement?.textContent?.trim() ?? "";
 
@@ -153,7 +153,7 @@ export const getContentFromLinkedInJobs = (
 
     setTimeout(() => {
       let jobDetailsElement: any = document?.querySelector(
-        ".jobs-description__container"
+        ".jobs-description__container",
       );
 
       setJobDescription(jobDetailsElement?.innerHTML);
@@ -163,7 +163,7 @@ export const getContentFromLinkedInJobs = (
     //location
     const locationText = document
       .querySelector(
-        ".job-details-jobs-unified-top-card__primary-description-without-tagline "
+        ".job-details-jobs-unified-top-card__primary-description-without-tagline ",
       )
       ?.textContent?.trim()
       ?.split("·")[1]
@@ -173,7 +173,7 @@ export const getContentFromLinkedInJobs = (
     }
 
     const location2 = document.querySelector(
-      ".job-details-jobs-unified-top-card__tertiary-description"
+      ".job-details-jobs-unified-top-card__tertiary-description",
     );
     const locationtext2: any = location2?.childNodes[1] ?? "";
     if (locationtext2?.textContent?.trim()) {
@@ -181,7 +181,7 @@ export const getContentFromLinkedInJobs = (
     }
 
     const loaction3Parent = document.querySelector(
-      ".job-details-jobs-unified-top-card__primary-description-container"
+      ".job-details-jobs-unified-top-card__primary-description-container",
     );
 
     if (loaction3Parent) {
@@ -226,9 +226,9 @@ export const getContentFromLinkedInJobs = (
     // Assuming you have a reference to the DOM element
     setTimeout(() => {
       const companyNameEle = document.querySelector(
-        ".job-details-jobs-unified-top-card__company-name"
+        ".job-details-jobs-unified-top-card__company-name",
       );
-      const companyName = companyNameEle.textContent.trim();
+      const companyName = companyNameEle?.textContent?.trim();
       setCompanyName(companyName);
     }, 500);
     // for comany details---
