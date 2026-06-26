@@ -277,33 +277,32 @@ const ResumeListForVA = (props: any) => {
 							{resumeList.res_success && (
 								<div className="ciautofill_v2_resume_list_container">
 									{userResumeList.length > 0 &&
-										userResumeList
-											.filter((r) => r.pdfUrl)
-											?.map((item, index) => {
-												return (
-													<div
-														className={`ciautofill_v2_resume_section ${
-															index ===
-															resumeList.resumeIndex
-																? "ciautofill_v2_resume_section-active"
-																: ""
-														}`}
-														key={item.id}
-														onClick={() =>
-															handleSelectedResume(
-																index,
-															)
-														}
-													>
-														<span className="ciautofill_v2_resume_name">
-															{" "}
-															<RenderName
-																item={item}
-																resumeList={
-																	resumeList
-																}
-															/>
-														</span>{" "}
+										userResumeList?.map((item, index) => {
+											return (
+												<div
+													className={`ciautofill_v2_resume_section ${
+														index ===
+														resumeList.resumeIndex
+															? "ciautofill_v2_resume_section-active"
+															: ""
+													}`}
+													key={item.id}
+													onClick={() =>
+														handleSelectedResume(
+															index,
+														)
+													}
+												>
+													<span className="ciautofill_v2_resume_name">
+														{" "}
+														<RenderName
+															item={item}
+															resumeList={
+																resumeList
+															}
+														/>
+													</span>{" "}
+													{item?.pdfUrl && (
 														<Eye
 															size={16}
 															onClick={(e) => {
@@ -313,9 +312,10 @@ const ResumeListForVA = (props: any) => {
 																);
 															}}
 														/>
-													</div>
-												);
-											})}
+													)}
+												</div>
+											);
+										})}
 								</div>
 							)}
 						</div>
