@@ -8,6 +8,63 @@ import {
 } from "../helper";
 import { workDaysdateFiller } from "./myworkdayWork";
 
+const getVisibleOptions = () => {
+  const options = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="option"]')
+  );
+
+  return options.filter((option) => {
+    const style = window.getComputedStyle(option);
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      option.getAttribute("aria-hidden") !== "true" &&
+      option.getAttribute("aria-disabled") !== "true"
+    );
+  });
+};
+
+const getActiveDropdownOptions = () => {
+  const expandedTrigger = document.querySelector<HTMLElement>(
+    '[aria-haspopup="listbox"][aria-expanded="true"]'
+  );
+  const controlledId = expandedTrigger?.getAttribute("aria-controls");
+
+  if (controlledId) {
+    const controlledElement = document.getElementById(controlledId);
+    if (controlledElement) {
+      const controlledOptions = Array.from(
+        controlledElement.querySelectorAll<HTMLElement>('[role="option"]')
+      ).filter((option) => option.getAttribute("aria-disabled") !== "true");
+
+      if (controlledOptions.length > 0) {
+        return controlledOptions;
+      }
+    }
+  }
+
+  const openListBoxes = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="listbox"]:not([aria-hidden="true"])'
+    )
+  ).filter((listbox) => {
+    const style = window.getComputedStyle(listbox);
+    return style.display !== "none" && style.visibility !== "hidden";
+  });
+
+  for (const listbox of openListBoxes) {
+    const options = Array.from(
+      listbox.querySelectorAll<HTMLElement>('[role="option"]')
+    ).filter((option) => option.getAttribute("aria-disabled") !== "true");
+
+    if (options.length > 0) {
+      return options;
+    }
+  }
+
+  return getVisibleOptions();
+};
+
 export const clickWorkdayEducationButton = async (applicantData) => {
   const tempDiv = document.querySelector("body");
   let delte = false;
@@ -254,8 +311,7 @@ const degreeFiller = async (data, index) => {
           select.click();
           await delay(1000);
 
-          const selectOptions: any =
-            document.querySelectorAll('[role="option"]');
+          const selectOptions = getActiveDropdownOptions();
           for (const [index, element] of selectOptions.entries()) {
             if (
               fromatStirngInLowerCase(element.textContent.trim()) ===

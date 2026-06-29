@@ -6,6 +6,86 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import { clickWorkdayEducationButton } from "./myworkdayEducation";
 import { clickWorkdayWorkExperienceButton } from "./myworkdayWork";
 
+const getVisibleOptions = () => {
+  const options = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="option"]')
+  );
+
+  return options.filter((option) => {
+    const style = window.getComputedStyle(option);
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      option.getAttribute("aria-hidden") !== "true" &&
+      option.getAttribute("aria-disabled") !== "true"
+    );
+  });
+};
+
+const getActiveDropdownOptions = () => {
+  const expandedTrigger = document.querySelector<HTMLElement>(
+    '[aria-haspopup="listbox"][aria-expanded="true"]'
+  );
+  const controlledId = expandedTrigger?.getAttribute("aria-controls");
+
+  if (controlledId) {
+    const controlledElement = document.getElementById(controlledId);
+    if (controlledElement) {
+      const controlledOptions = Array.from(
+        controlledElement.querySelectorAll<HTMLElement>('[role="option"]')
+      ).filter((option) => option.getAttribute("aria-disabled") !== "true");
+
+      if (controlledOptions.length > 0) {
+        return controlledOptions;
+      }
+    }
+  }
+
+  const openListBoxes = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="listbox"]:not([aria-hidden="true"])'
+    )
+  ).filter((listbox) => {
+    const style = window.getComputedStyle(listbox);
+    return style.display !== "none" && style.visibility !== "hidden";
+  });
+
+  for (const listbox of openListBoxes) {
+    const options = Array.from(
+      listbox.querySelectorAll<HTMLElement>('[role="option"]')
+    ).filter((option) => option.getAttribute("aria-disabled") !== "true");
+
+    if (options.length > 0) {
+      return options;
+    }
+  }
+
+  return getVisibleOptions();
+};
+
+const clickMatchingOption = (matcher: (text: string) => boolean) => {
+  const options = getActiveDropdownOptions();
+  for (const option of options) {
+    const optionText = option.textContent?.trim() ?? "";
+    if (matcher(optionText)) {
+      option.click();
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const isUnitedStatesValue = (text: string) => {
+  const formatted = fromatStirngInLowerCase(text);
+  return (
+    formatted === fromatStirngInLowerCase("america") ||
+    formatted === fromatStirngInLowerCase("usa") ||
+    formatted === fromatStirngInLowerCase("unitedstates") ||
+    formatted === fromatStirngInLowerCase("unitedstatesofamerica")
+  );
+};
+
 const fillcountry = async (applicantData) => {
   let countryDropDown: any = document.querySelector(
     '[data-automation-id="countryDropdown"]'
@@ -26,12 +106,7 @@ const fillcountry = async (applicantData) => {
 
   countryDropDown.click();
   await delay(1000);
-  const selectOptions: any = document.querySelectorAll('[role="option"]');
-  for (const [index, element] of selectOptions.entries()) {
-    if (countryHandler(element.textContent.trim(), applicantData)) {
-      element.click();
-    }
-  }
+  clickMatchingOption((text) => countryHandler(text, applicantData));
   await delay(3000);
 };
 
@@ -47,46 +122,30 @@ const fillDeviceType = async (applicantData) => {
   }
   phoneElement.click();
   await delay(500);
-  const selectOptions: any = document.querySelectorAll('[role="option"]');
-
-  for (const [index, element] of selectOptions.entries()) {
-    if (
-      fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase("mobile")
-      ) ||
-      fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase("cell")
-      )
-    ) {
-      //   phonetype = true;
-      element.click();
-    }
-  }
+  clickMatchingOption((text) => {
+    const formattedText = fromatStirngInLowerCase(text);
+    return (
+      formattedText?.includes(fromatStirngInLowerCase("mobile")) ||
+      formattedText?.includes(fromatStirngInLowerCase("cell"))
+    );
+  });
   await delay(500);
 };
 
 const countryHandler = (text, applicantData) => {
+  const normalizedCountry = applicantData?.country
+    ? fromatStirngInLowerCase(applicantData.country)
+    : "";
+  const normalizedText = fromatStirngInLowerCase(text);
+
   if (
-    fromatStirngInLowerCase(text) ===
-    fromatStirngInLowerCase(applicantData.country)
+    normalizedCountry &&
+    normalizedText === normalizedCountry
   ) {
     return true;
   }
-  if (fromatStirngInLowerCase(text) === fromatStirngInLowerCase("america")) {
-    return true;
-  }
-  if (fromatStirngInLowerCase(text) === fromatStirngInLowerCase("usa")) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(text) === fromatStirngInLowerCase("unitedstates")
-  ) {
-    return true;
-  }
-  if (
-    fromatStirngInLowerCase(text) ===
-    fromatStirngInLowerCase("unitedstatesofamerica")
-  ) {
+
+  if (isUnitedStatesValue(applicantData?.country) && isUnitedStatesValue(text)) {
     return true;
   }
 };
@@ -166,27 +225,27 @@ const fillSponshership = async (applicantData: Applicant) => {
     ) {
       select.click();
       await delay(500);
-      const selectOptions: any = document.querySelectorAll('[role="option"]');
-      for (const element of selectOptions) {
-        if (
-          fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("no")
-          ) &&
-          !applicantData.sponsorship_required
-        ) {
-          element.click();
-          return;
-        }
+      if (
+        clickMatchingOption((text) => {
+          const formattedText = fromatStirngInLowerCase(text);
+          if (
+            formattedText?.includes(fromatStirngInLowerCase("no")) &&
+            !applicantData.sponsorship_required
+          ) {
+            return true;
+          }
 
-        if (
-          fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("yes")
-          ) &&
-          applicantData.sponsorship_required
-        ) {
-          element.click();
-          return;
-        }
+          if (
+            formattedText?.includes(fromatStirngInLowerCase("yes")) &&
+            applicantData.sponsorship_required
+          ) {
+            return true;
+          }
+
+          return false;
+        })
+      ) {
+        return;
       }
     }
   }
@@ -208,18 +267,15 @@ const authorizedTowork = async (applicantData: Applicant) => {
     ) {
       select.click();
       await delay(500);
-      const selectOptions: any = document.querySelectorAll('[role="option"]');
-      for (const element of selectOptions) {
-        if (
-          fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("yes")
-          ) &&
-          applicantData.us_work_authoriztaion
-        ) {
-          //   phonetype = true;
-          element.click();
-          return;
-        }
+      if (
+        clickMatchingOption(
+          (text) =>
+            fromatStirngInLowerCase(text)?.includes(
+              fromatStirngInLowerCase("yes")
+            ) && applicantData.us_work_authoriztaion
+        )
+      ) {
+        return;
       }
     }
   }
@@ -236,17 +292,14 @@ const fillisAdult = async (applicantData: Applicant) => {
     if (label?.toLowerCase()?.includes("18 years")) {
       select.click();
       await delay(500);
-      const selectOptions: any = document.querySelectorAll('[role="option"]');
-      for (const element of selectOptions) {
-        if (
-          fromatStirngInLowerCase(element.textContent.trim())?.includes(
+      if (
+        clickMatchingOption((text) =>
+          fromatStirngInLowerCase(text)?.includes(
             fromatStirngInLowerCase("yes")
           )
-        ) {
-          //   phonetype = true;
-          element.click();
-          return;
-        }
+        )
+      ) {
+        return;
       }
     }
   }
