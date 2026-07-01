@@ -2,13 +2,19 @@ import { LOCALSTORAGE } from "../../utils/constant";
 import { isEmptyArray } from "../../utils/helper";
 import { Applicant } from "../data";
 import { createFile } from "../FromFiller/fileTypeDataFiller";
-import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import {
+  checkIfExist,
+  delay,
+  fromatStirngInLowerCase,
+  handleValueChanges,
+} from "../helper";
+import { fieldNames } from "../FromFiller/fieldsname";
 import { clickWorkdayEducationButton } from "./myworkdayEducation";
 import { clickWorkdayWorkExperienceButton } from "./myworkdayWork";
 
 const fillcountry = async (applicantData) => {
   let countryDropDown: any = document.querySelector(
-    '[data-automation-id="countryDropdown"]'
+    '[data-automation-id="countryDropdown"]',
   );
   if (!countryDropDown) {
     countryDropDown = document.querySelector('[name="country"]');
@@ -37,7 +43,7 @@ const fillcountry = async (applicantData) => {
 
 const fillDeviceType = async (applicantData) => {
   let phoneElement: any = document.querySelector(
-    '[data-automation-id="phone-device-type"]'
+    '[data-automation-id="phone-device-type"]',
   );
   if (!phoneElement) {
     phoneElement = document.querySelector('[name="phoneType"]');
@@ -52,10 +58,10 @@ const fillDeviceType = async (applicantData) => {
   for (const [index, element] of selectOptions.entries()) {
     if (
       fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase("mobile")
+        fromatStirngInLowerCase("mobile"),
       ) ||
       fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase("cell")
+        fromatStirngInLowerCase("cell"),
       )
     ) {
       //   phonetype = true;
@@ -154,7 +160,7 @@ const filltodayDate = () => {
 
 const fillSponshership = async (applicantData: Applicant) => {
   const selectElement: any = document.querySelectorAll(
-    'button[aria-haspopup="listbox"]'
+    'button[aria-haspopup="listbox"]',
   );
 
   for (const select of selectElement) {
@@ -170,7 +176,7 @@ const fillSponshership = async (applicantData: Applicant) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("no")
+            fromatStirngInLowerCase("no"),
           ) &&
           !applicantData.sponsorship_required
         ) {
@@ -180,7 +186,7 @@ const fillSponshership = async (applicantData: Applicant) => {
 
         if (
           fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("yes")
+            fromatStirngInLowerCase("yes"),
           ) &&
           applicantData.sponsorship_required
         ) {
@@ -194,9 +200,80 @@ const fillSponshership = async (applicantData: Applicant) => {
   await delay(500);
 };
 
+const getPrimaryQuestionnaireLabelText = (button: HTMLButtonElement) => {
+  const labelElement = document.querySelector(`[for="${button.id}"]`);
+  if (labelElement?.textContent?.trim()) {
+    return labelElement.textContent.trim();
+  }
+
+  const fieldContainer =
+    button.closest('[data-automation-id^="formField"]') ??
+    button.parentElement?.parentElement;
+  return fieldContainer?.textContent?.trim() ?? "";
+};
+
+const isWorkAuthorizationQuestion = (labelText: string) => {
+  const normalized = fromatStirngInLowerCase(labelText);
+  return (
+    checkIfExist(labelText, fieldNames.us_work_authorization) ||
+    normalized.includes(fromatStirngInLowerCase("currently authorized")) ||
+    normalized.includes(fromatStirngInLowerCase("legally authorized")) ||
+    normalized.includes(fromatStirngInLowerCase("eligible to work"))
+  );
+};
+
+const fillPrimaryQuestionnaireWorkAuthorization = async (
+  applicantData: Applicant,
+) => {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    'button[id^="primaryQuestionnaire--"][aria-haspopup="listbox"]',
+  );
+
+  for (const button of buttons) {
+    const labelText = getPrimaryQuestionnaireLabelText(button);
+
+    if (!isWorkAuthorizationQuestion(labelText)) {
+      continue;
+    }
+
+    button.click();
+    await delay(500);
+
+    const listbox = document.querySelector('ul[role="listbox"]');
+    const selectOptions = listbox?.querySelectorAll(
+      'li[role="option"]:not([aria-disabled="true"])',
+    );
+    if (!selectOptions) {
+      continue;
+    }
+
+    for (const element of selectOptions) {
+      const optionText = fromatStirngInLowerCase(
+        element.textContent?.trim() ?? "",
+      );
+      if (
+        optionText.includes(fromatStirngInLowerCase("yes")) &&
+        applicantData.us_work_authoriztaion
+      ) {
+        (element as HTMLElement).click();
+        return;
+      }
+      if (
+        optionText.includes(fromatStirngInLowerCase("no")) &&
+        !applicantData.us_work_authoriztaion
+      ) {
+        (element as HTMLElement).click();
+        return;
+      }
+    }
+  }
+
+  await delay(500);
+};
+
 const authorizedTowork = async (applicantData: Applicant) => {
   const selectElement: any = document.querySelectorAll(
-    'button[aria-haspopup="listbox"]'
+    'button[aria-haspopup="listbox"]',
   );
 
   for (const select of selectElement) {
@@ -204,6 +281,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
     if (
       label?.toLowerCase()?.includes("legally") ||
       label?.toLowerCase()?.includes("currently authorized") ||
+      label?.toLowerCase()?.includes("legally authorized") ||
       label?.toLowerCase()?.includes("Are you eligible to work in the country")
     ) {
       select.click();
@@ -212,7 +290,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("yes")
+            fromatStirngInLowerCase("yes"),
           ) &&
           applicantData.us_work_authoriztaion
         ) {
@@ -228,7 +306,7 @@ const authorizedTowork = async (applicantData: Applicant) => {
 
 const fillisAdult = async (applicantData: Applicant) => {
   const selectElement: any = document.querySelectorAll(
-    'button[aria-haspopup="listbox"]'
+    'button[aria-haspopup="listbox"]',
   );
 
   for (const select of selectElement) {
@@ -240,7 +318,7 @@ const fillisAdult = async (applicantData: Applicant) => {
       for (const element of selectOptions) {
         if (
           fromatStirngInLowerCase(element.textContent.trim())?.includes(
-            fromatStirngInLowerCase("yes")
+            fromatStirngInLowerCase("yes"),
           )
         ) {
           //   phonetype = true;
@@ -255,7 +333,7 @@ const fillisAdult = async (applicantData: Applicant) => {
 
 const fillFieldSetDataType = (applicantData: Applicant) => {
   const ethnicityPrompt = document.querySelector(
-    '[data-automation-id="ethnicityPrompt"]'
+    '[data-automation-id="ethnicityPrompt"]',
   );
   if (!ethnicityPrompt) {
     return;
@@ -267,7 +345,7 @@ const fillFieldSetDataType = (applicantData: Applicant) => {
   for (const label of allLabel) {
     if (
       fromatStirngInLowerCase(label.textContent.trim())?.includes(
-        fromatStirngInLowerCase(applicantData.race)
+        fromatStirngInLowerCase(applicantData.race),
       )
     ) {
       label.click();
@@ -278,7 +356,7 @@ const fillFieldSetDataType = (applicantData: Applicant) => {
 
 const deleteResume = async () => {
   const AllResume: any = document.querySelector(
-    '[data-automation-id="delete-file"]'
+    '[data-automation-id="delete-file"]',
   );
   if (AllResume) {
     AllResume.click();
@@ -312,7 +390,7 @@ const fillResume = async (applicantData: Applicant) => {
       // Create file asynchronously
       const designFile = await createFile(
         applicantData.pdf_url,
-        applicantData.resume_title
+        applicantData.resume_title,
       );
       // Set file to input field only for the first file input field found
       const dt = new DataTransfer();
@@ -320,7 +398,7 @@ const fillResume = async (applicantData: Applicant) => {
       textInputField.files = dt.files;
       // Trigger input change event
       textInputField.dispatchEvent(
-        new Event("change", { bubbles: true, cancelable: false })
+        new Event("change", { bubbles: true, cancelable: false }),
       );
     }
   } catch (error) {
@@ -331,7 +409,7 @@ const fillResume = async (applicantData: Applicant) => {
 const getHelp = async () => {
   // Selects input elements where the value contains "product" (case insensitive)
   const productInputs: any = document.querySelectorAll(
-    'input[type="text"][value="PRODUCT MANAGER"]'
+    'input[type="text"][value="PRODUCT MANAGER"]',
   );
   if (isEmptyArray(productInputs)) return;
   for (const productInput of productInputs) {
@@ -353,6 +431,7 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await clickWorkdayWorkExperienceButton(applicantData);
   await clickWorkdayEducationButton(applicantData);
   await fillSponshership(applicantData);
+  await fillPrimaryQuestionnaireWorkAuthorization(applicantData);
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);
   await fillFieldSetDataType(applicantData);
