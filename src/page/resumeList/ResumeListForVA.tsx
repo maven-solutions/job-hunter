@@ -225,7 +225,6 @@ const ResumeListForVA = (props: any) => {
     dispatch(setResumeIndex(index));
   };
 
-  console.log("resumeList", resumeList);
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_mode_toggle">
