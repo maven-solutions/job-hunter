@@ -247,18 +247,25 @@ const ResumeListForVA = (props: any) => {
             </button>
           )}
       </div>
-      {applicantMode === "va" ? (
-        <UserSelectList
-          selectedUserValue={selectedUserValue}
-          handleSelectChanges={handleSelectChanges}
-        />
-      ) : (
-        <UserSelectList
-          selectedUserValue={selectedUserValue}
-          handleSelectChanges={handleIndividualSelectChanges}
-          options={resumeList.individualUserList}
-        />
-      )}
+      {applicantMode === "va" &&
+        resumeList.applicantData &&
+        resumeList.applicantData.length > 0 && (
+          <UserSelectList
+            selectedUserValue={selectedUserValue}
+            handleSelectChanges={handleSelectChanges}
+          />
+        )}
+
+      {applicantMode === "individual" &&
+        resumeList.individualUserList &&
+        resumeList.individualUserList.length > 0 && (
+          <UserSelectList
+            selectedUserValue={selectedUserValue}
+            handleSelectChanges={handleIndividualSelectChanges}
+            options={resumeList.individualUserList}
+          />
+        )}
+
       <Height height="15" />
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
