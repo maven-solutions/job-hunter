@@ -112,8 +112,10 @@ export const detectInputAndFillData = async (
   applicantData: any,
   startLoading: any,
   stopLoading: any,
-  setIframeUrl?: any
+  setIframeUrl?: any,
 ) => {
+  console.log("applicantData ::", applicantData);
+
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
   // console.log("iframeList::", iframeList);
@@ -466,7 +468,7 @@ export const detectInputAndFillData = async (
 
 export const handleValueChanges = async (input) => {
   input.dispatchEvent(
-    new Event("change", { bubbles: true, cancelable: false })
+    new Event("change", { bubbles: true, cancelable: false }),
   );
   input.dispatchEvent(new Event("input", { bubbles: true, cancelable: false }));
   input.dispatchEvent(new Event("focus", { bubbles: true, cancelable: false }));

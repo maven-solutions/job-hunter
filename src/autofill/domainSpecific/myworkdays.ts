@@ -289,7 +289,9 @@ const isSponsorshipQuestion = (labelText: string) => {
   );
 };
 
-const fillPrimaryQuestionnaireSponsorship = async (applicantData: Applicant) => {
+const fillPrimaryQuestionnaireSponsorship = async (
+  applicantData: Applicant,
+) => {
   const buttons = document.querySelectorAll<HTMLButtonElement>(
     'button[id^="primaryQuestionnaire--"][aria-haspopup="listbox"]',
   );
