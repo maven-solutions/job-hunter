@@ -206,6 +206,14 @@ const getPrimaryQuestionnaireLabelText = (button: HTMLButtonElement) => {
     return labelElement.textContent.trim();
   }
 
+  const fieldsetLegend = button
+    .closest("fieldset")
+    ?.querySelector("legend")
+    ?.textContent?.trim();
+  if (fieldsetLegend) {
+    return fieldsetLegend;
+  }
+
   const fieldContainer =
     button.closest('[data-automation-id^="formField"]') ??
     button.parentElement?.parentElement;
@@ -261,6 +269,63 @@ const fillPrimaryQuestionnaireWorkAuthorization = async (
       if (
         optionText.includes(fromatStirngInLowerCase("no")) &&
         !applicantData.us_work_authoriztaion
+      ) {
+        (element as HTMLElement).click();
+        return;
+      }
+    }
+  }
+
+  await delay(500);
+};
+
+const isSponsorshipQuestion = (labelText: string) => {
+  const normalized = fromatStirngInLowerCase(labelText);
+  return (
+    checkIfExist(labelText, fieldNames.sponsorship) ||
+    checkIfExist(labelText, fieldNames.visa) ||
+    normalized.includes(fromatStirngInLowerCase("require sponsorship")) ||
+    normalized.includes(fromatStirngInLowerCase("employment visa"))
+  );
+};
+
+const fillPrimaryQuestionnaireSponsorship = async (applicantData: Applicant) => {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    'button[id^="primaryQuestionnaire--"][aria-haspopup="listbox"]',
+  );
+
+  for (const button of buttons) {
+    const labelText = getPrimaryQuestionnaireLabelText(button);
+
+    if (!isSponsorshipQuestion(labelText)) {
+      continue;
+    }
+
+    button.click();
+    await delay(500);
+
+    const listbox = document.querySelector('ul[role="listbox"]');
+    const selectOptions = listbox?.querySelectorAll(
+      'li[role="option"]:not([aria-disabled="true"])',
+    );
+    if (!selectOptions) {
+      continue;
+    }
+
+    for (const element of selectOptions) {
+      const optionText = fromatStirngInLowerCase(
+        element.textContent?.trim() ?? "",
+      );
+      if (
+        optionText.includes(fromatStirngInLowerCase("yes")) &&
+        applicantData.sponsorship_required
+      ) {
+        (element as HTMLElement).click();
+        return;
+      }
+      if (
+        optionText.includes(fromatStirngInLowerCase("no")) &&
+        !applicantData.sponsorship_required
       ) {
         (element as HTMLElement).click();
         return;
@@ -432,6 +497,7 @@ export const myworkDays = async (tempDiv: any, applicantData: Applicant) => {
   await clickWorkdayEducationButton(applicantData);
   await fillSponshership(applicantData);
   await fillPrimaryQuestionnaireWorkAuthorization(applicantData);
+  await fillPrimaryQuestionnaireSponsorship(applicantData);
   await authorizedTowork(applicantData);
   await fillisAdult(applicantData);
   await fillFieldSetDataType(applicantData);
