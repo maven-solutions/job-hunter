@@ -11,7 +11,11 @@ const UserSelectList = (props: any) => {
   const selectOptions = options ?? resumeList?.userList;
   return (
     <div className="va_user_select_section_wrapper">
-      <HeadingTitle title={title ?? "Applicant List:"} />
+      {(resumeList.applicantData.length > 0 ||
+        resumeList.individualUserList.length > 0) && (
+        <HeadingTitle title={title ?? "Applicant List:"} />
+      )}
+
       <Select
         isSearchable={false}
         options={selectOptions}

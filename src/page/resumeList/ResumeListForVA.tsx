@@ -271,9 +271,20 @@ const ResumeListForVA = (props: any) => {
 
         {!autoFilling && (
           <>
-            <span className="ciautofill_v2_select_title">
-              Select the Resume{" "}
-            </span>
+            {resumeList.applicantData.length > 0 ||
+              (resumeList.individualUserList.length > 0 && (
+                <span className="ciautofill_v2_select_title">
+                  Select the Resume{" "}
+                </span>
+              ))}
+
+            {resumeList.res_success &&
+              resumeList.applicantData.length === 0 &&
+              resumeList.individualUserList.length === 0 && (
+                <span className="ciautofill_v2_select_title_no_applicants_assigned">
+                  No applicants has assigned
+                </span>
+              )}
             <div className="ciautofill__resmelist__wrapper-va">
               {resumeList.loading && <ResumeSkleton />}
               {resumeList.res_success && (

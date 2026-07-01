@@ -115,6 +115,16 @@
   margin-top: -5px;
   color: #000000 !important;
 }
+.ciautofill_v2_select_title_no_applicants_assigned {
+  font-weight: 600;
+  font-size: 16px;
+  display: block;
+  font-family: "Inter", sans-serif !important;
+  /* margin-bottom: 10px; */
+  /* margin-top: -5px; */
+  color: #000000 !important;
+  text-align: center;
+}
 .ciautofill_v2_resume_list_container {
   overflow: auto;
 }
