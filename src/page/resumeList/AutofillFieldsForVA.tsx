@@ -32,6 +32,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     covidVaccinationStatus,
     disabilityStatus,
     userAuthorizationUsa,
+    userAuthorizationCanada,
     phoneType,
     zipCode,
     city,
@@ -43,6 +44,13 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     password,
     address,
     hispanicOrLatino,
+    userNoticePeriod,
+    preferredTimezone,
+    preferredRole,
+    preferredCommmunication,
+    securityClearance,
+    yearsOfExperienceInThisField,
+    noticePeriodAtYourCurrentEmployer,
   } = applicationForm;
 
   // Extracting full name, first name, and last name
@@ -51,7 +59,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
-    (sec) => sec.section === "employment-history"
+    (sec) => sec.section === "employment-history",
   );
 
   // const password = generatePassword(selectedUserId);
@@ -86,12 +94,21 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
     disability_status: Number(disabilityStatus),
     is_over_18: true,
     us_work_authoriztaion: userAuthorizationUsa,
+    canada_work_authoriztaion: userAuthorizationCanada,
     hispanic_or_latino: hispanicOrLatino?.value ?? false,
     higher_education: higher_education,
     phone_type: phoneType || "mobile",
     salary: expectedSalaryRange,
     sponsorship_required: false,
+    notice_period: userNoticePeriod?.label,
+    preferred_timezone: preferredTimezone,
+    preferred_role: preferredRole,
+    preferred_communication: preferredCommmunication,
+    security_clearance: securityClearance,
+    years_of_experience_in_this_field: yearsOfExperienceInThisField,
     willingToTravel,
+    willing_to_travel: willingToTravel,
+
     password,
   };
 };
@@ -128,12 +145,12 @@ const AutofillFieldsForVA = (props: any) => {
     const applicantData = extractInfo(
       userdetails.applicants[selectResumeIndex],
       userdetails.applicationForm,
-      selectedUserId
+      selectedUserId,
     );
     // console.log("vadata::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
-      JSON.stringify(applicantData)
+      JSON.stringify(applicantData),
     );
 
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
@@ -141,7 +158,7 @@ const AutofillFieldsForVA = (props: any) => {
       applicantData,
       startLoading,
       stopLoading,
-      setIframeUrl
+      setIframeUrl,
     );
 
     let executeDataTracker = true;
@@ -177,7 +194,7 @@ const AutofillFieldsForVA = (props: any) => {
       if (iframeUrl.includes(".greenhouse.")) {
         window.open(
           `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
-          "_blank"
+          "_blank",
         );
       } else {
         window.open(iframeUrl, "_blank");
