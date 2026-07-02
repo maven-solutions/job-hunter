@@ -13,13 +13,13 @@ function getTodayDateFormatted(): string {
 
 const fillGender = async (applicantData: Applicant) => {
   const gender = document.querySelector(
-    ".CandidateField__inputWrapper--genderId"
+    ".CandidateField__inputWrapper--genderId",
   ) as HTMLElement;
   if (!gender) {
     return;
   }
   const select: HTMLElement = gender.querySelector(
-    ".fab-SelectToggle__toggleButton"
+    ".fab-SelectToggle__toggleButton",
   );
 
   if (!select) {
@@ -43,13 +43,13 @@ const fillGender = async (applicantData: Applicant) => {
 
 const fillDisability = async (applicantData: Applicant) => {
   const disability: HTMLElement = document.querySelector(
-    ".CandidateField__inputWrapper--disabilityId"
+    ".CandidateField__inputWrapper--disabilityId",
   );
   if (!disability) {
     return;
   }
   const select: HTMLElement = disability.querySelector(
-    ".fab-SelectToggle__toggleButton"
+    ".fab-SelectToggle__toggleButton",
   );
 
   if (!select) {
@@ -69,7 +69,7 @@ const fillDisability = async (applicantData: Applicant) => {
 
     if (
       fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        "noidont"
+        "noidont",
       ) &&
       !applicantData.disability_status
     ) {
@@ -81,13 +81,13 @@ const fillDisability = async (applicantData: Applicant) => {
 
 const fillRace = async (applicantData: Applicant) => {
   const race: HTMLElement = document.querySelector(
-    ".CandidateField--ethnicityId"
+    ".CandidateField--ethnicityId",
   );
   if (!race) {
     return;
   }
   const select: HTMLElement = race.querySelector(
-    ".fab-SelectToggle__toggleButton"
+    ".fab-SelectToggle__toggleButton",
   );
 
   if (!select) {
@@ -100,7 +100,7 @@ const fillRace = async (applicantData: Applicant) => {
   for (const [index, element] of selectOptions.entries()) {
     if (
       fromatStirngInLowerCase(element.textContent.trim())?.includes(
-        fromatStirngInLowerCase(applicantData.race)
+        fromatStirngInLowerCase(applicantData.race),
       )
     ) {
       element.click();
@@ -112,7 +112,7 @@ const fillRace = async (applicantData: Applicant) => {
 
 const fillVeteran = async (applicantData: Applicant) => {
   const veteran: HTMLElement = document.querySelector(
-    ".CandidateField--veteranStatusId"
+    ".CandidateField--veteranStatusId",
   );
   if (!veteran) {
     return;
@@ -170,8 +170,6 @@ const fillAllRadioType = async (applicantData: Applicant) => {
     }
     // for 18 years
     if (fromatStirngInLowerCase(legend?.textContent)?.includes("yearsofage")) {
-      console.log(fromatStirngInLowerCase(legend?.textContent));
-
       const allLabel = fieldset.querySelectorAll("label");
       if (allLabel && allLabel.length > 0) {
         for (const label of allLabel) {
@@ -194,7 +192,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
     // for work auth
     if (
       fromatStirngInLowerCase(legend?.textContent)?.includes(
-        "legallyeligible"
+        "legallyeligible",
       ) ||
       fromatStirngInLowerCase(legend?.textContent)?.includes("toworkin")
     ) {
@@ -249,7 +247,7 @@ const fillAllRadioType = async (applicantData: Applicant) => {
 
 const fileUpload = async (applicantData) => {
   let textInputField: any = document.querySelectorAll(
-    '[aria-label="file-input"]'
+    '[aria-label="file-input"]',
   );
   if (textInputField.length === 1) {
     textInputField = textInputField[0];
@@ -259,7 +257,7 @@ const fileUpload = async (applicantData) => {
   }
   const designFile = await createFile(
     applicantData.pdf_url,
-    applicantData.resume_title
+    applicantData.resume_title,
   );
   // Set file to input field only for the first file input field found
   const dt = new DataTransfer();
@@ -267,7 +265,7 @@ const fileUpload = async (applicantData) => {
   textInputField.files = dt.files;
   // Trigger input change event
   textInputField.dispatchEvent(
-    new Event("change", { bubbles: true, cancelable: false })
+    new Event("change", { bubbles: true, cancelable: false }),
   );
 };
 

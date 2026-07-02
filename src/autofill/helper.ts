@@ -114,8 +114,6 @@ export const detectInputAndFillData = async (
   stopLoading: any,
   setIframeUrl?: any,
 ) => {
-  console.log("applicantData ::", applicantData);
-
   const iframeList: any = document.querySelectorAll("iframe");
   let iframe: any = "";
   // console.log("iframeList::", iframeList);
