@@ -31,6 +31,7 @@ interface IChromeResult {
   selectedUser?: any;
   selectedResumeIndex?: any;
   selectedUserIndex?: any;
+  selectedRoleType?: any;
 }
 
 const ResumeListForVA = (props: any) => {
@@ -66,11 +67,13 @@ const ResumeListForVA = (props: any) => {
     if (resumeList.res_success) {
       chrome.storage.local.get(
         [
+          CHROME_STOGRAGE.SELECTED_ROLE_TYPE,
           CHROME_STOGRAGE.SELECTED_USER,
           CHROME_STOGRAGE.SELECTED_RESUME_INDEX,
           CHROME_STOGRAGE.SELECTED_USER_INDEX,
         ],
         (result: IChromeResult) => {
+          console.log("result", result);
           if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
             setSelectedUserValue(result.selectedUser);
             const filteredArray = resumeList.applicantData?.filter((data) => {
@@ -164,6 +167,8 @@ const ResumeListForVA = (props: any) => {
   };
 
   const handleIndividualSelectChanges = (option: any) => {
+    console.log("option", option);
+    chrome.storage.local.set({ selectedUser: option }, () => {});
     const filteredArray = resumeList.individualApplicantData?.filter(
       (data: any) => {
         return option.value === data.applicantId;
