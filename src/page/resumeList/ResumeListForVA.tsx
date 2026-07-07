@@ -169,6 +169,12 @@ const ResumeListForVA = (props: any) => {
   const handleIndividualSelectChanges = (option: any) => {
     console.log("option", option);
     chrome.storage.local.set({ selectedUser: option }, () => {});
+    resumeList.individualApplicantData?.map((data: any, index: number) => {
+      if (option.value === data.applicantId) {
+        dispatch(setUserIndex(index));
+        chrome.storage.local.set({ selectedUserIndex: index });
+      }
+    });
     const filteredArray = resumeList.individualApplicantData?.filter(
       (data: any) => {
         return option.value === data.applicantId;
@@ -179,6 +185,7 @@ const ResumeListForVA = (props: any) => {
     setSelectedUserId(option.value);
     setSelectedUserValue(option);
     dispatch(setResumeIndex(0));
+    chrome.storage.local.set({ selectedResumeIndex: 0 });
   };
 
   const handleModeSwitch = (mode: "va" | "individual") => {
