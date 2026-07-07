@@ -73,44 +73,101 @@ const ResumeListForVA = (props: any) => {
           CHROME_STOGRAGE.SELECTED_USER_INDEX,
         ],
         (result: IChromeResult) => {
-          console.log("result", result);
+          const savedMode = result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as
+            | "va"
+            | "individual"
+            | undefined;
+          const mode = savedMode ?? "va";
+          setApplicantMode(mode);
+
+          const applicantPool =
+            mode === "individual"
+              ? resumeList.individualApplicantData
+              : resumeList.applicantData;
+          const userOptionPool =
+            mode === "individual"
+              ? resumeList.individualUserList
+              : resumeList.userList;
+
+          if (!applicantPool || applicantPool.length === 0) {
+            setSelectedUserValue(null);
+            setSelectedUserId(null);
+            setUserResumeList([]);
+            dispatch(setResumeIndex(0));
+            return;
+          }
+
+          let selectedApplicantIndex =
+            result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX) &&
+            applicantPool[result.selectedUserIndex]
+              ? result.selectedUserIndex
+              : mode === "va"
+                ? resumeList.userIndex
+                : 0;
+
+          if (!applicantPool[selectedApplicantIndex]) {
+            selectedApplicantIndex = 0;
+          }
+
+          let selectedApplicant = applicantPool[selectedApplicantIndex];
           if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
-            setSelectedUserValue(result.selectedUser);
-            const filteredArray = resumeList.applicantData?.filter((data) => {
-              return result.selectedUser.value === data.applicantId;
-            });
-            if (!filteredArray && filteredArray.length === 0) {
-              return;
+            const selectedById = applicantPool.find(
+              (data: any) => data.applicantId === result.selectedUser?.value,
+            );
+            if (selectedById) {
+              selectedApplicant = selectedById;
+              selectedApplicantIndex = applicantPool.findIndex(
+                (data: any) => data.applicantId === result.selectedUser?.value,
+              );
             }
-            const resume = filteredArray[0].applicants;
-            setUserResumeList(resume);
-          } else {
-            setSelectedUserValue(resumeList?.userList[resumeList.userIndex]);
           }
 
-          if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX)) {
-            const resume =
-              resumeList.applicantData[result.selectedUserIndex].applicants;
-            setUserResumeList(resume);
-            setSelectedUserId(
-              resumeList.applicantData[result.selectedUserIndex].applicantId,
-            );
-          } else {
-            const resume =
-              resumeList.applicantData[resumeList.userIndex].applicants;
-            setUserResumeList(resume);
-            setSelectedUserId(
-              resumeList.applicantData[resumeList.userIndex].applicantId,
-            );
+          if (!selectedApplicant) {
+            return;
           }
 
-          if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_RESUME_INDEX)) {
-            dispatch(setResumeIndex(result.selectedResumeIndex));
-          }
+          setSelectedUserValue(
+            result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)
+              ? result.selectedUser
+              : (userOptionPool?.[selectedApplicantIndex] ?? {
+                  label: selectedApplicant.fullName,
+                  value: selectedApplicant.applicantId,
+                }),
+          );
+          setSelectedUserId(selectedApplicant.applicantId);
+          setUserResumeList(selectedApplicant.applicants ?? []);
+          dispatch(setUserIndex(selectedApplicantIndex));
+          chrome.storage.local.set({
+            selectedUserIndex: selectedApplicantIndex,
+          });
+
+          const selectedResumeIndex = result.hasOwnProperty(
+            CHROME_STOGRAGE.SELECTED_RESUME_INDEX,
+          )
+            ? result.selectedResumeIndex
+            : 0;
+          dispatch(setResumeIndex(selectedResumeIndex));
         },
       );
     }
-  }, [resumeList.res_success]);
+  }, [
+    resumeList.res_success,
+    resumeList.applicantData,
+    resumeList.individualApplicantData,
+  ]);
+
+  useEffect(() => {
+    chrome.storage.local.get(
+      [CHROME_STOGRAGE.SELECTED_ROLE_TYPE],
+      (result: any) => {
+        if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_ROLE_TYPE)) {
+          setApplicantMode(
+            result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "va" | "individual",
+          );
+        }
+      },
+    );
+  }, []);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -167,7 +224,6 @@ const ResumeListForVA = (props: any) => {
   };
 
   const handleIndividualSelectChanges = (option: any) => {
-    console.log("option", option);
     chrome.storage.local.set({ selectedUser: option }, () => {});
     resumeList.individualApplicantData?.map((data: any, index: number) => {
       if (option.value === data.applicantId) {
@@ -240,18 +296,6 @@ const ResumeListForVA = (props: any) => {
     chrome.storage.local.set({ selectedResumeIndex: index });
     dispatch(setResumeIndex(index));
   };
-  useEffect(() => {
-    chrome.storage.local.get(
-      [CHROME_STOGRAGE.SELECTED_ROLE_TYPE],
-      (result: any) => {
-        if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_ROLE_TYPE)) {
-          setApplicantMode(
-            result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "va" | "individual",
-          );
-        }
-      },
-    );
-  }, []);
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
