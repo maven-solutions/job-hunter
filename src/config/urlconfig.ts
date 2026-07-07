@@ -5,8 +5,8 @@ export const LIVE_WEBSITE_URL = "https://app.careerai.io";
 
 // two state should be always false
 export const EXTENSION_IN_LOCAL = false;
-export const EXTENSION_IN_STAGING = false;
-export const EXTENSION_IN_LIVE = true;
+export const EXTENSION_IN_STAGING = true;
+export const EXTENSION_IN_LIVE = false;
 
 export const BASE_URL = EXTENSION_IN_LIVE
   ? "https://backend.careerai.io/api/v1"

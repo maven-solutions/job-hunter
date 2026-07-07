@@ -41,6 +41,7 @@ export const LOCALSTORAGE = {
 };
 
 export const CHROME_STOGRAGE = {
+  SELECTED_ROLE_TYPE: "selectedRoleType",
   SELECTED_USER: "selectedUser",
   SELECTED_RESUME_INDEX: "selectedResumeIndex",
   SELECTED_USER_INDEX: "selectedUserIndex",
