@@ -163,6 +163,11 @@ export const workDaysdateFiller = async (data, index) => {
 };
 
 export const clickWorkdayWorkExperienceButton = async (applicantData) => {
+  if (window.location.href.includes("nordic.wd1.myworkdayjobs.com")) {
+    await clickWorkdayWorkExperienceButtonNordic(applicantData);
+    return;
+  }
+
   const tempDiv = document.querySelector("body");
   let delte = false;
   let button: any = "";
@@ -282,6 +287,60 @@ export const clickWorkdayWorkExperienceButton = async (applicantData) => {
       // await delay(1000);
       // console.log("Processed element:", index);
     }
+  }
+};
+
+export const clickWorkdayWorkExperienceButtonNordic = async (applicantData) => {
+  if (
+    !applicantData?.employment_history ||
+    applicantData.employment_history.length === 0
+  ) {
+    return;
+  }
+
+  const employmentHistorySection = document.querySelector(
+    '[aria-labelledby="Employment-History-section"]'
+  );
+  if (!employmentHistorySection) {
+    return;
+  }
+
+  const getPanels = () =>
+    employmentHistorySection.querySelectorAll<HTMLElement>(
+      '[aria-labelledby^="Employment-History-"][aria-labelledby$="-panel"]'
+    );
+
+  const getAddAnotherButton = () =>
+    (employmentHistorySection.querySelector(
+      'button[data-automation-id="add-button"]'
+    ) as HTMLButtonElement) ??
+    Array.from(
+      employmentHistorySection.querySelectorAll<HTMLButtonElement>("button")
+    ).find((btn) =>
+      fromatStirngInLowerCase(btn.textContent ?? "").includes("addanother")
+    );
+
+  for (const [index, element] of applicantData.employment_history.entries()) {
+    let targetPanel = getPanels()[index];
+
+    if (!targetPanel) {
+      const addAnotherButton = getAddAnotherButton();
+      if (!addAnotherButton) {
+        break;
+      }
+
+      addAnotherButton.click();
+      await delay(1000);
+      const panelsAfterAdd = getPanels();
+      targetPanel = panelsAfterAdd[panelsAfterAdd.length - 1];
+    }
+
+    if (!targetPanel) {
+      continue;
+    }
+
+    await workExperienceDatafiller(targetPanel, applicantData, element, index);
+    await delay(500);
   }
 };
 
