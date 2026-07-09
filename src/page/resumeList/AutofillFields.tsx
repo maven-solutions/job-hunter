@@ -6,6 +6,7 @@ import { RootStore, useAppSelector } from "../../store/store";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
+  EXTENSION_ACTION,
   LOCALSTORAGE,
 } from "../../utils/constant";
 import { useDebounce } from "use-debounce";
@@ -47,7 +48,7 @@ const extractInfo = (resumeData, applicationForm) => {
 
   const summary = fields?.find((sec) => sec.section === "professional-summary");
   const employment_history = fields?.find(
-    (sec) => sec.section === "employment-history"
+    (sec) => sec.section === "employment-history",
   );
 
   const higher_education = getHighestEducation(education);
@@ -117,12 +118,12 @@ const AutofillFields = (props: any) => {
     const url = window.location.href;
     const applicantData = extractInfo(
       resumeList.applicantData[selectedResume].applicant,
-      resumeList.applicantData[selectedResume].applicationForm
+      resumeList.applicantData[selectedResume].applicationForm,
     );
     // console.log("applicantData::", applicantData);
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
-      JSON.stringify(applicantData)
+      JSON.stringify(applicantData),
     );
     localStorage.setItem(LOCALSTORAGE.CI_AUTOFILL_URL, url);
 
@@ -130,7 +131,7 @@ const AutofillFields = (props: any) => {
       applicantData,
       startLoading,
       stopLoading,
-      setIframeUrl
+      setIframeUrl,
     );
   };
 
@@ -139,7 +140,7 @@ const AutofillFields = (props: any) => {
       if (iframeUrl.includes(".greenhouse.")) {
         window.open(
           `${iframeUrl}&${CAREERAI_TOKEN_REF}=${AUTOFILL_TOKEN_FROM_CAREERAI}`,
-          "_blank"
+          "_blank",
         );
       } else {
         window.open(iframeUrl, "_blank");
@@ -169,6 +170,108 @@ const AutofillFields = (props: any) => {
     }
   }, [debouncedSearchTerm]);
 
+  const wait = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const captureVisibleTab = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { action: EXTENSION_ACTION.CAPTURE_VISIBLE_TAB },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          if (!response?.success || !response?.dataUrl) {
+            reject(new Error(response?.error || "Capture failed"));
+            return;
+          }
+          resolve(response.dataUrl);
+        },
+      );
+    });
+  };
+
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Failed to load image"));
+      image.src = src;
+    });
+  };
+
+  const handleScreenshot = async () => {
+    const scrollElement =
+      document.scrollingElement || document.documentElement || document.body;
+    const originalX = window.scrollX;
+    const originalY = window.scrollY;
+
+    try {
+      const fullWidth = Math.max(
+        scrollElement.scrollWidth,
+        document.documentElement.scrollWidth,
+        document.body.scrollWidth,
+        window.innerWidth,
+      );
+      const fullHeight = Math.max(
+        scrollElement.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.scrollHeight,
+        window.innerHeight,
+      );
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const stitchedCanvas = document.createElement("canvas");
+      stitchedCanvas.width = fullWidth;
+      stitchedCanvas.height = fullHeight;
+      const ctx = stitchedCanvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Canvas context unavailable");
+      }
+
+      for (let y = 0; y < fullHeight; y += viewportHeight) {
+        window.scrollTo(0, y);
+        await wait(350);
+
+        const dataUrl = await captureVisibleTab();
+        const screenshot = await loadImage(dataUrl);
+
+        const sliceHeight = Math.min(viewportHeight, fullHeight - y);
+        const scaleX = screenshot.width / viewportWidth;
+        const scaleY = screenshot.height / viewportHeight;
+
+        ctx.drawImage(
+          screenshot,
+          0,
+          0,
+          Math.round(viewportWidth * scaleX),
+          Math.round(sliceHeight * scaleY),
+          0,
+          y,
+          viewportWidth,
+          sliceHeight,
+        );
+      }
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = stitchedCanvas.toDataURL("image/png");
+      downloadLink.download = `careerai-fullpage-${Date.now()}.png`;
+      downloadLink.click();
+    } catch (error) {
+      console.error("Unable to capture full-page screenshot:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to capture full-page screenshot on this page.";
+      alert(`Unable to capture full-page screenshot: ${message}`);
+    } finally {
+      window.scrollTo(originalX, originalY);
+    }
+  };
+
   return (
     <div className="ci_va_two_button_section">
       <span />
@@ -186,6 +289,12 @@ const AutofillFields = (props: any) => {
               {iframeUrl ? "Proceed" : "Auto Fill"}
             </button>
           )}
+          <button
+            className={`screenshot__btn `}
+            onClick={() => handleScreenshot()}
+          >
+            Screeshot
+          </button>
         </div>
       </div>
     </div>

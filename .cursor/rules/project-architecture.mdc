@@ -1,0 +1,48 @@
+---
+description: CareerAI extension architecture and working conventions
+alwaysApply: true
+---
+
+# CareerAI Chrome Extension Context
+
+## Project Type
+- Chrome Extension (Manifest V3) built with React + TypeScript and bundled with webpack.
+- Runtime surfaces: popup UI, options page, background service worker, and content script overlay.
+
+## Core Entry Points
+- `src/popup/popup.tsx`: popup auth gate + popup detail page.
+- `src/options/options.tsx`: minimal options surface.
+- `src/background/background.ts`: external login/logout message bridge to chrome storage and tabs.
+- `src/contentScript/contentScript.tsx`: injects React app (`JobDetector`) into pages.
+- `src/static/manifest.json`: extension metadata, permissions, content script, background worker.
+
+## State and Data Flow
+- Redux Toolkit store in `src/store/store.tsx` with root reducer in `src/store/rootReducer.tsx`.
+- Main slices: `AuthSlice`, `JobDetailSlice`, `ResumeListSlice`.
+- API calls and async logic are split into feature API files under `src/store/features/**`.
+- Auth/token is synced via `chrome.storage.local` and axios interceptor (`src/config/axiosInstance.tsx`).
+
+## Feature Architecture
+- `src/landingPage/DetectJob/JobDetector.tsx` is the central orchestrator for content-script UI.
+- `src/jobExtractor/*` handles per-site job detail extraction.
+- `src/autofill/*` handles domain-specific form filling flows.
+- `src/page/**` contains page-level React screens (`resumeList`, `jobDetail`, `profile`, `popupDetail`).
+- `src/component/**` contains shared UI building blocks.
+- `src/hooks/**` contains site observers and behavior hooks.
+
+## Build and Environment
+- webpack config: `webpack.common.js`, `webpack.dev.js`, `webpack.prod.js`.
+- Build output is `dist/` and static assets are copied from `src/static`.
+- Environment toggles and backend URLs live in `src/config/urlconfig.ts`.
+
+## Working Conventions For Agent
+- Prefer targeted edits; avoid broad refactors unless requested.
+- Preserve existing naming/style patterns in nearby files.
+- For extension behavior changes, consider all 4 surfaces: content script, popup, background, manifest.
+- When touching extraction/autofill, preserve website-specific condition checks and selectors.
+- Keep Redux action/state naming consistent with existing slice patterns.
+
+## Exploration Constraints
+- Do not inspect or modify `dist/`.
+- Do not inspect or modify `node_modules/`.
+- Focus code reading and edits on source/config files only.

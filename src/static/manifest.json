@@ -15,9 +15,9 @@
     "default_title": "CareerAI - Search, Track and Autofill Jobs",
     "default_icon": "icon.png"
   },
-  "permissions": ["storage"],
+  "permissions": ["storage", "tabs", "activeTab"],
   "homepage_url": "https://app.careerai.io",
-  "host_permissions": ["https://app.careerai.io/*"],
+  "host_permissions": ["https://app.careerai.io/*", "<all_urls>"],
 
   "background": {
     "service_worker": "background.js"

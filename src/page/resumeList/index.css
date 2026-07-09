@@ -200,6 +200,23 @@
   font-family: "Inter", sans-serif;
 }
 
+.ext__autofill__fields__wrapper .autofill__btn__wrapper .screenshot__btn {
+  padding: 8px 25px;
+  border-radius: 5px;
+  background: #4339f2 !important;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  font-family: "Inter", sans-serif;
+  margin-left: 10px;
+}
+
 .ext__autofill__fields__wrapper
   .autofill__btn__wrapper
   .autofill__button__disable {
