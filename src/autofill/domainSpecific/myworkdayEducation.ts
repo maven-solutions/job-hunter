@@ -9,6 +9,11 @@ import {
 import { workDaysdateFiller } from "./myworkdayWork";
 
 export const clickWorkdayEducationButton = async (applicantData) => {
+  if (window.location.href.includes("nordic.wd1.myworkdayjobs.com")) {
+    await clickWorkdayEducationButtonNordic(applicantData);
+    return;
+  }
+
   const tempDiv = document.querySelector("body");
   let delte = false;
   let button: any = "";
@@ -130,6 +135,55 @@ export const clickWorkdayEducationButton = async (applicantData) => {
       // await delay(500);
       // console.log("Processed element:", index);
     }
+  }
+};
+
+export const clickWorkdayEducationButtonNordic = async (applicantData) => {
+  if (!applicantData?.education || applicantData.education.length === 0) {
+    return;
+  }
+
+  const educationSection = document.querySelector(
+    '[aria-labelledby="Education-section"]'
+  );
+  if (!educationSection) {
+    return;
+  }
+
+  const getPanels = () =>
+    educationSection.querySelectorAll<HTMLElement>(
+      '[aria-labelledby^="Education-"][aria-labelledby$="-panel"]'
+    );
+
+  const getAddAnotherButton = () =>
+    (educationSection.querySelector(
+      'button[data-automation-id="add-button"]'
+    ) as HTMLButtonElement) ??
+    Array.from(educationSection.querySelectorAll<HTMLButtonElement>("button")).find(
+      (btn) => fromatStirngInLowerCase(btn.textContent ?? "").includes("addanother")
+    );
+
+  for (const [index, element] of applicantData.education.entries()) {
+    let targetPanel = getPanels()[index];
+
+    if (!targetPanel) {
+      const addAnotherButton = getAddAnotherButton();
+      if (!addAnotherButton) {
+        break;
+      }
+
+      addAnotherButton.click();
+      await delay(1000);
+      const panelsAfterAdd = getPanels();
+      targetPanel = panelsAfterAdd[panelsAfterAdd.length - 1];
+    }
+
+    if (!targetPanel) {
+      continue;
+    }
+
+    await educationDatafiller(targetPanel, applicantData, element, index);
+    await delay(500);
   }
 };
 const getAllinputId = () => {
