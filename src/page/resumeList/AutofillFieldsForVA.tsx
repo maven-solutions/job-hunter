@@ -328,41 +328,54 @@ const AutofillFieldsForVA = (props: any) => {
       window.scrollTo(originalX, originalY);
     }
   };
+  const handleSaveScreenshotInJob = () => {
+    console.log("save screenshot In Job");
+    // dispatch(saveScreenshotInJob(screenshotBlob));
+    alert("Screenshot saved successfully.");
+  };
 
   return (
-    <div className="ci_va_two_button_section">
-      {!autoFilling &&
-      !iframeUrl &&
-      cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
-        <AutofillButton
-          onClick={openMissngLink}
-          iframeUrl={iframeUrl}
-          resumeList={resumeList}
-          addMissingLink
-          text="Add Site to Autofill"
-        />
-      ) : (
-        <span />
-      )}
+    <div>
+      <div className="ci_va_two_button_section">
+        {!autoFilling &&
+        !iframeUrl &&
+        cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
+          <AutofillButton
+            onClick={openMissngLink}
+            iframeUrl={iframeUrl}
+            resumeList={resumeList}
+            addMissingLink
+            text="Add Site to Autofill"
+          />
+        ) : (
+          <span />
+        )}
 
+        {!autoFilling && (
+          <AutofillButton
+            onClick={handleAutofill}
+            iframeUrl={iframeUrl}
+            resumeList={resumeList}
+            text={iframeUrl ? "Proceed" : "Auto Fill"}
+          />
+        )}
+        {!autoFilling && (
+          <AutofillButton
+            onClick={handleScreenshot}
+            resumeList={resumeList}
+            text={
+              resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
+            }
+            disabled={!resumeList.res_success || resumeList.screenshotUploading}
+          />
+        )}
+      </div>
       {!autoFilling && (
         <AutofillButton
-          onClick={handleAutofill}
-          iframeUrl={iframeUrl}
+          onClick={handleSaveScreenshotInJob}
           resumeList={resumeList}
-          text={iframeUrl ? "Proceed" : "Auto Fill"}
-        />
-      )}
-      {!autoFilling && (
-        <AutofillButton
-          onClick={handleScreenshot}
-          resumeList={resumeList}
-          text={
-            resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
-          }
-          disabled={
-            !resumeList.res_success || resumeList.screenshotUploading
-          }
+          text="save screenshot In Job"
+          disabled={!resumeList.res_success || resumeList.screenshotUploading}
         />
       )}
     </div>
