@@ -4,6 +4,7 @@ import {
   getApplicantResume,
   getDesignations,
   getIndividualSession,
+  uploadIndividualSessionScreenshot,
 } from "./ResumeListApi";
 const initialState: any = {
   loading: false,
@@ -12,6 +13,8 @@ const initialState: any = {
   deg_res_success: false,
   individualSession_loading: false,
   individualSession_res_success: false,
+  screenshotUploading: false,
+  screenshotUploadError: null,
 
   applicantData: [],
   userList: [],
@@ -119,6 +122,32 @@ const ResumeList = createSlice({
       state.individualSession_loading = false;
       state.individualSession_res_success = false;
     });
+
+    builder.addCase(uploadIndividualSessionScreenshot.pending, (state) => {
+      state.screenshotUploading = true;
+      state.screenshotUploadError = null;
+    });
+    builder.addCase(
+      uploadIndividualSessionScreenshot.fulfilled,
+      (state, { payload }: PayloadAction<any>) => {
+        state.screenshotUploading = false;
+        state.screenshotUploadError = null;
+        if (payload?.data) {
+          state.individualSession = {
+            ...state.individualSession,
+            ...payload.data,
+          };
+        }
+      },
+    );
+    builder.addCase(
+      uploadIndividualSessionScreenshot.rejected,
+      (state, { payload }: PayloadAction<any>) => {
+        state.screenshotUploading = false;
+        state.screenshotUploadError =
+          payload?.message ?? "Failed to upload screenshot";
+      },
+    );
   },
 });
 

@@ -60,11 +60,42 @@ export const getIndividualSession = createAsyncThunk(
   "getIndividualSession",
   async (data: undefined, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(`${BASE_URL}/va/individual/session
-`);
+      const res = await axiosInstance.get(
+        `${BASE_URL}/va/individual/session`,
+      );
       return res.data;
     } catch (error: any) {
       //   errorToastMessage(error.response?.data?.message);
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const uploadIndividualSessionScreenshot = createAsyncThunk(
+  "uploadIndividualSessionScreenshot",
+  async (screenshot: Blob, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "screenshot",
+        screenshot,
+        `screenshot-${Date.now()}.png`,
+      );
+
+      const res = await axiosInstance.post(
+        `${BASE_URL}/va/individual/session/screenshot`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      return res.data;
+    } catch (error: any) {
       if (!error.response) {
         throw error;
       }

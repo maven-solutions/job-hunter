@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
-import { RootStore, useAppSelector } from "../../store/store";
+import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
+import { uploadIndividualSessionScreenshot } from "../../store/features/ResumeList/ResumeListApi";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
@@ -114,6 +115,7 @@ const AutofillFieldsForVA = (props: any) => {
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
+  const dispatch = useAppDispatch();
 
   const startLoading = () => {
     setAutoFilling(true);
@@ -242,6 +244,17 @@ const AutofillFieldsForVA = (props: any) => {
       image.src = src;
     });
   };
+
+  const canvasToBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) =>
+          blob ? resolve(blob) : reject(new Error("Failed to create image")),
+        "image/png",
+      );
+    });
+  };
+
   const handleScreenshot = async () => {
     const scrollElement =
       document.scrollingElement || document.documentElement || document.body;
@@ -297,17 +310,20 @@ const AutofillFieldsForVA = (props: any) => {
         );
       }
 
-      const downloadLink = document.createElement("a");
-      downloadLink.href = stitchedCanvas.toDataURL("image/png");
-      downloadLink.download = `careerai-fullpage-${Date.now()}.png`;
-      downloadLink.click();
-    } catch (error) {
-      console.error("Unable to capture full-page screenshot:", error);
+      const screenshotBlob = await canvasToBlob(stitchedCanvas);
+      await dispatch(
+        uploadIndividualSessionScreenshot(screenshotBlob),
+      ).unwrap();
+      alert("Screenshot uploaded successfully.");
+    } catch (error: any) {
+      console.error("Unable to capture or upload screenshot:", error);
       const message =
-        error instanceof Error
+        error?.message ||
+        error?.error ||
+        (error instanceof Error
           ? error.message
-          : "Unable to capture full-page screenshot on this page.";
-      alert(`Unable to capture full-page screenshot: ${message}`);
+          : "Unable to capture or upload screenshot on this page.");
+      alert(`Unable to capture or upload screenshot: ${message}`);
     } finally {
       window.scrollTo(originalX, originalY);
     }
@@ -341,7 +357,12 @@ const AutofillFieldsForVA = (props: any) => {
         <AutofillButton
           onClick={handleScreenshot}
           resumeList={resumeList}
-          text="Screenshot"
+          text={
+            resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
+          }
+          disabled={
+            !resumeList.res_success || resumeList.screenshotUploading
+          }
         />
       )}
     </div>
