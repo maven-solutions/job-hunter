@@ -74,6 +74,46 @@ export const getIndividualSession = createAsyncThunk(
   },
 );
 
+export interface StartIndividualSessionPayload {
+  userId: string | number;
+  extensionJobId: string | number;
+}
+
+export const startIndividualSession = createAsyncThunk(
+  "startIndividualSession",
+  async (data: StartIndividualSessionPayload, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post(
+        `${BASE_URL}/va/individual/session`,
+        data,
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const cancelIndividualSession = createAsyncThunk(
+  "cancelIndividualSession",
+  async (_data: undefined, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.delete(
+        `${BASE_URL}/va/individual/session`,
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
 export const uploadIndividualSessionScreenshot = createAsyncThunk(
   "uploadIndividualSessionScreenshot",
   async (screenshot: Blob, { rejectWithValue }) => {
