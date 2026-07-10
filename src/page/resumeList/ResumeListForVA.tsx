@@ -330,12 +330,15 @@ const ResumeListForVA = (props: any) => {
       )}
       <Height height="15" />
       {resumeList.individualSession && (
-        <div>
-          <h1>Job Title</h1>
-
-          <p>{resumeList.individualSession.jobTitle}</p>
+        <div className="ciautofill_v2_job_title_section">
+          <span className="ciautofill_v2_job_title_label">Job Title:</span>
+          <span className="ciautofill_v2_job_title_value">
+            {resumeList.individualSession.jobTitle}
+          </span>
         </div>
       )}
+      <Height height="10" />
+
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
       )}
