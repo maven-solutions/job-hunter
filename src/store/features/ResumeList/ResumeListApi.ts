@@ -74,14 +74,14 @@ export const getIndividualSession = createAsyncThunk(
   },
 );
 
-export interface StartIndividualSessionPayload {
+export interface SaveIndividualSessionPayload {
   userId: string | number;
   extensionJobId: string | number;
 }
 
-export const startIndividualSession = createAsyncThunk(
-  "startIndividualSession",
-  async (data: StartIndividualSessionPayload, { rejectWithValue }) => {
+export const saveIndividualSession = createAsyncThunk(
+  "saveIndividualSession",
+  async (data: SaveIndividualSessionPayload, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.post(
         `${BASE_URL}/va/individual/session`,

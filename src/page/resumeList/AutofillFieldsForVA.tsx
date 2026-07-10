@@ -3,7 +3,10 @@ import React, { useEffect, useState } from "react";
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import { uploadIndividualSessionScreenshot } from "../../store/features/ResumeList/ResumeListApi";
+import {
+  saveIndividualSession,
+  uploadIndividualSessionScreenshot,
+} from "../../store/features/ResumeList/ResumeListApi";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
@@ -329,9 +332,12 @@ const AutofillFieldsForVA = (props: any) => {
     }
   };
   const handleSaveScreenshotInJob = () => {
-    console.log("save screenshot In Job");
-    // dispatch(saveScreenshotInJob(screenshotBlob));
-    alert("Screenshot saved successfully.");
+    dispatch(
+      saveIndividualSession({
+        userId: resumeList.individualSession?.userId,
+        extensionJobId: resumeList.individualSession?.extensionJobId,
+      }),
+    ).unwrap();
   };
 
   return (

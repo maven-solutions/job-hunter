@@ -4,7 +4,7 @@ import {
   getApplicantResume,
   getDesignations,
   getIndividualSession,
-  startIndividualSession,
+  saveIndividualSession,
   cancelIndividualSession,
   uploadIndividualSessionScreenshot,
 } from "./ResumeListApi";
@@ -15,7 +15,7 @@ const initialState: any = {
   deg_res_success: false,
   individualSession_loading: false,
   individualSession_res_success: false,
-  startIndividualSession_loading: false,
+  saveIndividualSession_loading: false,
   cancelIndividualSession_loading: false,
   screenshotUploading: false,
   screenshotUploadError: null,
@@ -127,20 +127,20 @@ const ResumeList = createSlice({
       state.individualSession_res_success = false;
     });
 
-    // START INDIVIDUAL SESSION
-    builder.addCase(startIndividualSession.pending, (state) => {
-      state.startIndividualSession_loading = true;
+    // SAVE INDIVIDUAL SESSION
+    builder.addCase(saveIndividualSession.pending, (state) => {
+      state.saveIndividualSession_loading = true;
     });
     builder.addCase(
-      startIndividualSession.fulfilled,
+      saveIndividualSession.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
-        state.startIndividualSession_loading = false;
+        state.saveIndividualSession_loading = false;
         state.individualSession_res_success = true;
         state.individualSession = payload?.data ?? null;
       },
     );
-    builder.addCase(startIndividualSession.rejected, (state) => {
-      state.startIndividualSession_loading = false;
+    builder.addCase(saveIndividualSession.rejected, (state) => {
+      state.saveIndividualSession_loading = false;
     });
 
     // CANCEL INDIVIDUAL SESSION
