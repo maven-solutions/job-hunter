@@ -3,12 +3,15 @@ import {
   getApplicantsData,
   getApplicantResume,
   getDesignations,
+  getIndividualSession,
 } from "./ResumeListApi";
 const initialState: any = {
   loading: false,
   deg_loading: false,
   res_success: false,
   deg_res_success: false,
+  individualSession_loading: false,
+  individualSession_res_success: false,
 
   applicantData: [],
   userList: [],
@@ -17,6 +20,7 @@ const initialState: any = {
   allRoles: [],
   userIndex: 0,
   resumeIndex: 0,
+  individualSession: null,
 };
 
 const ResumeList = createSlice({
@@ -53,7 +57,7 @@ const ResumeList = createSlice({
         state.individualUserList = (
           payload.data.individualApplicants ?? []
         ).map((data) => ({ label: data.fullName, value: data.applicantId }));
-      }
+      },
     );
     builder.addCase(getApplicantsData.rejected, (state) => {
       state.loading = false;
@@ -73,7 +77,7 @@ const ResumeList = createSlice({
         const filteredData =
           payload.data.filter((data: any) => data.pdfUrl) ?? [];
         state.applicantData = filteredData;
-      }
+      },
     );
     builder.addCase(getApplicantResume.rejected, (state) => {
       state.loading = false;
@@ -91,11 +95,29 @@ const ResumeList = createSlice({
         state.deg_loading = false;
         state.deg_res_success = true;
         state.allRoles = payload?.data;
-      }
+      },
     );
     builder.addCase(getDesignations.rejected, (state) => {
       state.deg_loading = false;
       state.deg_res_success = false;
+    });
+
+    // GET INDIVIDUAL SESSION
+    builder.addCase(getIndividualSession.pending, (state) => {
+      state.individualSession_loading = true;
+      state.individualSession_res_success = false;
+    });
+    builder.addCase(
+      getIndividualSession.fulfilled,
+      (state, { payload }: PayloadAction<any>) => {
+        state.individualSession_loading = false;
+        state.individualSession_res_success = true;
+        state.individualSession = payload?.data;
+      },
+    );
+    builder.addCase(getIndividualSession.rejected, (state) => {
+      state.individualSession_loading = false;
+      state.individualSession_res_success = false;
     });
   },
 });

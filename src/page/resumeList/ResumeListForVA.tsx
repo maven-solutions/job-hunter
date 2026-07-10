@@ -5,6 +5,7 @@ import {
   getApplicantResume,
   getApplicantsData,
   getDesignations,
+  getIndividualSession,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -60,8 +61,10 @@ const ResumeListForVA = (props: any) => {
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
+      dispatch(getIndividualSession());
     }
   }, []);
+  console.log("resumeList:::individualSession", resumeList.individualSession);
 
   useEffect(() => {
     if (resumeList.res_success) {
@@ -326,6 +329,13 @@ const ResumeListForVA = (props: any) => {
         />
       )}
       <Height height="15" />
+      {resumeList.individualSession && (
+        <div>
+          <h1>Job Title</h1>
+
+          <p>{resumeList.individualSession.jobTitle}</p>
+        </div>
+      )}
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
       )}
