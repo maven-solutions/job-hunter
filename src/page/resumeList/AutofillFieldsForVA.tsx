@@ -11,6 +11,7 @@ import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
   EXTENSION_ACTION,
+  EXTENSION_ROOT_ID,
   LOCALSTORAGE,
 } from "../../utils/constant";
 import { generatePassword, getHighestEducation, isAdult } from "./helper";
@@ -265,11 +266,30 @@ const AutofillFieldsForVA = (props: any) => {
     await wait(400);
   };
 
+  const setExtensionVisibility = (visible: boolean) => {
+    const extensionRoot = document.getElementById(EXTENSION_ROOT_ID);
+    if (!extensionRoot) return;
+
+    if (visible) {
+      extensionRoot.style.removeProperty("display");
+      extensionRoot.style.removeProperty("visibility");
+      extensionRoot.style.removeProperty("pointer-events");
+      return;
+    }
+
+    extensionRoot.style.setProperty("display", "none", "important");
+    extensionRoot.style.setProperty("visibility", "hidden", "important");
+    extensionRoot.style.setProperty("pointer-events", "none", "important");
+  };
+
   const handleScreenshot = async () => {
     const scrollElement =
       document.scrollingElement || document.documentElement || document.body;
     const originalX = window.scrollX;
     const originalY = window.scrollY;
+    let resultMessage = "";
+
+    setExtensionVisibility(false);
 
     try {
       const fullWidth = Math.max(
@@ -296,6 +316,9 @@ const AutofillFieldsForVA = (props: any) => {
       if (!ctx) {
         throw new Error("Canvas context unavailable");
       }
+
+      // Let the hide take effect before the first capture.
+      await waitForPaint();
 
       for (let y = 0; y < fullHeight; y += viewportHeight) {
         // Browser clamps scroll past maxScrollY; capture from that clamped
@@ -336,7 +359,7 @@ const AutofillFieldsForVA = (props: any) => {
       await dispatch(
         uploadIndividualSessionScreenshot(screenshotBlob),
       ).unwrap();
-      alert("Screenshot uploaded successfully.");
+      resultMessage = "Screenshot uploaded successfully.";
     } catch (error: any) {
       console.error("Unable to capture or upload screenshot:", error);
       const message =
@@ -345,9 +368,14 @@ const AutofillFieldsForVA = (props: any) => {
         (error instanceof Error
           ? error.message
           : "Unable to capture or upload screenshot on this page.");
-      alert(`Unable to capture or upload screenshot: ${message}`);
+      resultMessage = `Unable to capture or upload screenshot: ${message}`;
     } finally {
+      setExtensionVisibility(true);
       window.scrollTo(originalX, originalY);
+    }
+
+    if (resultMessage) {
+      alert(resultMessage);
     }
   };
   const handleSaveScreenshotInJob = () => {

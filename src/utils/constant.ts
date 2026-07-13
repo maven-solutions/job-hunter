@@ -28,6 +28,8 @@ export const EXTENSION_ACTION = {
   CAPTURE_VISIBLE_TAB: "CAPTURE_VISIBLE_TAB",
 };
 
+export const EXTENSION_ROOT_ID = "careerai-extension-root";
+
 export const USER_ROLE_TYPE = {
   INDIVIDUAL: "individual",
   ORGANIZATIONAL: "individual",
