@@ -341,46 +341,34 @@ const AutofillFieldsForVA = (props: any) => {
   };
 
   return (
-    <div>
-      <div className="ci_va_two_button_section">
-        {!autoFilling &&
-        !iframeUrl &&
-        cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
-          <AutofillButton
-            onClick={openMissngLink}
-            iframeUrl={iframeUrl}
-            resumeList={resumeList}
-            addMissingLink
-            text="Add Site to Autofill"
-          />
-        ) : (
-          <span />
-        )}
+    <div className="ci_va_two_button_section">
+      {!autoFilling &&
+      !iframeUrl &&
+      cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
+        <AutofillButton
+          onClick={openMissngLink}
+          iframeUrl={iframeUrl}
+          resumeList={resumeList}
+          addMissingLink
+          text="Add Site to Autofill"
+        />
+      ) : (
+        <span />
+      )}
 
-        {!autoFilling && (
-          <AutofillButton
-            onClick={handleAutofill}
-            iframeUrl={iframeUrl}
-            resumeList={resumeList}
-            text={iframeUrl ? "Proceed" : "Auto Fill"}
-          />
-        )}
-        {!autoFilling && (
-          <AutofillButton
-            onClick={handleScreenshot}
-            resumeList={resumeList}
-            text={
-              resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
-            }
-            disabled={!resumeList.res_success || resumeList.screenshotUploading}
-          />
-        )}
-      </div>
       {!autoFilling && (
         <AutofillButton
-          onClick={handleSaveScreenshotInJob}
+          onClick={handleAutofill}
+          iframeUrl={iframeUrl}
           resumeList={resumeList}
-          text="save screenshot In Job"
+          text={iframeUrl ? "Proceed" : "Auto Fill"}
+        />
+      )}
+      {!autoFilling && (
+        <AutofillButton
+          onClick={handleScreenshot}
+          resumeList={resumeList}
+          text={resumeList.screenshotUploading ? "Uploading..." : "Screenshot"}
           disabled={!resumeList.res_success || resumeList.screenshotUploading}
         />
       )}
