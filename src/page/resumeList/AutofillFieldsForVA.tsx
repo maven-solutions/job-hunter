@@ -258,6 +258,13 @@ const AutofillFieldsForVA = (props: any) => {
     });
   };
 
+  const waitForPaint = async () => {
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+    await wait(400);
+  };
+
   const handleScreenshot = async () => {
     const scrollElement =
       document.scrollingElement || document.documentElement || document.body;
@@ -280,6 +287,7 @@ const AutofillFieldsForVA = (props: any) => {
 
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+      const maxScrollY = Math.max(0, fullHeight - viewportHeight);
 
       const stitchedCanvas = document.createElement("canvas");
       stitchedCanvas.width = fullWidth;
@@ -290,20 +298,31 @@ const AutofillFieldsForVA = (props: any) => {
       }
 
       for (let y = 0; y < fullHeight; y += viewportHeight) {
-        window.scrollTo(0, y);
-        await wait(350);
+        // Browser clamps scroll past maxScrollY; capture from that clamped
+        // position and crop the unused top so the last slice is not a repeat.
+        const targetScrollY = Math.min(y, maxScrollY);
+        window.scrollTo(0, targetScrollY);
+        scrollElement.scrollTop = targetScrollY;
+        await waitForPaint();
 
+        const actualScrollY = Math.round(
+          scrollElement.scrollTop || window.scrollY || 0,
+        );
         const dataUrl = await captureVisibleTab();
         const screenshot = await loadImage(dataUrl);
 
         const sliceHeight = Math.min(viewportHeight, fullHeight - y);
+        const sourceY = Math.max(
+          0,
+          Math.min(y - actualScrollY, viewportHeight - sliceHeight),
+        );
         const scaleX = screenshot.width / viewportWidth;
         const scaleY = screenshot.height / viewportHeight;
 
         ctx.drawImage(
           screenshot,
           0,
-          0,
+          Math.round(sourceY * scaleY),
           Math.round(viewportWidth * scaleX),
           Math.round(sliceHeight * scaleY),
           0,
