@@ -10,7 +10,6 @@ import {
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
 import Height from "../../component/height/Height";
-import { ResumeSkleton } from "../../component/skleton/Skleton";
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
 import {
   setResumeIndex,
@@ -18,7 +17,6 @@ import {
 } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
 import { CHROME_STOGRAGE } from "../../utils/constant";
-import RenderName from "./RenderName";
 import AutofillLoader from "./AutofillLoader";
 import "./index.css";
 import "./index2.css";
@@ -28,6 +26,7 @@ import JobSavedNotification from "../../contentScript/JobSaved";
 import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
 import ApplicantPickerV2 from "./ApplicantPickerV2";
+import ResumeListV2 from "./ResumeListV2";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -344,50 +343,15 @@ const ResumeListForVAV2 = (props: any) => {
             />
           </section>
 
-          <section className="form-section">
-            <p className="section-label">Resume</p>
-            <div className="resume-list">
-              {resumeList.loading && <ResumeSkleton />}
-              {resumeList.res_success &&
-                userResumeList.map((item, index) => {
-                  const isSelected = index === resumeList.resumeIndex;
-                  return (
-                    <label
-                      className={`resume-card ${isSelected ? "is-selected" : ""}`}
-                      key={item.id}
-                    >
-                      <input
-                        type="radio"
-                        name="resume"
-                        checked={isSelected}
-                        onChange={() => handleSelectedResume(index)}
-                      />
-                      <span aria-hidden="true" className="custom-radio" />
-                      <span className="resume-name">
-                        <RenderName item={item} resumeList={resumeList} />
-                      </span>
-                      {item?.pdfUrl && (
-                        <button
-                          aria-label="Preview resume"
-                          className="preview-button"
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            hanldeChildClick(item?.pdfUrl);
-                          }}
-                        >
-                          <svg aria-hidden="true" viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                        </button>
-                      )}
-                    </label>
-                  );
-                })}
-            </div>
-          </section>
+            <ResumeListV2
+              loading={resumeList.loading}
+              success={resumeList.res_success}
+              resumes={userResumeList}
+              selectedIndex={resumeList.resumeIndex}
+              resumeList={resumeList}
+              onSelect={handleSelectedResume}
+              onPreview={hanldeChildClick}
+            />
 
           <div className="support-message">
             <svg aria-hidden="true" viewBox="0 0 24 24">
