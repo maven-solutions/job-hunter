@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Eye } from "react-feather";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
@@ -28,6 +27,7 @@ import SwitchTabV2 from "./SwitchTabV2";
 import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
 import SupportMessageV2 from "./SupportMessageV2";
+import ScreenshotGallery from "./ScreenshotGallery";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -309,7 +309,9 @@ const ResumeListForVAV2 = (props: any) => {
     ? getUserDetailsById(selectedUserId)
     : applicantPool?.[0];
   const selectedApplicantName =
-    selectedApplicant?.fullName ?? selectedUserValue?.label ?? "Select Applicant";
+    selectedApplicant?.fullName ??
+    selectedUserValue?.label ??
+    "Select Applicant";
   const selectedApplicantRole =
     selectedApplicant?.title ||
     selectedApplicant?.designation ||
@@ -326,10 +328,7 @@ const ResumeListForVAV2 = (props: any) => {
         <div className="popup-content">
           <section className="form-section">
             <p className="section-label">Applying for</p>
-            <SwitchTabV2
-              value={applicantMode}
-              onChange={handleModeSwitch}
-            />
+            <SwitchTabV2 value={applicantMode} onChange={handleModeSwitch} />
 
             <ApplicantPickerV2
               name={selectedApplicantName}
@@ -344,43 +343,22 @@ const ResumeListForVAV2 = (props: any) => {
             />
           </section>
 
-            <ResumeListV2
-              loading={resumeList.loading}
-              success={resumeList.res_success}
-              resumes={userResumeList}
-              selectedIndex={resumeList.resumeIndex}
-              resumeList={resumeList}
-              onSelect={handleSelectedResume}
-              onPreview={hanldeChildClick}
-            />
+          <ResumeListV2
+            loading={resumeList.loading}
+            success={resumeList.res_success}
+            resumes={userResumeList}
+            selectedIndex={resumeList.resumeIndex}
+            resumeList={resumeList}
+            onSelect={handleSelectedResume}
+            onPreview={hanldeChildClick}
+          />
 
           <SupportMessageV2 />
 
-          <section className="screenshots-section">
-            <h2>
-              Saved screenshots{" "}
-              <span>· {resumeList.individualSession?.screenshots?.length ?? 0}</span>
-            </h2>
-            {resumeList.individualSession?.screenshots?.length > 0 ? (
-              <div className="ciautofill_v2_screenshot_icons">
-                {resumeList.individualSession.screenshots.map(
-                  (screenshot: { id: string; url: string }) => (
-                    <Eye
-                      key={screenshot.id}
-                      size={16}
-                      className="ciautofill_v2_screenshot_eye"
-                      onClick={() => window.open(screenshot.url, "_blank")}
-                    />
-                  ),
-                )}
-              </div>
-            ) : (
-              <p>No screenshots yet — run Auto Fill, then capture this page.</p>
-            )}
-          </section>
-
           {showJobTrackedAlert && (
-            <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
+            <JobSavedNotification
+              setShowJobTrackedAlert={setShowJobTrackedAlert}
+            />
           )}
           {errorINCountSave && (
             <JobNotSavedError setShowJobTrackedAlert={setErrorINCountSave} />
@@ -409,6 +387,10 @@ const ResumeListForVAV2 = (props: any) => {
               </div>
             )}
           </WhiteCard>
+
+          <ScreenshotGallery
+            screenshots={resumeList.individualSession?.screenshots}
+          />
         </div>
       </div>
     </Layout>
