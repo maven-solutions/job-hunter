@@ -5,6 +5,7 @@ import {
   getApplicantResume,
   getApplicantsData,
   getDesignations,
+  getIndividualSession,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 import WhiteCard from "../../component/card/WhiteCard";
@@ -60,8 +61,10 @@ const ResumeListForVA = (props: any) => {
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
+      dispatch(getIndividualSession());
     }
   }, []);
+  console.log("resumeList:::individualSession", resumeList.individualSession);
 
   useEffect(() => {
     if (resumeList.res_success) {
@@ -326,6 +329,38 @@ const ResumeListForVA = (props: any) => {
         />
       )}
       <Height height="15" />
+      {resumeList.individualSession && (
+        <>
+          <div className="ciautofill_v2_job_title_section">
+            <span className="ciautofill_v2_job_title_label">Job Title:</span>
+            <span className="ciautofill_v2_job_title_value">
+              {resumeList.individualSession.jobTitle}
+            </span>
+          </div>
+          <div className="ciautofill_v2_job_title_section">
+            <span className="ciautofill_v2_job_title_label">Screenshot:</span>
+            <span className="ciautofill_v2_job_title_value">
+              {resumeList.individualSession.screenshots?.length ?? 0}
+            </span>
+            {resumeList.individualSession.screenshots?.length > 0 && (
+              <div className="ciautofill_v2_screenshot_icons">
+                {resumeList.individualSession.screenshots.map(
+                  (screenshot: { id: string; url: string }) => (
+                    <Eye
+                      key={screenshot.id}
+                      size={16}
+                      className="ciautofill_v2_screenshot_eye"
+                      onClick={() => window.open(screenshot.url, "_blank")}
+                    />
+                  ),
+                )}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      <Height height="10" />
+
       {showJobTrackedAlert && (
         <JobSavedNotification setShowJobTrackedAlert={setShowJobTrackedAlert} />
       )}

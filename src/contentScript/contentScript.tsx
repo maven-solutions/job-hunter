@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 
 import JobDetector from "../landingPage/DetectJob/JobDetector";
 import Store from "../store/store";
+import { EXTENSION_ROOT_ID } from "../utils/constant";
 
 const App: React.FC<{}> = () => {
   return (
@@ -14,6 +15,7 @@ const App: React.FC<{}> = () => {
 };
 
 const root = document.createElement("div");
+root.id = EXTENSION_ROOT_ID;
 document.body.appendChild(root);
 const rootElement = ReactDOM.createRoot(root);
 rootElement.render(<App />);

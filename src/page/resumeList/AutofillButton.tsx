@@ -1,16 +1,18 @@
 import React from "react";
 
 const AutofillButton = (props: any) => {
-  const { resumeList, onClick, text } = props;
+  const { resumeList, onClick, text, disabled } = props;
+  const isDisabled = disabled ?? !resumeList.res_success;
+
   return (
     <div className="ext__autofill__fields__wrapper">
       <div className="autofill__btn__wrapper">
         <button
           className={`autofill__btn ${
-            resumeList.res_success ? "" : "autofill__button__disable"
+            isDisabled ? "autofill__button__disable" : ""
           }`}
           onClick={onClick}
-          disabled={resumeList.res_success ? false : true}
+          disabled={isDisabled}
         >
           {text}
         </button>

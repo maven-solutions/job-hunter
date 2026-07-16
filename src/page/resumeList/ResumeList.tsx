@@ -42,7 +42,7 @@ const ResumeList = (props: any) => {
     const { item } = props;
     const role = getRoleById(
       item?.applicant?.preferredRole,
-      item?.applicant?.customPreferredRole
+      item?.applicant?.customPreferredRole,
     );
 
     const roleString = role ? `  (${role}) ` : "";

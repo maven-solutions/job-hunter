@@ -15,7 +15,7 @@ export const getDesignations = createAsyncThunk(
       }
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApplicantsData = createAsyncThunk(
@@ -23,7 +23,7 @@ export const getApplicantsData = createAsyncThunk(
   async (data: undefined, { dispatch, rejectWithValue }) => {
     try {
       const res = await axiosInstance.get(
-        `${VA_BASE_URL}/get-me-with-applicants`
+        `${VA_BASE_URL}/get-me-with-applicants`,
       );
       return res.data;
     } catch (error: any) {
@@ -33,7 +33,7 @@ export const getApplicantsData = createAsyncThunk(
       }
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getApplicantResume = createAsyncThunk(
@@ -53,5 +53,93 @@ export const getApplicantResume = createAsyncThunk(
       }
       return rejectWithValue(error.response.data);
     }
-  }
+  },
+);
+
+export const getIndividualSession = createAsyncThunk(
+  "getIndividualSession",
+  async (data: undefined, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(
+        `${BASE_URL}/va/individual/session`,
+      );
+      return res.data;
+    } catch (error: any) {
+      //   errorToastMessage(error.response?.data?.message);
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export interface SaveIndividualSessionPayload {
+  userId: string | number;
+  extensionJobId: string | number;
+}
+
+export const saveIndividualSession = createAsyncThunk(
+  "saveIndividualSession",
+  async (data: SaveIndividualSessionPayload, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post(
+        `${BASE_URL}/va/individual/session`,
+        data,
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const cancelIndividualSession = createAsyncThunk(
+  "cancelIndividualSession",
+  async (_data: undefined, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.delete(
+        `${BASE_URL}/va/individual/session`,
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const uploadIndividualSessionScreenshot = createAsyncThunk(
+  "uploadIndividualSessionScreenshot",
+  async (screenshot: Blob, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append(
+        "screenshot",
+        screenshot,
+        `screenshot-${Date.now()}.png`,
+      );
+
+      const res = await axiosInstance.post(
+        `${BASE_URL}/va/individual/session/screenshot`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
 );

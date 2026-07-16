@@ -172,6 +172,49 @@
   cursor: pointer !important;
 }
 
+.ciautofill_v2_job_title_section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #d4d9e3;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 5px;
+  background: #f9f9ff;
+}
+
+.ciautofill_v2_job_title_label {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.ciautofill_v2_job_title_value {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.ciautofill_v2_screenshot_icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.ciautofill_v2_screenshot_eye {
+  color: #7b7b7b;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ciautofill_v2_screenshot_eye:hover {
+  color: #4339f2;
+}
+
 .ci_iframe_gradient_box {
   font-family: "Inter", sans-serif;
   font-weight: 400;
