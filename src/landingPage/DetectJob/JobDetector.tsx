@@ -50,6 +50,7 @@ import useFisglobalObserver from "../../hooks/observer/useFisglobalObserver";
 import ResumeGptInfoModal from "./GptInfoModal";
 import Error from "../../page/Error/Error";
 import ResumeListForVA from "../../page/resumeList/ResumeListForVA";
+import ResumeListForVAV2 from "../../page/resumeList/ResumeListForVA.v2";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -273,7 +274,7 @@ const JobDetector = (props: any) => {
       )}
 
       {showPage === SHOW_PAGE.resumeListForVAPage && (
-        <ResumeListForVA
+        <ResumeListForVAV2
           autoFilling={autoFilling}
           setAutoFilling={setAutoFilling}
           setShowPage={setShowPage}

@@ -1,0 +1,395 @@
+:root {
+  --purple: #4b3bf0;
+  --purple-dark: #3a2cd0;
+  --purple-light: #f0eeff;
+  --purple-muted: #ecebf6;
+  --text: #1b1b2f;
+  --text-secondary: #54536a;
+  --muted: #8b8aa0;
+  --border: #e1e0ee;
+  --panel-border: #e7e6f2;
+  --panel: #f7f7fc;
+  --green: #1f9254;
+  --green-bg: #e4f6eb;
+}
+
+.ciautofill_v2_panel {
+  color: var(--text);
+  font-family: Manrope, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  .popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 8px 4px 0;
+  }
+
+  .section-label {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .segment-control {
+    width: max-content;
+    display: inline-flex;
+    gap: 2px;
+    margin-bottom: 10px;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--purple-muted);
+  }
+
+  .segment-control label {
+    padding: 7px 16px;
+    border-radius: 7px;
+    color: var(--text-secondary);
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 160ms ease;
+  }
+
+  .segment-control input:checked + label {
+    color: var(--purple);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-weight: 700;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .applicant-picker {
+    position: relative;
+  }
+
+  .applicant-picker summary {
+    list-style: none;
+  }
+
+  .applicant-picker summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .applicant-summary {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .avatar {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+  }
+
+  .avatar--primary {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--purple);
+    color: #fff;
+    font-size: 15px;
+  }
+
+  .avatar--soft {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--purple-muted);
+    color: var(--purple);
+    font-size: 13px;
+  }
+
+  .applicant-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .applicant-copy strong,
+  .applicant-copy small,
+  .applicant-option strong,
+  .applicant-option small {
+    display: block;
+  }
+
+  .applicant-copy strong {
+    font-size: 15px;
+  }
+
+  .applicant-copy small,
+  .applicant-option small {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .chevron {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 160ms ease;
+  }
+
+  .applicant-picker[open] .chevron {
+    transform: rotate(180deg);
+  }
+
+  .applicant-menu {
+    margin-top: 8px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 28px -10px rgba(30, 28, 60, 0.3);
+  }
+
+  .applicant-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .applicant-option:hover,
+  .applicant-option--selected {
+    background: var(--purple-light);
+  }
+
+  .applicant-option strong {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .resume-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  .resume-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 150ms ease, background 150ms ease;
+  }
+
+  .resume-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .resume-card.is-selected {
+    padding: 10px 12px;
+    border: 2px solid var(--purple);
+    background: var(--purple-light);
+  }
+
+  .custom-radio {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    border: 2px solid #cfcedd;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .resume-card.is-selected .custom-radio {
+    border: 6px solid var(--purple);
+  }
+
+  .resume-name {
+    flex: 1;
+    color: #33324a;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .resume-card.is-selected .resume-name {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .preview-button {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: #f2f1fa;
+    cursor: pointer;
+  }
+
+  .preview-button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--purple);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .support-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .support-message svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .screenshots-section {
+    padding-top: 8px;
+    border-top: 1px solid var(--panel-border);
+  }
+
+  .screenshots-section h2 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .screenshots-section h2 span {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .screenshots-section p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .ciautofill_v2_screenshot_icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ciautofill_v2_screenshot_eye {
+    color: #7b7b7b;
+    cursor: pointer;
+  }
+
+  .ciautofill_v2_screenshot_eye:hover {
+    color: #4339f2;
+  }
+
+  .ci-white-card {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .ciautofill_v2_resume_autofill_button_section {
+    margin-top: 2px;
+  }
+
+  .ci_va_two_button_section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .ci_va_v2_button_stack {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .ci_va_v2_secondary_actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ext__autofill__fields__wrapper {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .ext__autofill__fields__wrapper .autofill__btn__wrapper {
+    margin-top: 0;
+    justify-content: stretch;
+  }
+
+  .ext__autofill__fields__wrapper .autofill__btn__wrapper .autofill__btn {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 12px;
+    border: 1px solid #d9d8e8;
+    background: #fff !important;
+    color: #33324a;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  .ci_va_v2_primary_button .ext__autofill__fields__wrapper .autofill__btn {
+    background: var(--purple) !important;
+    color: #fff;
+    border: 0;
+    min-height: 52px;
+    border-radius: 13px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+}

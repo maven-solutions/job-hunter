@@ -114,6 +114,7 @@ const AutofillFieldsForVA = (props: any) => {
     setShowJobTrackedAlert,
     setErrorINCountSave,
     autoFilling,
+    isV2Layout,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -733,22 +734,52 @@ const AutofillFieldsForVA = (props: any) => {
   };
 
   return (
-    <div className="ci_va_two_button_section">
-      {!autoFilling &&
-      !iframeUrl &&
-      cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
-        <AutofillButton
-          onClick={openMissngLink}
-          iframeUrl={iframeUrl}
-          resumeList={resumeList}
-          addMissingLink
-          text="Add Site to Autofill"
-        />
-      ) : (
-        <span />
+    <div className={isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"}>
+      {!autoFilling && isV2Layout && (
+        <div className="ci_va_v2_primary_button">
+          <AutofillButton
+            onClick={handleAutofill}
+            iframeUrl={iframeUrl}
+            resumeList={resumeList}
+            text={iframeUrl ? "Proceed" : "Auto Fill this page"}
+          />
+        </div>
       )}
 
-      {!autoFilling && (
+      {!autoFilling && isV2Layout && (
+        <div className="ci_va_v2_secondary_actions">
+          <AutofillButton
+            onClick={handleScreenshot}
+            resumeList={resumeList}
+            text={resumeList.screenshotUploading ? "Uploading..." : "Screenshot"}
+            disabled={!resumeList.res_success || resumeList.screenshotUploading}
+          />
+          <AutofillButton
+            onClick={openMissngLink}
+            iframeUrl={iframeUrl}
+            resumeList={resumeList}
+            text="Save Site"
+            disabled={cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI}
+          />
+        </div>
+      )}
+
+      {!isV2Layout &&
+        (!autoFilling &&
+        !iframeUrl &&
+        cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
+          <AutofillButton
+            onClick={openMissngLink}
+            iframeUrl={iframeUrl}
+            resumeList={resumeList}
+            addMissingLink
+            text="Add Site to Autofill"
+          />
+        ) : (
+          <span />
+        ))}
+
+      {!isV2Layout && !autoFilling && (
         <AutofillButton
           onClick={handleAutofill}
           iframeUrl={iframeUrl}
@@ -756,7 +787,7 @@ const AutofillFieldsForVA = (props: any) => {
           text={iframeUrl ? "Proceed" : "Auto Fill"}
         />
       )}
-      {!autoFilling && (
+      {!isV2Layout && !autoFilling && (
         <AutofillButton
           onClick={handleScreenshot}
           resumeList={resumeList}
