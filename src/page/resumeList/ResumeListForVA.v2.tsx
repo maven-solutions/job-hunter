@@ -27,7 +27,7 @@ import IframeProceed from "./IframeProceed";
 import JobSavedNotification from "../../contentScript/JobSaved";
 import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
-import { getInitials } from "./helper";
+import ApplicantPickerV2 from "./ApplicantPickerV2";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -315,7 +315,6 @@ const ResumeListForVAV2 = (props: any) => {
     selectedApplicant?.designation ||
     selectedApplicant?.position ||
     "Applicant";
-  const selectedInitials = getInitials(selectedApplicantName);
   const currentOptions =
     applicantMode === "individual"
       ? resumeList.individualUserList
@@ -332,46 +331,17 @@ const ResumeListForVAV2 = (props: any) => {
               onChange={handleModeSwitch}
             />
 
-            <details className="applicant-picker">
-              <summary className="applicant-summary">
-                <span className="avatar avatar--primary">
-                  {selectedInitials || "NA"}
-                </span>
-                <span className="applicant-copy">
-                  <strong>{selectedApplicantName}</strong>
-                  <small>{selectedApplicantRole}</small>
-                </span>
-                <svg aria-hidden="true" className="chevron" viewBox="0 0 24 24">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </summary>
-
-              <div className="applicant-menu">
-                {(currentOptions ?? []).map((option: any) => {
-                  const name = option.label ?? "Applicant";
-                  const initials = getInitials(name);
-                  const isSelected = selectedUserValue?.value === option.value;
-                  return (
-                    <button
-                      className={`applicant-option ${isSelected ? "applicant-option--selected" : ""}`}
-                      key={option.value}
-                      type="button"
-                      onClick={() =>
-                        applicantMode === "va"
-                          ? handleSelectChanges(option)
-                          : handleIndividualSelectChanges(option)
-                      }
-                    >
-                      <span className="avatar avatar--soft">{initials}</span>
-                      <span>
-                        <strong>{name}</strong>
-                        <small>{isSelected ? selectedApplicantRole : "Applicant"}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
+            <ApplicantPickerV2
+              name={selectedApplicantName}
+              role={selectedApplicantRole}
+              options={currentOptions ?? []}
+              selectedValue={selectedUserValue?.value}
+              onSelect={(option) =>
+                applicantMode === "va"
+                  ? handleSelectChanges(option)
+                  : handleIndividualSelectChanges(option)
+              }
+            />
           </section>
 
           <section className="form-section">
