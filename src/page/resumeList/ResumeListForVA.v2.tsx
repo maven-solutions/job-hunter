@@ -26,6 +26,7 @@ import "./index.v2.css";
 import IframeProceed from "./IframeProceed";
 import JobSavedNotification from "../../contentScript/JobSaved";
 import JobNotSavedError from "../../contentScript/JobNotSavedError";
+import SwitchTabV2 from "./SwitchTabV2";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -330,24 +331,10 @@ const ResumeListForVAV2 = (props: any) => {
         <div className="popup-content">
           <section className="form-section">
             <p className="section-label">Applying for</p>
-            <div className="segment-control" aria-label="Applicant type">
-              <input
-                id="organization"
-                className="visually-hidden"
-                type="radio"
-                checked={applicantMode === "va"}
-                onChange={() => handleModeSwitch("va")}
-              />
-              <label htmlFor="organization">Organization</label>
-              <input
-                id="individual"
-                className="visually-hidden"
-                type="radio"
-                checked={applicantMode === "individual"}
-                onChange={() => handleModeSwitch("individual")}
-              />
-              <label htmlFor="individual">Individual</label>
-            </div>
+            <SwitchTabV2
+              value={applicantMode}
+              onChange={handleModeSwitch}
+            />
 
             <details className="applicant-picker">
               <summary className="applicant-summary">
