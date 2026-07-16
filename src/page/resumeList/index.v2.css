@@ -86,7 +86,7 @@
   }
 
   .applicant-summary {
-    width: 100%;
+    width: calc(100% - 30px);
     display: flex;
     align-items: center;
     gap: 12px;
