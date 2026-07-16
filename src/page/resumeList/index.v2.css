@@ -358,10 +358,15 @@
     gap: 10px;
   }
 
+  .ci_va_v2_primary_button {
+    width: 100%;
+  }
+
   .ci_va_v2_secondary_actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+    width: 100%;
   }
 
   .ext__autofill__fields__wrapper {
@@ -377,6 +382,10 @@
   .ext__autofill__fields__wrapper .autofill__btn__wrapper .autofill__btn {
     width: 100%;
     min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     border-radius: 12px;
     border: 1px solid #d9d8e8;
     background: #fff !important;
@@ -386,7 +395,28 @@
     box-shadow: none;
   }
 
-  .ci_va_v2_primary_button .ext__autofill__fields__wrapper .autofill__btn {
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn
+    .autofill__btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 0;
+  }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn
+    .autofill__btn__icon
+    svg {
+    display: block;
+  }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn--primary {
     background: var(--purple) !important;
     color: #fff;
     border: 0;
@@ -394,5 +424,22 @@
     border-radius: 13px;
     font-size: 16px;
     font-weight: 700;
+  }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn--secondary {
+    background: #fff !important;
+    color: #33324a;
+    border: 1px solid #d9d8e8;
+  }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn.autofill__button__disable {
+    cursor: not-allowed;
+    background: #e2e2e2 !important;
+    color: #808080 !important;
+    border-color: #e2e2e2;
   }
 }

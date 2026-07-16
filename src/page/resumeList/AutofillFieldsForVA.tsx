@@ -20,6 +20,7 @@ import AutofillButton from "./AutofillButton";
 import { getDomainName } from "../../utils/helper";
 import { saveAudofillJob } from "../../utils/autofillJobSavApi";
 import { dataTrackerHandler } from "../../autofill/data.tracker";
+import { Camera, Link, Zap } from "react-feather";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -739,9 +740,10 @@ const AutofillFieldsForVA = (props: any) => {
         <div className="ci_va_v2_primary_button">
           <AutofillButton
             onClick={handleAutofill}
-            iframeUrl={iframeUrl}
             resumeList={resumeList}
             text={iframeUrl ? "Proceed" : "Auto Fill this page"}
+            variant="primary"
+            icon={<Zap size={18} />}
           />
         </div>
       )}
@@ -752,13 +754,16 @@ const AutofillFieldsForVA = (props: any) => {
             onClick={handleScreenshot}
             resumeList={resumeList}
             text={resumeList.screenshotUploading ? "Uploading..." : "Screenshot"}
+            variant="secondary"
+            icon={<Camera size={16} />}
             disabled={!resumeList.res_success || resumeList.screenshotUploading}
           />
           <AutofillButton
             onClick={openMissngLink}
-            iframeUrl={iframeUrl}
             resumeList={resumeList}
             text="Save Site"
+            variant="secondary"
+            icon={<Link size={16} />}
             disabled={cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI}
           />
         </div>
@@ -770,9 +775,7 @@ const AutofillFieldsForVA = (props: any) => {
         cirefValue !== AUTOFILL_TOKEN_FROM_CAREERAI ? (
           <AutofillButton
             onClick={openMissngLink}
-            iframeUrl={iframeUrl}
             resumeList={resumeList}
-            addMissingLink
             text="Add Site to Autofill"
           />
         ) : (
@@ -782,7 +785,6 @@ const AutofillFieldsForVA = (props: any) => {
       {!isV2Layout && !autoFilling && (
         <AutofillButton
           onClick={handleAutofill}
-          iframeUrl={iframeUrl}
           resumeList={resumeList}
           text={iframeUrl ? "Proceed" : "Auto Fill"}
         />
