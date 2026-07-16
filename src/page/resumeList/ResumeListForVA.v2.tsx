@@ -27,6 +27,7 @@ import IframeProceed from "./IframeProceed";
 import JobSavedNotification from "../../contentScript/JobSaved";
 import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
+import { getInitials } from "./helper";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -314,12 +315,7 @@ const ResumeListForVAV2 = (props: any) => {
     selectedApplicant?.designation ||
     selectedApplicant?.position ||
     "Applicant";
-  const selectedInitials = selectedApplicantName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((item: string) => item[0]?.toUpperCase())
-    .join("");
+  const selectedInitials = getInitials(selectedApplicantName);
   const currentOptions =
     applicantMode === "individual"
       ? resumeList.individualUserList
@@ -353,12 +349,7 @@ const ResumeListForVAV2 = (props: any) => {
               <div className="applicant-menu">
                 {(currentOptions ?? []).map((option: any) => {
                   const name = option.label ?? "Applicant";
-                  const initials = name
-                    .split(" ")
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .map((part: string) => part[0]?.toUpperCase())
-                    .join("");
+                  const initials = getInitials(name);
                   const isSelected = selectedUserValue?.value === option.value;
                   return (
                     <button
