@@ -223,14 +223,14 @@
   }
 
   .resume-card.is-selected {
-    padding: 10px 12px;
+    /* padding: 10px 12px; */
     border: 2px solid var(--purple);
     background: var(--purple-light);
   }
 
   .custom-radio {
-    width: 20px;
-    height: 20px;
+    width: 13px;
+    height: 13px;
     flex: 0 0 auto;
     border: 2px solid #cfcedd;
     border-radius: 50%;
@@ -238,7 +238,7 @@
   }
 
   .resume-card.is-selected .custom-radio {
-    border: 6px solid var(--purple);
+    border: 4px solid var(--purple);
   }
 
   .resume-name {
@@ -254,14 +254,14 @@
   }
 
   .preview-button {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     flex: 0 0 auto;
     display: grid;
     place-items: center;
     border: 0;
     border-radius: 9px;
-    background: #f2f1fa;
+    background: var(--purple-light);
     cursor: pointer;
   }
 
