@@ -51,6 +51,7 @@ import ResumeGptInfoModal from "./GptInfoModal";
 import Error from "../../page/Error/Error";
 import ResumeListForVA from "../../page/resumeList/ResumeListForVA";
 import ResumeListForVAV2 from "../../page/resumeList/ResumeListForVA.v2";
+import TestCompoment from "../../page/resumeList/testCompoment";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
@@ -284,6 +285,7 @@ const JobDetector = (props: any) => {
           setErrorINCountSave={setErrorINCountSave}
         />
       )}
+      {/* <TestCompoment /> */}
 
       {showPage === SHOW_PAGE.ErrorPage && (
         <Error
