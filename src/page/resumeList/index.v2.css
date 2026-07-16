@@ -279,7 +279,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 12px;
+    padding: 15px;
     border-radius: 10px;
     background: var(--green-bg);
     color: var(--green);

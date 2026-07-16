@@ -27,6 +27,7 @@ import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
 import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
+import SupportMessageV2 from "./SupportMessageV2";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -353,12 +354,7 @@ const ResumeListForVAV2 = (props: any) => {
               onPreview={hanldeChildClick}
             />
 
-          <div className="support-message">
-            <svg aria-hidden="true" viewBox="0 0 24 24">
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-            <span>This site supports Autofill</span>
-          </div>
+          <SupportMessageV2 />
 
           <section className="screenshots-section">
             <h2>
