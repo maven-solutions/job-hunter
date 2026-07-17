@@ -15,7 +15,7 @@ import AutofillButton from "./AutofillButton";
 import { getDomainName } from "../../utils/helper";
 import { saveAudofillJob } from "../../utils/autofillJobSavApi";
 import { dataTrackerHandler } from "../../autofill/data.tracker";
-import { Camera, Link, Zap } from "react-feather";
+import { Bookmark, Camera, Zap } from "react-feather";
 import { handleScreenshot } from "./handleScreenshot";
 
 const extractInfo = (resumeData, applicationForm, selectedUserId) => {
@@ -266,8 +266,10 @@ const AutofillFieldsForVA = (props: any) => {
             resumeList={resumeList}
             text="Save Site"
             variant="secondary"
-            icon={<Link size={16} />}
-            disabled={cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI || autoFilling}
+            icon={<Bookmark size={16} />}
+            disabled={
+              cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI || autoFilling
+            }
           />
         </div>
       )}
