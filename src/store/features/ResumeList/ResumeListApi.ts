@@ -143,3 +143,20 @@ export const uploadIndividualSessionScreenshot = createAsyncThunk(
     }
   },
 );
+
+export const deleteIndividualSessionScreenshot = createAsyncThunk(
+  "deleteIndividualSessionScreenshot",
+  async (screenshotId: string, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.delete(
+        `${BASE_URL}/va/individual/session/screenshot/${screenshotId}`,
+      );
+      return res.data;
+    } catch (error: any) {
+      if (!error.response) {
+        throw error;
+      }
+      return rejectWithValue(error.response.data);
+    }
+  },
+);

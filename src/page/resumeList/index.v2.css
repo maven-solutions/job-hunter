@@ -328,19 +328,99 @@
     line-height: 1.4;
   }
 
-  .ciautofill_v2_screenshot_icons {
-    display: flex;
-    align-items: center;
+  .ciautofill_v2_screenshot_grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
 
-  .ciautofill_v2_screenshot_eye {
-    color: #7b7b7b;
-    cursor: pointer;
+  .ciautofill_v2_screenshot_card {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    background: var(--panel);
+    box-shadow: 0 2px 8px rgba(34, 31, 70, 0.08);
   }
 
-  .ciautofill_v2_screenshot_eye:hover {
-    color: #4339f2;
+  .ciautofill_v2_screenshot_link {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #eeedf5;
+  }
+
+  .ciautofill_v2_screenshot_link img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 180ms ease;
+  }
+
+  .ciautofill_v2_screenshot_link:hover img {
+    transform: scale(1.04);
+  }
+
+  .ciautofill_v2_screenshot_open,
+  .ciautofill_v2_screenshot_delete {
+    position: absolute;
+    top: 7px;
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(20, 18, 45, 0.18);
+  }
+
+  .ciautofill_v2_screenshot_open {
+    right: 7px;
+    color: #fff;
+    background: rgba(27, 27, 47, 0.72);
+    pointer-events: none;
+  }
+
+  .ciautofill_v2_screenshot_delete {
+    right: 42px;
+    z-index: 1;
+    padding: 0;
+    color: #c93434;
+    background: rgba(255, 255, 255, 0.94);
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .ciautofill_v2_screenshot_delete:hover:not(:disabled) {
+    color: #fff;
+    background: #d43b3b;
+    transform: translateY(-1px);
+  }
+
+  .ciautofill_v2_screenshot_delete:disabled {
+    cursor: wait;
+    opacity: 0.75;
+  }
+
+  .ciautofill_v2_screenshot_spinner {
+    animation: ciautofill_v2_spin 800ms linear infinite;
+  }
+
+  .screenshots-section .ciautofill_v2_screenshot_error {
+    margin-top: 8px;
+    color: #c93434;
+  }
+
+  @keyframes ciautofill_v2_spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .ci-white-card {

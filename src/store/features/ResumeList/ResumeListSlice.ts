@@ -7,6 +7,7 @@ import {
   saveIndividualSession,
   cancelIndividualSession,
   uploadIndividualSessionScreenshot,
+  deleteIndividualSessionScreenshot,
 } from "./ResumeListApi";
 const initialState: any = {
   loading: false,
@@ -19,6 +20,8 @@ const initialState: any = {
   cancelIndividualSession_loading: false,
   screenshotUploading: false,
   screenshotUploadError: null,
+  deletingScreenshotId: null,
+  screenshotDeleteError: null,
 
   applicantData: [],
   userList: [],
@@ -179,6 +182,42 @@ const ResumeList = createSlice({
         state.screenshotUploading = false;
         state.screenshotUploadError =
           payload?.message ?? "Failed to upload screenshot";
+      },
+    );
+
+    builder.addCase(
+      deleteIndividualSessionScreenshot.pending,
+      (state, { meta }) => {
+        state.deletingScreenshotId = meta.arg;
+        state.screenshotDeleteError = null;
+      },
+    );
+    builder.addCase(
+      deleteIndividualSessionScreenshot.fulfilled,
+      (state, { payload, meta }: PayloadAction<any, string, any>) => {
+        state.deletingScreenshotId = null;
+        state.screenshotDeleteError = null;
+
+        if (payload?.data?.screenshots) {
+          state.individualSession = {
+            ...state.individualSession,
+            ...payload.data,
+          };
+          return;
+        }
+
+        state.individualSession.screenshots =
+          state.individualSession?.screenshots?.filter(
+            (screenshot: { id: string }) => screenshot.id !== meta.arg,
+          ) ?? [];
+      },
+    );
+    builder.addCase(
+      deleteIndividualSessionScreenshot.rejected,
+      (state, { payload }: PayloadAction<any>) => {
+        state.deletingScreenshotId = null;
+        state.screenshotDeleteError =
+          payload?.message ?? "Failed to delete screenshot";
       },
     );
   },
