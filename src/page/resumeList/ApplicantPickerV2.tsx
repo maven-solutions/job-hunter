@@ -11,6 +11,7 @@ interface ApplicantPickerV2Props {
   role: string;
   options: ApplicantOption[];
   selectedValue?: string | number | null;
+  activeSessionUserId?: string | number | null;
   onSelect: (option: ApplicantOption) => void;
 }
 
@@ -19,6 +20,7 @@ const ApplicantPickerV2 = ({
   role,
   options,
   selectedValue,
+  activeSessionUserId,
   onSelect,
 }: ApplicantPickerV2Props) => {
   const detailsRef = useRef<HTMLDetailsElement>(null);
@@ -51,6 +53,9 @@ const ApplicantPickerV2 = ({
           const optionName = option.label ?? "Applicant";
           const initials = getInitials(optionName);
           const isSelected = selectedValue === option.value;
+          const hasActiveSession =
+            activeSessionUserId != null &&
+            activeSessionUserId === option.value;
           return (
             <button
               className={`applicant-option ${isSelected ? "applicant-option--selected" : ""}`}
@@ -63,6 +68,11 @@ const ApplicantPickerV2 = ({
                 <strong>{optionName}</strong>
                 <small>{isSelected ? role : "Applicant"}</small>
               </span>
+              {hasActiveSession && (
+                <span className="applicant-option__session-badge">
+                  Active session
+                </span>
+              )}
             </button>
           );
         })}

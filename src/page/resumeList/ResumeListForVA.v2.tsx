@@ -345,6 +345,7 @@ const ResumeListForVAV2 = (props: any) => {
               role={selectedApplicantRole}
               options={currentOptions ?? []}
               selectedValue={selectedUserValue?.value}
+              activeSessionUserId={resumeList.individualSession?.userId}
               onSelect={(option) =>
                 applicantMode === "va"
                   ? handleSelectChanges(option)

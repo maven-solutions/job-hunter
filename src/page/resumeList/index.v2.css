@@ -205,6 +205,17 @@
     font-weight: 600;
   }
 
+  .applicant-option__session-badge {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #e7f7ee;
+    color: #1a7f4b;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   .resume-list {
     display: flex;
     flex-direction: column;
