@@ -352,7 +352,7 @@ const ResumeListForVAV2 = (props: any) => {
             onPreview={hanldeChildClick}
           />
 
-          <SupportMessageV2 />
+          {/* <SupportMessageV2 /> */}
 
           {showJobTrackedAlert && (
             <JobSavedNotification
