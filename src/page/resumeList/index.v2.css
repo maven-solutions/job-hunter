@@ -546,4 +546,24 @@
     color: #808080 !important;
     border-color: #e2e2e2;
   }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn.autofill__btn--loading {
+    cursor: wait;
+    opacity: 0.85;
+  }
+
+  .ext__autofill__fields__wrapper
+    .autofill__btn__wrapper
+    .autofill__btn
+    .autofill__btn__spinner {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: autofill-btn-spin 0.8s linear infinite;
+  }
 }

@@ -235,7 +235,7 @@ const AutofillFieldsForVA = (props: any) => {
         isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"
       }
     >
-      {!autoFilling && isV2Layout && (
+      {isV2Layout && (
         <div className="ci_va_v2_primary_button">
           <AutofillButton
             onClick={handleAutofill}
@@ -243,21 +243,23 @@ const AutofillFieldsForVA = (props: any) => {
             text={iframeUrl ? "Proceed" : "Auto Fill this page"}
             variant="primary"
             icon={<Zap size={18} />}
+            loading={autoFilling}
+            loadingText="Auto Filling..."
           />
         </div>
       )}
 
-      {!autoFilling && isV2Layout && (
+      {isV2Layout && (
         <div className="ci_va_v2_secondary_actions">
           <AutofillButton
             onClick={onScreenshot}
             resumeList={resumeList}
-            text={
-              resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
-            }
+            text="Screenshot"
             variant="secondary"
             icon={<Camera size={16} />}
-            disabled={!resumeList.res_success || resumeList.screenshotUploading}
+            disabled={!resumeList.res_success || autoFilling}
+            loading={resumeList.screenshotUploading}
+            loadingText="Uploading..."
           />
           <AutofillButton
             onClick={openMissngLink}
@@ -265,7 +267,7 @@ const AutofillFieldsForVA = (props: any) => {
             text="Save Site"
             variant="secondary"
             icon={<Link size={16} />}
-            disabled={cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI}
+            disabled={cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI || autoFilling}
           />
         </div>
       )}
@@ -294,8 +296,10 @@ const AutofillFieldsForVA = (props: any) => {
         <AutofillButton
           onClick={onScreenshot}
           resumeList={resumeList}
-          text={resumeList.screenshotUploading ? "Uploading..." : "Screenshot"}
-          disabled={!resumeList.res_success || resumeList.screenshotUploading}
+          text="Screenshot"
+          disabled={!resumeList.res_success}
+          loading={resumeList.screenshotUploading}
+          loadingText="Uploading..."
         />
       )}
     </div>

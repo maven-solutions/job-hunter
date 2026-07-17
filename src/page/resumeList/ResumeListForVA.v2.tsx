@@ -16,7 +16,6 @@ import {
 } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
 import { CHROME_STOGRAGE } from "../../utils/constant";
-import AutofillLoader from "./AutofillLoader";
 import "./index.css";
 import "./index2.css";
 import "./index.v2.css";
@@ -367,25 +366,22 @@ const ResumeListForVAV2 = (props: any) => {
           {iframeUrl && <IframeProceed />}
 
           <WhiteCard>
-            {autoFilling && <AutofillLoader />}
-            {!autoFilling && (
-              <div className="ciautofill_v2_resume_autofill_button_section">
-                <AutofillFieldsForVA
-                  selectedUserId={selectedUserId}
-                  getUserDetailsById={getUserDetailsById}
-                  selectResumeIndex={resumeList.resumeIndex}
-                  content={content}
-                  setAutoFilling={setAutoFilling}
-                  setIframeUrl={setIframeUrl}
-                  iframeUrl={iframeUrl}
-                  setShowAddWebsite={setShowAddWebsite}
-                  setShowJobTrackedAlert={setShowJobTrackedAlert}
-                  setErrorINCountSave={setErrorINCountSave}
-                  autoFilling={autoFilling}
-                  isV2Layout
-                />
-              </div>
-            )}
+            <div className="ciautofill_v2_resume_autofill_button_section">
+              <AutofillFieldsForVA
+                selectedUserId={selectedUserId}
+                getUserDetailsById={getUserDetailsById}
+                selectResumeIndex={resumeList.resumeIndex}
+                content={content}
+                setAutoFilling={setAutoFilling}
+                setIframeUrl={setIframeUrl}
+                iframeUrl={iframeUrl}
+                setShowAddWebsite={setShowAddWebsite}
+                setShowJobTrackedAlert={setShowJobTrackedAlert}
+                setErrorINCountSave={setErrorINCountSave}
+                autoFilling={autoFilling}
+                isV2Layout
+              />
+            </div>
           </WhiteCard>
 
           <ScreenshotGallery

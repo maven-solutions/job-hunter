@@ -230,6 +230,34 @@
   background: #e2e2e2 !important;
   color: #808080 !important;
 }
+
+.ext__autofill__fields__wrapper
+  .autofill__btn__wrapper
+  .autofill__btn.autofill__btn--loading {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.ext__autofill__fields__wrapper
+  .autofill__btn__wrapper
+  .autofill__btn
+  .autofill__btn__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: autofill-btn-spin 0.8s linear infinite;
+}
+
+@keyframes autofill-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .ci_va_two_button_section {
   display: flex;
   justify-content: space-between;
