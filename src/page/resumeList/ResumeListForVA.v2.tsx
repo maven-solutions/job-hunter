@@ -341,29 +341,33 @@ const ResumeListForVAV2 = (props: any) => {
             <p className="section-label">Applying for</p>
             <SwitchTabV2 value={applicantMode} onChange={handleModeSwitch} />
 
-            <ApplicantPickerV2
-              name={selectedApplicantName}
-              role={selectedApplicantRole}
-              options={currentOptions ?? []}
-              selectedValue={selectedUserValue?.value}
-              activeSessionUserId={resumeList.individualSession?.userId}
-              onSelect={(option) =>
-                applicantMode === "va"
-                  ? handleSelectChanges(option)
-                  : handleIndividualSelectChanges(option)
-              }
-            />
+            {!autoFilling && (
+              <ApplicantPickerV2
+                name={selectedApplicantName}
+                role={selectedApplicantRole}
+                options={currentOptions ?? []}
+                selectedValue={selectedUserValue?.value}
+                activeSessionUserId={resumeList.individualSession?.userId}
+                onSelect={(option) =>
+                  applicantMode === "va"
+                    ? handleSelectChanges(option)
+                    : handleIndividualSelectChanges(option)
+                }
+              />
+            )}
           </section>
 
-          <ResumeListV2
-            loading={resumeList.loading}
-            success={resumeList.res_success}
-            resumes={userResumeList}
-            selectedIndex={resumeList.resumeIndex}
-            resumeList={resumeList}
-            onSelect={handleSelectedResume}
-            onPreview={hanldeChildClick}
-          />
+          {!autoFilling && (
+            <ResumeListV2
+              loading={resumeList.loading}
+              success={resumeList.res_success}
+              resumes={userResumeList}
+              selectedIndex={resumeList.resumeIndex}
+              resumeList={resumeList}
+              onSelect={handleSelectedResume}
+              onPreview={hanldeChildClick}
+            />
+          )}
 
           {/* <SupportMessageV2 /> */}
 
@@ -404,13 +408,14 @@ const ResumeListForVAV2 = (props: any) => {
           </div>
           {/* </WhiteCard> */}
 
-          {resumeList.individualSession?.userId === selectedUserId && (
-            <ScreenshotGallery
-              screenshots={resumeList.individualSession?.screenshots}
-              extensionJobId={resumeList.individualSession?.extensionJobId}
-              userId={resumeList.individualSession?.userId}
-            />
-          )}
+          {!autoFilling &&
+            resumeList.individualSession?.userId === selectedUserId && (
+              <ScreenshotGallery
+                screenshots={resumeList.individualSession?.screenshots}
+                extensionJobId={resumeList.individualSession?.extensionJobId}
+                userId={resumeList.individualSession?.userId}
+              />
+            )}
         </div>
       </div>
     </Layout>
