@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { getInitials } from "./helper";
 
 interface ApplicantOption {
@@ -21,10 +21,18 @@ const ApplicantPickerV2 = ({
   selectedValue,
   onSelect,
 }: ApplicantPickerV2Props) => {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
   const selectedInitials = getInitials(name);
 
+  const handleSelect = (option: ApplicantOption) => {
+    onSelect(option);
+    if (detailsRef.current) {
+      detailsRef.current.open = false;
+    }
+  };
+
   return (
-    <details className="applicant-picker">
+    <details className="applicant-picker" ref={detailsRef}>
       <summary className="applicant-summary">
         <span className="avatar avatar--primary">
           {selectedInitials || "NA"}
@@ -48,7 +56,7 @@ const ApplicantPickerV2 = ({
               className={`applicant-option ${isSelected ? "applicant-option--selected" : ""}`}
               key={option.value}
               type="button"
-              onClick={() => onSelect(option)}
+              onClick={() => handleSelect(option)}
             >
               <span className="avatar avatar--soft">{initials}</span>
               <span>

@@ -162,27 +162,35 @@
   }
 
   .applicant-menu {
-    margin-top: 8px;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    max-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 6px;
     border: 1px solid var(--border);
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 12px 28px -10px rgba(30, 28, 60, 0.3);
-
   }
 
   .applicant-option {
     width: 100%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px ;
+    padding: 8px;
     border: 0;
     border-radius: 9px;
     background: transparent;
     text-align: left;
     cursor: pointer;
-    margin: 5px;
+    margin: 5px 0;
   }
 
   .applicant-option:hover,
