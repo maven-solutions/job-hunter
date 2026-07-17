@@ -149,13 +149,16 @@ export const deleteIndividualSessionScreenshot = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const res = await axiosInstance.delete(`${BASE_URL}/va/proof-of-work`, {
-        data: {
-          applicationTrackingId,
-          userId,
-          screenshotId,
+      const res = await axiosInstance.delete(
+        `${BASE_URL}/va/individual/proof-of-work`,
+        {
+          data: {
+            applicationTrackingId,
+            userId,
+            screenshotId,
+          },
         },
-      });
+      );
       return res.data;
     } catch (error: any) {
       if (!error.response) {
