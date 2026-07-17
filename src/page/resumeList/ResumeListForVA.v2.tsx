@@ -7,8 +7,7 @@ import {
   getIndividualSession,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
-import WhiteCard from "../../component/card/WhiteCard";
-import Height from "../../component/height/Height";
+
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
 import {
   setResumeIndex,
@@ -25,7 +24,6 @@ import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
 import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
-import SupportMessageV2 from "./SupportMessageV2";
 import ScreenshotGallery from "./ScreenshotGallery";
 import JobCardV2 from "./JobCard.v2";
 
@@ -333,8 +331,6 @@ const ResumeListForVAV2 = (props: any) => {
       ? resumeList.individualUserList
       : resumeList.userList;
 
-  console.log("resumeList:::individualSession", resumeList.individualSession);
-  console.log("selectedUserValue", resumeList.selectedUserValue);
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_panel">
@@ -406,9 +402,11 @@ const ResumeListForVAV2 = (props: any) => {
           </div>
           {/* </WhiteCard> */}
 
-          <ScreenshotGallery
-            screenshots={resumeList.individualSession?.screenshots}
-          />
+          {resumeList.individualSession?.userId === selectedUserId && (
+            <ScreenshotGallery
+              screenshots={resumeList.individualSession?.screenshots}
+            />
+          )}
         </div>
       </div>
     </Layout>

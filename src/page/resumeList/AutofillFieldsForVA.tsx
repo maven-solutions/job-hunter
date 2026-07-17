@@ -257,7 +257,11 @@ const AutofillFieldsForVA = (props: any) => {
             text="Screenshot"
             variant="secondary"
             icon={<Camera size={16} />}
-            disabled={!resumeList.res_success || autoFilling}
+            disabled={
+              !resumeList.res_success ||
+              autoFilling ||
+              resumeList.individualSession?.userId !== selectedUserId
+            }
             loading={resumeList.screenshotUploading}
             loadingText="Uploading..."
           />
