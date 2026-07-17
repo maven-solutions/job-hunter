@@ -343,7 +343,12 @@
   }
 
   .ciautofill_v2_resume_autofill_button_section {
-    margin-top: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px;
+    
+  
   }
 
   .ci_va_two_button_section {
@@ -353,13 +358,15 @@
   }
 
   .ci_va_v2_button_stack {
-    display: grid;
-    grid-template-columns: 1fr;
+    width: 100%;
+    margin-top: 10px;
+
     gap: 10px;
   }
 
   .ci_va_v2_primary_button {
     width: 100%;
+
   }
 
   .ci_va_v2_secondary_actions {
@@ -367,6 +374,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
+    margin-top: 10px;
   }
 
   .ext__autofill__fields__wrapper {

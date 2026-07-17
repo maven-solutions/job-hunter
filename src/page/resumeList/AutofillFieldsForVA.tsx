@@ -3,9 +3,7 @@ import React, { useEffect, useState } from "react";
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
-import {
-  saveIndividualSession,
-} from "../../store/features/ResumeList/ResumeListApi";
+import { saveIndividualSession } from "../../store/features/ResumeList/ResumeListApi";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
@@ -232,7 +230,11 @@ const AutofillFieldsForVA = (props: any) => {
   };
 
   return (
-    <div className={isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"}>
+    <div
+      className={
+        isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"
+      }
+    >
       {!autoFilling && isV2Layout && (
         <div className="ci_va_v2_primary_button">
           <AutofillButton
@@ -250,7 +252,9 @@ const AutofillFieldsForVA = (props: any) => {
           <AutofillButton
             onClick={onScreenshot}
             resumeList={resumeList}
-            text={resumeList.screenshotUploading ? "Uploading..." : "Screenshot"}
+            text={
+              resumeList.screenshotUploading ? "Uploading..." : "Screenshot"
+            }
             variant="secondary"
             icon={<Camera size={16} />}
             disabled={!resumeList.res_success || resumeList.screenshotUploading}
