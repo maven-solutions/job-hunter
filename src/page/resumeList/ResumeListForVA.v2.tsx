@@ -65,6 +65,7 @@ const ResumeListForVAV2 = (props: any) => {
       dispatch(getIndividualSession());
     }
   }, []);
+
   useEffect(() => {
     if (resumeList.res_success) {
       chrome.storage.local.get(
@@ -332,6 +333,8 @@ const ResumeListForVAV2 = (props: any) => {
       ? resumeList.individualUserList
       : resumeList.userList;
 
+  console.log("resumeList:::individualSession", resumeList.individualSession);
+  console.log("selectedUserValue", resumeList.selectedUserValue);
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_panel">
