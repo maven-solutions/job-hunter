@@ -65,8 +65,6 @@ const ResumeListForVAV2 = (props: any) => {
       dispatch(getIndividualSession());
     }
   }, []);
-  console.log("resumeList:::individualSession", resumeList.individualSession);
-
   useEffect(() => {
     if (resumeList.res_success) {
       chrome.storage.local.get(
@@ -296,6 +294,18 @@ const ResumeListForVAV2 = (props: any) => {
     return filteredArray[0];
   };
 
+  const getSessionUserName = (userId: number | undefined | null) => {
+    if (userId == null) return "";
+    const match =
+      resumeList.individualUserList?.find(
+        (user: { label: string; value: number }) => user.value === userId,
+      ) ??
+      resumeList.userList?.find(
+        (user: { label: string; value: number }) => user.value === userId,
+      );
+    return match?.label ?? "";
+  };
+
   const handleSelectedResume = (index) => {
     chrome.storage.local.set({ selectedResumeIndex: index });
     dispatch(setResumeIndex(index));
@@ -365,10 +375,14 @@ const ResumeListForVAV2 = (props: any) => {
           )}
           {!iframeUrl && showAddWebsite && <AddMissingLink />}
           {iframeUrl && <IframeProceed />}
-          <JobCardV2
-            jobTitle="Senior Frontend Engineer"
-            userName="Deepak Joshi"
-          />
+          {resumeList.individualSession && (
+            <JobCardV2
+              jobTitle={resumeList.individualSession?.jobTitle}
+              userName={getSessionUserName(
+                resumeList.individualSession?.userId,
+              )}
+            />
+          )}
           {/* <WhiteCard> */}
           <div className="ciautofill_v2_resume_autofill_button_section">
             <AutofillFieldsForVA
