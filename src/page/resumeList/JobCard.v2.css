@@ -1,0 +1,57 @@
+.tc_job_card {
+  /* min-height: 74px; */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border, #e5e4f2);
+  border-radius: 14px;
+  background: var(--card-bg, #fff);
+}
+
+.tc_job_icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--purple-soft, #eceaf9);
+  color: var(--purple, #4b38f4);
+}
+
+.tc_job_icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tc_job_copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.tc_job_copy h1 {
+  margin: 0 0 3px;
+  color: var(--text, #202035);
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tc_job_copy p {
+  margin: 0;
+  color: var(--muted, #9290aa);
+  font-size: 12px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

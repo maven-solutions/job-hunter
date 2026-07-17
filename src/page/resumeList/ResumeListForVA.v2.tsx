@@ -27,6 +27,7 @@ import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
 import SupportMessageV2 from "./SupportMessageV2";
 import ScreenshotGallery from "./ScreenshotGallery";
+import JobCardV2 from "./JobCard.v2";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -364,7 +365,10 @@ const ResumeListForVAV2 = (props: any) => {
           )}
           {!iframeUrl && showAddWebsite && <AddMissingLink />}
           {iframeUrl && <IframeProceed />}
-
+          <JobCardV2
+            jobTitle="Senior Frontend Engineer"
+            userName="Deepak Joshi"
+          />
           <WhiteCard>
             <div className="ciautofill_v2_resume_autofill_button_section">
               <AutofillFieldsForVA

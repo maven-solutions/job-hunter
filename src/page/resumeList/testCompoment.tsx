@@ -1,5 +1,6 @@
 import React from "react";
 import Layout from "../../template/Layout";
+import JobCard from "./JobCard.v2";
 import "./testCompoment.css";
 
 type ApplicantCardProps = {
@@ -109,6 +110,10 @@ const TestCompoment = (props: any) => {
           name="Deepak Joshi"
           resumeName="Angela G. Dillingham"
           badge="Individual"
+        />
+        <JobCard
+          jobTitle="Senior Frontend Engineer"
+          userName="Deepak Joshi"
         />
         <StatusCard
           title="Autofill complete · 14 fields"
