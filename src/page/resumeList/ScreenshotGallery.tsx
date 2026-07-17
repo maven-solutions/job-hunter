@@ -10,9 +10,15 @@ interface Screenshot {
 
 interface ScreenshotGalleryProps {
   screenshots?: Screenshot[];
+  extensionJobId: string;
+  userId: number;
 }
 
-const ScreenshotGallery = ({ screenshots = [] }: ScreenshotGalleryProps) => {
+const ScreenshotGallery = ({
+  screenshots = [],
+  extensionJobId,
+  userId,
+}: ScreenshotGalleryProps) => {
   const dispatch = useAppDispatch();
   const { deletingScreenshotId, screenshotDeleteError } = useAppSelector(
     (store: RootStore) => store.ResumeListSlice,
@@ -25,7 +31,13 @@ const ScreenshotGallery = ({ screenshots = [] }: ScreenshotGalleryProps) => {
     );
 
     if (shouldDelete) {
-      dispatch(deleteIndividualSessionScreenshot(screenshot.id));
+      dispatch(
+        deleteIndividualSessionScreenshot({
+          applicationTrackingId: extensionJobId,
+          userId,
+          screenshotId: screenshot.id,
+        }),
+      );
     }
   };
 

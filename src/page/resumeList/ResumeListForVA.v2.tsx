@@ -331,6 +331,8 @@ const ResumeListForVAV2 = (props: any) => {
       ? resumeList.individualUserList
       : resumeList.userList;
 
+  console.log("resumeList:::individualSession", resumeList.individualSession);
+
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_panel">
@@ -405,6 +407,8 @@ const ResumeListForVAV2 = (props: any) => {
           {resumeList.individualSession?.userId === selectedUserId && (
             <ScreenshotGallery
               screenshots={resumeList.individualSession?.screenshots}
+              extensionJobId={resumeList.individualSession?.extensionJobId}
+              userId={resumeList.individualSession?.userId}
             />
           )}
         </div>

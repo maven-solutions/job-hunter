@@ -60,9 +60,7 @@ export const getIndividualSession = createAsyncThunk(
   "getIndividualSession",
   async (data: undefined, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(
-        `${BASE_URL}/va/individual/session`,
-      );
+      const res = await axiosInstance.get(`${BASE_URL}/va/individual/session`);
       return res.data;
     } catch (error: any) {
       //   errorToastMessage(error.response?.data?.message);
@@ -119,11 +117,7 @@ export const uploadIndividualSessionScreenshot = createAsyncThunk(
   async (screenshot: Blob, { rejectWithValue }) => {
     try {
       const formData = new FormData();
-      formData.append(
-        "screenshot",
-        screenshot,
-        `screenshot-${Date.now()}.png`,
-      );
+      formData.append("screenshot", screenshot, `screenshot-${Date.now()}.png`);
 
       const res = await axiosInstance.post(
         `${BASE_URL}/va/individual/session/screenshot`,
@@ -146,11 +140,22 @@ export const uploadIndividualSessionScreenshot = createAsyncThunk(
 
 export const deleteIndividualSessionScreenshot = createAsyncThunk(
   "deleteIndividualSessionScreenshot",
-  async (screenshotId: string, { rejectWithValue }) => {
+  async (
+    {
+      applicationTrackingId,
+      userId,
+      screenshotId,
+    }: { applicationTrackingId: string; userId: number; screenshotId: string },
+    { rejectWithValue },
+  ) => {
     try {
-      const res = await axiosInstance.delete(
-        `${BASE_URL}/va/individual/session/screenshot/${screenshotId}`,
-      );
+      const res = await axiosInstance.delete(`${BASE_URL}/va/proof-of-work`, {
+        data: {
+          applicationTrackingId,
+          userId,
+          screenshotId,
+        },
+      });
       return res.data;
     } catch (error: any) {
       if (!error.response) {
