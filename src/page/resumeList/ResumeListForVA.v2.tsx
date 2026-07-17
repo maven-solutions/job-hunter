@@ -369,24 +369,24 @@ const ResumeListForVAV2 = (props: any) => {
             jobTitle="Senior Frontend Engineer"
             userName="Deepak Joshi"
           />
-          <WhiteCard>
-            <div className="ciautofill_v2_resume_autofill_button_section">
-              <AutofillFieldsForVA
-                selectedUserId={selectedUserId}
-                getUserDetailsById={getUserDetailsById}
-                selectResumeIndex={resumeList.resumeIndex}
-                content={content}
-                setAutoFilling={setAutoFilling}
-                setIframeUrl={setIframeUrl}
-                iframeUrl={iframeUrl}
-                setShowAddWebsite={setShowAddWebsite}
-                setShowJobTrackedAlert={setShowJobTrackedAlert}
-                setErrorINCountSave={setErrorINCountSave}
-                autoFilling={autoFilling}
-                isV2Layout
-              />
-            </div>
-          </WhiteCard>
+          {/* <WhiteCard> */}
+          <div className="ciautofill_v2_resume_autofill_button_section">
+            <AutofillFieldsForVA
+              selectedUserId={selectedUserId}
+              getUserDetailsById={getUserDetailsById}
+              selectResumeIndex={resumeList.resumeIndex}
+              content={content}
+              setAutoFilling={setAutoFilling}
+              setIframeUrl={setIframeUrl}
+              iframeUrl={iframeUrl}
+              setShowAddWebsite={setShowAddWebsite}
+              setShowJobTrackedAlert={setShowJobTrackedAlert}
+              setErrorINCountSave={setErrorINCountSave}
+              autoFilling={autoFilling}
+              isV2Layout
+            />
+          </div>
+          {/* </WhiteCard> */}
 
           <ScreenshotGallery
             screenshots={resumeList.individualSession?.screenshots}
