@@ -62,11 +62,11 @@ const ResumeList = createSlice({
         state.individualApplicantData = payload.data.individualApplicants ?? [];
         state.userList = (payload.data.applicants ?? []).map((data) => ({
           label: data.fullName,
-          value: data.applicantId,
+          value: data.id,
         }));
         state.individualUserList = (
           payload.data.individualApplicants ?? []
-        ).map((data) => ({ label: data.fullName, value: data.applicantId }));
+        ).map((data) => ({ label: data.fullName, value: data.id }));
       },
     );
     builder.addCase(getApplicantsData.rejected, (state) => {

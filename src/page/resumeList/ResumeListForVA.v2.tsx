@@ -333,7 +333,7 @@ const ResumeListForVAV2 = (props: any) => {
       ? resumeList.individualUserList
       : resumeList.userList;
 
-  console.log("resumeList:::individualSession", resumeList.individualSession);
+  console.log("resumeList:::individualSession", resumeList);
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
