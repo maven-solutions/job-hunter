@@ -65,6 +65,7 @@ const ResumeListForVAV2 = (props: any) => {
 
   console.log("orgState:::", orgState);
   console.log("resumeList:::", resumeList);
+  console.log("selectedUserId:::", selectedUserId);
 
   useEffect(() => {
     if (!resumeList.deg_res_success) {
