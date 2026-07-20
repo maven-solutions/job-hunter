@@ -26,6 +26,7 @@ import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
 import ScreenshotGallery from "./ScreenshotGallery";
 import JobCardV2 from "./JobCard.v2";
+import { getOrgSession } from "../../store/features/Organization/OrgApi";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -57,10 +58,18 @@ const ResumeListForVAV2 = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
+  const orgState: any = useAppSelector((store: RootStore) => {
+    return store.OrgSlice;
+  });
+
+  console.log("orgState:::", orgState);
+  console.log("resumeList:::", resumeList);
+
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
       dispatch(getIndividualSession());
+      dispatch(getOrgSession());
     }
   }, []);
 
@@ -170,6 +179,17 @@ const ResumeListForVAV2 = (props: any) => {
     );
   }, []);
 
+  useEffect(() => {
+    if (resumeList.individualSession) {
+      setApplicantMode("individual");
+      return;
+    }
+
+    if (orgState?.orgSession) {
+      setApplicantMode("va");
+    }
+  }, [resumeList.individualSession, orgState?.orgSession]);
+
   const dispatch = useAppDispatch();
   useEffect(() => {
     // for organization student
@@ -245,44 +265,6 @@ const ResumeListForVAV2 = (props: any) => {
     chrome.storage.local.set({ selectedResumeIndex: 0 });
   };
 
-  const handleModeSwitch = (mode: "va" | "individual") => {
-    setApplicantMode(mode);
-    chrome.storage.local.set(
-      { [CHROME_STOGRAGE.SELECTED_ROLE_TYPE]: mode as string },
-      () => {},
-    );
-    dispatch(setResumeIndex(0));
-    if (mode === "individual") {
-      const first = resumeList.individualApplicantData?.[0];
-      if (first) {
-        setSelectedUserId(first.applicantId);
-        setSelectedUserValue({
-          label: first.fullName,
-          value: first.applicantId,
-        });
-        setUserResumeList(first.applicants ?? []);
-      } else {
-        setSelectedUserId(null);
-        setSelectedUserValue(null);
-        setUserResumeList([]);
-      }
-    } else {
-      const first = resumeList.applicantData?.[resumeList.userIndex];
-      if (first) {
-        setSelectedUserId(first.applicantId);
-        setSelectedUserValue({
-          label: first.fullName,
-          value: first.applicantId,
-        });
-        setUserResumeList(first.applicants ?? []);
-      } else {
-        setSelectedUserId(null);
-        setSelectedUserValue(null);
-        setUserResumeList([]);
-      }
-    }
-  };
-
   const getUserDetailsById = (id) => {
     const pool =
       applicantMode === "individual"
@@ -339,7 +321,7 @@ const ResumeListForVAV2 = (props: any) => {
         <div className="popup-content">
           <section className="form-section">
             <p className="section-label">Applying for</p>
-            <SwitchTabV2 value={applicantMode} onChange={handleModeSwitch} />
+            <SwitchTabV2 value={applicantMode} />
 
             {!autoFilling && (
               <ApplicantPickerV2
