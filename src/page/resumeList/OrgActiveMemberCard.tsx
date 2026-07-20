@@ -1,20 +1,20 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { getInitials } from "./helper";
 
 interface ApplicantDataItem {
+  id: number;
   applicantId: number;
   userId?: number;
-  coverLetterId: 1;
+  coverLetterId: number;
   createdAt: string;
+  updatedAt: string;
   email: string;
   fullName: string;
-  id: number;
   image: string | null;
   onHold: boolean;
   organizationId: number;
-  updatedAt: string;
-  applicants: any;
-  applicationForm: any;
+  applicants: unknown;
+  applicationForm: unknown;
 }
 
 interface OrgActiveMemberCardProps {
@@ -22,31 +22,35 @@ interface OrgActiveMemberCardProps {
   applicants?: ApplicantDataItem[];
 }
 
-const isSameId = (left: unknown, right: unknown) =>
-  left != null && right != null && String(left) === String(right);
-
 const OrgActiveMemberCard = ({
   activeUserId,
   applicants = [],
 }: OrgActiveMemberCardProps) => {
-  const applicantMatch = applicants.find((item) =>
-    isSameId(item.id, activeUserId),
-  );
+  const activeApplicant = useMemo(() => {
+    if (activeUserId == null) {
+      return undefined;
+    }
 
-  const name = applicantMatch?.fullName ?? "";
-  const email = applicantMatch?.email ?? "";
+    const normalizedActiveUserId = String(activeUserId);
+
+    return applicants.find(({ id }) => String(id) === normalizedActiveUserId);
+  }, [activeUserId, applicants]);
+
+  const { fullName = "", email = "" } = activeApplicant ?? {};
+  const initials = getInitials(fullName) || "NA";
 
   return (
     <div className="applicant-summary">
-      <span className="avatar avatar--primary">
-        {getInitials(name) || "NA"}
+      <span className="avatar avatar--primary" aria-hidden="true">
+        {initials}
       </span>
+
       <span className="applicant-copy">
-        <strong>{name}</strong>
-        <small>{email}</small>
+        <strong>{fullName}</strong>
+        {email && <small>{email}</small>}
       </span>
     </div>
   );
 };
 
-export default OrgActiveMemberCard;
+export default memo(OrgActiveMemberCard);
