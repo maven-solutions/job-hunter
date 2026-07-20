@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
@@ -269,6 +269,14 @@ const ResumeListForVAV2 = (props: any) => {
     chrome.storage.local.set({ selectedResumeIndex: 0 });
   };
 
+  const handleOrgActiveApplicantSelect = useCallback(
+    (option: { label: string; value: string | number }) => {
+      if (selectedUserValue?.value === option.value) return;
+      handleSelectChanges(option);
+    },
+    [selectedUserValue?.value, resumeList.applicantData],
+  );
+
   const getUserDetailsById = (id) => {
     const pool =
       applicantMode === "individual"
@@ -289,6 +297,13 @@ const ResumeListForVAV2 = (props: any) => {
         (user: { label: string; value: number }) => user.value === userId,
       );
     return match?.label ?? "";
+  };
+  const getOrgSessionUserName = (userId: number | undefined | null) => {
+    if (userId == null) return "";
+    const match = resumeList.applicantData?.find(
+      (user: { fullName: string; id: number }) => user.id === userId,
+    );
+    return match?.fullName ?? "";
   };
 
   const handleSelectedResume = (index) => {
@@ -331,10 +346,11 @@ const ResumeListForVAV2 = (props: any) => {
               <OrgActiveMemberCard
                 activeUserId={orgState.orgSession.userId}
                 applicants={resumeList?.applicantData}
+                onActiveApplicantSelect={handleOrgActiveApplicantSelect}
               />
             )}
 
-            <ApplicantPickerV2
+            {/* <ApplicantPickerV2
               name={selectedApplicantName}
               role={selectedApplicantRole}
               options={currentOptions ?? []}
@@ -345,7 +361,7 @@ const ResumeListForVAV2 = (props: any) => {
                   ? handleSelectChanges(option)
                   : handleIndividualSelectChanges(option)
               }
-            />
+            /> */}
           </section>
 
           {!autoFilling && (
@@ -372,12 +388,19 @@ const ResumeListForVAV2 = (props: any) => {
           )}
           {!iframeUrl && showAddWebsite && <AddMissingLink />}
           {iframeUrl && <IframeProceed />}
-          {resumeList.individualSession && (
+          {resumeList.individualSession && autoFilling && (
             <JobCardV2
               jobTitle={resumeList.individualSession?.jobTitle}
               userName={getSessionUserName(
                 resumeList.individualSession?.userId,
               )}
+            />
+          )}
+
+          {orgState?.orgSession && autoFilling && (
+            <JobCardV2
+              jobTitle={orgState.orgSession?.jobTitle}
+              userName={getOrgSessionUserName(orgState.orgSession?.userId)}
             />
           )}
           {/* <WhiteCard> */}

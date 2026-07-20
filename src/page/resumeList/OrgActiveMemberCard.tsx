@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import { getInitials } from "./helper";
 
 interface ApplicantDataItem {
@@ -20,11 +20,16 @@ interface ApplicantDataItem {
 interface OrgActiveMemberCardProps {
   activeUserId?: string | number | null;
   applicants?: ApplicantDataItem[];
+  onActiveApplicantSelect?: (option: {
+    label: string;
+    value: string | number;
+  }) => void;
 }
 
 const OrgActiveMemberCard = ({
   activeUserId,
   applicants = [],
+  onActiveApplicantSelect,
 }: OrgActiveMemberCardProps) => {
   const activeApplicant = useMemo(() => {
     if (activeUserId == null) {
@@ -35,6 +40,14 @@ const OrgActiveMemberCard = ({
 
     return applicants.find(({ id }) => String(id) === normalizedActiveUserId);
   }, [activeUserId, applicants]);
+
+  useEffect(() => {
+    if (!activeApplicant || !onActiveApplicantSelect) return;
+    onActiveApplicantSelect({
+      label: activeApplicant.fullName,
+      value: activeApplicant.applicantId,
+    });
+  }, [activeApplicant, onActiveApplicantSelect]);
 
   const { fullName = "", email = "" } = activeApplicant ?? {};
   const initials = getInitials(fullName) || "NA";
