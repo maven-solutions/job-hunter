@@ -63,7 +63,7 @@ const OrgActiveMemberCard = ({
       if (userId !== activeApplicant.id) {
         dispatch(setResumeIndex(0));
         setLocalStorageData("selectedResumeIndex", 0);
-        setLocalStorageData("selectedUserId", activeApplicant.id);
+        setLocalStorageData("selectedUserId", activeApplicant?.id);
       } else {
         dispatch(setResumeIndex(resumeIndex));
         setLocalStorageData("selectedResumeIndex", resumeIndex);
