@@ -5,6 +5,10 @@ import {
   setResumeIndex,
   setUserIndex,
 } from "../../store/features/ResumeList/ResumeListSlice";
+import {
+  getLocalStorageData,
+  setLocalStorageData,
+} from "../../autofill/helper";
 
 interface ApplicantDataItem {
   id: number;
@@ -65,12 +69,29 @@ const OrgActiveMemberCard = ({
 
   useEffect(() => {
     if (!activeApplicant) return;
-    setUserResumeList(activeApplicant.applicants);
-    setSelectedUserId(activeApplicant.id);
-    dispatch(setResumeIndex(0));
-    chrome.storage.local.set({ selectedResumeIndex: 0 });
-    chrome.storage.local.set({ selectedUserId: activeApplicant.id }, () => {});
-  }, [activeApplicant, setUserResumeList, setSelectedUserId]);
+
+    const syncActiveApplicant = async () => {
+      setUserResumeList?.(activeApplicant.applicants);
+      setSelectedUserId?.(activeApplicant.id);
+      const resumeIndex = await getLocalStorageData("selectedResumeIndex");
+      const userId = await getLocalStorageData("selectedUserId");
+
+      console.log("resumeIndex::", resumeIndex);
+      console.log("userId::", userId);
+
+      if (userId !== activeApplicant.id) {
+        dispatch(setResumeIndex(0));
+        setLocalStorageData("selectedResumeIndex", 0);
+        setLocalStorageData("selectedUserId", activeApplicant.id);
+      } else {
+        dispatch(setResumeIndex(resumeIndex));
+        setLocalStorageData("selectedResumeIndex", resumeIndex);
+        // setLocalStorageData("selectedUserId", activeApplicant.id);
+      }
+    };
+
+    syncActiveApplicant();
+  }, [activeApplicant]);
 
   const { fullName = "", email = "" } = activeApplicant ?? {};
   const initials = getInitials(fullName) || "";

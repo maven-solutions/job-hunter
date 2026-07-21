@@ -28,6 +28,7 @@ import ScreenshotGallery from "./ScreenshotGallery";
 import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
+import { setLocalStorageData } from "../../autofill/helper";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -308,7 +309,7 @@ const ResumeListForVAV2 = (props: any) => {
   };
 
   const handleSelectedResume = (index) => {
-    chrome.storage.local.set({ selectedResumeIndex: index });
+    setLocalStorageData("selectedResumeIndex", index);
     dispatch(setResumeIndex(index));
   };
 
