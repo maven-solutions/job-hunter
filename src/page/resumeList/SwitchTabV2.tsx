@@ -1,6 +1,6 @@
 import React from "react";
 
-export type SwitchTabMode = "va" | "individual";
+export type SwitchTabMode = "org" | "individual";
 
 interface SwitchTabV2Props {
   value: SwitchTabMode;
