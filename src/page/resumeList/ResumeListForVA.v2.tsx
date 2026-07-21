@@ -64,10 +64,6 @@ const ResumeListForVAV2 = (props: any) => {
     return store.OrgSlice;
   });
 
-  console.log("orgState:::", orgState);
-  console.log("resumeList:::", resumeList);
-  console.log("selectedUserId:::", selectedUserId);
-
   useEffect(() => {
     if (!resumeList.deg_res_success) {
       dispatch(getDesignations());
