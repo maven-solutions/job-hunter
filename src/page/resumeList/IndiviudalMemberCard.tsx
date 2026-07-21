@@ -33,7 +33,7 @@ interface OrgActiveMemberCardProps {
   setUserResumeList?: (value: any) => void;
 }
 
-const OrgActiveMemberCard = ({
+const IndiviudalMemberCard = ({
   activeUserId,
   applicants = [],
   setSelectedUserId,
@@ -41,6 +41,15 @@ const OrgActiveMemberCard = ({
 }: OrgActiveMemberCardProps) => {
   const dispatch = useAppDispatch();
 
+  const resumeList: any = useAppSelector((store: RootStore) => {
+    return store.ResumeListSlice;
+  });
+  const authState: any = useAppSelector((store: RootStore) => {
+    return store.AuthSlice;
+  });
+  const orgState: any = useAppSelector((store: RootStore) => {
+    return store.OrgSlice;
+  });
   const activeApplicant = useMemo(() => {
     if (activeUserId == null) {
       return undefined;
@@ -51,6 +60,8 @@ const OrgActiveMemberCard = ({
     return applicants.find(({ id }) => String(id) === normalizedActiveUserId);
   }, [activeUserId, applicants]);
 
+  console.log("activeApplicant:::", activeApplicant);
+
   useEffect(() => {
     if (!activeApplicant) return;
 
@@ -59,6 +70,9 @@ const OrgActiveMemberCard = ({
       setSelectedUserId?.(activeApplicant.id);
       const resumeIndex = await getLocalStorageData("selectedResumeIndex");
       const userId = await getLocalStorageData("selectedUserId");
+
+      console.log("resumeIndex::", resumeIndex);
+      console.log("userId::", userId);
 
       if (userId !== activeApplicant.id) {
         dispatch(setResumeIndex(0));
@@ -90,4 +104,4 @@ const OrgActiveMemberCard = ({
   );
 };
 
-export default memo(OrgActiveMemberCard);
+export default memo(IndiviudalMemberCard);

@@ -22,13 +22,13 @@ import IframeProceed from "./IframeProceed";
 import JobSavedNotification from "../../contentScript/JobSaved";
 import JobNotSavedError from "../../contentScript/JobNotSavedError";
 import SwitchTabV2 from "./SwitchTabV2";
-import ApplicantPickerV2 from "./ApplicantPickerV2";
 import ResumeListV2 from "./ResumeListV2";
 import ScreenshotGallery from "./ScreenshotGallery";
 import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
 import { setLocalStorageData } from "../../autofill/helper";
+import IndiviudalMemberCard from "./IndiviudalMemberCard";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -76,115 +76,6 @@ const ResumeListForVAV2 = (props: any) => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (!resumeList.res_success || orgState?.orgSession) {
-  //     return;
-  //   }
-
-  //   chrome.storage.local.get(
-  //     [
-  //       CHROME_STOGRAGE.SELECTED_ROLE_TYPE,
-  //       CHROME_STOGRAGE.SELECTED_USER,
-  //       CHROME_STOGRAGE.SELECTED_RESUME_INDEX,
-  //       CHROME_STOGRAGE.SELECTED_USER_INDEX,
-  //     ],
-  //     (result: IChromeResult) => {
-  //       const savedMode = result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as
-  //         | "va"
-  //         | "individual"
-  //         | undefined;
-  //       const mode = savedMode ?? "va";
-  //       setApplicantMode(mode);
-
-  //       const applicantPool =
-  //         mode === "individual"
-  //           ? resumeList.individualApplicantData
-  //           : resumeList.applicantData;
-  //       const userOptionPool =
-  //         mode === "individual"
-  //           ? resumeList.individualUserList
-  //           : resumeList.userList;
-
-  //       if (!applicantPool || applicantPool.length === 0) {
-  //         setSelectedUserValue(null);
-  //         setSelectedUserId(null);
-  //         setUserResumeList([]);
-  //         dispatch(setResumeIndex(0));
-  //         return;
-  //       }
-
-  //       let selectedApplicantIndex =
-  //         result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX) &&
-  //         applicantPool[result.selectedUserIndex]
-  //           ? result.selectedUserIndex
-  //           : mode === "va"
-  //             ? resumeList.userIndex
-  //             : 0;
-
-  //       if (!applicantPool[selectedApplicantIndex]) {
-  //         selectedApplicantIndex = 0;
-  //       }
-
-  //       let selectedApplicant = applicantPool[selectedApplicantIndex];
-  //       if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)) {
-  //         const selectedById = applicantPool.find(
-  //           (data: any) => data.applicantId === result.selectedUser?.value,
-  //         );
-  //         if (selectedById) {
-  //           selectedApplicant = selectedById;
-  //           selectedApplicantIndex = applicantPool.findIndex(
-  //             (data: any) => data.applicantId === result.selectedUser?.value,
-  //           );
-  //         }
-  //       }
-
-  //       if (!selectedApplicant) {
-  //         return;
-  //       }
-
-  //       setSelectedUserValue(
-  //         result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER)
-  //           ? result.selectedUser
-  //           : (userOptionPool?.[selectedApplicantIndex] ?? {
-  //               label: selectedApplicant.fullName,
-  //               value: selectedApplicant.applicantId,
-  //             }),
-  //       );
-  //       setSelectedUserId(selectedApplicant.applicantId);
-  //       setUserResumeList(selectedApplicant.applicants ?? []);
-  //       dispatch(setUserIndex(selectedApplicantIndex));
-  //       chrome.storage.local.set({
-  //         selectedUserIndex: selectedApplicantIndex,
-  //       });
-
-  //       const selectedResumeIndex = result.hasOwnProperty(
-  //         CHROME_STOGRAGE.SELECTED_RESUME_INDEX,
-  //       )
-  //         ? result.selectedResumeIndex
-  //         : 0;
-  //       dispatch(setResumeIndex(selectedResumeIndex));
-  //     },
-  //   );
-  // }, [
-  //   resumeList.res_success,
-  //   resumeList.applicantData,
-  //   resumeList.individualApplicantData,
-  //   orgState?.orgSession,
-  // ]);
-
-  // useEffect(() => {
-  //   chrome.storage.local.get(
-  //     [CHROME_STOGRAGE.SELECTED_ROLE_TYPE],
-  //     (result: any) => {
-  //       if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_ROLE_TYPE)) {
-  //         setApplicantMode(
-  //           result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "va" | "individual",
-  //         );
-  //       }
-  //     },
-  //   );
-  // }, []);
-
   useEffect(() => {
     if (resumeList.individualSession) {
       setApplicantMode("individual");
@@ -225,60 +116,6 @@ const ResumeListForVAV2 = (props: any) => {
     window.open(pdfUrl, "_blank");
   };
 
-  const handleSelectChanges = (option) => {
-    chrome.storage.local.set({ selectedUser: option }, () => {});
-    const filteredArray = resumeList.applicantData?.filter((data) => {
-      return option.value === data.applicantId;
-    });
-    resumeList.applicantData?.map((data, index) => {
-      if (option.value === data.applicantId) {
-        dispatch(setUserIndex(index));
-        chrome.storage.local.set({ selectedUserIndex: index });
-      }
-    });
-
-    if (!filteredArray && filteredArray.length === 0) {
-      return;
-    }
-
-    const resume = filteredArray[0].applicants;
-    setUserResumeList(resume);
-    // setSelectResumeIndex(resumeList.resumeIndex);
-    dispatch(setResumeIndex(0));
-    chrome.storage.local.set({ selectedResumeIndex: 0 });
-    setSelectedUserId(option.value);
-    setSelectedUserValue(option);
-  };
-
-  const handleIndividualSelectChanges = (option: any) => {
-    chrome.storage.local.set({ selectedUser: option }, () => {});
-    resumeList.individualApplicantData?.map((data: any, index: number) => {
-      if (option.value === data.applicantId) {
-        dispatch(setUserIndex(index));
-        chrome.storage.local.set({ selectedUserIndex: index });
-      }
-    });
-    const filteredArray = resumeList.individualApplicantData?.filter(
-      (data: any) => {
-        return option.value === data.applicantId;
-      },
-    );
-    if (!filteredArray || filteredArray.length === 0) return;
-    setUserResumeList(filteredArray[0].applicants);
-    setSelectedUserId(option.value);
-    setSelectedUserValue(option);
-    dispatch(setResumeIndex(0));
-    chrome.storage.local.set({ selectedResumeIndex: 0 });
-  };
-
-  const handleOrgActiveApplicantSelect = useCallback(
-    (option: { label: string; value: string | number }) => {
-      if (selectedUserValue?.value === option.value) return;
-      handleSelectChanges(option);
-    },
-    [selectedUserValue?.value, resumeList.applicantData],
-  );
-
   const getUserDetailsById = (id) => {
     const pool =
       applicantMode === "individual"
@@ -313,27 +150,6 @@ const ResumeListForVAV2 = (props: any) => {
     dispatch(setResumeIndex(index));
   };
 
-  const applicantPool =
-    applicantMode === "individual"
-      ? resumeList.individualApplicantData
-      : resumeList.applicantData;
-  const selectedApplicant = selectedUserId
-    ? getUserDetailsById(selectedUserId)
-    : applicantPool?.[0];
-  const selectedApplicantName =
-    selectedApplicant?.fullName ??
-    selectedUserValue?.label ??
-    "Select Applicant";
-  const selectedApplicantRole =
-    selectedApplicant?.title ||
-    selectedApplicant?.designation ||
-    selectedApplicant?.position ||
-    "Applicant";
-  const currentOptions =
-    applicantMode === "individual"
-      ? resumeList.individualUserList
-      : resumeList.userList;
-
   console.log("resumeList:::individualSession", resumeList);
 
   return (
@@ -348,24 +164,19 @@ const ResumeListForVAV2 = (props: any) => {
               <OrgActiveMemberCard
                 activeUserId={orgState.orgSession.userId}
                 applicants={resumeList?.applicantData}
-                // onActiveApplicantSelect={handleOrgActiveApplicantSelect}
                 setSelectedUserId={setSelectedUserId}
                 setUserResumeList={setUserResumeList}
               />
             )}
 
-            {/* <ApplicantPickerV2
-              name={selectedApplicantName}
-              role={selectedApplicantRole}
-              options={currentOptions ?? []}
-              selectedValue={selectedUserValue?.value}
-              activeSessionUserId={resumeList.individualSession?.userId}
-              onSelect={(option) =>
-                applicantMode === "va"
-                  ? handleSelectChanges(option)
-                  : handleIndividualSelectChanges(option)
-              }
-            /> */}
+            {!autoFilling && resumeList.individualSession && (
+              <IndiviudalMemberCard
+                activeUserId={resumeList.individualSession?.userId}
+                applicants={resumeList.individualApplicantData}
+                setSelectedUserId={setSelectedUserId}
+                setUserResumeList={setUserResumeList}
+              />
+            )}
           </section>
 
           {!autoFilling && (
