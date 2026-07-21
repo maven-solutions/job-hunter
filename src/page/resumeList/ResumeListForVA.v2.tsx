@@ -342,7 +342,7 @@ const ResumeListForVAV2 = (props: any) => {
         <div className="popup-content">
           <section className="form-section">
             <p className="section-label">Applying for</p>
-            <SwitchTabV2 value={applicantMode} />
+            <SwitchTabV2 />
 
             {!autoFilling && orgState?.orgSession && (
               <OrgActiveMemberCard

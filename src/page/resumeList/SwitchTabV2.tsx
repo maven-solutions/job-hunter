@@ -1,18 +1,20 @@
 import React from "react";
+import { RootStore, useAppSelector } from "../../store/store";
 
-export type SwitchTabMode = "va" | "individual";
-
-interface SwitchTabV2Props {
-  value: SwitchTabMode;
-}
-
-const SwitchTabV2 = ({ value }: SwitchTabV2Props) => {
-  if (!value) return null;
-  const activeLabel = value === "individual" ? "Individual" : "Organization";
+const SwitchTabV2 = () => {
+  const resumeList: any = useAppSelector((store: RootStore) => {
+    return store.ResumeListSlice;
+  });
+  const orgState: any = useAppSelector((store: RootStore) => {
+    return store.OrgSlice;
+  });
 
   return (
     <div className="segment-control" aria-label="Active applicant type">
-      <label>{activeLabel}</label>
+      <label>
+        {resumeList.individualSession ? "Individual" : ""}
+        {orgState.orgSession ? "Organization" : ""}
+      </label>
     </div>
   );
 };
