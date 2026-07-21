@@ -101,6 +101,7 @@ const extractInfo = (resumeData, applicationForm, selectedUserId) => {
 
 const AutofillFieldsForVA = (props: any) => {
   const {
+    applicantMode,
     selectedUserId,
     getUserDetailsById,
     setAutoFilling,
@@ -216,8 +217,8 @@ const AutofillFieldsForVA = (props: any) => {
     setShowAddWebsite(true);
   };
 
-  const onScreenshot = () => {
-    handleScreenshot(dispatch);
+  const onScreenshot = (applicantMode: string) => {
+    handleScreenshot(dispatch, applicantMode);
   };
 
   const handleSaveScreenshotInJob = () => {
@@ -252,16 +253,12 @@ const AutofillFieldsForVA = (props: any) => {
       {isV2Layout && (
         <div className="ci_va_v2_secondary_actions">
           <AutofillButton
-            onClick={onScreenshot}
+            onClick={() => onScreenshot(applicantMode)}
             resumeList={resumeList}
             text="Screenshot"
             variant="secondary"
             icon={<Camera size={16} />}
-            disabled={
-              !resumeList.res_success ||
-              autoFilling ||
-              resumeList.individualSession?.userId !== selectedUserId
-            }
+            disabled={autoFilling}
             loading={resumeList.screenshotUploading}
             loadingText="Uploading..."
           />
@@ -300,7 +297,7 @@ const AutofillFieldsForVA = (props: any) => {
       )}
       {!isV2Layout && !autoFilling && (
         <AutofillButton
-          onClick={onScreenshot}
+          onClick={() => onScreenshot(applicantMode)}
           resumeList={resumeList}
           text="Screenshot"
           disabled={!resumeList.res_success}

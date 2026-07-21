@@ -70,7 +70,7 @@ const ScreenshotGallery = ({
                   <ExternalLink size={14} aria-hidden="true" />
                 </span>
               </a>
-              <button
+              {/* <button
                 className="ciautofill_v2_screenshot_delete"
                 type="button"
                 onClick={() => handleDelete(screenshot)}
@@ -87,7 +87,7 @@ const ScreenshotGallery = ({
                 ) : (
                   <Trash2 size={15} aria-hidden="true" />
                 )}
-              </button>
+              </button> */}
             </article>
           ))}
         </div>

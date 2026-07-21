@@ -1,3 +1,4 @@
+import { uploadOrgSessionScreenshot } from "../../store/features/Organization/OrgApi";
 import { uploadIndividualSessionScreenshot } from "../../store/features/ResumeList/ResumeListApi";
 import { AppDispatch } from "../../store/store";
 import { EXTENSION_ACTION, EXTENSION_ROOT_ID } from "../../utils/constant";
@@ -172,7 +173,10 @@ const neutralizeFloatingElementsForScreenshot = (): (() => void) => {
   };
 };
 
-export const handleScreenshot = async (dispatch: AppDispatch) => {
+export const handleScreenshot = async (
+  dispatch: AppDispatch,
+  applicantMode: string,
+) => {
   const scrollElement =
     document.scrollingElement || document.documentElement || document.body;
   const originalX = window.scrollX;
@@ -453,7 +457,14 @@ export const handleScreenshot = async (dispatch: AppDispatch) => {
     }
 
     const screenshotBlob = await canvasToBlob(stitchedCanvas);
-    await dispatch(uploadIndividualSessionScreenshot(screenshotBlob)).unwrap();
+    if (applicantMode === "individual") {
+      await dispatch(
+        uploadIndividualSessionScreenshot(screenshotBlob),
+      ).unwrap();
+    }
+    if (applicantMode === "va") {
+      await dispatch(uploadOrgSessionScreenshot(screenshotBlob)).unwrap();
+    }
     resultMessage = "Screenshot uploaded successfully.";
   } catch (error: any) {
     console.error("Unable to capture or upload screenshot:", error);

@@ -26,17 +26,19 @@ interface OrgActiveMemberCardProps {
   activeUserId?: string | number | null;
   applicants?: ApplicantDataItem[];
   setSelectedUserId?: (value: string | number) => void;
-  onActiveApplicantSelect?: (option: {
-    label: string;
-    value: string | number;
-  }) => void;
+  setUserResumeList?: (value: any) => void;
+  // onActiveApplicantSelect?: (option: {
+  //   label: string;
+  //   value: string | number;
+  // }) => void;
 }
 
 const OrgActiveMemberCard = ({
   activeUserId,
   applicants = [],
   setSelectedUserId,
-  onActiveApplicantSelect,
+  setUserResumeList,
+  // onActiveApplicantSelect,
 }: OrgActiveMemberCardProps) => {
   const dispatch = useAppDispatch();
 
@@ -59,16 +61,19 @@ const OrgActiveMemberCard = ({
     return applicants.find(({ id }) => String(id) === normalizedActiveUserId);
   }, [activeUserId, applicants]);
 
+  console.log("activeApplicant:::", activeApplicant);
+
   useEffect(() => {
-    if (!activeApplicant || !onActiveApplicantSelect) return;
-    onActiveApplicantSelect({
-      label: activeApplicant.fullName,
-      value: activeApplicant.applicantId,
-    });
-  }, [activeApplicant, onActiveApplicantSelect]);
+    if (!activeApplicant) return;
+    setUserResumeList(activeApplicant.applicants);
+    setSelectedUserId(activeApplicant.id);
+    dispatch(setResumeIndex(0));
+    chrome.storage.local.set({ selectedResumeIndex: 0 });
+    chrome.storage.local.set({ selectedUserId: activeApplicant.id }, () => {});
+  }, [activeApplicant, setUserResumeList, setSelectedUserId]);
 
   const { fullName = "", email = "" } = activeApplicant ?? {};
-  const initials = getInitials(fullName) || "NA";
+  const initials = getInitials(fullName) || "";
 
   useEffect(() => {
     const handleIndividualSelectChanges = (option: any) => {

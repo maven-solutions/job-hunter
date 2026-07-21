@@ -347,7 +347,9 @@ const ResumeListForVAV2 = (props: any) => {
               <OrgActiveMemberCard
                 activeUserId={orgState.orgSession.userId}
                 applicants={resumeList?.applicantData}
-                onActiveApplicantSelect={handleOrgActiveApplicantSelect}
+                // onActiveApplicantSelect={handleOrgActiveApplicantSelect}
+                setSelectedUserId={setSelectedUserId}
+                setUserResumeList={setUserResumeList}
               />
             )}
 
@@ -418,6 +420,7 @@ const ResumeListForVAV2 = (props: any) => {
               setShowJobTrackedAlert={setShowJobTrackedAlert}
               setErrorINCountSave={setErrorINCountSave}
               autoFilling={autoFilling}
+              applicantMode={applicantMode}
               isV2Layout
             />
           </div>
@@ -431,6 +434,13 @@ const ResumeListForVAV2 = (props: any) => {
                 userId={resumeList.individualSession?.userId}
               />
             )}
+          {!autoFilling && orgState.orgSession?.userId === selectedUserId && (
+            <ScreenshotGallery
+              screenshots={orgState.orgSession?.screenshots}
+              extensionJobId={orgState.orgSession?.jobId}
+              userId={orgState.orgSession?.userId}
+            />
+          )}
         </div>
       </div>
     </Layout>

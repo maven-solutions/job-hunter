@@ -7,6 +7,7 @@ interface SwitchTabV2Props {
 }
 
 const SwitchTabV2 = ({ value }: SwitchTabV2Props) => {
+  if (!value) return null;
   const activeLabel = value === "individual" ? "Individual" : "Organization";
 
   return (
