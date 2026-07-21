@@ -222,15 +222,6 @@ const AutofillFieldsForVA = (props: any) => {
     handleScreenshot(dispatch, applicantMode);
   };
 
-  const handleSaveScreenshotInJob = () => {
-    dispatch(
-      saveIndividualSession({
-        userId: resumeList.individualSession?.userId,
-        extensionJobId: resumeList.individualSession?.extensionJobId,
-      }),
-    ).unwrap();
-  };
-
   return (
     <div
       className={
@@ -293,16 +284,6 @@ const AutofillFieldsForVA = (props: any) => {
           onClick={handleAutofill}
           resumeList={resumeList}
           text={iframeUrl ? "Proceed" : "Auto Fill"}
-        />
-      )}
-      {!isV2Layout && !autoFilling && (
-        <AutofillButton
-          onClick={() => onScreenshot(applicantMode)}
-          resumeList={resumeList}
-          text="Screenshot"
-          disabled={!resumeList.res_success}
-          loading={resumeList.screenshotUploading}
-          loadingText="Uploading..."
         />
       )}
     </div>
