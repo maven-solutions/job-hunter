@@ -51,9 +51,7 @@ const ResumeListForVA = (props: any) => {
   const [iframeUrl, setIframeUrl] = useState("");
   const [showAddWebsite, setShowAddWebsite] = useState(false);
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
-  const [applicantMode, setApplicantMode] = useState<"org" | "individual">(
-    "org",
-  );
+  const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -79,10 +77,10 @@ const ResumeListForVA = (props: any) => {
         ],
         (result: IChromeResult) => {
           const savedMode = result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as
-            | "org"
+            | "va"
             | "individual"
             | undefined;
-          const mode = savedMode ?? "org";
+          const mode = savedMode ?? "va";
           setApplicantMode(mode);
 
           const applicantPool =
@@ -106,7 +104,7 @@ const ResumeListForVA = (props: any) => {
             result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX) &&
             applicantPool[result.selectedUserIndex]
               ? result.selectedUserIndex
-              : mode === "org"
+              : mode === "va"
                 ? resumeList.userIndex
                 : 0;
 
@@ -167,7 +165,7 @@ const ResumeListForVA = (props: any) => {
       (result: any) => {
         if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_ROLE_TYPE)) {
           setApplicantMode(
-            result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "org" | "individual",
+            result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "va" | "individual",
           );
         }
       },
@@ -249,7 +247,7 @@ const ResumeListForVA = (props: any) => {
     chrome.storage.local.set({ selectedResumeIndex: 0 });
   };
 
-  const handleModeSwitch = (mode: "org" | "individual") => {
+  const handleModeSwitch = (mode: "va" | "individual") => {
     setApplicantMode(mode);
     chrome.storage.local.set(
       { [CHROME_STOGRAGE.SELECTED_ROLE_TYPE]: mode as string },
@@ -306,8 +304,8 @@ const ResumeListForVA = (props: any) => {
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_mode_toggle">
         <button
-          className={`ciautofill_v2_mode_btn ${applicantMode === "org" ? "ciautofill_v2_mode_btn--active" : ""}`}
-          onClick={() => handleModeSwitch("org")}
+          className={`ciautofill_v2_mode_btn ${applicantMode === "va" ? "ciautofill_v2_mode_btn--active" : ""}`}
+          onClick={() => handleModeSwitch("va")}
         >
           Organization Applicants
         </button>
@@ -318,7 +316,7 @@ const ResumeListForVA = (props: any) => {
           Individual Applicants
         </button>
       </div>
-      {applicantMode === "org" ? (
+      {applicantMode === "va" ? (
         <UserSelectList
           selectedUserValue={selectedUserValue}
           handleSelectChanges={handleSelectChanges}
