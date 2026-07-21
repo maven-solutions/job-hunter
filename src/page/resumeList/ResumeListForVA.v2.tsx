@@ -52,9 +52,7 @@ const ResumeListForVAV2 = (props: any) => {
   const [iframeUrl, setIframeUrl] = useState("");
   const [showAddWebsite, setShowAddWebsite] = useState(false);
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
-  const [applicantMode, setApplicantMode] = useState<"org" | "individual">(
-    "org",
-  );
+  const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -91,10 +89,10 @@ const ResumeListForVAV2 = (props: any) => {
   //     ],
   //     (result: IChromeResult) => {
   //       const savedMode = result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as
-  //         | "org"
+  //         | "va"
   //         | "individual"
   //         | undefined;
-  //       const mode = savedMode ?? "org";
+  //       const mode = savedMode ?? "va";
   //       setApplicantMode(mode);
 
   //       const applicantPool =
@@ -118,7 +116,7 @@ const ResumeListForVAV2 = (props: any) => {
   //         result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_USER_INDEX) &&
   //         applicantPool[result.selectedUserIndex]
   //           ? result.selectedUserIndex
-  //           : mode === "org"
+  //           : mode === "va"
   //             ? resumeList.userIndex
   //             : 0;
 
@@ -179,7 +177,7 @@ const ResumeListForVAV2 = (props: any) => {
   //     (result: any) => {
   //       if (result.hasOwnProperty(CHROME_STOGRAGE.SELECTED_ROLE_TYPE)) {
   //         setApplicantMode(
-  //           result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "org" | "individual",
+  //           result[CHROME_STOGRAGE.SELECTED_ROLE_TYPE] as "va" | "individual",
   //         );
   //       }
   //     },
@@ -193,7 +191,7 @@ const ResumeListForVAV2 = (props: any) => {
     }
 
     if (orgState?.orgSession) {
-      setApplicantMode("org");
+      setApplicantMode("va");
     }
   }, [resumeList.individualSession, orgState?.orgSession]);
 
@@ -209,7 +207,7 @@ const ResumeListForVAV2 = (props: any) => {
       return;
     }
 
-    if (authState.authenticated && authState?.ci_user?.userType === "org") {
+    if (authState.authenticated && authState?.ci_user?.userType === "va") {
       if (!resumeList.res_success || resumeList.applicantData.length === 0) {
         // for va user
         dispatch(getApplicantsData());
@@ -360,7 +358,7 @@ const ResumeListForVAV2 = (props: any) => {
               selectedValue={selectedUserValue?.value}
               activeSessionUserId={resumeList.individualSession?.userId}
               onSelect={(option) =>
-                applicantMode === "org"
+                applicantMode === "va"
                   ? handleSelectChanges(option)
                   : handleIndividualSelectChanges(option)
               }
