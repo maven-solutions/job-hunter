@@ -9,12 +9,18 @@ const SwitchTabV2 = () => {
     return store.OrgSlice;
   });
 
+  const hasSession = resumeList.individualSession || orgState.orgSession;
+
   return (
     <div className="segment-control" aria-label="Active applicant type">
-      <label>
-        {resumeList.individualSession ? "Individual" : ""}
-        {orgState.orgSession ? "Organization" : ""}
-      </label>
+      {!hasSession ? (
+        <div style={{ width: "100px", height: "30px" }} />
+      ) : (
+        <label>
+          {resumeList.individualSession ? "Individual" : ""}
+          {orgState.orgSession ? "Organization" : ""}
+        </label>
+      )}
     </div>
   );
 };
