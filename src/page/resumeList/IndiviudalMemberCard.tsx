@@ -60,8 +60,6 @@ const IndiviudalMemberCard = ({
     return applicants.find(({ id }) => String(id) === normalizedActiveUserId);
   }, [activeUserId, applicants]);
 
-  console.log("activeApplicant:::", activeApplicant);
-
   useEffect(() => {
     if (!activeApplicant) return;
 
@@ -70,9 +68,6 @@ const IndiviudalMemberCard = ({
       setSelectedUserId?.(activeApplicant.id);
       const resumeIndex = await getLocalStorageData("selectedResumeIndex");
       const userId = await getLocalStorageData("selectedUserId");
-
-      console.log("resumeIndex::", resumeIndex);
-      console.log("userId::", userId);
 
       if (userId !== activeApplicant.id) {
         dispatch(setResumeIndex(0));

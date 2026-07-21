@@ -64,7 +64,6 @@ const ResumeListForVA = (props: any) => {
       dispatch(getIndividualSession());
     }
   }, []);
-  console.log("resumeList:::individualSession", resumeList.individualSession);
 
   useEffect(() => {
     if (resumeList.res_success) {
