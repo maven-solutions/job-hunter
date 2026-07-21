@@ -130,6 +130,7 @@ const AutofillFieldsForVA = (props: any) => {
 
   const autofillByContentScript = async () => {
     const url = window.location.href;
+
     const userdetails = getUserDetailsById(selectedUserId);
     const applicantData = extractInfo(
       userdetails.applicants[selectResumeIndex],
@@ -240,7 +241,7 @@ const AutofillFieldsForVA = (props: any) => {
         <div className="ci_va_v2_primary_button">
           <AutofillButton
             onClick={handleAutofill}
-            resumeList={resumeList}
+            // resumeList={resumeList}
             text={iframeUrl ? "Proceed" : "Auto Fill this page"}
             variant="primary"
             icon={<Zap size={18} />}
@@ -259,7 +260,6 @@ const AutofillFieldsForVA = (props: any) => {
             variant="secondary"
             icon={<Camera size={16} />}
             disabled={autoFilling}
-            loading={resumeList.screenshotUploading}
             loadingText="Uploading..."
           />
           <AutofillButton

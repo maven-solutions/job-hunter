@@ -23,7 +23,7 @@ const AutofillButton = ({
   loading = false,
   loadingText = "Loading...",
 }: AutofillButtonProps) => {
-  const isDisabled = loading || (disabled ?? !resumeList?.res_success);
+  const isDisabled = loading || disabled;
 
   return (
     <div className="ext__autofill__fields__wrapper">

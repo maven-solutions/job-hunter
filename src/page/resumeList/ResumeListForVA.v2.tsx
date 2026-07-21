@@ -283,7 +283,7 @@ const ResumeListForVAV2 = (props: any) => {
       applicantMode === "individual"
         ? resumeList.individualApplicantData
         : resumeList.applicantData;
-    const filteredArray = pool?.filter((data: any) => id === data.applicantId);
+    const filteredArray = pool?.filter((data: any) => id === data.id);
     if (!filteredArray || filteredArray.length === 0) return null;
     return filteredArray[0];
   };
