@@ -154,7 +154,7 @@ const ResumeListForVAV2 = (props: any) => {
             <p className="section-label">Applying for</p>
             <SwitchTabV2 />
 
-            {!autoFilling && orgState?.orgSession && (
+            {orgState?.orgSession && (
               <OrgActiveMemberCard
                 activeUserId={orgState.orgSession.userId}
                 applicants={resumeList?.applicantData}
@@ -163,7 +163,7 @@ const ResumeListForVAV2 = (props: any) => {
               />
             )}
 
-            {!autoFilling && resumeList.individualSession && (
+            {resumeList.individualSession && (
               <IndiviudalMemberCard
                 activeUserId={resumeList.individualSession?.userId}
                 applicants={resumeList.individualApplicantData}

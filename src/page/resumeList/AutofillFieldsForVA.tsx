@@ -118,6 +118,9 @@ const AutofillFieldsForVA = (props: any) => {
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
+  const orgState: any = useAppSelector((store: RootStore) => {
+    return store.OrgSlice;
+  });
   const dispatch = useAppDispatch();
 
   const startLoading = () => {
@@ -237,6 +240,12 @@ const AutofillFieldsForVA = (props: any) => {
             variant="primary"
             icon={<Zap size={18} />}
             loading={autoFilling}
+            disabled={
+              resumeList.loading ||
+              autoFilling ||
+              orgState?.session_loading ||
+              resumeList.individualSession_loading
+            }
             loadingText="Auto Filling..."
           />
         </div>
@@ -250,7 +259,7 @@ const AutofillFieldsForVA = (props: any) => {
             text="Screenshot"
             variant="secondary"
             icon={<Camera size={16} />}
-            disabled={autoFilling}
+            disabled={autoFilling || resumeList.loading}
             loadingText="Uploading..."
           />
           <AutofillButton
