@@ -197,7 +197,7 @@ const ResumeListForVAV2 = (props: any) => {
           )}
           {!iframeUrl && showAddWebsite && <AddMissingLink />}
           {iframeUrl && <IframeProceed />}
-          {resumeList.individualSession && autoFilling && (
+          {resumeList.individualSession && (
             <JobCardV2
               jobTitle={resumeList.individualSession?.jobTitle}
               userName={getSessionUserName(
@@ -206,7 +206,7 @@ const ResumeListForVAV2 = (props: any) => {
             />
           )}
 
-          {orgState?.orgSession && autoFilling && (
+          {orgState?.orgSession && (
             <JobCardV2
               jobTitle={orgState.orgSession?.jobTitle}
               userName={getOrgSessionUserName(orgState.orgSession?.userId)}
