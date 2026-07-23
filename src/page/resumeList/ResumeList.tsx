@@ -16,6 +16,7 @@ import AutofillFields from "./AutofillFields";
 import ResumeListV2 from "./ResumeListV2";
 import { getApplicantSession } from "../../store/features/applicant/ApplicantApi";
 import JobCardV2 from "./JobCard.v2";
+import ScreenshotGallery from "./ScreenshotGallery";
 // import { getApplicantSession } from "../../store/features/Applicant/ApplicantApi";
 
 const ResumeList = (props: any) => {
@@ -115,6 +116,14 @@ const ResumeList = (props: any) => {
               autoFilling={autoFilling}
             />
           </div>
+
+          {!autoFilling && applicantState.applicantSession && (
+            <ScreenshotGallery
+              screenshots={applicantState.applicantSession?.screenshots}
+              extensionJobId={applicantState.applicantSession?.jobId}
+              userId={applicantState.applicantSession?.userId}
+            />
+          )}
         </div>
       </div>
     </Layout>
