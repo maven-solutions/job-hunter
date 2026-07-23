@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { detectInputAndFillData } from "../../autofill/helper";
 import "./index.css";
-import { RootStore, useAppSelector } from "../../store/store";
+import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
@@ -12,6 +12,7 @@ import { useDebounce } from "use-debounce";
 import { getHighestEducation } from "./helper";
 import AutofillButton from "./AutofillButton";
 import { Bookmark, Camera, Zap } from "react-feather";
+import { handleScreenshot } from "./handleScreenshot";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -101,7 +102,7 @@ const AutofillFields = (props: any) => {
     iframeUrl,
     autoFilling,
     isV2Layout,
-    onScreenshot,
+
     onSaveSite,
   } = props;
 
@@ -111,6 +112,8 @@ const AutofillFields = (props: any) => {
   const applicantState: any = useAppSelector((store: RootStore) => {
     return store.ApplicantSlice;
   });
+
+  const dispatch = useAppDispatch();
 
   const startLoading = () => {
     setAutoFilling(true);
@@ -176,6 +179,10 @@ const AutofillFields = (props: any) => {
     }
   }, [debouncedSearchTerm]);
 
+  const onScreenshot = (applicantMode: string) => {
+    handleScreenshot(dispatch, applicantMode);
+  };
+
   return (
     <div
       className={
@@ -204,7 +211,7 @@ const AutofillFields = (props: any) => {
       {isV2Layout && (
         <div className="ci_va_v2_secondary_actions">
           <AutofillButton
-            onClick={onScreenshot}
+            onClick={() => onScreenshot("applicant")}
             resumeList={resumeList}
             text="Screenshot"
             variant="secondary"
@@ -212,7 +219,7 @@ const AutofillFields = (props: any) => {
             disabled={autoFilling || resumeList.loading}
             loadingText="Uploading..."
           />
-          <AutofillButton
+          {/* <AutofillButton
             onClick={onSaveSite}
             resumeList={resumeList}
             text="Save Site"
@@ -221,7 +228,7 @@ const AutofillFields = (props: any) => {
             disabled={
               cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI || autoFilling
             }
-          />
+          /> */}
         </div>
       )}
 

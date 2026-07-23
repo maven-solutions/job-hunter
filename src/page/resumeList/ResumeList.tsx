@@ -6,15 +6,12 @@ import {
   getDesignations,
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
-import Height from "../../component/height/Height";
 import "./index.css";
 import "./index2.css";
 import "./index.v2.css";
-import AutofillLoader from "./AutofillLoader";
 import IframeProceed from "./IframeProceed";
 import AutofillFields from "./AutofillFields";
 import ResumeListV2 from "./ResumeListV2";
-// import { getApplicantSession } from "../../store/features/Applicant/ApplicantApi";
 import JobCardV2 from "./JobCard.v2";
 import ScreenshotGallery from "./ScreenshotGallery";
 import { getApplicantSession } from "../../store/features/applicant/ApplicantApi";
@@ -35,8 +32,6 @@ const ResumeList = (props: any) => {
     return store.ApplicantSlice;
   });
 
-  console.log("applicantState", applicantState);
-  console.log("resumeList", resumeList);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -78,10 +73,6 @@ const ResumeList = (props: any) => {
     return match?.fullName ?? "";
   };
 
-  const onScreenshot = (applicantMode: string) => {
-    console.log("applicantMode", applicantMode);
-  };
-
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_panel">
@@ -97,7 +88,7 @@ const ResumeList = (props: any) => {
               onPreview={handlePreview}
             />
           )}
-          {autoFilling && <AutofillLoader />}
+          {/* {autoFilling && <AutofillLoader />} */}
 
           {/* <Height height="10" /> */}
           {iframeUrl && <IframeProceed />}
@@ -119,7 +110,6 @@ const ResumeList = (props: any) => {
               iframeUrl={iframeUrl}
               autoFilling={autoFilling}
               isV2Layout
-              onScreenshot={() => onScreenshot("applicant")}
               onSaveSite={() => {}}
             />
           </div>

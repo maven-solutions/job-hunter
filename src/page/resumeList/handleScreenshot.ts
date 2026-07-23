@@ -1,5 +1,6 @@
 import { uploadOrgSessionScreenshot } from "../../store/features/Organization/OrgApi";
 import { uploadIndividualSessionScreenshot } from "../../store/features/ResumeList/ResumeListApi";
+import { uploadApplicantSessionScreenshot } from "../../store/features/applicant/ApplicantApi";
 import { AppDispatch } from "../../store/store";
 import { EXTENSION_ACTION, EXTENSION_ROOT_ID } from "../../utils/constant";
 
@@ -464,6 +465,10 @@ export const handleScreenshot = async (
     }
     if (applicantMode === "va") {
       await dispatch(uploadOrgSessionScreenshot(screenshotBlob)).unwrap();
+    }
+
+    if (applicantMode === "applicant") {
+      await dispatch(uploadApplicantSessionScreenshot(screenshotBlob)).unwrap();
     }
     resultMessage = "Screenshot uploaded successfully.";
   } catch (error: any) {

@@ -42,16 +42,13 @@ import useWorkDaysObserver from "../../hooks/observer/useWorkDaysObserver";
 import usePaylocityObserver from "../../hooks/observer/usePaylocityObserver";
 import useMagellanhealthObserver from "../../hooks/observer/useMagellanhealthObserver";
 import useURLobserver from "../../hooks/observer/useURLobserver";
-import { resumeGPTmainFunction } from "./gpt-resume";
 import useHpeObserver from "../../hooks/observer/useHpeObserver";
 import useConcentrixObserver from "../../hooks/observer/useConcentrixObserver";
 import useZimmerbiometObserver from "../../hooks/observer/useZimmerbiometObserver";
 import useFisglobalObserver from "../../hooks/observer/useFisglobalObserver";
 import ResumeGptInfoModal from "./GptInfoModal";
 import Error from "../../page/Error/Error";
-import ResumeListForVA from "../../page/resumeList/ResumeListForVA";
 import ResumeListForVAV2 from "../../page/resumeList/ResumeListForVA.v2";
-import TestCompoment from "../../page/resumeList/testCompoment";
 
 const JobDetector = (props: any) => {
   const { content, popup } = props;
