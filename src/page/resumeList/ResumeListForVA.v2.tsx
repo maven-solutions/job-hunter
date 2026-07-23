@@ -65,11 +65,11 @@ const ResumeListForVAV2 = (props: any) => {
   });
 
   useEffect(() => {
-    if (!resumeList.deg_res_success) {
-      dispatch(getDesignations());
-      dispatch(getIndividualSession());
-      dispatch(getOrgSession());
-    }
+    // if (!resumeList.deg_res_success) {
+    dispatch(getDesignations());
+    dispatch(getIndividualSession());
+    dispatch(getOrgSession());
+    // }
   }, []);
 
   useEffect(() => {

@@ -274,17 +274,17 @@ const JobDetector = (props: any) => {
         />
       )}
 
-      {showPage === SHOW_PAGE.resumeListForVAPage && (
-        <ResumeListForVAV2
-          autoFilling={autoFilling}
-          setAutoFilling={setAutoFilling}
-          setShowPage={setShowPage}
-          content={content}
-          showPage={showPage}
-          errorINCountSave={errorINCountSave}
-          setErrorINCountSave={setErrorINCountSave}
-        />
-      )}
+      {/* {showPage === SHOW_PAGE.resumeListForVAPage && ( */}
+      <ResumeListForVAV2
+        autoFilling={autoFilling}
+        setAutoFilling={setAutoFilling}
+        setShowPage={setShowPage}
+        content={content}
+        showPage={showPage}
+        errorINCountSave={errorINCountSave}
+        setErrorINCountSave={setErrorINCountSave}
+      />
+      {/* )} */}
       {/* <TestCompoment /> */}
 
       {showPage === SHOW_PAGE.ErrorPage && (
