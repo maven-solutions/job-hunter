@@ -6,11 +6,12 @@ import { RootStore, useAppSelector } from "../../store/store";
 import {
   AUTOFILL_TOKEN_FROM_CAREERAI,
   CAREERAI_TOKEN_REF,
-  EXTENSION_ACTION,
   LOCALSTORAGE,
 } from "../../utils/constant";
 import { useDebounce } from "use-debounce";
 import { getHighestEducation } from "./helper";
+import AutofillButton from "./AutofillButton";
+import { Bookmark, Camera, Zap } from "react-feather";
 
 const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -95,15 +96,20 @@ const extractInfo = (resumeData, applicationForm) => {
 const AutofillFields = (props: any) => {
   const {
     selectedResume,
-    content,
     setAutoFilling,
     setIframeUrl,
     iframeUrl,
     autoFilling,
+    isV2Layout,
+    onScreenshot,
+    onSaveSite,
   } = props;
 
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
+  });
+  const applicantState: any = useAppSelector((store: RootStore) => {
+    return store.ApplicantSlice;
   });
 
   const startLoading = () => {
@@ -171,24 +177,74 @@ const AutofillFields = (props: any) => {
   }, [debouncedSearchTerm]);
 
   return (
-    <div className="ci_va_two_button_section">
-      <span />
-      <div className="ext__autofill__fields__wrapper">
-        <div className="autofill__btn__wrapper">
-          {!autoFilling && (
-            <button
-              className={`autofill__btn ${
-                resumeList.res_success ? "" : "autofill__button__disable"
-              }`}
-              onClick={() => handleAutofill()}
-              disabled={resumeList.res_success ? false : true}
-            >
-              {/* Auto Fill */}
-              {iframeUrl ? "Proceed" : "Auto Fill"}
-            </button>
-          )}
+    <div
+      className={
+        isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"
+      }
+    >
+      {isV2Layout && (
+        <div className="ci_va_v2_primary_button">
+          <AutofillButton
+            onClick={handleAutofill}
+            text={iframeUrl ? "Proceed" : "Auto Fill this page"}
+            variant="primary"
+            icon={<Zap size={18} />}
+            loading={autoFilling}
+            disabled={
+              resumeList.loading ||
+              autoFilling ||
+              applicantState?.session_loading ||
+              !resumeList.res_success
+            }
+            loadingText="Auto Filling..."
+          />
         </div>
-      </div>
+      )}
+
+      {isV2Layout && (
+        <div className="ci_va_v2_secondary_actions">
+          <AutofillButton
+            onClick={onScreenshot}
+            resumeList={resumeList}
+            text="Screenshot"
+            variant="secondary"
+            icon={<Camera size={16} />}
+            disabled={autoFilling || resumeList.loading}
+            loadingText="Uploading..."
+          />
+          <AutofillButton
+            onClick={onSaveSite}
+            resumeList={resumeList}
+            text="Save Site"
+            variant="secondary"
+            icon={<Bookmark size={16} />}
+            disabled={
+              cirefValue === AUTOFILL_TOKEN_FROM_CAREERAI || autoFilling
+            }
+          />
+        </div>
+      )}
+
+      {!isV2Layout && (
+        <>
+          <span />
+          <div className="ext__autofill__fields__wrapper">
+            <div className="autofill__btn__wrapper">
+              {!autoFilling && (
+                <button
+                  className={`autofill__btn ${
+                    resumeList.res_success ? "" : "autofill__button__disable"
+                  }`}
+                  onClick={() => handleAutofill()}
+                  disabled={resumeList.res_success ? false : true}
+                >
+                  {iframeUrl ? "Proceed" : "Auto Fill"}
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

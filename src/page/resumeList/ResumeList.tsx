@@ -14,12 +14,10 @@ import AutofillLoader from "./AutofillLoader";
 import IframeProceed from "./IframeProceed";
 import AutofillFields from "./AutofillFields";
 import ResumeListV2 from "./ResumeListV2";
-import { getApplicantSession } from "../../store/features/applicant/ApplicantApi";
+// import { getApplicantSession } from "../../store/features/Applicant/ApplicantApi";
 import JobCardV2 from "./JobCard.v2";
 import ScreenshotGallery from "./ScreenshotGallery";
-import AutofillButton from "./AutofillButton";
-import { Bookmark, Camera } from "react-feather";
-// import { getApplicantSession } from "../../store/features/Applicant/ApplicantApi";
+import { getApplicantSession } from "../../store/features/applicant/ApplicantApi";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -120,25 +118,9 @@ const ResumeList = (props: any) => {
               setIframeUrl={setIframeUrl}
               iframeUrl={iframeUrl}
               autoFilling={autoFilling}
-            />
-          </div>
-          <div className="ci_va_v2_secondary_actions">
-            <AutofillButton
-              onClick={() => onScreenshot("va")}
-              resumeList={resumeList}
-              text="Screenshot"
-              variant="secondary"
-              icon={<Camera size={16} />}
-              disabled={autoFilling || resumeList.loading}
-              loadingText="Uploading..."
-            />
-            <AutofillButton
-              onClick={() => {}}
-              resumeList={resumeList}
-              text="Save Site"
-              variant="secondary"
-              icon={<Bookmark size={16} />}
-              disabled={autoFilling}
+              isV2Layout
+              onScreenshot={() => onScreenshot("applicant")}
+              onSaveSite={() => {}}
             />
           </div>
 
