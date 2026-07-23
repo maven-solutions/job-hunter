@@ -18,6 +18,7 @@ import { ResumeSkleton } from "../../component/skleton/Skleton";
 import IframError from "./IframError";
 import AutofillLoader from "./AutofillLoader";
 import IframeProceed from "./IframeProceed";
+import { getApplicantSession } from "../../store/features/applicant/ApplicantApi";
 
 const ResumeList = (props: any) => {
   const { setShowPage, content, autoFilling, setAutoFilling, showPage } = props;
@@ -31,7 +32,10 @@ const ResumeList = (props: any) => {
   const authState: any = useAppSelector((store: RootStore) => {
     return store.AuthSlice;
   });
-  // console.log("resumeList", resumeList);
+  const applicantState: any = useAppSelector((store: RootStore) => {
+    return store.ApplicantSlice;
+  });
+  console.log("applicantState", applicantState);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -73,6 +77,7 @@ const ResumeList = (props: any) => {
   };
   useEffect(() => {
     // for organization student
+    dispatch(getApplicantSession());
     if (
       authState.authenticated &&
       authState?.ci_user?.organizations[0]?.role?.id === 3
