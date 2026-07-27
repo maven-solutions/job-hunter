@@ -342,6 +342,90 @@ const fillCheckobx = (applicantData: Applicant) => {
   }
 };
 
+// New Greenhouse react-select (demographic section) gender filler
+const fillGenderReactSelect = async (applicantData: Applicant) => {
+  if (!applicantData.gender) {
+    return;
+  }
+
+  const allLabels = document.querySelectorAll("label.select__label, .select__label");
+  let genderLabel: Element | null = null;
+
+  for (const label of allLabels) {
+    const labelText = fromatStirngInLowerCase(label?.textContent ?? "");
+    if (labelText.includes("gender")) {
+      genderLabel = label;
+      break;
+    }
+  }
+
+  if (!genderLabel) {
+    return;
+  }
+
+  const selectContainer =
+    genderLabel.closest(".select__container") ||
+    genderLabel.closest(".select") ||
+    genderLabel.parentElement;
+
+  if (!selectContainer) {
+    return;
+  }
+
+  // Skip if already filled with matching value
+  const selectedValue = selectContainer.querySelector(
+    ".select__single-value"
+  ) as HTMLElement | null;
+  if (
+    selectedValue &&
+    fromatStirngInLowerCase(selectedValue.textContent) ===
+      fromatStirngInLowerCase(applicantData.gender)
+  ) {
+    return;
+  }
+
+  const selectControl = selectContainer.querySelector(
+    ".select__control"
+  ) as HTMLElement | null;
+  const selectInput = selectContainer.querySelector(
+    'input.select__input[role="combobox"], input[role="combobox"]'
+  ) as HTMLInputElement | null;
+
+  if (!selectControl && !selectInput) {
+    return;
+  }
+
+  // Open the react-select menu
+  const toggleButton = selectContainer.querySelector(
+    'button[aria-label="Toggle flyout"]'
+  ) as HTMLElement | null;
+
+  if (toggleButton) {
+    toggleButton.click();
+  } else if (selectControl) {
+    selectControl.click();
+  } else {
+    selectInput?.click();
+  }
+
+  await delay(500);
+
+  const selectOptions: NodeListOf<HTMLElement> =
+    document.querySelectorAll('[role="option"]');
+
+  for (const option of selectOptions) {
+    const optionText = fromatStirngInLowerCase(option.textContent?.trim());
+    const genderText = fromatStirngInLowerCase(applicantData.gender);
+    if (optionText === genderText || optionText?.includes(genderText)) {
+      option.click();
+      handleValueChanges(option);
+      break;
+    }
+  }
+
+  await delay(500);
+};
+
 export const greenHouse = async (tempDiv: any, applicantData: Applicant) => {
   checkAdultAge(applicantData);
   usWorkAuthorization(applicantData);
@@ -349,4 +433,5 @@ export const greenHouse = async (tempDiv: any, applicantData: Applicant) => {
   immigrationsponsorship(applicantData);
   fillEducation(applicantData.education);
   fillCheckobx(applicantData);
+  await fillGenderReactSelect(applicantData);
 };
