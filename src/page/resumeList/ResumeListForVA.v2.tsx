@@ -28,7 +28,17 @@ import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
 import { setLocalStorageData } from "../../autofill/helper";
+import {
+  ANALYZER_COLLECTED_EVENT_NAME,
+  getCollectedFieldEntries,
+  getCollectedFieldsCount,
+  initHtmlAnalyzer,
+  sendCollectedFieldsToApi,
+} from "../../autofill/ai/htmlAlalyzer";
+import { initHtmlScanner } from "../../autofill/ai/scanHtml";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
+import AutofillButton from "./AutofillButton";
+import { Cpu, Send } from "react-feather";
 
 interface IChromeResult {
   selectedUser?: any;
@@ -54,6 +64,8 @@ const ResumeListForVAV2 = (props: any) => {
   const [showAddWebsite, setShowAddWebsite] = useState(false);
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
   const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
+  const [collectedFieldCount, setCollectedFieldCount] = useState(0);
+  const [analyzerSending, setAnalyzerSending] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -82,6 +94,23 @@ const ResumeListForVAV2 = (props: any) => {
       setApplicantMode("va");
     }
   }, [resumeList.individualSession, orgState?.orgSession]);
+
+  useEffect(() => {
+    const handleCollectedUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ count: number }>;
+      setCollectedFieldCount(customEvent.detail?.count ?? getCollectedFieldsCount());
+    };
+
+    window.addEventListener(ANALYZER_COLLECTED_EVENT_NAME, handleCollectedUpdate);
+    setCollectedFieldCount(getCollectedFieldsCount());
+
+    return () => {
+      window.removeEventListener(
+        ANALYZER_COLLECTED_EVENT_NAME,
+        handleCollectedUpdate
+      );
+    };
+  }, []);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -144,6 +173,30 @@ const ResumeListForVAV2 = (props: any) => {
   const handleSelectedResume = (index) => {
     setLocalStorageData("selectedResumeIndex", index);
     dispatch(setResumeIndex(index));
+  };
+
+  const handleHtmlAnalyzer = () => {
+    initHtmlAnalyzer();
+  };
+
+  const handleHtmlScanner = () => {
+    const count = initHtmlScanner();
+    console.log(`[CareerAI Scan] Scanner activated on ${count} fields`);
+  };
+
+  const handleSendAnalyzerToApi = async () => {
+    const collectedData = getCollectedFieldEntries();
+    console.log("[CareerAI Analyzer] Collected field data:", collectedData);
+
+    setAnalyzerSending(true);
+    try {
+      await sendCollectedFieldsToApi();
+      setCollectedFieldCount(0);
+    } catch (error) {
+      console.error("[CareerAI Analyzer]", error);
+    } finally {
+      setAnalyzerSending(false);
+    }
   };
 
   return (
@@ -212,6 +265,41 @@ const ResumeListForVAV2 = (props: any) => {
               userName={getOrgSessionUserName(orgState.orgSession?.userId)}
             />
           )}
+          <div className="ciautofill_v2_resume_autofill_button_section ci_va_v2_secondary_actions">
+            <AutofillButton
+              onClick={handleHtmlAnalyzer}
+              text="Analyze Fields"
+              variant="secondary"
+              icon={<Cpu size={16} />}
+              disabled={autoFilling || resumeList.loading || analyzerSending}
+            />
+
+            <AutofillButton
+              onClick={handleHtmlScanner}
+              text="Scan Fields"
+              variant="secondary"
+              icon={<Cpu size={16} />}
+              disabled={autoFilling || resumeList.loading || analyzerSending}
+            />
+            <AutofillButton
+              onClick={handleSendAnalyzerToApi}
+              text={
+                collectedFieldCount > 0
+                  ? `Send to API (${collectedFieldCount})`
+                  : "Send to API"
+              }
+              variant="secondary"
+              icon={<Send size={16} />}
+              loading={analyzerSending}
+              loadingText="Sending..."
+              disabled={
+                autoFilling ||
+                resumeList.loading ||
+                analyzerSending ||
+                collectedFieldCount === 0
+              }
+            />
+          </div>
           {/* <WhiteCard> */}
           <div className="ciautofill_v2_resume_autofill_button_section">
             <AutofillFieldsForVA
