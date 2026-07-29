@@ -20,6 +20,7 @@ export interface ScannableFieldData {
   label: string;
   fieldType: ScannableFieldType;
   currentValue: string;
+  options?: string[];
   autocomplete?: string;
 }
 
@@ -375,6 +376,17 @@ export const callOpenAiForFields = async (
   }
 
   if (fieldData.fieldType === "combobox" || fieldData.fieldType === "select") {
+    if (isGenderField(fieldData)) {
+      const gender = pick(applicant?.gender as string, "Male");
+      const normalized = fromatStirngInLowerCase(gender) ?? "";
+      if (normalized.includes("female")) {
+        return { answer: "Female" };
+      }
+      if (normalized.includes("male")) {
+        return { answer: "Male" };
+      }
+      return { answer: gender };
+    }
     if (labelKey.includes("country") && !labelKey.includes("phone")) {
       return { answer: pick(applicant?.country as string, "United States") };
     }
@@ -427,6 +439,251 @@ const matchOption = (answer: string, options: string[]): string | null => {
   return null;
 };
 
+const isGenderField = (fieldData: ScannableFieldData): boolean => {
+  const labelKey = fromatStirngInLowerCase(fieldData.label) ?? "";
+  const idKey = fromatStirngInLowerCase(fieldData.id) ?? "";
+  return labelKey.includes("gender") || idKey.includes("gender");
+};
+
+const matchGenderOption = (answer: string, options: string[]): string | null => {
+  const direct = matchOption(answer, options);
+  if (direct) {
+    return direct;
+  }
+
+  const normalizedAnswer = fromatStirngInLowerCase(answer) ?? "";
+  const aliases: Record<string, string[]> = {
+    male: ["male", "man", "m"],
+    female: ["female", "woman", "f"],
+    nonbinary: ["nonbinary", "nonbinary/genderqueer", "genderqueer", "nb"],
+  };
+
+  let targetKeys: string[] = [];
+  if (normalizedAnswer.includes("male") && !normalizedAnswer.includes("female")) {
+    targetKeys = aliases.male;
+  } else if (normalizedAnswer.includes("female")) {
+    targetKeys = aliases.female;
+  } else if (normalizedAnswer.includes("non") || normalizedAnswer.includes("binary")) {
+    targetKeys = aliases.nonbinary;
+  }
+
+  for (const option of options) {
+    const normalizedOption = fromatStirngInLowerCase(option) ?? "";
+    if (targetKeys.some((alias) => normalizedOption.includes(alias))) {
+      return option;
+    }
+  }
+
+  return null;
+};
+
+const getComboboxToggleButton = (
+  element: HTMLInputElement
+): HTMLButtonElement | null => {
+  return element
+    .closest(".select-shell, .select__container, .select")
+    ?.querySelector('button[aria-label="Toggle flyout"]') as HTMLButtonElement | null;
+};
+
+const closeCombobox = (): void => {
+  document.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+  );
+};
+
+interface ScannedSelectOption {
+  label: string;
+  element: HTMLElement;
+}
+
+const clickToggleFlyout = (toggleBtn: HTMLButtonElement): void => {
+  toggleBtn.focus();
+  toggleBtn.dispatchEvent(
+    new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window })
+  );
+  toggleBtn.dispatchEvent(
+    new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window })
+  );
+  toggleBtn.click();
+};
+
+const waitForDomUpdate = (): Promise<void> => {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+};
+
+const isNodeVisible = (node: HTMLElement): boolean => {
+  if (!node.isConnected) {
+    return false;
+  }
+  const rect = node.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+};
+
+const scanSelectOptionsFromDom = (
+  element: HTMLInputElement
+): ScannedSelectOption[] => {
+  const results: ScannedSelectOption[] = [];
+  const seen = new Set<string>();
+
+  const addOption = (optionEl: HTMLElement) => {
+    const label = cleanLabelText(optionEl.textContent ?? "");
+    if (!label || seen.has(label)) {
+      return;
+    }
+    seen.add(label);
+    results.push({ label, element: optionEl });
+  };
+
+  if (element.id) {
+    const listbox = document.getElementById(
+      `react-select-${element.id}-listbox`
+    );
+    listbox
+      ?.querySelectorAll<HTMLElement>(".select__option[role='option']")
+      .forEach(addOption);
+  }
+
+  document.querySelectorAll<HTMLElement>(".select__menu").forEach((menu) => {
+    if (element.id) {
+      const linkedListbox = menu.querySelector(
+        `#react-select-${element.id}-listbox`
+      );
+      if (linkedListbox) {
+        linkedListbox
+          .querySelectorAll<HTMLElement>(".select__option[role='option']")
+          .forEach(addOption);
+        return;
+      }
+    }
+
+    if (isNodeVisible(menu)) {
+      menu
+        .querySelectorAll<HTMLElement>(".select__option[role='option']")
+        .forEach(addOption);
+    }
+  });
+
+  if (results.length === 0) {
+    document
+      .querySelectorAll<HTMLElement>(
+        `[id="react-select-${element.id}-listbox"] .select__option, .select__menu-list [role="option"]`
+      )
+      .forEach(addOption);
+  }
+
+  return results;
+};
+
+const openToggleAndScanOptions = async (
+  element: HTMLInputElement
+): Promise<ScannedSelectOption[]> => {
+  if (element.getAttribute("aria-expanded") === "true") {
+    closeCombobox();
+    await delay(150);
+  }
+
+  const toggleBtn = getComboboxToggleButton(element);
+  if (!toggleBtn) {
+    console.warn("[CareerAI Scan] Toggle flyout button not found for:", element.id);
+    return [];
+  }
+
+  clickToggleFlyout(toggleBtn);
+  await delay(300);
+  await waitForDomUpdate();
+
+  let scanned = scanSelectOptionsFromDom(element);
+
+  if (scanned.length === 0) {
+    await delay(200);
+    await waitForDomUpdate();
+    scanned = scanSelectOptionsFromDom(element);
+  }
+
+  console.log(
+    "[CareerAI Scan] Scanned select options after toggle:",
+    scanned.map((opt) => opt.label)
+  );
+
+  return scanned;
+};
+
+const clickOptionElement = (optionEl: HTMLElement): void => {
+  optionEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+  optionEl.dispatchEvent(
+    new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+  );
+  optionEl.dispatchEvent(
+    new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window })
+  );
+  optionEl.dispatchEvent(
+    new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window })
+  );
+  optionEl.dispatchEvent(
+    new PointerEvent("pointerup", { bubbles: true, cancelable: true })
+  );
+  optionEl.click();
+};
+
+const selectFromScannedOptions = async (
+  element: HTMLInputElement,
+  answer: string,
+  scannedOptions: ScannedSelectOption[],
+  matcher: (answer: string, options: string[]) => string | null = matchOption
+): Promise<boolean> => {
+  if (scannedOptions.length === 0) {
+    return false;
+  }
+
+  const labels = scannedOptions.map((opt) => opt.label);
+  const matchedLabel = matcher(answer, labels);
+
+  if (!matchedLabel) {
+    console.warn("[CareerAI Scan] No match for answer:", answer, labels);
+    closeCombobox();
+    return false;
+  }
+
+  const target = scannedOptions.find((opt) => opt.label === matchedLabel);
+  if (!target) {
+    closeCombobox();
+    return false;
+  }
+
+  clickOptionElement(target.element);
+  await delay(300);
+  await handleValueChanges(element);
+
+  const selectedValue = element
+    .closest(".select-shell, .select")
+    ?.querySelector(".select__single-value");
+
+  return (
+    element.getAttribute("aria-expanded") === "false" ||
+    !!selectedValue?.textContent?.trim()
+  );
+};
+
+const fillGreenhouseCombobox = async (
+  element: HTMLInputElement,
+  answer: string,
+  matcher: (answer: string, options: string[]) => string | null = matchOption
+): Promise<boolean> => {
+  const scannedOptions = await openToggleAndScanOptions(element);
+  return selectFromScannedOptions(element, answer, scannedOptions, matcher);
+};
+
+const fillGenderCombobox = async (
+  element: HTMLInputElement,
+  answer: string
+): Promise<boolean> => {
+  return fillGreenhouseCombobox(element, answer, matchGenderOption);
+};
+
 const fillNativeSelect = async (
   select: HTMLSelectElement,
   answer: string
@@ -451,36 +708,11 @@ const fillNativeSelect = async (
   return false;
 };
 
-const fillCombobox = async (element: HTMLInputElement, answer: string): Promise<boolean> => {
-  element.focus();
-  element.click();
-  await delay(400);
-
-  const options = Array.from(
-    document.querySelectorAll('[role="option"], .select__option')
-  );
-  const matched = matchOption(
-    answer,
-    options.map((opt) => cleanLabelText(opt.textContent ?? ""))
-  );
-
-  if (!matched) {
-    document.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
-    );
-    return false;
-  }
-
-  for (const optionEl of options) {
-    const optionText = cleanLabelText(optionEl.textContent ?? "");
-    if (optionText === matched) {
-      (optionEl as HTMLElement).click();
-      await delay(300);
-      return true;
-    }
-  }
-
-  return false;
+const fillCombobox = async (
+  element: HTMLInputElement,
+  answer: string
+): Promise<boolean> => {
+  return fillGreenhouseCombobox(element, answer, matchOption);
 };
 
 const fillTextLikeField = async (
@@ -504,6 +736,9 @@ export const applyScannedFieldAnswer = async (
   }
 
   if (data.fieldType === "combobox" && element instanceof HTMLInputElement) {
+    if (isGenderField(data)) {
+      return fillGenderCombobox(element, answer);
+    }
     return fillCombobox(element, answer);
   }
 
