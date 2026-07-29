@@ -36,6 +36,7 @@ import {
   sendCollectedFieldsToApi,
 } from "../../autofill/ai/htmlAlalyzer";
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
+import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scanToMakeApi";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu, Send } from "react-feather";
@@ -66,6 +67,7 @@ const ResumeListForVAV2 = (props: any) => {
   const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
   const [collectedFieldCount, setCollectedFieldCount] = useState(0);
   const [analyzerSending, setAnalyzerSending] = useState(false);
+  const [scanApiLoading, setScanApiLoading] = useState(false);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -98,16 +100,21 @@ const ResumeListForVAV2 = (props: any) => {
   useEffect(() => {
     const handleCollectedUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<{ count: number }>;
-      setCollectedFieldCount(customEvent.detail?.count ?? getCollectedFieldsCount());
+      setCollectedFieldCount(
+        customEvent.detail?.count ?? getCollectedFieldsCount(),
+      );
     };
 
-    window.addEventListener(ANALYZER_COLLECTED_EVENT_NAME, handleCollectedUpdate);
+    window.addEventListener(
+      ANALYZER_COLLECTED_EVENT_NAME,
+      handleCollectedUpdate,
+    );
     setCollectedFieldCount(getCollectedFieldsCount());
 
     return () => {
       window.removeEventListener(
         ANALYZER_COLLECTED_EVENT_NAME,
-        handleCollectedUpdate
+        handleCollectedUpdate,
       );
     };
   }, []);
@@ -199,6 +206,26 @@ const ResumeListForVAV2 = (props: any) => {
     }
   };
 
+  const scanHtmlToMakeApi = async () => {
+    setScanApiLoading(true);
+    try {
+      const payload = await scanHtmlToMakeApiPayload({
+        token: "",
+        resumeId: "",
+        fromAgent: false,
+        parser: "internal",
+      });
+      console.log("[CareerAI ScanAPI] Ready payload:", payload);
+      console.log(
+        `[CareerAI ScanAPI] ${payload.elements.length} elements, source=${payload.source}`
+      );
+    } catch (error) {
+      console.error("[CareerAI ScanAPI]", error);
+    } finally {
+      setScanApiLoading(false);
+    }
+  };
+
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
       <div className="ciautofill_v2_panel">
@@ -271,7 +298,12 @@ const ResumeListForVAV2 = (props: any) => {
               text="Analyze Fields"
               variant="secondary"
               icon={<Cpu size={16} />}
-              disabled={autoFilling || resumeList.loading || analyzerSending}
+              disabled={
+                autoFilling ||
+                resumeList.loading ||
+                analyzerSending ||
+                scanApiLoading
+              }
             />
 
             <AutofillButton
@@ -279,7 +311,27 @@ const ResumeListForVAV2 = (props: any) => {
               text="Scan Fields"
               variant="secondary"
               icon={<Cpu size={16} />}
-              disabled={autoFilling || resumeList.loading || analyzerSending}
+              disabled={
+                autoFilling ||
+                resumeList.loading ||
+                analyzerSending ||
+                scanApiLoading
+              }
+            />
+
+            <AutofillButton
+              onClick={scanHtmlToMakeApi}
+              text="Scan Fields to make api"
+              variant="secondary"
+              icon={<Cpu size={16} />}
+              loading={scanApiLoading}
+              loadingText="Scanning..."
+              disabled={
+                autoFilling ||
+                resumeList.loading ||
+                analyzerSending ||
+                scanApiLoading
+              }
             />
             <AutofillButton
               onClick={handleSendAnalyzerToApi}
@@ -296,6 +348,7 @@ const ResumeListForVAV2 = (props: any) => {
                 autoFilling ||
                 resumeList.loading ||
                 analyzerSending ||
+                scanApiLoading ||
                 collectedFieldCount === 0
               }
             />
