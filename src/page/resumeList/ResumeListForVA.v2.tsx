@@ -33,6 +33,7 @@ import {
 } from "../../autofill/ai/htmlAlalyzer";
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
 import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scanToMakeApi";
+import { autofillGreenhouseWithAi } from "../../autofill/ai/greenhouseWithAi";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
@@ -226,7 +227,22 @@ const ResumeListForVAV2 = (props: any) => {
         fromAgent: false,
         parser: "internal",
       });
-      await dispatch(getJobApplicationFillWithAi(payload)).unwrap();
+      console.log("[CareerAI ScanAPI] Ready payload:", payload);
+
+      const fillResponse = await dispatch(
+        getJobApplicationFillWithAi(payload),
+      ).unwrap();
+      console.log("[CareerAI ScanAPI] Fill response:", fillResponse);
+
+      if (
+        payload.source === "greenhouse" ||
+        window.location.href.toLowerCase().includes("greenhouse")
+      ) {
+        const fillResult = await autofillGreenhouseWithAi(
+          fillResponse.data.fill_data_list,
+        );
+        console.log("[CareerAI ScanAPI] Autofill result:", fillResult);
+      }
     } catch (error) {
       console.error("[CareerAI ScanAPI]", error);
     } finally {

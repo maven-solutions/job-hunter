@@ -351,7 +351,7 @@ interface CandidateField {
   kind: "text" | "combobox" | "select" | "phone-country";
 }
 
-const collectCandidateFields = (): CandidateField[] => {
+export const collectCandidateFields = (): CandidateField[] => {
   const candidates = document.querySelectorAll<HTMLElement>(
     "input, textarea, select",
   );
