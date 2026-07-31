@@ -18,11 +18,13 @@ export interface ScanToMakeApiPayload {
   source: string;
   fromAgent: boolean;
   resumeId: string;
+  userId: string;
 }
 
 export interface ScanToMakeApiOptions {
   token?: string;
   resumeId?: string;
+  userId?: string;
   fromAgent?: boolean;
   parser?: string;
 }
@@ -509,6 +511,7 @@ export const scanHtmlToMakeApiPayload = async (
     source: detectSource(url),
     fromAgent: options.fromAgent ?? false,
     resumeId: options.resumeId ?? "",
+    userId: options.userId ?? "",
   };
 
   console.log("[CareerAI ScanAPI] Payload:", payload);

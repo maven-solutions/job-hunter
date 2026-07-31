@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RootStore, useAppDispatch, useAppSelector } from "../../store/store";
 import {
   getApplicantResume,
@@ -9,12 +9,8 @@ import {
 import Layout from "../../template/Layout";
 
 import AutofillFieldsForVA from "./AutofillFieldsForVA";
-import {
-  setResumeIndex,
-  setUserIndex,
-} from "../../store/features/ResumeList/ResumeListSlice";
+import { setResumeIndex } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
-import { CHROME_STOGRAGE } from "../../utils/constant";
 import "./index.css";
 import "./index2.css";
 import "./index.v2.css";
@@ -37,6 +33,7 @@ import {
 } from "../../autofill/ai/htmlAlalyzer";
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
 import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scanToMakeApi";
+import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu, Send } from "react-feather";
@@ -59,7 +56,6 @@ const ResumeListForVAV2 = (props: any) => {
     setErrorINCountSave,
   } = props;
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [selectedUserValue, setSelectedUserValue] = useState<any>(null);
   const [userResumeList, setUserResumeList] = useState([]);
   const [iframeUrl, setIframeUrl] = useState("");
   const [showAddWebsite, setShowAddWebsite] = useState(false);
@@ -77,10 +73,6 @@ const ResumeListForVAV2 = (props: any) => {
   const orgState: any = useAppSelector((store: RootStore) => {
     return store.OrgSlice;
   });
-
-  console.log("authState", authState);
-  console.log("resumeList", resumeList);
-  console.log("selectedUserId", selectedUserId);
 
   useEffect(() => {
     // if (!resumeList.deg_res_success) {
@@ -213,10 +205,21 @@ const ResumeListForVAV2 = (props: any) => {
   const scanHtmlToMakeApi = async () => {
     setScanApiLoading(true);
     try {
+      const selectedResume = userResumeList?.[resumeList.resumeIndex] as
+        | { id?: string | number }
+        | undefined;
+      const resumeId =
+        selectedResume?.id != null ? String(selectedResume.id) : "";
+      const userId = selectedUserId != null ? String(selectedUserId) : "";
+
+      if (!resumeId || !userId) {
+        throw new Error("Select a user and resume before scanning.");
+      }
+
       const payload = await scanHtmlToMakeApiPayload({
-        // token: "",
-        resumeId: "1",
-        userId: "354",
+        token: authState?.ci_token ?? "",
+        resumeId,
+        userId,
         fromAgent: false,
         parser: "internal",
       });
@@ -224,6 +227,11 @@ const ResumeListForVAV2 = (props: any) => {
       console.log(
         `[CareerAI ScanAPI] ${payload.elements.length} elements, source=${payload.source}`,
       );
+
+      const result = await dispatch(
+        getJobApplicationFillWithAi(payload),
+      ).unwrap();
+      console.log("[CareerAI ScanAPI] Fill result:", result);
     } catch (error) {
       console.error("[CareerAI ScanAPI]", error);
     } finally {
