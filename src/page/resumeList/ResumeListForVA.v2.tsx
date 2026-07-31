@@ -78,6 +78,10 @@ const ResumeListForVAV2 = (props: any) => {
     return store.OrgSlice;
   });
 
+  console.log("authState", authState);
+  console.log("resumeList", resumeList);
+  console.log("selectedUserId", selectedUserId);
+
   useEffect(() => {
     // if (!resumeList.deg_res_success) {
     dispatch(getDesignations());
@@ -210,14 +214,15 @@ const ResumeListForVAV2 = (props: any) => {
     setScanApiLoading(true);
     try {
       const payload = await scanHtmlToMakeApiPayload({
-        token: "",
-        resumeId: "",
+        // token: "",
+        resumeId: "1",
+        userId: "354",
         fromAgent: false,
         parser: "internal",
       });
       console.log("[CareerAI ScanAPI] Ready payload:", payload);
       console.log(
-        `[CareerAI ScanAPI] ${payload.elements.length} elements, source=${payload.source}`
+        `[CareerAI ScanAPI] ${payload.elements.length} elements, source=${payload.source}`,
       );
     } catch (error) {
       console.error("[CareerAI ScanAPI]", error);

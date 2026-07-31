@@ -20,8 +20,8 @@ export interface JobApplicationFillPayload {
   fromAgent: boolean;
 }
 
-export const createJobApplicationFill = createAsyncThunk(
-  "createJobApplicationFill",
+export const getJobApplicationFillWithAi = createAsyncThunk(
+  "getJobApplicationFillWithAi",
   async (data: JobApplicationFillPayload, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.post(

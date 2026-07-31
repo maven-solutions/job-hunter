@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { createJobApplicationFill } from "./ScanHtmlWithAiApi";
+import { getJobApplicationFillWithAi } from "./ScanHtmlWithAiApi";
 
 const initialState: any = {
   loading: {
@@ -26,13 +26,13 @@ const ScanHtmlWithAiSlice = createSlice({
   },
   extraReducers: (builder) => {
     // CREATE JOB APPLICATION FILL
-    builder.addCase(createJobApplicationFill.pending, (state) => {
+    builder.addCase(getJobApplicationFillWithAi.pending, (state) => {
       state.loading.create = true;
       state.req_success.create = false;
       state.error = null;
     });
     builder.addCase(
-      createJobApplicationFill.fulfilled,
+      getJobApplicationFillWithAi.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
         state.loading.create = false;
         state.req_success.create = true;
@@ -41,7 +41,7 @@ const ScanHtmlWithAiSlice = createSlice({
       },
     );
     builder.addCase(
-      createJobApplicationFill.rejected,
+      getJobApplicationFillWithAi.rejected,
       (state, { payload }: PayloadAction<any>) => {
         state.loading.create = false;
         state.req_success.create = false;
