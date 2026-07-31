@@ -98,7 +98,7 @@ const getFieldLabel = (element: HTMLElement): string => {
 
   const wrapperLabel = element
     .closest(
-      ".field-wrapper, .input-wrapper, .select__container, .text-input-wrapper, .phone-input__phone, .phone-input__country"
+      ".field-wrapper, .input-wrapper, .select__container, .text-input-wrapper, .phone-input__phone, .phone-input__country",
     )
     ?.querySelector("label");
   if (wrapperLabel?.textContent) {
@@ -128,10 +128,16 @@ const isRequiredField = (element: HTMLElement): boolean => {
     (element.id &&
       document.querySelector(`label[for="${CSS.escape(element.id)}"]`)) ||
     element
-      .closest(".field-wrapper, .select__container, .input-wrapper, .file-upload")
+      .closest(
+        ".field-wrapper, .select__container, .input-wrapper, .file-upload",
+      )
       ?.querySelector("label, .upload-label, .label");
 
-  if (label?.querySelector(".required, [aria-hidden='true']")?.textContent?.includes("*")) {
+  if (
+    label
+      ?.querySelector(".required, [aria-hidden='true']")
+      ?.textContent?.includes("*")
+  ) {
     return true;
   }
   if (label?.textContent?.includes("*")) {
@@ -174,10 +180,10 @@ const extractPhoneCountryCodeOptions = (): string[] => {
     .querySelectorAll<HTMLElement>(".iti__country-list .iti__country")
     .forEach((item) => {
       const name = cleanLabelText(
-        item.querySelector(".iti__country-name")?.textContent ?? ""
+        item.querySelector(".iti__country-name")?.textContent ?? "",
       );
       const dial = cleanLabelText(
-        item.querySelector(".iti__dial-code")?.textContent ?? ""
+        item.querySelector(".iti__dial-code")?.textContent ?? "",
       );
       if (!name || !dial) return;
 
@@ -191,17 +197,17 @@ const extractPhoneCountryCodeOptions = (): string[] => {
 };
 
 const getComboboxToggleButton = (
-  element: HTMLInputElement
+  element: HTMLInputElement,
 ): HTMLButtonElement | null =>
   element
     .closest(".select-shell, .select__container, .select")
     ?.querySelector(
-      'button[aria-label="Toggle flyout"]'
+      'button[aria-label="Toggle flyout"]',
     ) as HTMLButtonElement | null;
 
 const closeCombobox = (): void => {
   document.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
   );
 };
 
@@ -212,14 +218,14 @@ const clickToggleFlyout = (toggleBtn: HTMLButtonElement): void => {
       bubbles: true,
       cancelable: true,
       view: window,
-    })
+    }),
   );
   toggleBtn.dispatchEvent(
     new MouseEvent("mouseup", {
       bubbles: true,
       cancelable: true,
       view: window,
-    })
+    }),
   );
   toggleBtn.click();
 };
@@ -250,7 +256,7 @@ const scanComboboxOptionsFromDom = (element: HTMLInputElement): string[] => {
 
   if (element.id) {
     const listbox = document.getElementById(
-      `react-select-${element.id}-listbox`
+      `react-select-${element.id}-listbox`,
     );
     listbox
       ?.querySelectorAll<HTMLElement>("[role='option'], .select__option")
@@ -260,7 +266,7 @@ const scanComboboxOptionsFromDom = (element: HTMLInputElement): string[] => {
   document.querySelectorAll<HTMLElement>(".select__menu").forEach((menu) => {
     if (element.id) {
       const linkedListbox = menu.querySelector(
-        `#react-select-${element.id}-listbox`
+        `#react-select-${element.id}-listbox`,
       );
       if (linkedListbox) {
         linkedListbox
@@ -280,7 +286,7 @@ const scanComboboxOptionsFromDom = (element: HTMLInputElement): string[] => {
   if (results.length === 0) {
     document
       .querySelectorAll<HTMLElement>(
-        `[id="react-select-${element.id}-listbox"] [role="option"], .select__menu-list [role="option"], [role="listbox"] [role="option"]`
+        `[id="react-select-${element.id}-listbox"] [role="option"], .select__menu-list [role="option"], [role="listbox"] [role="option"]`,
       )
       .forEach(addOption);
   }
@@ -289,7 +295,7 @@ const scanComboboxOptionsFromDom = (element: HTMLInputElement): string[] => {
 };
 
 const openAndScanComboboxOptions = async (
-  element: HTMLInputElement
+  element: HTMLInputElement,
 ): Promise<string[]> => {
   if (element.getAttribute("aria-expanded") === "true") {
     closeCombobox();
@@ -300,7 +306,7 @@ const openAndScanComboboxOptions = async (
   if (!toggleBtn) {
     console.warn(
       "[CareerAI ScanAPI] Toggle flyout not found for:",
-      element.id || getFieldLabel(element)
+      element.id || getFieldLabel(element),
     );
     return [];
   }
@@ -347,7 +353,7 @@ interface CandidateField {
 
 const collectCandidateFields = (): CandidateField[] => {
   const candidates = document.querySelectorAll<HTMLElement>(
-    "input, textarea, select"
+    "input, textarea, select",
   );
   const results: CandidateField[] = [];
   const seenIds = new Set<string>();
@@ -364,7 +370,10 @@ const collectCandidateFields = (): CandidateField[] => {
         return;
       }
       // intl-tel search / hidden required inputs
-      if (element.tabIndex === -1 && element.getAttribute("aria-hidden") === "true") {
+      if (
+        element.tabIndex === -1 &&
+        element.getAttribute("aria-hidden") === "true"
+      ) {
         return;
       }
     }
@@ -425,7 +434,7 @@ const collectCandidateFields = (): CandidateField[] => {
   // If phone country list exists but no Country combobox was found, still include it
   if (!phoneCountryAdded && document.querySelector(".iti__country-list")) {
     const phoneInput = document.querySelector<HTMLElement>(
-      ".phone-input, #phone, input[type='tel']"
+      ".phone-input, #phone, input[type='tel']",
     );
     results.push({
       element: phoneInput ?? document.body,
@@ -443,15 +452,11 @@ const collectCandidateFields = (): CandidateField[] => {
  * with field labels, required flags, types, and select options.
  */
 export const scanHtmlToMakeApiPayload = async (
-  options: ScanToMakeApiOptions = {}
+  options: ScanToMakeApiOptions = {},
 ): Promise<ScanToMakeApiPayload> => {
   const url = window.location.href;
   const candidates = collectCandidateFields();
   const elements: ApiFormElement[] = [];
-
-  console.log(
-    `[CareerAI ScanAPI] Scanning ${candidates.length} fields on ${url}`
-  );
 
   for (const candidate of candidates) {
     if (candidate.kind === "text") {
@@ -476,7 +481,7 @@ export const scanHtmlToMakeApiPayload = async (
 
     if (candidate.kind === "select") {
       const selectOptions = getNativeSelectOptions(
-        candidate.element as HTMLSelectElement
+        candidate.element as HTMLSelectElement,
       );
       elements.push({
         label: candidate.label,
@@ -489,7 +494,7 @@ export const scanHtmlToMakeApiPayload = async (
 
     // combobox – open flyout and collect full option list
     const comboboxOptions = await openAndScanComboboxOptions(
-      candidate.element as HTMLInputElement
+      candidate.element as HTMLInputElement,
     );
     elements.push({
       label: candidate.label,
@@ -497,10 +502,6 @@ export const scanHtmlToMakeApiPayload = async (
       type: "search",
       ...(comboboxOptions.length > 0 ? { options: comboboxOptions } : {}),
     });
-
-    console.log(
-      `[CareerAI ScanAPI] ${candidate.label}: ${comboboxOptions.length} options`
-    );
   }
 
   const payload: ScanToMakeApiPayload = {
@@ -514,6 +515,5 @@ export const scanHtmlToMakeApiPayload = async (
     userId: options.userId ?? "",
   };
 
-  console.log("[CareerAI ScanAPI] Payload:", payload);
   return payload;
 };

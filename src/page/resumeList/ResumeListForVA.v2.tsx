@@ -73,6 +73,9 @@ const ResumeListForVAV2 = (props: any) => {
   const orgState: any = useAppSelector((store: RootStore) => {
     return store.OrgSlice;
   });
+  const htmlWithAiState: any = useAppSelector((store: RootStore) => {
+    return store.ScanHtmlWithAiSlice;
+  });
 
   useEffect(() => {
     // if (!resumeList.deg_res_success) {
@@ -223,15 +226,7 @@ const ResumeListForVAV2 = (props: any) => {
         fromAgent: false,
         parser: "internal",
       });
-      console.log("[CareerAI ScanAPI] Ready payload:", payload);
-      console.log(
-        `[CareerAI ScanAPI] ${payload.elements.length} elements, source=${payload.source}`,
-      );
-
-      const result = await dispatch(
-        getJobApplicationFillWithAi(payload),
-      ).unwrap();
-      console.log("[CareerAI ScanAPI] Fill result:", result);
+      await dispatch(getJobApplicationFillWithAi(payload)).unwrap();
     } catch (error) {
       console.error("[CareerAI ScanAPI]", error);
     } finally {
