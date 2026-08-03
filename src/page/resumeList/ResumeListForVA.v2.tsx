@@ -32,6 +32,11 @@ import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu, Send } from "react-feather";
+import {
+  getOrgSessionUserName,
+  getSessionUserName,
+  getUserDetailsById,
+} from "./helper";
 
 const ResumeListForVAV2 = (props: any) => {
   const {
@@ -111,44 +116,14 @@ const ResumeListForVAV2 = (props: any) => {
     window.open(pdfUrl, "_blank");
   };
 
-  const getUserDetailsById = (id) => {
-    const pool =
-      applicantMode === "individual"
-        ? resumeList.individualApplicantData
-        : resumeList.applicantData;
-    const filteredArray = pool?.filter((data: any) => id === data.id);
-    if (!filteredArray || filteredArray.length === 0) return null;
-    return filteredArray[0];
-  };
-
-  const getSessionUserName = (userId: number | undefined | null) => {
-    if (userId == null) return "";
-    const match =
-      resumeList.individualUserList?.find(
-        (user: { label: string; value: number }) => user.value === userId,
-      ) ??
-      resumeList.userList?.find(
-        (user: { label: string; value: number }) => user.value === userId,
-      );
-    return match?.label ?? "";
-  };
-  const getOrgSessionUserName = (userId: number | undefined | null) => {
-    if (userId == null) return "";
-    const match = resumeList.applicantData?.find(
-      (user: { fullName: string; id: number }) => user.id === userId,
-    );
-    return match?.fullName ?? "";
-  };
-
-  const handleSelectedResume = (index) => {
-    setLocalStorageData("selectedResumeIndex", index);
-    dispatch(setResumeIndex(index));
-  };
-
   const handleHtmlScanner = () => {
     const count = initHtmlScanner();
     console.log(`[CareerAI Scan] Scanner activated on ${count} fields`);
   };
+
+    const handleSelectedResume = (index) => {
+      dispatch(setResumeIndex(index));
+    };
 
   const scanHtmlToMakeApi = async () => {
     setScanApiLoading(true);
@@ -247,6 +222,7 @@ const ResumeListForVAV2 = (props: any) => {
               jobTitle={resumeList.individualSession?.jobTitle}
               userName={getSessionUserName(
                 resumeList.individualSession?.userId,
+                resumeList,
               )}
             />
           )}
@@ -254,7 +230,10 @@ const ResumeListForVAV2 = (props: any) => {
           {orgState?.orgSession && (
             <JobCardV2
               jobTitle={orgState.orgSession?.jobTitle}
-              userName={getOrgSessionUserName(orgState.orgSession?.userId)}
+              userName={getOrgSessionUserName(
+                orgState.orgSession?.userId,
+                resumeList,
+              )}
             />
           )}
           <div className="ciautofill_v2_resume_autofill_button_section ci_va_v2_secondary_actions">
@@ -281,7 +260,9 @@ const ResumeListForVAV2 = (props: any) => {
           <div className="ciautofill_v2_resume_autofill_button_section">
             <AutofillFieldsForVA
               selectedUserId={selectedUserId}
-              getUserDetailsById={getUserDetailsById}
+              getUserDetailsById={(id) =>
+                getUserDetailsById(id, applicantMode, resumeList)
+              }
               selectResumeIndex={resumeList.resumeIndex}
               content={content}
               setAutoFilling={setAutoFilling}
