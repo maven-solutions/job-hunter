@@ -869,25 +869,27 @@ const attachIconToField = (element: HTMLElement): void => {
 };
 
 /**
- * Scans the page body for autofillable inputs, textareas, and selects,
+ * Scans the Greenhouse page body for autofillable inputs, textareas, and selects,
  * then injects a small icon on each field (Grammarly-style).
  * @param applicantData applicant profile from extractInfo (same as VA autofill)
  */
-export const initHtmlScanner = (
+export const initGreenhouseHtmlScanner = (
   applicantData: ApplicantContext | null = null,
 ): number => {
   injectScanStyles();
-  removeHtmlScannerIcons();
+  removeGreenhouseHtmlScannerIcons();
   applicantContext = applicantData;
 
   const elements = findAutofillableElements();
   elements.forEach((element) => attachIconToField(element));
 
-  console.log(`[CareerAI Scan] Found ${elements.length} autofillable fields`);
+  console.log(
+    `[CareerAI Scan:greenhouse] Found ${elements.length} autofillable fields`,
+  );
   return elements.length;
 };
 
-export const removeHtmlScannerIcons = (): void => {
+export const removeGreenhouseHtmlScannerIcons = (): void => {
   document
     .querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`)
     .forEach((el) => el.remove());
@@ -895,4 +897,4 @@ export const removeHtmlScannerIcons = (): void => {
   applicantContext = null;
 };
 
-export const getScannedFieldCount = (): number => scannedFields.size;
+export const getGreenhouseScannedFieldCount = (): number => scannedFields.size;

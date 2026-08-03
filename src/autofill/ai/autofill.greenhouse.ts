@@ -1,5 +1,5 @@
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import { collectCandidateFields } from "./scan.greenhouse";
+import { collectGreenhouseCandidateFields } from "./scan.greenhouse";
 
 export interface GreenhouseAiAnswer {
   label: string;
@@ -458,7 +458,7 @@ export const autofillGreenhouseWithAi = async (
     throw new Error("No fill answers found in API response");
   }
 
-  const candidates = collectCandidateFields().map(
+  const candidates = collectGreenhouseCandidateFields().map(
     (candidate): DomField => ({
       element: candidate.element,
       label: candidate.label,

@@ -10,7 +10,7 @@ export interface ApiFormElement {
   options?: string[];
 }
 
-export interface ScanToMakeApiPayload {
+export interface GreenhouseScanToMakeApiPayload {
   elements: ApiFormElement[];
   token: string;
   url: string;
@@ -21,7 +21,7 @@ export interface ScanToMakeApiPayload {
   userId: string;
 }
 
-export interface ScanToMakeApiOptions {
+export interface GreenhouseScanToMakeApiOptions {
   token?: string;
   resumeId?: string;
   userId?: string;
@@ -351,7 +351,7 @@ interface CandidateField {
   kind: "text" | "combobox" | "select" | "phone-country";
 }
 
-export const collectCandidateFields = (): CandidateField[] => {
+export const collectGreenhouseCandidateFields = (): CandidateField[] => {
   const candidates = document.querySelectorAll<HTMLElement>(
     "input, textarea, select",
   );
@@ -448,14 +448,14 @@ export const collectCandidateFields = (): CandidateField[] => {
 };
 
 /**
- * Scans the current page's application form and builds an API payload
+ * Scans the Greenhouse application form and builds an API payload
  * with field labels, required flags, types, and select options.
  */
-export const scanHtmlToMakeApiPayload = async (
-  options: ScanToMakeApiOptions = {},
-): Promise<ScanToMakeApiPayload> => {
+export const scanGreenhouseHtmlToMakeApiPayload = async (
+  options: GreenhouseScanToMakeApiOptions = {},
+): Promise<GreenhouseScanToMakeApiPayload> => {
   const url = window.location.href;
-  const candidates = collectCandidateFields();
+  const candidates = collectGreenhouseCandidateFields();
   const elements: ApiFormElement[] = [];
 
   for (const candidate of candidates) {
@@ -504,7 +504,7 @@ export const scanHtmlToMakeApiPayload = async (
     });
   }
 
-  const payload: ScanToMakeApiPayload = {
+  const payload: GreenhouseScanToMakeApiPayload = {
     elements,
     token: options.token ?? "",
     url,

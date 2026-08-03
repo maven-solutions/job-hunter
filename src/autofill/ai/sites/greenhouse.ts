@@ -1,11 +1,11 @@
 import { Applicant } from "../../data";
 import { fileTypeDataFiller } from "../../FromFiller/fileTypeDataFiller";
 import { autofillGreenhouseWithAi } from "../autofill.greenhouse";
-import { initHtmlScanner } from "../cibtn.greenhouse";
+import { initGreenhouseHtmlScanner } from "../cibtn.greenhouse";
 import {
-  scanHtmlToMakeApiPayload,
-  ScanToMakeApiOptions,
-  ScanToMakeApiPayload,
+  scanGreenhouseHtmlToMakeApiPayload,
+  GreenhouseScanToMakeApiOptions,
+  GreenhouseScanToMakeApiPayload,
 } from "../scan.greenhouse";
 import { AiFillResult, AiSiteHandler } from "../types";
 
@@ -35,9 +35,9 @@ export const isGreenhouseBoardsUrl = (
 };
 
 const buildScanPayload = async (
-  options: ScanToMakeApiOptions,
-): Promise<ScanToMakeApiPayload> => {
-  const payload = await scanHtmlToMakeApiPayload(options);
+  options: GreenhouseScanToMakeApiOptions,
+): Promise<GreenhouseScanToMakeApiPayload> => {
+  const payload = await scanGreenhouseHtmlToMakeApiPayload(options);
   // Ensure API source is stable even if detectSource is uncertain.
   return { ...payload, source: "greenhouse" };
 };
@@ -51,7 +51,11 @@ const applyFill = async (
 
   // Resume is not returned by the AI fill API — upload from local applicant data.
   if (applicantData?.pdf_url) {
-    await fileTypeDataFiller(document.querySelector("body"), applicantData, false);
+    await fileTypeDataFiller(
+      document.querySelector("body"),
+      applicantData,
+      false,
+    );
     filled += 1;
   }
 
@@ -71,7 +75,7 @@ export const greenhouseAiHandler: AiSiteHandler = {
   id: "greenhouse",
   matches: isGreenhouseBoardsUrl,
   initFieldScanner: (applicantData) =>
-    initHtmlScanner(applicantData as Record<string, unknown>),
+    initGreenhouseHtmlScanner(applicantData as Record<string, unknown>),
   buildScanPayload,
   applyFill,
 };
