@@ -254,7 +254,7 @@ const ResumeListForVAV2 = (props: any) => {
                   <AutofillButton
                     onClick={handleScanAndAutofillWithAi}
                     text="Autofill with AI"
-                    variant="secondary"
+                    variant="primary"
                     icon={<Cpu size={16} />}
                     loading={scanApiLoading}
                     loadingText={aiAutofillLoadingText}

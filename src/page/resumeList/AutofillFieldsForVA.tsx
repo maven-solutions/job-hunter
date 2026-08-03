@@ -17,6 +17,7 @@ import { saveAudofillJob } from "../../utils/autofillJobSavApi";
 import { dataTrackerHandler } from "../../autofill/data.tracker";
 import { Bookmark, Camera, Zap } from "react-feather";
 import { handleScreenshot } from "./handleScreenshot";
+import { isAiAutofillSupported } from "../../autofill/ai/registry";
 
 export const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
@@ -231,7 +232,7 @@ const AutofillFieldsForVA = (props: any) => {
         isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"
       }
     >
-      {isV2Layout && (
+      {isV2Layout && !isAiAutofillSupported() && (
         <div className="ci_va_v2_primary_button">
           <AutofillButton
             onClick={handleAutofill}
