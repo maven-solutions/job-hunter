@@ -102,7 +102,7 @@ const injectScanStyles = (): void => {
     .${SCAN_ICON_WRAPPER_CLASS} {
       position: absolute;
       top: 50%;
-      right: 8px;
+      left: 8px;
       transform: translateY(-50%);
       z-index: 2147483646;
       pointer-events: auto;
