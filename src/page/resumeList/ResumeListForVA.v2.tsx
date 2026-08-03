@@ -8,7 +8,7 @@ import {
 } from "../../store/features/ResumeList/ResumeListApi";
 import Layout from "../../template/Layout";
 
-import AutofillFieldsForVA from "./AutofillFieldsForVA";
+import AutofillFieldsForVA, { extractInfo } from "./AutofillFieldsForVA";
 import { setResumeIndex } from "../../store/features/ResumeList/ResumeListSlice";
 import AddMissingLink from "./AddMissingLink";
 import "./index.css";
@@ -115,7 +115,23 @@ const ResumeListForVAV2 = (props: any) => {
   };
 
   const handleHtmlScanner = () => {
-    const count = initHtmlScanner();
+    const userdetails = getUserDetailsById(
+      selectedUserId,
+      applicantMode,
+      resumeList,
+    );
+    if (!userdetails) {
+      console.warn("[CareerAI Scan] No user selected or user details not found");
+      return;
+    }
+
+    const applicantData = extractInfo(
+      userdetails.applicants[resumeList.resumeIndex],
+      userdetails.applicationForm,
+      selectedUserId,
+    );
+
+    const count = initHtmlScanner(applicantData);
     console.log(`[CareerAI Scan] Scanner activated on ${count} fields`);
   };
 

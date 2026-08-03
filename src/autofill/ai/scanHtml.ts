@@ -1,4 +1,4 @@
-import { EXTENSION_ROOT_ID, LOCALSTORAGE } from "../../utils/constant";
+import { EXTENSION_ROOT_ID } from "../../utils/constant";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 
 const SCAN_ICON_CLASS = "careerai-scan-field-icon";
@@ -24,6 +24,8 @@ export interface ScannableFieldData {
   autocomplete?: string;
 }
 
+export type ApplicantContext = Record<string, unknown>;
+
 interface ScannableFieldEntry {
   data: ScannableFieldData;
   element: HTMLElement;
@@ -31,6 +33,7 @@ interface ScannableFieldEntry {
 }
 
 const scannedFields = new Map<string, ScannableFieldEntry>();
+let applicantContext: ApplicantContext | null = null;
 
 const SKIP_INPUT_TYPES = new Set([
   "hidden",
@@ -44,30 +47,25 @@ const SKIP_INPUT_TYPES = new Set([
   "search",
 ]);
 
-const getApplicantContext = (): Record<string, unknown> | null => {
-  try {
-    const raw = localStorage.getItem(LOCALSTORAGE.CI_AUTOFILL_USERINFO);
-    if (!raw) {
-      return null;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-};
+const getApplicantContext = (): ApplicantContext | null => applicantContext;
 
 const cleanLabelText = (text: string): string =>
   text.replace(/\*/g, "").replace(/\s+/g, " ").trim();
 
 const isInsideExtension = (element: Element): boolean => {
-  return !!element.closest(`#${EXTENSION_ROOT_ID}, .${SCAN_ICON_WRAPPER_CLASS}`);
+  return !!element.closest(
+    `#${EXTENSION_ROOT_ID}, .${SCAN_ICON_WRAPPER_CLASS}`,
+  );
 };
 
 const isVisibleField = (element: HTMLElement): boolean => {
   if (element.closest(".visually-hidden, [aria-hidden='true']")) {
     return false;
   }
-  if (element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true") {
+  if (
+    element.hasAttribute("disabled") ||
+    element.getAttribute("aria-disabled") === "true"
+  ) {
     return false;
   }
   if (element.classList.contains("remix-css-1a0ro4n-requiredInput")) {
@@ -103,7 +101,9 @@ const getFieldLabel = (element: HTMLElement): string => {
   }
 
   const wrapperLabel = element
-    .closest(".field-wrapper, .input-wrapper, .select__container, .text-input-wrapper")
+    .closest(
+      ".field-wrapper, .input-wrapper, .select__container, .text-input-wrapper",
+    )
     ?.querySelector("label");
   if (wrapperLabel?.textContent) {
     return cleanLabelText(wrapperLabel.textContent);
@@ -140,12 +140,20 @@ const getFieldType = (element: HTMLElement): ScannableFieldType | null => {
   return null;
 };
 
-const getCurrentValue = (element: HTMLElement, fieldType: ScannableFieldType): string => {
+const getCurrentValue = (
+  element: HTMLElement,
+  fieldType: ScannableFieldType,
+): string => {
   if (element instanceof HTMLSelectElement) {
-    return element.options[element.selectedIndex]?.text?.trim() ?? element.value;
+    return (
+      element.options[element.selectedIndex]?.text?.trim() ?? element.value
+    );
   }
 
-  if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+  if (
+    element instanceof HTMLInputElement ||
+    element instanceof HTMLTextAreaElement
+  ) {
     if (fieldType === "combobox") {
       const selected = element
         .closest(".select-shell, .select")
@@ -194,7 +202,7 @@ const extractFieldData = (element: HTMLElement): ScannableFieldData | null => {
 
 const findAutofillableElements = (): HTMLElement[] => {
   const candidates = document.querySelectorAll<HTMLElement>(
-    "input, textarea, select"
+    "input, textarea, select",
   );
   const results: HTMLElement[] = [];
   const seenIds = new Set<string>();
@@ -277,19 +285,19 @@ const injectScanStyles = (): void => {
 const findIconAnchor = (element: HTMLElement): HTMLElement => {
   return (
     (element.closest(
-      ".input-wrapper, .select__container, .field-wrapper, .text-input-wrapper, .phone-input__phone, .select"
+      ".input-wrapper, .select__container, .field-wrapper, .text-input-wrapper, .phone-input__phone, .select",
     ) as HTMLElement) || element.parentElement!
   );
 };
 
 const setIconState = (
   button: HTMLButtonElement,
-  state: "default" | "loading" | "filled" | "error"
+  state: "default" | "loading" | "filled" | "error",
 ): void => {
   button.classList.remove(
     `${SCAN_ICON_CLASS}--loading`,
     `${SCAN_ICON_CLASS}--filled`,
-    `${SCAN_ICON_CLASS}--error`
+    `${SCAN_ICON_CLASS}--error`,
   );
 
   switch (state) {
@@ -319,11 +327,13 @@ const setIconState = (
  * Replace with real API call later.
  */
 export const callOpenAiForFields = async (
-  fieldData: ScannableFieldData
+  fieldData: ScannableFieldData,
 ): Promise<{ answer: string }> => {
   await delay(600);
 
   const applicant = getApplicantContext();
+
+  console.log("applicant", applicant);
   const labelKey = fromatStirngInLowerCase(fieldData.label) ?? "";
   const idKey = fromatStirngInLowerCase(fieldData.id) ?? "";
   const autocomplete = fromatStirngInLowerCase(fieldData.autocomplete) ?? "";
@@ -351,8 +361,14 @@ export const callOpenAiForFields = async (
     return { answer: pick(applicant?.last_name as string, "Doe") };
   }
 
-  if (idKey.includes("email") || labelKey.includes("email") || autocomplete.includes("email")) {
-    return { answer: pick(applicant?.email_address as string, "john.doe@example.com") };
+  if (
+    idKey.includes("email") ||
+    labelKey.includes("email") ||
+    autocomplete.includes("email")
+  ) {
+    return {
+      answer: pick(applicant?.email_address as string, "john.doe@example.com"),
+    };
   }
 
   if (
@@ -361,11 +377,18 @@ export const callOpenAiForFields = async (
     fieldData.fieldType === "tel" ||
     autocomplete.includes("tel")
   ) {
-    return { answer: pick(applicant?.phone_number as string, "+1 555-010-1234") };
+    return {
+      answer: pick(applicant?.phone_number as string, "+1 555-010-1234"),
+    };
   }
 
   if (labelKey.includes("linkedin") || idKey.includes("linkedin")) {
-    return { answer: pick(applicant?.linkedin_url as string, "https://linkedin.com/in/johndoe") };
+    return {
+      answer: pick(
+        applicant?.linkedin_url as string,
+        "https://linkedin.com/in/johndoe",
+      ),
+    };
   }
 
   if (fieldData.fieldType === "textarea") {
@@ -445,7 +468,10 @@ const isGenderField = (fieldData: ScannableFieldData): boolean => {
   return labelKey.includes("gender") || idKey.includes("gender");
 };
 
-const matchGenderOption = (answer: string, options: string[]): string | null => {
+const matchGenderOption = (
+  answer: string,
+  options: string[],
+): string | null => {
   const direct = matchOption(answer, options);
   if (direct) {
     return direct;
@@ -459,11 +485,17 @@ const matchGenderOption = (answer: string, options: string[]): string | null => 
   };
 
   let targetKeys: string[] = [];
-  if (normalizedAnswer.includes("male") && !normalizedAnswer.includes("female")) {
+  if (
+    normalizedAnswer.includes("male") &&
+    !normalizedAnswer.includes("female")
+  ) {
     targetKeys = aliases.male;
   } else if (normalizedAnswer.includes("female")) {
     targetKeys = aliases.female;
-  } else if (normalizedAnswer.includes("non") || normalizedAnswer.includes("binary")) {
+  } else if (
+    normalizedAnswer.includes("non") ||
+    normalizedAnswer.includes("binary")
+  ) {
     targetKeys = aliases.nonbinary;
   }
 
@@ -478,16 +510,18 @@ const matchGenderOption = (answer: string, options: string[]): string | null => 
 };
 
 const getComboboxToggleButton = (
-  element: HTMLInputElement
+  element: HTMLInputElement,
 ): HTMLButtonElement | null => {
   return element
     .closest(".select-shell, .select__container, .select")
-    ?.querySelector('button[aria-label="Toggle flyout"]') as HTMLButtonElement | null;
+    ?.querySelector(
+      'button[aria-label="Toggle flyout"]',
+    ) as HTMLButtonElement | null;
 };
 
 const closeCombobox = (): void => {
   document.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
   );
 };
 
@@ -499,10 +533,18 @@ interface ScannedSelectOption {
 const clickToggleFlyout = (toggleBtn: HTMLButtonElement): void => {
   toggleBtn.focus();
   toggleBtn.dispatchEvent(
-    new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window })
+    new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
   );
   toggleBtn.dispatchEvent(
-    new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window })
+    new MouseEvent("mouseup", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
   );
   toggleBtn.click();
 };
@@ -524,7 +566,7 @@ const isNodeVisible = (node: HTMLElement): boolean => {
 };
 
 const scanSelectOptionsFromDom = (
-  element: HTMLInputElement
+  element: HTMLInputElement,
 ): ScannedSelectOption[] => {
   const results: ScannedSelectOption[] = [];
   const seen = new Set<string>();
@@ -540,7 +582,7 @@ const scanSelectOptionsFromDom = (
 
   if (element.id) {
     const listbox = document.getElementById(
-      `react-select-${element.id}-listbox`
+      `react-select-${element.id}-listbox`,
     );
     listbox
       ?.querySelectorAll<HTMLElement>(".select__option[role='option']")
@@ -550,7 +592,7 @@ const scanSelectOptionsFromDom = (
   document.querySelectorAll<HTMLElement>(".select__menu").forEach((menu) => {
     if (element.id) {
       const linkedListbox = menu.querySelector(
-        `#react-select-${element.id}-listbox`
+        `#react-select-${element.id}-listbox`,
       );
       if (linkedListbox) {
         linkedListbox
@@ -570,7 +612,7 @@ const scanSelectOptionsFromDom = (
   if (results.length === 0) {
     document
       .querySelectorAll<HTMLElement>(
-        `[id="react-select-${element.id}-listbox"] .select__option, .select__menu-list [role="option"]`
+        `[id="react-select-${element.id}-listbox"] .select__option, .select__menu-list [role="option"]`,
       )
       .forEach(addOption);
   }
@@ -579,7 +621,7 @@ const scanSelectOptionsFromDom = (
 };
 
 const openToggleAndScanOptions = async (
-  element: HTMLInputElement
+  element: HTMLInputElement,
 ): Promise<ScannedSelectOption[]> => {
   if (element.getAttribute("aria-expanded") === "true") {
     closeCombobox();
@@ -588,7 +630,10 @@ const openToggleAndScanOptions = async (
 
   const toggleBtn = getComboboxToggleButton(element);
   if (!toggleBtn) {
-    console.warn("[CareerAI Scan] Toggle flyout button not found for:", element.id);
+    console.warn(
+      "[CareerAI Scan] Toggle flyout button not found for:",
+      element.id,
+    );
     return [];
   }
 
@@ -606,7 +651,7 @@ const openToggleAndScanOptions = async (
 
   console.log(
     "[CareerAI Scan] Scanned select options after toggle:",
-    scanned.map((opt) => opt.label)
+    scanned.map((opt) => opt.label),
   );
 
   return scanned;
@@ -615,16 +660,24 @@ const openToggleAndScanOptions = async (
 const clickOptionElement = (optionEl: HTMLElement): void => {
   optionEl.scrollIntoView({ block: "nearest", inline: "nearest" });
   optionEl.dispatchEvent(
-    new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+    new PointerEvent("pointerdown", { bubbles: true, cancelable: true }),
   );
   optionEl.dispatchEvent(
-    new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window })
+    new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
   );
   optionEl.dispatchEvent(
-    new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window })
+    new MouseEvent("mouseup", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
   );
   optionEl.dispatchEvent(
-    new PointerEvent("pointerup", { bubbles: true, cancelable: true })
+    new PointerEvent("pointerup", { bubbles: true, cancelable: true }),
   );
   optionEl.click();
 };
@@ -633,7 +686,7 @@ const selectFromScannedOptions = async (
   element: HTMLInputElement,
   answer: string,
   scannedOptions: ScannedSelectOption[],
-  matcher: (answer: string, options: string[]) => string | null = matchOption
+  matcher: (answer: string, options: string[]) => string | null = matchOption,
 ): Promise<boolean> => {
   if (scannedOptions.length === 0) {
     return false;
@@ -671,7 +724,7 @@ const selectFromScannedOptions = async (
 const fillGreenhouseCombobox = async (
   element: HTMLInputElement,
   answer: string,
-  matcher: (answer: string, options: string[]) => string | null = matchOption
+  matcher: (answer: string, options: string[]) => string | null = matchOption,
 ): Promise<boolean> => {
   const scannedOptions = await openToggleAndScanOptions(element);
   return selectFromScannedOptions(element, answer, scannedOptions, matcher);
@@ -679,17 +732,17 @@ const fillGreenhouseCombobox = async (
 
 const fillGenderCombobox = async (
   element: HTMLInputElement,
-  answer: string
+  answer: string,
 ): Promise<boolean> => {
   return fillGreenhouseCombobox(element, answer, matchGenderOption);
 };
 
 const fillNativeSelect = async (
   select: HTMLSelectElement,
-  answer: string
+  answer: string,
 ): Promise<boolean> => {
   const options = Array.from(select.options).map((opt) =>
-    cleanLabelText(opt.textContent ?? opt.value)
+    cleanLabelText(opt.textContent ?? opt.value),
   );
   const matched = matchOption(answer, options);
   if (!matched) {
@@ -710,14 +763,14 @@ const fillNativeSelect = async (
 
 const fillCombobox = async (
   element: HTMLInputElement,
-  answer: string
+  answer: string,
 ): Promise<boolean> => {
   return fillGreenhouseCombobox(element, answer, matchOption);
 };
 
 const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
-  answer: string
+  answer: string,
 ): Promise<boolean> => {
   element.focus();
   element.value = answer;
@@ -727,7 +780,7 @@ const fillTextLikeField = async (
 
 export const applyScannedFieldAnswer = async (
   entry: ScannableFieldEntry,
-  answer: string
+  answer: string,
 ): Promise<boolean> => {
   const { element, data, selectElement } = entry;
 
@@ -819,10 +872,14 @@ const attachIconToField = (element: HTMLElement): void => {
 /**
  * Scans the page body for autofillable inputs, textareas, and selects,
  * then injects a small icon on each field (Grammarly-style).
+ * @param applicantData applicant profile from extractInfo (same as VA autofill)
  */
-export const initHtmlScanner = (): number => {
+export const initHtmlScanner = (
+  applicantData: ApplicantContext | null = null,
+): number => {
   injectScanStyles();
   removeHtmlScannerIcons();
+  applicantContext = applicantData;
 
   const elements = findAutofillableElements();
   elements.forEach((element) => attachIconToField(element));
@@ -832,8 +889,11 @@ export const initHtmlScanner = (): number => {
 };
 
 export const removeHtmlScannerIcons = (): void => {
-  document.querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`).forEach((el) => el.remove());
+  document
+    .querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`)
+    .forEach((el) => el.remove());
   scannedFields.clear();
+  applicantContext = null;
 };
 
 export const getScannedFieldCount = (): number => scannedFields.size;

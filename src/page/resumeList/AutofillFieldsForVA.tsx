@@ -18,7 +18,7 @@ import { dataTrackerHandler } from "../../autofill/data.tracker";
 import { Bookmark, Camera, Zap } from "react-feather";
 import { handleScreenshot } from "./handleScreenshot";
 
-const extractInfo = (resumeData, applicationForm, selectedUserId) => {
+export const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
   const {
     firstName,
