@@ -1,7 +1,5 @@
-import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scan.greenhouse";
-import { autofillGreenhouseWithAi } from "../../autofill/ai/autofill.greenhouse";
+import { getAiSiteHandler } from "../../autofill/ai/registry";
 import { Applicant } from "../../autofill/data";
-import { fileTypeDataFiller } from "../../autofill/FromFiller/fileTypeDataFiller";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
 
@@ -49,6 +47,10 @@ export type ScanHtmlToMakeApiResult = {
   fieldsFilled: number;
 };
 
+/**
+ * Shared AI autofill pipeline (phase transitions + API call).
+ * Site-specific DOM scan / fill is delegated to the matched AiSiteHandler.
+ */
 export const scanHtmlToMakeApi = async ({
   dispatch,
   token,
@@ -58,6 +60,14 @@ export const scanHtmlToMakeApi = async ({
   applicantData,
   setAiAutofillPhase,
 }: ScanHtmlToMakeApiParams): Promise<ScanHtmlToMakeApiResult> => {
+  const handler = getAiSiteHandler();
+  if (!handler) {
+    console.warn(
+      "[CareerAI ScanAPI] AI autofill is not supported on this site.",
+    );
+    return { fieldsDetected: 0, fieldsFilled: 0 };
+  }
+
   setAiAutofillPhase("scanning");
   let fieldsDetected = 0;
   let fieldsFilled = 0;
@@ -69,7 +79,7 @@ export const scanHtmlToMakeApi = async ({
       selectedUserId,
     );
 
-    const payload = await scanHtmlToMakeApiPayload({
+    const payload = await handler.buildScanPayload({
       token: token ?? "",
       resumeId,
       userId,
@@ -85,24 +95,13 @@ export const scanHtmlToMakeApi = async ({
     ).unwrap();
 
     setAiAutofillPhase("autofilling");
-    if (
-      payload.source === "greenhouse" ||
-      window.location.href.toLowerCase().includes("greenhouse")
-    ) {
-      const fillResult = await autofillGreenhouseWithAi(
-        fillResponse.data.fill_data_list,
-      );
-      fieldsFilled = fillResult.filled;
-
-      // Resume is not returned by the AI fill API — upload from local applicant data.
-      if (applicantData?.pdf_url) {
-        const pageBody = document.querySelector("body");
-        await fileTypeDataFiller(pageBody, applicantData, false);
-        fieldsFilled += 1;
-      }
-    }
+    const fillResult = await handler.applyFill(
+      fillResponse?.data?.fill_data_list ?? fillResponse?.data ?? fillResponse,
+      applicantData,
+    );
+    fieldsFilled = fillResult.filled;
   } catch (error) {
-    console.error("[CareerAI ScanAPI]", error);
+    console.error(`[CareerAI ScanAPI:${handler.id}]`, error);
   } finally {
     setAiAutofillPhase("idle");
   }

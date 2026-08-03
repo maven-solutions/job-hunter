@@ -24,7 +24,6 @@ import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
 
-import { initHtmlScanner } from "../../autofill/ai/cibtn.greenhouse";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu } from "react-feather";
@@ -38,6 +37,10 @@ import {
   AiAutofillPhase,
   scanHtmlToMakeApi,
 } from "./scanHtmlToMakeApi";
+import {
+  getAiSiteHandler,
+  isAiAutofillSupported,
+} from "../../autofill/ai/registry";
 
 const ResumeListForVAV2 = (props: any) => {
   const {
@@ -128,6 +131,11 @@ const ResumeListForVAV2 = (props: any) => {
   };
 
   const handleScanAndAutofillWithAi = async () => {
+    const aiHandler = getAiSiteHandler();
+    if (!aiHandler) {
+      return;
+    }
+
     setFieldsDetected(0);
     setFieldsFilled(0);
 
@@ -140,17 +148,19 @@ const ResumeListForVAV2 = (props: any) => {
       return;
     }
 
-    const applicantData = extractInfo(
+    const applicantData: any = extractInfo(
       userdetails.applicants[resumeList.resumeIndex],
       userdetails.applicationForm,
       selectedUserId,
     );
 
-    const detectedByIcons = initHtmlScanner(applicantData);
+    // Site-specific (Greenhouse today): field icons / markers on the form.
+    const detectedByIcons = aiHandler.initFieldScanner?.(applicantData) ?? 0;
     console.log(
-      `[CareerAI Scan] Scanner activated on ${detectedByIcons} fields`,
+      `[CareerAI Scan:${aiHandler.id}] Scanner activated on ${detectedByIcons} fields`,
     );
     setFieldsDetected(detectedByIcons);
+
     const { fieldsDetected: apiDetected, fieldsFilled: filled } =
       await scanHtmlToMakeApi({
         dispatch,
@@ -237,26 +247,30 @@ const ResumeListForVAV2 = (props: any) => {
               )}
             />
           )}
-          <div className="ciautofill_v2_resume_autofill_button_section">
-            <div className="ci_va_v2_button_stack">
-              <div className="ci_va_v2_primary_button">
-                <AutofillButton
-                  onClick={handleScanAndAutofillWithAi}
-                  text="Autofill with AI"
-                  variant="secondary"
-                  icon={<Cpu size={16} />}
-                  loading={scanApiLoading}
-                  loadingText={aiAutofillLoadingText}
-                  disabled={autoFilling || resumeList.loading || scanApiLoading}
-                />
+          {isAiAutofillSupported() && (
+            <div className="ciautofill_v2_resume_autofill_button_section">
+              <div className="ci_va_v2_button_stack">
+                <div className="ci_va_v2_primary_button">
+                  <AutofillButton
+                    onClick={handleScanAndAutofillWithAi}
+                    text="Autofill with AI"
+                    variant="secondary"
+                    icon={<Cpu size={16} />}
+                    loading={scanApiLoading}
+                    loadingText={aiAutofillLoadingText}
+                    disabled={
+                      autoFilling || resumeList.loading || scanApiLoading
+                    }
+                  />
+                </div>
+                {(fieldsDetected > 0 || fieldsFilled > 0) && (
+                  <p className="ci_va_v2_scan_field_stats">
+                    {fieldsDetected} fields detected · {fieldsFilled} filled
+                  </p>
+                )}
               </div>
-              {(fieldsDetected > 0 || fieldsFilled > 0) && (
-                <p className="ci_va_v2_scan_field_stats">
-                  {fieldsDetected} fields detected · {fieldsFilled} filled
-                </p>
-              )}
             </div>
-          </div>
+          )}
           {/* <WhiteCard> */}
           <div className="ciautofill_v2_resume_autofill_button_section">
             <AutofillFieldsForVA
