@@ -333,7 +333,6 @@ export const callOpenAiForFields = async (
 
   const applicant = getApplicantContext();
 
-  console.log("applicant", applicant);
   const labelKey = fromatStirngInLowerCase(fieldData.label) ?? "";
   const idKey = fromatStirngInLowerCase(fieldData.id) ?? "";
   const autocomplete = fromatStirngInLowerCase(fieldData.autocomplete) ?? "";

@@ -23,7 +23,6 @@ import ScreenshotGallery from "./ScreenshotGallery";
 import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
-import { setLocalStorageData } from "../../autofill/helper";
 
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
@@ -121,7 +120,6 @@ const ResumeListForVAV2 = (props: any) => {
       resumeList,
     );
     if (!userdetails) {
-      console.warn("[CareerAI Scan] No user selected or user details not found");
       return;
     }
 
