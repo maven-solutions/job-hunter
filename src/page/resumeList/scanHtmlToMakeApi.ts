@@ -1,15 +1,13 @@
 import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scan.greenhouse";
 import { autofillGreenhouseWithAi } from "../../autofill/ai/autofill.greenhouse";
+import { Applicant } from "../../autofill/data";
+import { fileTypeDataFiller } from "../../autofill/FromFiller/fileTypeDataFiller";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
 
 type ResumeWithId = { id?: string | number };
 
-export type AiAutofillPhase =
-  | "idle"
-  | "scanning"
-  | "analysing"
-  | "autofilling";
+export type AiAutofillPhase = "idle" | "scanning" | "analysing" | "autofilling";
 
 export const AI_AUTOFILL_LOADING_TEXT: Record<
   Exclude<AiAutofillPhase, "idle">,
@@ -26,8 +24,7 @@ export const getSelectedResumeAndUserIds = (
   selectedUserId: string | number | null | undefined,
 ): { resumeId: string; userId: string } => {
   const selectedResume = userResumeList?.[resumeIndex];
-  const resumeId =
-    selectedResume?.id != null ? String(selectedResume.id) : "";
+  const resumeId = selectedResume?.id != null ? String(selectedResume.id) : "";
   const userId = selectedUserId != null ? String(selectedUserId) : "";
 
   if (!resumeId || !userId) {
@@ -43,6 +40,7 @@ export type ScanHtmlToMakeApiParams = {
   userResumeList: ResumeWithId[] | undefined | null;
   resumeIndex: number;
   selectedUserId: string | number | null | undefined;
+  applicantData: Applicant | any;
   setAiAutofillPhase: (phase: AiAutofillPhase) => void;
 };
 
@@ -57,6 +55,7 @@ export const scanHtmlToMakeApi = async ({
   userResumeList,
   resumeIndex,
   selectedUserId,
+  applicantData,
   setAiAutofillPhase,
 }: ScanHtmlToMakeApiParams): Promise<ScanHtmlToMakeApiResult> => {
   setAiAutofillPhase("scanning");
@@ -94,6 +93,13 @@ export const scanHtmlToMakeApi = async ({
         fillResponse.data.fill_data_list,
       );
       fieldsFilled = fillResult.filled;
+
+      // Resume is not returned by the AI fill API — upload from local applicant data.
+      if (applicantData?.pdf_url) {
+        const pageBody = document.querySelector("body");
+        await fileTypeDataFiller(pageBody, applicantData, false);
+        fieldsFilled += 1;
+      }
     }
   } catch (error) {
     console.error("[CareerAI ScanAPI]", error);

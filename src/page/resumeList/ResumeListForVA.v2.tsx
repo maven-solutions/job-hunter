@@ -151,7 +151,6 @@ const ResumeListForVAV2 = (props: any) => {
       `[CareerAI Scan] Scanner activated on ${detectedByIcons} fields`,
     );
     setFieldsDetected(detectedByIcons);
-
     const { fieldsDetected: apiDetected, fieldsFilled: filled } =
       await scanHtmlToMakeApi({
         dispatch,
@@ -159,6 +158,7 @@ const ResumeListForVAV2 = (props: any) => {
         userResumeList,
         resumeIndex: resumeList.resumeIndex,
         selectedUserId,
+        applicantData,
         setAiAutofillPhase,
       });
 
