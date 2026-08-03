@@ -1,5 +1,5 @@
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import { collectCandidateFields } from "./scanToMakeApi";
+import { collectCandidateFields } from "./scan.greenhouse";
 
 export interface GreenhouseAiAnswer {
   label: string;
@@ -242,7 +242,9 @@ const scanSelectOptionsFromDom = (
       `react-select-${element.id}-listbox`,
     );
     listbox
-      ?.querySelectorAll<HTMLElement>(".select__option[role='option'], [role='option']")
+      ?.querySelectorAll<HTMLElement>(
+        ".select__option[role='option'], [role='option']",
+      )
       .forEach(addOption);
   }
 
@@ -325,10 +327,6 @@ const fillGreenhouseCombobox = async (
 
   const toggleBtn = getComboboxToggleButton(element);
   if (!toggleBtn) {
-    console.warn(
-      "[CareerAI GreenhouseAI] Toggle flyout not found for:",
-      element.id || answer,
-    );
     return false;
   }
 
@@ -353,7 +351,6 @@ const fillGreenhouseCombobox = async (
     scanned.map((opt) => opt.label),
   );
   if (!matchedLabel) {
-    console.warn("[CareerAI GreenhouseAI] No combobox match:", answer, scanned.map((o) => o.label));
     closeCombobox();
     return false;
   }
@@ -400,7 +397,6 @@ const fillPhoneCountryCode = async (answer: string): Promise<boolean> => {
 
   const opened = await openItiCountryDropdown();
   if (!opened) {
-    console.warn("[CareerAI GreenhouseAI] Phone country dropdown not found");
     return false;
   }
 
@@ -436,10 +432,7 @@ const fillPhoneCountryCode = async (answer: string): Promise<boolean> => {
   return true;
 };
 
-const fillField = async (
-  field: DomField,
-  answer: string,
-): Promise<boolean> => {
+const fillField = async (field: DomField, answer: string): Promise<boolean> => {
   if (field.kind === "phone-country") {
     return fillPhoneCountryCode(answer);
   }
@@ -448,10 +441,7 @@ const fillField = async (
     return fillNativeSelect(field.element, answer);
   }
 
-  if (
-    field.kind === "combobox" &&
-    field.element instanceof HTMLInputElement
-  ) {
+  if (field.kind === "combobox" && field.element instanceof HTMLInputElement) {
     return fillGreenhouseCombobox(field.element, answer);
   }
 
@@ -472,7 +462,6 @@ export const autofillGreenhouseWithAi = async (
   response: unknown,
 ): Promise<GreenhouseAiFillResult> => {
   const answers = normalizeGreenhouseAiAnswers(response);
-  console.log("[CareerAI GreenhouseAI] Answers to apply:", answers);
 
   if (answers.length === 0) {
     throw new Error("No fill answers found in API response");
@@ -508,18 +497,11 @@ export const autofillGreenhouseWithAi = async (
       const ok = await fillField(field, match.answer);
       if (ok) {
         filled += 1;
-        console.log(
-          `[CareerAI GreenhouseAI] Filled "${field.label}" = "${match.answer}"`,
-        );
       } else {
         failed += 1;
-        console.warn(
-          `[CareerAI GreenhouseAI] Failed "${field.label}" = "${match.answer}"`,
-        );
       }
     } catch (error) {
       failed += 1;
-      console.error(`[CareerAI GreenhouseAI] Error on "${field.label}"`, error);
     }
 
     await delay(200);
@@ -531,6 +513,5 @@ export const autofillGreenhouseWithAi = async (
     failed,
     skipped,
   };
-  console.log("[CareerAI GreenhouseAI] Fill summary:", result);
   return result;
 };

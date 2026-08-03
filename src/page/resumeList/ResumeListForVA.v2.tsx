@@ -32,8 +32,8 @@ import {
   sendCollectedFieldsToApi,
 } from "../../autofill/ai/htmlAlalyzer";
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
-import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scanToMakeApi";
-import { autofillGreenhouseWithAi } from "../../autofill/ai/greenhouseWithAi";
+import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scan.greenhouse";
+import { autofillGreenhouseWithAi } from "../../autofill/ai/autofill.greenhouse";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
@@ -227,12 +227,10 @@ const ResumeListForVAV2 = (props: any) => {
         fromAgent: false,
         parser: "internal",
       });
-      console.log("[CareerAI ScanAPI] Ready payload:", payload);
 
       const fillResponse = await dispatch(
         getJobApplicationFillWithAi(payload),
       ).unwrap();
-      console.log("[CareerAI ScanAPI] Fill response:", fillResponse);
 
       if (
         payload.source === "greenhouse" ||
@@ -241,7 +239,6 @@ const ResumeListForVAV2 = (props: any) => {
         const fillResult = await autofillGreenhouseWithAi(
           fillResponse.data.fill_data_list,
         );
-        console.log("[CareerAI ScanAPI] Autofill result:", fillResult);
       }
     } catch (error) {
       console.error("[CareerAI ScanAPI]", error);
