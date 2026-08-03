@@ -27,7 +27,7 @@ import OrgActiveMemberCard from "./OrgActiveMemberCard";
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
-import { Cpu, Send } from "react-feather";
+import { Cpu } from "react-feather";
 import {
   getOrgSessionUserName,
   getSessionUserName,
@@ -52,6 +52,8 @@ const ResumeListForVAV2 = (props: any) => {
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
   const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
   const [scanApiLoading, setScanApiLoading] = useState(false);
+  const [fieldsDetected, setFieldsDetected] = useState(0);
+  const [fieldsFilled, setFieldsFilled] = useState(0);
   const resumeList: any = useAppSelector((store: RootStore) => {
     return store.ResumeListSlice;
   });
@@ -113,7 +115,14 @@ const ResumeListForVAV2 = (props: any) => {
     window.open(pdfUrl, "_blank");
   };
 
-  const handleHtmlScanner = () => {
+  const handleSelectedResume = (index) => {
+    dispatch(setResumeIndex(index));
+  };
+
+  const handleScanAndAutofillWithAi = async () => {
+    setFieldsDetected(0);
+    setFieldsFilled(0);
+
     const userdetails = getUserDetailsById(
       selectedUserId,
       applicantMode,
@@ -129,23 +138,26 @@ const ResumeListForVAV2 = (props: any) => {
       selectedUserId,
     );
 
-    const count = initHtmlScanner(applicantData);
-    console.log(`[CareerAI Scan] Scanner activated on ${count} fields`);
-  };
+    const detectedByIcons = initHtmlScanner(applicantData);
+    console.log(
+      `[CareerAI Scan] Scanner activated on ${detectedByIcons} fields`,
+    );
+    setFieldsDetected(detectedByIcons);
 
-  const handleSelectedResume = (index) => {
-    dispatch(setResumeIndex(index));
-  };
+    const { fieldsDetected: apiDetected, fieldsFilled: filled } =
+      await scanHtmlToMakeApi({
+        dispatch,
+        token: authState?.ci_token ?? "",
+        userResumeList,
+        resumeIndex: resumeList.resumeIndex,
+        selectedUserId,
+        setScanApiLoading,
+      });
 
-  const handleScanHtmlToMakeApi = () =>
-    scanHtmlToMakeApi({
-      dispatch,
-      token: authState?.ci_token ?? "",
-      userResumeList,
-      resumeIndex: resumeList.resumeIndex,
-      selectedUserId,
-      setScanApiLoading,
-    });
+    // Prefer API scan count when available; fall back to icon scanner count.
+    setFieldsDetected(apiDetected > 0 ? apiDetected : detectedByIcons);
+    setFieldsFilled(filled);
+  };
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
@@ -217,25 +229,21 @@ const ResumeListForVAV2 = (props: any) => {
               )}
             />
           )}
-          <div className="ciautofill_v2_resume_autofill_button_section ci_va_v2_secondary_actions">
+          <div className="ciautofill_v2_resume_autofill_button_section ci_va_v2_button_stack">
             <AutofillButton
-              onClick={handleHtmlScanner}
-              text="Scan Fields"
-              variant="secondary"
-              icon={<Cpu size={16} />}
-              disabled={autoFilling || resumeList.loading || scanApiLoading}
-            />
-
-            <AutofillButton
-              onClick={handleScanHtmlToMakeApi}
-              text="
-              Autofill with AI"
+              onClick={handleScanAndAutofillWithAi}
+              text="Autofill with AI"
               variant="secondary"
               icon={<Cpu size={16} />}
               loading={scanApiLoading}
               loadingText="Scanning..."
               disabled={autoFilling || resumeList.loading || scanApiLoading}
             />
+            {(fieldsDetected > 0 || fieldsFilled > 0) && (
+              <p className="ci_va_v2_scan_field_stats">
+                {fieldsDetected} fields detected · {fieldsFilled} filled
+              </p>
+            )}
           </div>
           {/* <WhiteCard> */}
           <div className="ciautofill_v2_resume_autofill_button_section">

@@ -31,6 +31,11 @@ export type ScanHtmlToMakeApiParams = {
   setScanApiLoading: (loading: boolean) => void;
 };
 
+export type ScanHtmlToMakeApiResult = {
+  fieldsDetected: number;
+  fieldsFilled: number;
+};
+
 export const scanHtmlToMakeApi = async ({
   dispatch,
   token,
@@ -38,8 +43,11 @@ export const scanHtmlToMakeApi = async ({
   resumeIndex,
   selectedUserId,
   setScanApiLoading,
-}: ScanHtmlToMakeApiParams): Promise<void> => {
+}: ScanHtmlToMakeApiParams): Promise<ScanHtmlToMakeApiResult> => {
   setScanApiLoading(true);
+  let fieldsDetected = 0;
+  let fieldsFilled = 0;
+
   try {
     const { resumeId, userId } = getSelectedResumeAndUserIds(
       userResumeList,
@@ -55,6 +63,8 @@ export const scanHtmlToMakeApi = async ({
       parser: "internal",
     });
 
+    fieldsDetected = payload.elements?.length ?? 0;
+
     const fillResponse = await dispatch(
       getJobApplicationFillWithAi(payload),
     ).unwrap();
@@ -63,11 +73,16 @@ export const scanHtmlToMakeApi = async ({
       payload.source === "greenhouse" ||
       window.location.href.toLowerCase().includes("greenhouse")
     ) {
-      await autofillGreenhouseWithAi(fillResponse.data.fill_data_list);
+      const fillResult = await autofillGreenhouseWithAi(
+        fillResponse.data.fill_data_list,
+      );
+      fieldsFilled = fillResult.filled;
     }
   } catch (error) {
     console.error("[CareerAI ScanAPI]", error);
   } finally {
     setScanApiLoading(false);
   }
+
+  return { fieldsDetected, fieldsFilled };
 };

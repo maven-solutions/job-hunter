@@ -485,6 +485,14 @@
     margin-top: 10px;
   }
 
+  .ci_va_v2_scan_field_stats {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #5b6572;
+    text-align: center;
+  }
+
   .ext__autofill__fields__wrapper {
     margin-top: 0;
     width: 100%;
