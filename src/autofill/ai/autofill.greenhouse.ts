@@ -72,7 +72,6 @@ export const normalizeGreenhouseAiAnswers = (
     return payload.fields.map(toAnswer).filter(Boolean) as GreenhouseAiAnswer[];
   }
 
-  // Flat map: { "First Name": "John", "Email": "a@b.com" }
   if (typeof payload === "object") {
     const reserved = new Set([
       "elements",

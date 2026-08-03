@@ -349,7 +349,7 @@ export const callOpenAiForFields = async (
     labelKey.includes("firstname") ||
     autocomplete.includes("givenname")
   ) {
-    return { answer: pick(applicant?.first_name as string, "John") };
+    return { answer: pick(applicant?.first_name as string, "") };
   }
 
   if (
@@ -357,7 +357,7 @@ export const callOpenAiForFields = async (
     labelKey.includes("lastname") ||
     autocomplete.includes("familyname")
   ) {
-    return { answer: pick(applicant?.last_name as string, "Doe") };
+    return { answer: pick(applicant?.last_name as string, "") };
   }
 
   if (
@@ -366,7 +366,7 @@ export const callOpenAiForFields = async (
     autocomplete.includes("email")
   ) {
     return {
-      answer: pick(applicant?.email_address as string, "john.doe@example.com"),
+      answer: pick(applicant?.email_address as string, ""),
     };
   }
 
@@ -377,23 +377,19 @@ export const callOpenAiForFields = async (
     autocomplete.includes("tel")
   ) {
     return {
-      answer: pick(applicant?.phone_number as string, "+1 555-010-1234"),
+      answer: pick(applicant?.phone_number as string, ""),
     };
   }
 
   if (labelKey.includes("linkedin") || idKey.includes("linkedin")) {
     return {
-      answer: pick(
-        applicant?.linkedin_url as string,
-        "https://linkedin.com/in/johndoe",
-      ),
+      answer: pick(applicant?.linkedin_url as string, ""),
     };
   }
 
   if (fieldData.fieldType === "textarea") {
     return {
-      answer:
-        "I have 3+ years of experience resolving client-facing payroll inquiries, documenting cases, and escalating complex issues while maintaining SLAs.",
+      answer: "",
     };
   }
 
@@ -629,10 +625,6 @@ const openToggleAndScanOptions = async (
 
   const toggleBtn = getComboboxToggleButton(element);
   if (!toggleBtn) {
-    console.warn(
-      "[CareerAI Scan] Toggle flyout button not found for:",
-      element.id,
-    );
     return [];
   }
 
@@ -647,11 +639,6 @@ const openToggleAndScanOptions = async (
     await waitForDomUpdate();
     scanned = scanSelectOptionsFromDom(element);
   }
-
-  console.log(
-    "[CareerAI Scan] Scanned select options after toggle:",
-    scanned.map((opt) => opt.label),
-  );
 
   return scanned;
 };
@@ -695,7 +682,6 @@ const selectFromScannedOptions = async (
   const matchedLabel = matcher(answer, labels);
 
   if (!matchedLabel) {
-    console.warn("[CareerAI Scan] No match for answer:", answer, labels);
     closeCombobox();
     return false;
   }
@@ -845,7 +831,6 @@ const attachIconToField = (element: HTMLElement): void => {
 
     try {
       entry.data.currentValue = getCurrentValue(element, entry.data.fieldType);
-      console.log("[CareerAI Scan] Field data:", entry.data);
 
       const result = await callOpenAiForFields(entry.data);
       if (!result?.answer) {
@@ -859,7 +844,6 @@ const attachIconToField = (element: HTMLElement): void => {
 
       setIconState(button, "filled");
     } catch (error) {
-      console.error("[CareerAI Scan]", error);
       setIconState(button, "error");
     }
   });
@@ -883,9 +867,6 @@ export const initGreenhouseHtmlScanner = (
   const elements = findAutofillableElements();
   elements.forEach((element) => attachIconToField(element));
 
-  console.log(
-    `[CareerAI Scan:greenhouse] Found ${elements.length} autofillable fields`,
-  );
   return elements.length;
 };
 

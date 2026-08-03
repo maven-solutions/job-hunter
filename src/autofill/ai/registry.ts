@@ -1,3 +1,4 @@
+import { ashbyAiHandler } from "./sites/ashby";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { AiSiteHandler } from "./types";
 
@@ -14,8 +15,8 @@ import { AiSiteHandler } from "./types";
  */
 const AI_SITE_HANDLERS: AiSiteHandler[] = [
   greenhouseAiHandler,
+  ashbyAiHandler,
   // leverAiHandler,
-  // ashbyAiHandler,
   // workdayAiHandler,
 ];
 
