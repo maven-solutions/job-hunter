@@ -229,21 +229,25 @@ const ResumeListForVAV2 = (props: any) => {
               )}
             />
           )}
-          <div className="ciautofill_v2_resume_autofill_button_section ci_va_v2_button_stack">
-            <AutofillButton
-              onClick={handleScanAndAutofillWithAi}
-              text="Autofill with AI"
-              variant="secondary"
-              icon={<Cpu size={16} />}
-              loading={scanApiLoading}
-              loadingText="Scanning..."
-              disabled={autoFilling || resumeList.loading || scanApiLoading}
-            />
-            {(fieldsDetected > 0 || fieldsFilled > 0) && (
-              <p className="ci_va_v2_scan_field_stats">
-                {fieldsDetected} fields detected · {fieldsFilled} filled
-              </p>
-            )}
+          <div className="ciautofill_v2_resume_autofill_button_section">
+            <div className="ci_va_v2_button_stack">
+              <div className="ci_va_v2_primary_button">
+                <AutofillButton
+                  onClick={handleScanAndAutofillWithAi}
+                  text="Autofill with AI"
+                  variant="secondary"
+                  icon={<Cpu size={16} />}
+                  loading={scanApiLoading}
+                  loadingText="Scanning..."
+                  disabled={autoFilling || resumeList.loading || scanApiLoading}
+                />
+              </div>
+              {(fieldsDetected > 0 || fieldsFilled > 0) && (
+                <p className="ci_va_v2_scan_field_stats">
+                  {fieldsDetected} fields detected · {fieldsFilled} filled
+                </p>
+              )}
+            </div>
           </div>
           {/* <WhiteCard> */}
           <div className="ciautofill_v2_resume_autofill_button_section">
