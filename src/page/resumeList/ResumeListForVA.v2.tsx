@@ -26,9 +26,6 @@ import OrgActiveMemberCard from "./OrgActiveMemberCard";
 import { setLocalStorageData } from "../../autofill/helper";
 
 import { initHtmlScanner } from "../../autofill/ai/scanHtml";
-import { scanHtmlToMakeApiPayload } from "../../autofill/ai/scan.greenhouse";
-import { autofillGreenhouseWithAi } from "../../autofill/ai/autofill.greenhouse";
-import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu, Send } from "react-feather";
@@ -37,6 +34,7 @@ import {
   getSessionUserName,
   getUserDetailsById,
 } from "./helper";
+import { scanHtmlToMakeApi } from "./scanHtmlToMakeApi";
 
 const ResumeListForVAV2 = (props: any) => {
   const {
@@ -121,50 +119,19 @@ const ResumeListForVAV2 = (props: any) => {
     console.log(`[CareerAI Scan] Scanner activated on ${count} fields`);
   };
 
-    const handleSelectedResume = (index) => {
-      dispatch(setResumeIndex(index));
-    };
-
-  const scanHtmlToMakeApi = async () => {
-    setScanApiLoading(true);
-    try {
-      const selectedResume = userResumeList?.[resumeList.resumeIndex] as
-        | { id?: string | number }
-        | undefined;
-      const resumeId =
-        selectedResume?.id != null ? String(selectedResume.id) : "";
-      const userId = selectedUserId != null ? String(selectedUserId) : "";
-
-      if (!resumeId || !userId) {
-        throw new Error("Select a user and resume before scanning.");
-      }
-
-      const payload = await scanHtmlToMakeApiPayload({
-        token: authState?.ci_token ?? "",
-        resumeId,
-        userId,
-        fromAgent: false,
-        parser: "internal",
-      });
-
-      const fillResponse = await dispatch(
-        getJobApplicationFillWithAi(payload),
-      ).unwrap();
-
-      if (
-        payload.source === "greenhouse" ||
-        window.location.href.toLowerCase().includes("greenhouse")
-      ) {
-        const fillResult = await autofillGreenhouseWithAi(
-          fillResponse.data.fill_data_list,
-        );
-      }
-    } catch (error) {
-      console.error("[CareerAI ScanAPI]", error);
-    } finally {
-      setScanApiLoading(false);
-    }
+  const handleSelectedResume = (index) => {
+    dispatch(setResumeIndex(index));
   };
+
+  const handleScanHtmlToMakeApi = () =>
+    scanHtmlToMakeApi({
+      dispatch,
+      token: authState?.ci_token ?? "",
+      userResumeList,
+      resumeIndex: resumeList.resumeIndex,
+      selectedUserId,
+      setScanApiLoading,
+    });
 
   return (
     <Layout setShowPage={setShowPage} showPage={showPage} firstBgWidth="10">
@@ -246,7 +213,7 @@ const ResumeListForVAV2 = (props: any) => {
             />
 
             <AutofillButton
-              onClick={scanHtmlToMakeApi}
+              onClick={handleScanHtmlToMakeApi}
               text="
               Autofill with AI"
               variant="secondary"
