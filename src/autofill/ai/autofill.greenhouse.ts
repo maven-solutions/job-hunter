@@ -28,15 +28,6 @@ const cleanLabelText = (text: string): string =>
 const normalizeLabel = (label: string): string =>
   fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
 
-/**
- * Accepts common API response shapes and returns label/answer pairs.
- * Supported:
- * - { elements: [{ label, answer }] }
- * - { answers: [{ label, answer }] }
- * - { data: { elements|answers|... } }
- * - [{ label, answer }]
- * - { "First Name": "John", ... }  (label→value map)
- */
 export const normalizeGreenhouseAiAnswers = (
   response: unknown,
 ): GreenhouseAiAnswer[] => {
