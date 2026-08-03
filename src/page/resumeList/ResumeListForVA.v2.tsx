@@ -24,7 +24,7 @@ import JobCardV2 from "./JobCard.v2";
 import { getOrgSession } from "../../store/features/Organization/OrgApi";
 import OrgActiveMemberCard from "./OrgActiveMemberCard";
 
-import { initHtmlScanner } from "../../autofill/ai/scanHtml";
+import { initHtmlScanner } from "../../autofill/ai/cibtn.greenhouse";
 import IndiviudalMemberCard from "./IndiviudalMemberCard";
 import AutofillButton from "./AutofillButton";
 import { Cpu } from "react-feather";
