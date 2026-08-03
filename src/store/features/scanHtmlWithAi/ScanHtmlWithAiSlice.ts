@@ -27,15 +27,15 @@ const ScanHtmlWithAiSlice = createSlice({
   extraReducers: (builder) => {
     // CREATE JOB APPLICATION FILL
     builder.addCase(getJobApplicationFillWithAi.pending, (state) => {
-      state.loading.create = true;
-      state.req_success.create = false;
+      state.loading.get = true;
+      state.req_success.get = false;
       state.error = null;
     });
     builder.addCase(
       getJobApplicationFillWithAi.fulfilled,
       (state, { payload }: PayloadAction<any>) => {
-        state.loading.create = false;
-        state.req_success.create = true;
+        state.loading.get = false;
+        state.req_success.get = true;
         state.fillResult = payload?.data ?? payload;
         state.error = null;
       },
@@ -43,8 +43,8 @@ const ScanHtmlWithAiSlice = createSlice({
     builder.addCase(
       getJobApplicationFillWithAi.rejected,
       (state, { payload }: PayloadAction<any>) => {
-        state.loading.create = false;
-        state.req_success.create = false;
+        state.loading.get = false;
+        state.req_success.get = false;
         state.error = payload?.message ?? "Failed to fill job application";
       },
     );

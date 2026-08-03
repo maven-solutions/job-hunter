@@ -5,6 +5,21 @@ import { AppDispatch } from "../../store/store";
 
 type ResumeWithId = { id?: string | number };
 
+export type AiAutofillPhase =
+  | "idle"
+  | "scanning"
+  | "analysing"
+  | "autofilling";
+
+export const AI_AUTOFILL_LOADING_TEXT: Record<
+  Exclude<AiAutofillPhase, "idle">,
+  string
+> = {
+  scanning: "Scanning Page",
+  analysing: "Analysing With AI",
+  autofilling: "Autofilling",
+};
+
 export const getSelectedResumeAndUserIds = (
   userResumeList: ResumeWithId[] | undefined | null,
   resumeIndex: number,
@@ -28,7 +43,7 @@ export type ScanHtmlToMakeApiParams = {
   userResumeList: ResumeWithId[] | undefined | null;
   resumeIndex: number;
   selectedUserId: string | number | null | undefined;
-  setScanApiLoading: (loading: boolean) => void;
+  setAiAutofillPhase: (phase: AiAutofillPhase) => void;
 };
 
 export type ScanHtmlToMakeApiResult = {
@@ -42,9 +57,9 @@ export const scanHtmlToMakeApi = async ({
   userResumeList,
   resumeIndex,
   selectedUserId,
-  setScanApiLoading,
+  setAiAutofillPhase,
 }: ScanHtmlToMakeApiParams): Promise<ScanHtmlToMakeApiResult> => {
-  setScanApiLoading(true);
+  setAiAutofillPhase("scanning");
   let fieldsDetected = 0;
   let fieldsFilled = 0;
 
@@ -65,10 +80,12 @@ export const scanHtmlToMakeApi = async ({
 
     fieldsDetected = payload.elements?.length ?? 0;
 
+    setAiAutofillPhase("analysing");
     const fillResponse = await dispatch(
       getJobApplicationFillWithAi(payload),
     ).unwrap();
 
+    setAiAutofillPhase("autofilling");
     if (
       payload.source === "greenhouse" ||
       window.location.href.toLowerCase().includes("greenhouse")
@@ -81,7 +98,7 @@ export const scanHtmlToMakeApi = async ({
   } catch (error) {
     console.error("[CareerAI ScanAPI]", error);
   } finally {
-    setScanApiLoading(false);
+    setAiAutofillPhase("idle");
   }
 
   return { fieldsDetected, fieldsFilled };

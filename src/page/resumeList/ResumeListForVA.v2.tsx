@@ -33,7 +33,11 @@ import {
   getSessionUserName,
   getUserDetailsById,
 } from "./helper";
-import { scanHtmlToMakeApi } from "./scanHtmlToMakeApi";
+import {
+  AI_AUTOFILL_LOADING_TEXT,
+  AiAutofillPhase,
+  scanHtmlToMakeApi,
+} from "./scanHtmlToMakeApi";
 
 const ResumeListForVAV2 = (props: any) => {
   const {
@@ -51,7 +55,8 @@ const ResumeListForVAV2 = (props: any) => {
   const [showAddWebsite, setShowAddWebsite] = useState(false);
   const [showJobTrackedAlert, setShowJobTrackedAlert] = useState(false);
   const [applicantMode, setApplicantMode] = useState<"va" | "individual">("va");
-  const [scanApiLoading, setScanApiLoading] = useState(false);
+  const [aiAutofillPhase, setAiAutofillPhase] =
+    useState<AiAutofillPhase>("idle");
   const [fieldsDetected, setFieldsDetected] = useState(0);
   const [fieldsFilled, setFieldsFilled] = useState(0);
   const resumeList: any = useAppSelector((store: RootStore) => {
@@ -63,9 +68,12 @@ const ResumeListForVAV2 = (props: any) => {
   const orgState: any = useAppSelector((store: RootStore) => {
     return store.OrgSlice;
   });
-  const htmlWithAiState: any = useAppSelector((store: RootStore) => {
-    return store.ScanHtmlWithAiSlice;
-  });
+
+  const scanApiLoading = aiAutofillPhase !== "idle";
+  const aiAutofillLoadingText =
+    aiAutofillPhase === "idle"
+      ? "Scanning Page"
+      : AI_AUTOFILL_LOADING_TEXT[aiAutofillPhase];
 
   useEffect(() => {
     // if (!resumeList.deg_res_success) {
@@ -151,7 +159,7 @@ const ResumeListForVAV2 = (props: any) => {
         userResumeList,
         resumeIndex: resumeList.resumeIndex,
         selectedUserId,
-        setScanApiLoading,
+        setAiAutofillPhase,
       });
 
     // Prefer API scan count when available; fall back to icon scanner count.
@@ -238,7 +246,7 @@ const ResumeListForVAV2 = (props: any) => {
                   variant="secondary"
                   icon={<Cpu size={16} />}
                   loading={scanApiLoading}
-                  loadingText="Scanning..."
+                  loadingText={aiAutofillLoadingText}
                   disabled={autoFilling || resumeList.loading || scanApiLoading}
                 />
               </div>
