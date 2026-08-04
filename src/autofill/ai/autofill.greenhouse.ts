@@ -28,48 +28,218 @@ const cleanLabelText = (text: string): string =>
 const normalizeLabel = (label: string): string =>
   fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
 
-export const normalizeGreenhouseAiAnswers = (
+/** API placeholders that should not count as a real fill value. */
+const EMPTY_ANSWER_TOKENS = new Set([
+  "",
+  "null",
+  "undefined",
+  "n/a",
+  "na",
+  "nil",
+  "-",
+  "--",
+  "[]",
+  "{}",
+  "empty",
+  "not provided",
+  "not available",
+  "no data",
+  "no answer",
+]);
+
+/**
+ * True only when the API returned a usable non-empty answer.
+ * empty string / empty array / null / "null" / "N/A" must NOT count as filled.
+ */
+export const isUsableGreenhouseAnswer = (value: unknown): boolean => {
+  if (value == null) return false;
+  if (typeof value === "number") return !Number.isNaN(value);
+  if (typeof value === "boolean") return true;
+
+  // [] or [null, "", ...] → empty
+  if (Array.isArray(value)) {
+    if (value.length === 0) return false;
+    return value.some((v) => isUsableGreenhouseAnswer(v));
+  }
+
+  if (typeof value === "object") {
+    const nested =
+      (value as any).answer ??
+      (value as any).value ??
+      (value as any).fill ??
+      (value as any).text ??
+      (value as any).data;
+    if (nested === undefined && Object.keys(value as object).length === 0) {
+      return false;
+    }
+    if (nested === undefined) return false;
+    return isUsableGreenhouseAnswer(nested);
+  }
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return false;
+  return !EMPTY_ANSWER_TOKENS.has(trimmed.toLowerCase());
+};
+
+/** Coerce a raw API answer into a display/fill string, or "" if unusable. */
+const coerceAnswerString = (raw: unknown): string => {
+  if (!isUsableGreenhouseAnswer(raw)) return "";
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map((v) => String(v).trim())
+      .filter((v) => isUsableGreenhouseAnswer(v))
+      .join(", ");
+  }
+
+  if (typeof raw === "object" && raw != null) {
+    const nested =
+      (raw as any).answer ??
+      (raw as any).value ??
+      (raw as any).fill ??
+      (raw as any).text ??
+      (raw as any).data;
+    return coerceAnswerString(nested);
+  }
+
+  return String(raw).trim();
+};
+
+/** Extract raw answer from an API item (prefers explicit keys over `??` fallback). */
+const extractRawAnswer = (item: any): unknown => {
+  if (item == null || typeof item !== "object") return undefined;
+  if ("answer" in item) return item.answer;
+  if ("value" in item) return item.value;
+  if ("fill" in item) return item.fill;
+  if ("text" in item) return item.text;
+  if ("data" in item) return item.data;
+  return undefined;
+};
+
+const isEmptyApiAnswer = (raw: unknown): boolean =>
+  !isUsableGreenhouseAnswer(raw);
+
+const addLabelKey = (set: Set<string>, label: string): void => {
+  const cleaned = cleanLabelText(label);
+  if (!cleaned) return;
+  const n = normalizeLabel(cleaned);
+  if (n) set.add(n);
+  const compact = cleaned
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  if (compact) set.add(compact);
+};
+
+/** Whether this form field’s API payload was explicitly empty/null/[]. */
+const isFieldMarkedEmpty = (
+  label: string,
+  emptyLabelKeys: Set<string>,
+): boolean => {
+  if (emptyLabelKeys.size === 0) return false;
+  const n = normalizeLabel(label);
+  if (n && emptyLabelKeys.has(n)) return true;
+  const compact = cleanLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  if (compact && emptyLabelKeys.has(compact)) return true;
+
+  // Soft: API empty-label is a shortened version of the long form label
+  if (n && n.length >= 8) {
+    for (const key of emptyLabelKeys) {
+      if (key.length < 8) continue;
+      if (n === key || n.includes(key) || key.includes(n)) return true;
+    }
+  }
+  return false;
+};
+
+export interface GreenhouseParsedFillResponse {
+  /** Usable non-empty answers only */
+  answers: GreenhouseAiAnswer[];
+  /**
+   * Label keys for which the API returned empty string / empty array /
+   * null / placeholder — those fields must NOT be filled or soft-matched.
+   */
+  emptyLabelKeys: Set<string>;
+  /** How many API items had an empty/null/[] answer. */
+  emptyCount: number;
+}
+
+/**
+ * Parse fill API response into usable answers + labels that came back empty.
+ */
+export const parseGreenhouseAiFillResponse = (
   response: unknown,
-): GreenhouseAiAnswer[] => {
-  if (!response) return [];
+): GreenhouseParsedFillResponse => {
+  const answers: GreenhouseAiAnswer[] = [];
+  const emptyLabelKeys = new Set<string>();
+  let emptyCount = 0;
+
+  if (!response) {
+    return { answers, emptyLabelKeys, emptyCount };
+  }
 
   let payload: any = response;
   if (payload?.data != null && typeof payload.data === "object") {
     payload = payload.data;
   }
+  if (
+    payload?.fill_data_list != null &&
+    typeof payload.fill_data_list === "object"
+  ) {
+    payload = payload.fill_data_list;
+  }
 
-  const toAnswer = (item: any): GreenhouseAiAnswer | null => {
-    if (!item || typeof item !== "object") return null;
+  const markEmpty = (label: string): void => {
+    addLabelKey(emptyLabelKeys, label);
+    emptyCount += 1;
+  };
+
+  const processItem = (item: any): void => {
+    if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
-    const answer = String(
-      item.answer ?? item.value ?? item.fill ?? item.text ?? "",
-    ).trim();
-    if (!label || !answer) return null;
-    return {
+    if (!label) return;
+
+    const raw = extractRawAnswer(item);
+
+    if (isEmptyApiAnswer(raw)) {
+      markEmpty(label);
+      return;
+    }
+
+    const answer = coerceAnswerString(raw);
+    if (!answer) {
+      markEmpty(label);
+      return;
+    }
+
+    answers.push({
       label,
       answer,
       type: item.type ? String(item.type) : undefined,
-    };
+    });
   };
 
   if (Array.isArray(payload)) {
-    return payload.map(toAnswer).filter(Boolean) as GreenhouseAiAnswer[];
+    payload.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.elements)) {
-    return payload.elements
-      .map(toAnswer)
-      .filter(Boolean) as GreenhouseAiAnswer[];
+    payload.elements.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.answers)) {
-    return payload.answers
-      .map(toAnswer)
-      .filter(Boolean) as GreenhouseAiAnswer[];
+    payload.answers.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.fields)) {
-    return payload.fields.map(toAnswer).filter(Boolean) as GreenhouseAiAnswer[];
+    payload.fields.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (typeof payload === "object") {
@@ -77,6 +247,7 @@ export const normalizeGreenhouseAiAnswers = (
       "elements",
       "answers",
       "fields",
+      "fill_data_list",
       "resumeId",
       "userId",
       "parser",
@@ -89,19 +260,35 @@ export const normalizeGreenhouseAiAnswers = (
       "status",
       "error",
     ]);
-    const mapped: GreenhouseAiAnswer[] = [];
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
-      if (typeof value !== "string" && typeof value !== "number") continue;
-      const answer = String(value).trim();
-      if (!answer) continue;
-      mapped.push({ label, answer });
+      if (isEmptyApiAnswer(value)) {
+        markEmpty(label);
+        continue;
+      }
+      if (
+        typeof value !== "string" &&
+        typeof value !== "number" &&
+        !Array.isArray(value)
+      ) {
+        continue;
+      }
+      const answer = coerceAnswerString(value);
+      if (!answer) {
+        markEmpty(label);
+        continue;
+      }
+      answers.push({ label, answer });
     }
-    return mapped;
   }
 
-  return [];
+  return { answers, emptyLabelKeys, emptyCount };
 };
+
+/** Usable answers only (empty string / [] filtered out). */
+export const normalizeGreenhouseAiAnswers = (
+  response: unknown,
+): GreenhouseAiAnswer[] => parseGreenhouseAiFillResponse(response).answers;
 
 const matchOption = (answer: string, options: string[]): string | null => {
   const normalizedAnswer = fromatStirngInLowerCase(answer);
@@ -277,16 +464,18 @@ const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableGreenhouseAnswer(answer)) return false;
   element.focus();
   element.value = answer;
   await handleValueChanges(element);
-  return true;
+  return isUsableGreenhouseAnswer(element.value);
 };
 
 const fillNativeSelect = async (
   select: HTMLSelectElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableGreenhouseAnswer(answer)) return false;
   const options = Array.from(select.options).map((opt) =>
     cleanLabelText(opt.textContent ?? opt.value),
   );
@@ -310,6 +499,7 @@ const fillGreenhouseCombobox = async (
   element: HTMLInputElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableGreenhouseAnswer(answer)) return false;
   if (element.getAttribute("aria-expanded") === "true") {
     closeCombobox();
     await delay(150);
@@ -377,6 +567,8 @@ const openItiCountryDropdown = async (): Promise<boolean> => {
 };
 
 const fillPhoneCountryCode = async (answer: string): Promise<boolean> => {
+  if (!isUsableGreenhouseAnswer(answer)) return false;
+
   // Prefer Greenhouse react-select country combobox inside phone input
   const greenhouseCountry = document.querySelector<HTMLInputElement>(
     ".phone-input__country input[role='combobox'], .phone-input__country .select__input, #country",
@@ -423,6 +615,9 @@ const fillPhoneCountryCode = async (answer: string): Promise<boolean> => {
 };
 
 const fillField = async (field: DomField, answer: string): Promise<boolean> => {
+  // Never write or score empty / null / placeholder API values as filled
+  if (!isUsableGreenhouseAnswer(answer)) return false;
+
   if (field.kind === "phone-country") {
     return fillPhoneCountryCode(answer);
   }
@@ -447,15 +642,17 @@ const fillField = async (field: DomField, answer: string): Promise<boolean> => {
 
 /**
  * Applies AI fill answers to the current Greenhouse job application form.
+ *
+ * Stats:
+ * - `filled` = only fields with a usable non-empty API answer AND successful DOM write
+ * - empty string / empty array / null / placeholders → not filled (skipped)
+ * - labels with empty API values never soft-match other answers
  */
 export const autofillGreenhouseWithAi = async (
   response: unknown,
 ): Promise<GreenhouseAiFillResult> => {
-  const answers = normalizeGreenhouseAiAnswers(response);
-
-  if (answers.length === 0) {
-    throw new Error("No fill answers found in API response");
-  }
+  const { answers, emptyLabelKeys, emptyCount } =
+    parseGreenhouseAiFillResponse(response);
 
   const candidates = collectGreenhouseCandidateFields().map(
     (candidate): DomField => ({
@@ -469,9 +666,28 @@ export const autofillGreenhouseWithAi = async (
   let failed = 0;
   let skipped = 0;
 
+  // No usable answers and no empty markers → every form field is "not filled"
+  if (answers.length === 0 && emptyCount === 0) {
+    return {
+      total: 0,
+      filled: 0,
+      failed: 0,
+      skipped: candidates.length,
+    };
+  }
+
   for (const field of candidates) {
+    // API returned "" / [] / null for this label → never fill, never soft-match others
+    if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
+      skipped += 1;
+      continue;
+    }
+
     const match = findAnswerForLabel(field.label, answers);
-    if (!match?.answer) {
+    const answer = match?.answer;
+
+    // Missing or empty answer → not filled
+    if (!isUsableGreenhouseAnswer(answer)) {
       skipped += 1;
       continue;
     }
@@ -484,24 +700,23 @@ export const autofillGreenhouseWithAi = async (
       });
       await delay(150);
 
-      const ok = await fillField(field, match.answer);
+      const ok = await fillField(field, answer as string);
       if (ok) {
         filled += 1;
       } else {
         failed += 1;
       }
-    } catch (error) {
+    } catch {
       failed += 1;
     }
 
     await delay(200);
   }
 
-  const result: GreenhouseAiFillResult = {
-    total: answers.length,
+  return {
+    total: answers.length + emptyCount,
     filled,
     failed,
     skipped,
   };
-  return result;
 };
