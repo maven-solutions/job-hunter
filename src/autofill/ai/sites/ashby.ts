@@ -39,10 +39,10 @@ const applyFill = async (
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
   const fillResult = await autofillAshbyWithAi(fillData);
-  let filled = fillResult.filled;
 
   // Resume is not returned by the AI fill API — upload from local applicant data.
-  // fileTypeDataFiller already has Ashby-specific file input selection.
+  // Do NOT increment `filled` for resume: it is not one of the scanned form
+  // fields, and inflating filled masks empty API answers (e.g. LinkedIn "").
   const resumeInput = document.querySelector<HTMLInputElement>(
     "input#systemfield_resume, input#_systemfield_resume, input[type='file'][id*='resume'], input[type='file'][name*='resume'], .ashby-application-form-container input[type='file']",
   );
@@ -53,12 +53,11 @@ const applyFill = async (
       applicantData,
       false,
     );
-    filled += 1;
   }
 
   return {
     total: fillResult.total,
-    filled,
+    filled: fillResult.filled,
     failed: fillResult.failed,
     skipped: fillResult.skipped,
   };

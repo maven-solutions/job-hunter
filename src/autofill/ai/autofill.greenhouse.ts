@@ -292,6 +292,7 @@ export const normalizeGreenhouseAiAnswers = (
 ): GreenhouseAiAnswer[] => parseGreenhouseAiFillResponse(response).answers;
 
 const matchOption = (answer: string, options: string[]): string | null => {
+  if (!isUsableGreenhouseAnswer(answer)) return null;
   const normalizedAnswer = fromatStirngInLowerCase(answer);
   if (!normalizedAnswer) return null;
 

@@ -47,21 +47,21 @@ const applyFill = async (
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
   const fillResult = await autofillGreenhouseWithAi(fillData);
-  let filled = fillResult.filled;
 
   // Resume is not returned by the AI fill API — upload from local applicant data.
+  // Do NOT increment `filled` for resume: it is not one of the scanned form
+  // fields, and inflating filled masks empty API answers (e.g. LinkedIn "").
   if (applicantData?.pdf_url) {
     await fileTypeDataFiller(
       document.querySelector("body"),
       applicantData,
       false,
     );
-    filled += 1;
   }
 
   return {
     total: fillResult.total,
-    filled,
+    filled: fillResult.filled,
     failed: fillResult.failed,
     skipped: fillResult.skipped,
   };
