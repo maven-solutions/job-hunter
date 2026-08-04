@@ -1,5 +1,10 @@
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import {
+  AiFieldScannerOptions,
+  AiFormElement,
+  RequestFieldAnswerFn,
+} from "./types";
 
 const SCAN_ICON_CLASS = "careerai-scan-field-icon";
 const SCAN_ICON_WRAPPER_CLASS = "careerai-scan-icon-wrapper";
@@ -33,7 +38,8 @@ interface ScannableFieldEntry {
 }
 
 const scannedFields = new Map<string, ScannableFieldEntry>();
-let applicantContext: ApplicantContext | null = null;
+/** Single-field AI fill callback (same job-application-fill API as full scan). */
+let requestFieldAnswerFn: RequestFieldAnswerFn | null = null;
 
 const SKIP_INPUT_TYPES = new Set([
   "hidden",
@@ -47,10 +53,31 @@ const SKIP_INPUT_TYPES = new Set([
   "search",
 ]);
 
-const getApplicantContext = (): ApplicantContext | null => applicantContext;
-
 const cleanLabelText = (text: string): string =>
   text.replace(/\*/g, "").replace(/\s+/g, " ").trim();
+
+const isRequiredField = (element: HTMLElement): boolean => {
+  if (
+    element.getAttribute("aria-required") === "true" ||
+    element.hasAttribute("required")
+  ) {
+    return true;
+  }
+  const group = element.closest("[aria-required], [required]");
+  if (
+    group?.getAttribute("aria-required") === "true" ||
+    group?.hasAttribute("required")
+  ) {
+    return true;
+  }
+  const label =
+    (element.id &&
+      document.querySelector(`label[for="${CSS.escape(element.id)}"]`)) ||
+    element
+      .closest(".field-wrapper, .select__container, .input-wrapper")
+      ?.querySelector("label");
+  return !!label?.textContent?.includes("*");
+};
 
 const isInsideExtension = (element: Element): boolean => {
   return !!element.closest(
@@ -323,116 +350,70 @@ const setIconState = (
 };
 
 /**
- * Dummy OpenAI API – returns mock answers based on field label/id and applicant profile.
- * Replace with real API call later.
+ * Build a one-element API payload for this field (same shape as full form scan).
+ * Combobox/select options are collected first so the model can pick a valid value.
  */
-export const callOpenAiForFields = async (
-  fieldData: ScannableFieldData,
-): Promise<{ answer: string }> => {
-  await delay(600);
+const buildApiElementForField = async (
+  entry: ScannableFieldEntry,
+): Promise<AiFormElement> => {
+  const { data, element, selectElement } = entry;
+  const required = isRequiredField(element);
 
-  const applicant = getApplicantContext();
+  if (data.fieldType === "select" && selectElement) {
+    const options = Array.from(selectElement.options)
+      .map((opt) => cleanLabelText(opt.textContent ?? opt.value))
+      .filter((label) => {
+        if (!label) return false;
+        if (/select|choose|---/i.test(label)) return false;
+        return true;
+      });
+    return {
+      label: data.label,
+      required,
+      type: "search",
+      options,
+    };
+  }
 
-  const labelKey = fromatStirngInLowerCase(fieldData.label) ?? "";
-  const idKey = fromatStirngInLowerCase(fieldData.id) ?? "";
-  const autocomplete = fromatStirngInLowerCase(fieldData.autocomplete) ?? "";
+  if (data.fieldType === "combobox" && element instanceof HTMLInputElement) {
+    const scanned = await openToggleAndScanOptions(element);
+    closeCombobox();
+    await delay(150);
+    const options = scanned.map((opt) => opt.label);
+    return {
+      label: data.label,
+      required,
+      type: "search",
+      ...(options.length > 0 ? { options } : {}),
+    };
+  }
 
-  const pick = (...values: (string | undefined | null)[]): string => {
-    for (const value of values) {
-      if (value) return value;
-    }
-    return "";
+  return {
+    label: data.label,
+    required,
+    type: "text",
   };
+};
 
-  if (
-    idKey.includes("first") ||
-    labelKey.includes("firstname") ||
-    autocomplete.includes("givenname")
-  ) {
-    return { answer: pick(applicant?.first_name as string, "") };
+/**
+ * Request AI answer for one field via job-application-fill API
+ * (same endpoint as full-page scan in scanHtmlToMakeApi).
+ */
+const requestAiAnswerForField = async (
+  entry: ScannableFieldEntry,
+): Promise<string> => {
+  if (!requestFieldAnswerFn) {
+    throw new Error(
+      "AI fill is not ready. Run Autofill with AI once first.",
+    );
   }
 
-  if (
-    idKey.includes("last") ||
-    labelKey.includes("lastname") ||
-    autocomplete.includes("familyname")
-  ) {
-    return { answer: pick(applicant?.last_name as string, "") };
+  const apiElement = await buildApiElementForField(entry);
+  const answer = await requestFieldAnswerFn(apiElement);
+  if (!answer) {
+    throw new Error("No answer returned from AI fill API");
   }
-
-  if (
-    idKey.includes("email") ||
-    labelKey.includes("email") ||
-    autocomplete.includes("email")
-  ) {
-    return {
-      answer: pick(applicant?.email_address as string, ""),
-    };
-  }
-
-  if (
-    idKey.includes("phone") ||
-    labelKey.includes("phone") ||
-    fieldData.fieldType === "tel" ||
-    autocomplete.includes("tel")
-  ) {
-    return {
-      answer: pick(applicant?.phone_number as string, ""),
-    };
-  }
-
-  if (labelKey.includes("linkedin") || idKey.includes("linkedin")) {
-    return {
-      answer: pick(applicant?.linkedin_url as string, ""),
-    };
-  }
-
-  if (fieldData.fieldType === "textarea") {
-    return {
-      answer: "",
-    };
-  }
-
-  if (fieldData.fieldType === "combobox" || fieldData.fieldType === "select") {
-    if (isGenderField(fieldData)) {
-      const gender = pick(applicant?.gender as string, "Male");
-      const normalized = fromatStirngInLowerCase(gender) ?? "";
-      if (normalized.includes("female")) {
-        return { answer: "Female" };
-      }
-      if (normalized.includes("male")) {
-        return { answer: "Male" };
-      }
-      return { answer: gender };
-    }
-    if (labelKey.includes("country") && !labelKey.includes("phone")) {
-      return { answer: pick(applicant?.country as string, "United States") };
-    }
-    if (labelKey.includes("eligible") || labelKey.includes("authorization")) {
-      return { answer: "Yes" };
-    }
-    if (labelKey.includes("noncompete") || labelKey.includes("sponsorship")) {
-      return { answer: "No" };
-    }
-    if (labelKey.includes("pronoun")) {
-      return { answer: pick(applicant?.gender as string, "He/Him") };
-    }
-    if (labelKey.includes("consent") || labelKey.includes("privacy")) {
-      return { answer: "Yes" };
-    }
-    if (labelKey.includes("hearabout") || labelKey.includes("howdidyouhear")) {
-      return { answer: "LinkedIn" };
-    }
-    if (labelKey.includes("experience") || labelKey.includes("payroll")) {
-      return { answer: "Yes" };
-    }
-    if (labelKey.includes("schedule") || labelKey.includes("available")) {
-      return { answer: "Yes" };
-    }
-    return { answer: "Yes" };
-  }
-
-  return { answer: pick(applicant?.full_name as string, "Sample answer") };
+  return answer;
 };
 
 const matchOption = (answer: string, options: string[]): string | null => {
@@ -832,18 +813,16 @@ const attachIconToField = (element: HTMLElement): void => {
     try {
       entry.data.currentValue = getCurrentValue(element, entry.data.fieldType);
 
-      const result = await callOpenAiForFields(entry.data);
-      if (!result?.answer) {
-        throw new Error("No answer returned");
-      }
+      const answer = await requestAiAnswerForField(entry);
 
-      const applied = await applyScannedFieldAnswer(entry, result.answer);
+      const applied = await applyScannedFieldAnswer(entry, answer);
       if (!applied) {
-        throw new Error(`Could not apply answer: ${result.answer}`);
+        throw new Error(`Could not apply answer: ${answer}`);
       }
 
       setIconState(button, "filled");
     } catch (error) {
+      console.error("[CareerAI FieldAI:greenhouse]", error);
       setIconState(button, "error");
     }
   });
@@ -855,14 +834,17 @@ const attachIconToField = (element: HTMLElement): void => {
 /**
  * Scans the Greenhouse page body for autofillable inputs, textareas, and selects,
  * then injects a small icon on each field (Grammarly-style).
- * @param applicantData applicant profile from extractInfo (same as VA autofill)
+ *
+ * Field icon clicks call the AI job-application-fill API for that one field
+ * via `options.requestFieldAnswer` (wired from scanHtmlToMakeApi).
  */
 export const initGreenhouseHtmlScanner = (
-  applicantData: ApplicantContext | null = null,
+  _applicantData: ApplicantContext | null = null,
+  options: AiFieldScannerOptions = {},
 ): number => {
   injectScanStyles();
   removeGreenhouseHtmlScannerIcons();
-  applicantContext = applicantData;
+  requestFieldAnswerFn = options.requestFieldAnswer ?? null;
 
   const elements = findAutofillableElements();
   elements.forEach((element) => attachIconToField(element));
@@ -875,7 +857,7 @@ export const removeGreenhouseHtmlScannerIcons = (): void => {
     .querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`)
     .forEach((el) => el.remove());
   scannedFields.clear();
-  applicantContext = null;
+  requestFieldAnswerFn = null;
 };
 
 export const getGreenhouseScannedFieldCount = (): number => scannedFields.size;

@@ -71,8 +71,8 @@ const applyFill = async (
 export const ashbyAiHandler: AiSiteHandler = {
   id: "ashby",
   matches: isAshbyUrl,
-  initFieldScanner: (applicantData) =>
-    initAshbyHtmlScanner(applicantData as Record<string, unknown>),
+  initFieldScanner: (applicantData, options) =>
+    initAshbyHtmlScanner(applicantData as Record<string, unknown>, options),
   buildScanPayload,
   applyFill,
 };

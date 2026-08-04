@@ -74,8 +74,11 @@ const applyFill = async (
 export const greenhouseAiHandler: AiSiteHandler = {
   id: "greenhouse",
   matches: isGreenhouseBoardsUrl,
-  initFieldScanner: (applicantData) =>
-    initGreenhouseHtmlScanner(applicantData as Record<string, unknown>),
+  initFieldScanner: (applicantData, options) =>
+    initGreenhouseHtmlScanner(
+      applicantData as Record<string, unknown>,
+      options,
+    ),
   buildScanPayload,
   applyFill,
 };

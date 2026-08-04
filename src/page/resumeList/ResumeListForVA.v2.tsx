@@ -154,14 +154,7 @@ const ResumeListForVAV2 = (props: any) => {
       selectedUserId,
     );
 
-    // Site-specific (Greenhouse today): field icons / markers on the form.
-    const detectedByIcons = aiHandler.initFieldScanner?.(applicantData) ?? 0;
-    console.log(
-      `[CareerAI Scan:${aiHandler.id}] Scanner activated on ${detectedByIcons} fields`,
-    );
-    setFieldsDetected(detectedByIcons);
-
-    const { fieldsDetected: apiDetected, fieldsFilled: filled } =
+    const { fieldsDetected: detected, fieldsFilled: filled } =
       await scanHtmlToMakeApi({
         dispatch,
         token: authState?.ci_token ?? "",
@@ -172,8 +165,7 @@ const ResumeListForVAV2 = (props: any) => {
         setAiAutofillPhase,
       });
 
-    // Prefer API scan count when available; fall back to icon scanner count.
-    setFieldsDetected(apiDetected > 0 ? apiDetected : detectedByIcons);
+    setFieldsDetected(detected);
     setFieldsFilled(filled);
   };
 

@@ -1,6 +1,10 @@
-import { EXTENSION_ROOT_ID } from "../../utils/constant";
-import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import { collectAshbyCandidateFields } from "./scan.ashby";
+import {
+  AiFieldScannerOptions,
+  AiFormElement,
+  RequestFieldAnswerFn,
+} from "./types";
 
 const SCAN_ICON_CLASS = "careerai-ashby-scan-field-icon";
 const SCAN_ICON_WRAPPER_CLASS = "careerai-ashby-scan-icon-wrapper";
@@ -35,7 +39,8 @@ interface ScannableFieldEntry {
 }
 
 const scannedFields = new Map<string, ScannableFieldEntry>();
-let applicantContext: ApplicantContext | null = null;
+/** Single-field AI fill callback (same job-application-fill API as full scan). */
+let requestFieldAnswerFn: RequestFieldAnswerFn | null = null;
 
 const cleanLabelText = (text: string): string =>
   text
@@ -43,8 +48,6 @@ const cleanLabelText = (text: string): string =>
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-
-const getApplicantContext = (): ApplicantContext | null => applicantContext;
 
 const getCurrentValue = (element: HTMLElement, kind: string): string => {
   if (element instanceof HTMLSelectElement) {
@@ -182,82 +185,44 @@ const setIconState = (
   }
 };
 
-const callOpenAiForFields = async (
-  fieldData: ScannableFieldData,
-): Promise<{ answer: string }> => {
-  await delay(400);
+/**
+ * Build a one-element API payload for this field (same shape as full form scan).
+ */
+const buildApiElementForField = (entry: ScannableFieldEntry): AiFormElement => {
+  const { data, kind } = entry;
+  const options = data.options;
+  const isSearch =
+    kind === "select" ||
+    kind === "combobox" ||
+    kind === "option-group" ||
+    (options != null && options.length > 0);
 
-  const applicant = getApplicantContext();
-  const labelKey = fromatStirngInLowerCase(fieldData.label) ?? "";
-  const idKey = fromatStirngInLowerCase(fieldData.id) ?? "";
-
-  const pick = (...values: (string | undefined | null)[]): string => {
-    for (const value of values) {
-      if (value) return value;
-    }
-    return "";
+  return {
+    label: data.label,
+    required: false,
+    type: isSearch ? "search" : "text",
+    ...(options != null && options.length > 0 ? { options } : {}),
   };
+};
 
-  if (
-    idKey.includes("name") ||
-    labelKey === "name" ||
-    labelKey.includes("fullname")
-  ) {
-    return { answer: pick(applicant?.full_name as string, " ") };
+/**
+ * Request AI answer for one field via job-application-fill API
+ * (same endpoint as full-page scan in scanHtmlToMakeApi).
+ */
+const requestAiAnswerForField = async (
+  entry: ScannableFieldEntry,
+): Promise<string> => {
+  if (!requestFieldAnswerFn) {
+    throw new Error(
+      "AI fill is not ready. Run Autofill with AI once first.",
+    );
   }
 
-  if (idKey.includes("email") || labelKey.includes("email")) {
-    return {
-      answer: pick(applicant?.email_address as string, ""),
-    };
+  const answer = await requestFieldAnswerFn(buildApiElementForField(entry));
+  if (!answer) {
+    throw new Error("No answer returned from AI fill API");
   }
-
-  if (
-    idKey.includes("phone") ||
-    labelKey.includes("phone") ||
-    fieldData.fieldType === "tel"
-  ) {
-    return {
-      answer: pick(applicant?.phone_number as string, ""),
-    };
-  }
-
-  if (labelKey.includes("linkedin") || idKey.includes("linkedin")) {
-    return {
-      answer: pick(applicant?.linkedin_url as string, ""),
-    };
-  }
-
-  if (labelKey.includes("github") || idKey.includes("github")) {
-    return {
-      answer: pick(applicant?.github_url as string, ""),
-    };
-  }
-
-  if (fieldData.fieldType === "textarea") {
-    return {
-      answer: "",
-    };
-  }
-
-  if (
-    fieldData.fieldType === "select" ||
-    fieldData.fieldType === "combobox" ||
-    fieldData.fieldType === "option-group"
-  ) {
-    if (labelKey.includes("gender")) {
-      return { answer: pick(applicant?.gender as string, "Male") };
-    }
-    if (labelKey.includes("authoriz") || labelKey.includes("eligible")) {
-      return { answer: "Yes" };
-    }
-    if (labelKey.includes("sponsor")) {
-      return { answer: "No" };
-    }
-    return { answer: fieldData.options?.[0] ?? "Yes" };
-  }
-
-  return { answer: pick(applicant?.full_name as string, "Sample answer") };
+  return answer;
 };
 
 const fillTextLikeField = async (
@@ -388,18 +353,16 @@ const attachIconToField = (entry: ScannableFieldEntry): void => {
 
     try {
       entry.data.currentValue = getCurrentValue(element, entry.kind);
-      const result = await callOpenAiForFields(entry.data);
-      if (!result?.answer) {
-        throw new Error("No answer returned");
-      }
+      const answer = await requestAiAnswerForField(entry);
 
-      const applied = await applyScannedFieldAnswer(entry, result.answer);
+      const applied = await applyScannedFieldAnswer(entry, answer);
       if (!applied) {
-        throw new Error(`Could not apply answer: ${result.answer}`);
+        throw new Error(`Could not apply answer: ${answer}`);
       }
 
       setIconState(button, "filled");
     } catch (error) {
+      console.error("[CareerAI FieldAI:ashby]", error);
       setIconState(button, "error");
     }
   });
@@ -411,13 +374,17 @@ const attachIconToField = (entry: ScannableFieldEntry): void => {
 /**
  * Scans the Ashby application form for autofillable fields and injects
  * Grammarly-style field icons. Returns the number of fields marked.
+ *
+ * Field icon clicks call the AI job-application-fill API for that one field
+ * via `options.requestFieldAnswer` (wired from scanHtmlToMakeApi).
  */
 export const initAshbyHtmlScanner = (
-  applicantData: ApplicantContext | null = null,
+  _applicantData: ApplicantContext | null = null,
+  options: AiFieldScannerOptions = {},
 ): number => {
   injectScanStyles();
   removeAshbyHtmlScannerIcons();
-  applicantContext = applicantData;
+  requestFieldAnswerFn = options.requestFieldAnswer ?? null;
 
   const candidates = collectAshbyCandidateFields();
 
@@ -454,7 +421,7 @@ export const removeAshbyHtmlScannerIcons = (): void => {
     .querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`)
     .forEach((el) => el.remove());
   scannedFields.clear();
-  applicantContext = null;
+  requestFieldAnswerFn = null;
 };
 
 export const getAshbyScannedFieldCount = (): number => scannedFields.size;

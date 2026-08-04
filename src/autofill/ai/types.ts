@@ -38,6 +38,19 @@ export interface AiFillResult {
 }
 
 /**
+ * Callback used by per-field icons to request one AI answer for a single element.
+ * Implemented by the shared scan pipeline (dispatch → job-application-fill).
+ */
+export type RequestFieldAnswerFn = (
+  element: AiFormElement,
+) => Promise<string | null>;
+
+export interface AiFieldScannerOptions {
+  /** When set, field icon clicks call the real AI fill API for that one field. */
+  requestFieldAnswer?: RequestFieldAnswerFn;
+}
+
+/**
  * Domain-specific AI autofill handler.
  * Add one implementation per ATS / career site (Greenhouse, Lever, Ashby, …).
  *
@@ -53,7 +66,10 @@ export interface AiSiteHandler {
    * Optional field icon scanner (Grammarly-style markers).
    * Returns how many fields were marked. Greenhouse-only for now.
    */
-  initFieldScanner?: (applicantData: Applicant) => number;
+  initFieldScanner?: (
+    applicantData: Applicant,
+    options?: AiFieldScannerOptions,
+  ) => number;
   /** Read the page form and build the AI fill API payload. */
   buildScanPayload: (options: AiScanPayloadOptions) => Promise<AiScanPayload>;
   /**

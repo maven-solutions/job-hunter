@@ -1,4 +1,8 @@
 import { getAiSiteHandler } from "../../autofill/ai/registry";
+import {
+  AiFormElement,
+  RequestFieldAnswerFn,
+} from "../../autofill/ai/types";
 import { Applicant } from "../../autofill/data";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
@@ -47,9 +51,101 @@ export type ScanHtmlToMakeApiResult = {
   fieldsFilled: number;
 };
 
+const normalizeLabelKey = (label: string): string =>
+  label.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+/**
+ * Pull a single field answer from a job-application-fill API response.
+ */
+export const extractAnswerFromFillResponse = (
+  response: unknown,
+  fieldLabel: string,
+): string | null => {
+  if (response == null) return null;
+
+  let payload: any = response;
+  if (payload?.data != null && typeof payload.data === "object") {
+    payload = payload.data;
+  }
+  if (
+    payload?.fill_data_list != null &&
+    typeof payload.fill_data_list === "object"
+  ) {
+    payload = payload.fill_data_list;
+  }
+
+  const items: any[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.elements)
+      ? payload.elements
+      : Array.isArray(payload?.answers)
+        ? payload.answers
+        : Array.isArray(payload?.fields)
+          ? payload.fields
+          : [];
+
+  if (items.length === 0) return null;
+
+  const target = normalizeLabelKey(fieldLabel);
+  const match =
+    items.find((item) => {
+      const label = String(item?.label ?? item?.field ?? item?.name ?? "");
+      return label === fieldLabel || normalizeLabelKey(label) === target;
+    }) ?? items[0];
+
+  const answer = String(
+    match?.answer ?? match?.value ?? match?.fill ?? match?.text ?? "",
+  ).trim();
+
+  return answer || null;
+};
+
+/**
+ * Builds a requestFieldAnswer callback that posts a one-element payload
+ * to getJobApplicationFillWithAi (same API as the full-page scan).
+ */
+export const createRequestFieldAnswer = ({
+  dispatch,
+  token,
+  resumeId,
+  userId,
+  source,
+}: {
+  dispatch: AppDispatch;
+  token: string;
+  resumeId: string;
+  userId: string;
+  source: string;
+}): RequestFieldAnswerFn => {
+  return async (element: AiFormElement): Promise<string | null> => {
+    const payload = {
+      elements: [element],
+      token: token ?? "",
+      url: window.location.href,
+      parser: "internal",
+      source,
+      fromAgent: false,
+      resumeId,
+      userId,
+    };
+
+    const fillResponse = await dispatch(
+      getJobApplicationFillWithAi(payload),
+    ).unwrap();
+
+    return extractAnswerFromFillResponse(
+      fillResponse?.data?.fill_data_list ?? fillResponse?.data ?? fillResponse,
+      element.label,
+    );
+  };
+};
+
 /**
  * Shared AI autofill pipeline (phase transitions + API call).
  * Site-specific DOM scan / fill is delegated to the matched AiSiteHandler.
+ *
+ * Also wires per-field icon buttons so each click hits the AI fill API
+ * with a single-element payload (not local applicant context).
  */
 export const scanHtmlToMakeApi = async ({
   dispatch,
@@ -79,6 +175,18 @@ export const scanHtmlToMakeApi = async ({
       selectedUserId,
     );
 
+    const requestFieldAnswer = createRequestFieldAnswer({
+      dispatch,
+      token: token ?? "",
+      resumeId,
+      userId,
+      source: handler.id,
+    });
+
+    // Field icons use the same AI API for single-field refills.
+    const iconCount =
+      handler.initFieldScanner?.(applicantData, { requestFieldAnswer }) ?? 0;
+
     const payload = await handler.buildScanPayload({
       token: token ?? "",
       resumeId,
@@ -87,7 +195,8 @@ export const scanHtmlToMakeApi = async ({
       parser: "internal",
     });
 
-    fieldsDetected = payload.elements?.length ?? 0;
+    fieldsDetected =
+      payload.elements?.length > 0 ? payload.elements.length : iconCount;
 
     setAiAutofillPhase("analysing");
     const fillResponse = await dispatch(
