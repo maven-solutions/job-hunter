@@ -24,6 +24,75 @@ const cleanLabelText = (text: string): string =>
 const normalizeLabel = (label: string): string =>
   fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
 
+/** API placeholders that should not count as a real fill value. */
+const EMPTY_ANSWER_TOKENS = new Set([
+  "",
+  "null",
+  "undefined",
+  "n/a",
+  "na",
+  "nil",
+  "-",
+  "--",
+  "[]",
+  "{}",
+  "empty",
+  "not provided",
+  "not available",
+  "no data",
+  "no answer",
+]);
+
+/**
+ * True only when the API returned a usable non-empty answer.
+ * empty / null / "null" / "N/A" must NOT be treated as filled.
+ */
+export const isUsableAshbyAnswer = (value: unknown): boolean => {
+  if (value == null) return false;
+  if (typeof value === "number") return !Number.isNaN(value);
+  if (typeof value === "boolean") return true;
+
+  if (Array.isArray(value)) {
+    return value.some((v) => isUsableAshbyAnswer(v));
+  }
+
+  if (typeof value === "object") {
+    const nested =
+      (value as any).answer ??
+      (value as any).value ??
+      (value as any).fill ??
+      (value as any).text;
+    return isUsableAshbyAnswer(nested);
+  }
+
+  const trimmed = String(value).trim();
+  if (!trimmed) return false;
+  return !EMPTY_ANSWER_TOKENS.has(trimmed.toLowerCase());
+};
+
+/** Coerce a raw API answer into a display/fill string, or "" if unusable. */
+const coerceAnswerString = (raw: unknown): string => {
+  if (!isUsableAshbyAnswer(raw)) return "";
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map((v) => String(v).trim())
+      .filter((v) => isUsableAshbyAnswer(v))
+      .join(", ");
+  }
+
+  if (typeof raw === "object" && raw != null) {
+    const nested =
+      (raw as any).answer ??
+      (raw as any).value ??
+      (raw as any).fill ??
+      (raw as any).text;
+    return coerceAnswerString(nested);
+  }
+
+  return String(raw).trim();
+};
+
 export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
   if (!response) return [];
 
@@ -31,15 +100,37 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
   if (payload?.data != null && typeof payload.data === "object") {
     payload = payload.data;
   }
+  // Common envelope from job-application-fill
+  if (
+    payload?.fill_data_list != null &&
+    typeof payload.fill_data_list === "object"
+  ) {
+    payload = payload.fill_data_list;
+  }
 
   const toAnswer = (item: any): AshbyAiAnswer | null => {
     if (!item || typeof item !== "object") return null;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
-    const raw = item.answer ?? item.value ?? item.fill ?? item.text ?? "";
-    const answer = Array.isArray(raw)
-      ? raw.map((v) => String(v).trim()).filter(Boolean).join(", ")
-      : String(raw).trim();
-    if (!label || !answer) return null;
+    if (!label) return null;
+
+    // Prefer undefined over treating explicit null via `??` fallback chain
+    const raw =
+      item.answer !== undefined
+        ? item.answer
+        : item.value !== undefined
+          ? item.value
+          : item.fill !== undefined
+            ? item.fill
+            : item.text !== undefined
+              ? item.text
+              : undefined;
+
+    // Explicit null / missing → not filled
+    if (raw === null || raw === undefined) return null;
+
+    const answer = coerceAnswerString(raw);
+    if (!answer || !isUsableAshbyAnswer(answer)) return null;
+
     return {
       label,
       answer,
@@ -68,6 +159,7 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
       "elements",
       "answers",
       "fields",
+      "fill_data_list",
       "resumeId",
       "userId",
       "parser",
@@ -83,8 +175,9 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
     const mapped: AshbyAiAnswer[] = [];
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
+      if (value === null || value === undefined) continue;
       if (typeof value !== "string" && typeof value !== "number") continue;
-      const answer = String(value).trim();
+      const answer = coerceAnswerString(value);
       if (!answer) continue;
       mapped.push({ label, answer });
     }
@@ -405,18 +498,21 @@ const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableAshbyAnswer(answer)) return false;
+
   element.focus();
   setNativeValue(element, answer);
   element.dispatchEvent(new Event("input", { bubbles: true }));
   element.dispatchEvent(new Event("change", { bubbles: true }));
   await handleValueChanges(element);
-  return element.value === answer || element.value.length > 0;
+  return isUsableAshbyAnswer(element.value);
 };
 
 const fillNativeSelect = async (
   select: HTMLSelectElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableAshbyAnswer(answer)) return false;
   const options = Array.from(select.options).map((opt) =>
     cleanLabelText(opt.textContent ?? opt.value),
   );
@@ -441,6 +537,7 @@ const fillAshbyCombobox = async (
   element: HTMLElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableAshbyAnswer(answer)) return false;
   if (element.getAttribute("aria-expanded") === "true") {
     closeListbox();
     await delay(100);
@@ -524,6 +621,7 @@ const fillCheckboxGroup = async (
   entry: HTMLElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableAshbyAnswer(answer)) return false;
   const checkboxes = Array.from(
     entry.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
   ).filter((cb) => !isAshbyYesNoStateCheckbox(cb));
@@ -574,6 +672,7 @@ const fillOptionGroup = async (
   entry: HTMLElement,
   answer: string,
 ): Promise<boolean> => {
+  if (!isUsableAshbyAnswer(answer)) return false;
   // Multi-select checkboxes (ethnicity, communities, etc.)
   const labeledCheckboxes = Array.from(
     entry.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
@@ -645,6 +744,9 @@ const fillField = async (
   field: AshbyCandidateField,
   answer: string,
 ): Promise<boolean> => {
+  // Never write or score empty / null / placeholder API values as filled
+  if (!isUsableAshbyAnswer(answer)) return false;
+
   if (field.kind === "option-group" || field.kind === "checkbox-group") {
     return fillOptionGroup(field.element, answer);
   }
@@ -669,25 +771,37 @@ const fillField = async (
 
 /**
  * Applies AI fill answers to the current Ashby job application form.
+ *
+ * Stats:
+ * - `filled` = only fields where API returned a usable non-empty answer AND DOM write succeeded
+ * - empty / null / "null" / "N/A" answers are skipped (not filled)
  */
 export const autofillAshbyWithAi = async (
   response: unknown,
 ): Promise<AshbyAiFillResult> => {
   const answers = normalizeAshbyAiAnswers(response);
-
-  if (answers.length === 0) {
-    throw new Error("No fill answers found in API response");
-  }
-
   const candidates = collectAshbyCandidateFields();
 
   let filled = 0;
   let failed = 0;
   let skipped = 0;
 
+  // No usable answers at all → every form field is "not filled"
+  if (answers.length === 0) {
+    return {
+      total: 0,
+      filled: 0,
+      failed: 0,
+      skipped: candidates.length,
+    };
+  }
+
   for (const field of candidates) {
     const match = findAnswerForLabel(field.label, answers);
-    if (!match?.answer) {
+    const answer = match?.answer;
+
+    // Missing or empty/null/placeholder answer → not filled
+    if (!isUsableAshbyAnswer(answer)) {
       skipped += 1;
       continue;
     }
@@ -700,7 +814,7 @@ export const autofillAshbyWithAi = async (
       });
       await delay(150);
 
-      const ok = await fillField(field, match.answer);
+      const ok = await fillField(field, answer as string);
       if (ok) {
         filled += 1;
       } else {
