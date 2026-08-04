@@ -24,13 +24,14 @@ const cleanLabelText = (text: string): string =>
 const normalizeLabel = (label: string): string =>
   fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
 
-/** API placeholders that should not count as a real fill value. */
+/**
+ * API placeholders that should not count as a real fill value.
+ * Note: "N/A" is often a real answer on job forms — do NOT treat as empty.
+ */
 const EMPTY_ANSWER_TOKENS = new Set([
   "",
   "null",
   "undefined",
-  "n/a",
-  "na",
   "nil",
   "-",
   "--",

@@ -28,13 +28,14 @@ const cleanLabelText = (text: string): string =>
 const normalizeLabel = (label: string): string =>
   fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
 
-/** API placeholders that should not count as a real fill value. */
+/**
+ * API placeholders that should not count as a real fill value.
+ * Note: "N/A" is a real answer on Greenhouse forms (e.g. previous email) — do NOT treat as empty.
+ */
 const EMPTY_ANSWER_TOKENS = new Set([
   "",
   "null",
   "undefined",
-  "n/a",
-  "na",
   "nil",
   "-",
   "--",
