@@ -45,28 +45,36 @@ const EMPTY_ANSWER_TOKENS = new Set([
 
 /**
  * True only when the API returned a usable non-empty answer.
- * empty / null / "null" / "N/A" must NOT be treated as filled.
+ * empty string / empty array / null / "null" / "N/A" must NOT count as filled.
  */
 export const isUsableAshbyAnswer = (value: unknown): boolean => {
   if (value == null) return false;
   if (typeof value === "number") return !Number.isNaN(value);
   if (typeof value === "boolean") return true;
 
+  // [] or [null, "", ...] → empty
   if (Array.isArray(value)) {
+    if (value.length === 0) return false;
     return value.some((v) => isUsableAshbyAnswer(v));
   }
 
   if (typeof value === "object") {
+    // {} with no nested fill value
     const nested =
       (value as any).answer ??
       (value as any).value ??
       (value as any).fill ??
-      (value as any).text;
+      (value as any).text ??
+      (value as any).data;
+    if (nested === undefined && Object.keys(value as object).length === 0) {
+      return false;
+    }
+    if (nested === undefined) return false;
     return isUsableAshbyAnswer(nested);
   }
 
   const trimmed = String(value).trim();
-  if (!trimmed) return false;
+  if (!trimmed) return false; // "" / whitespace-only
   return !EMPTY_ANSWER_TOKENS.has(trimmed.toLowerCase());
 };
 
@@ -86,21 +94,94 @@ const coerceAnswerString = (raw: unknown): string => {
       (raw as any).answer ??
       (raw as any).value ??
       (raw as any).fill ??
-      (raw as any).text;
+      (raw as any).text ??
+      (raw as any).data;
     return coerceAnswerString(nested);
   }
 
   return String(raw).trim();
 };
 
-export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
-  if (!response) return [];
+/** Extract raw answer from an API item (prefers explicit keys over `??` fallback). */
+const extractRawAnswer = (item: any): unknown => {
+  if (item == null || typeof item !== "object") return undefined;
+  if ("answer" in item) return item.answer;
+  if ("value" in item) return item.value;
+  if ("fill" in item) return item.fill;
+  if ("text" in item) return item.text;
+  if ("data" in item) return item.data;
+  return undefined;
+};
+
+/** Empty string, empty array, null, or non-usable tokens all count as “no answer”. */
+const isEmptyApiAnswer = (raw: unknown): boolean => !isUsableAshbyAnswer(raw);
+
+const addLabelKey = (set: Set<string>, label: string): void => {
+  const cleaned = cleanLabelText(label);
+  if (!cleaned) return;
+  const n = normalizeLabel(cleaned);
+  if (n) set.add(n);
+  const compact = cleanLabelText(cleaned)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  if (compact) set.add(compact);
+};
+
+/** Whether this form field’s API payload was explicitly empty/null/[]. */
+const isFieldMarkedEmpty = (
+  label: string,
+  emptyLabelKeys: Set<string>,
+): boolean => {
+  if (emptyLabelKeys.size === 0) return false;
+  const n = normalizeLabel(label);
+  if (n && emptyLabelKeys.has(n)) return true;
+  const compact = cleanLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  if (compact && emptyLabelKeys.has(compact)) return true;
+
+  // Soft: API empty-label is a shortened version of the long form label
+  if (n && n.length >= 8) {
+    for (const key of emptyLabelKeys) {
+      if (key.length < 8) continue;
+      if (n === key || n.includes(key) || key.includes(n)) return true;
+    }
+  }
+  return false;
+};
+
+export interface AshbyParsedFillResponse {
+  /** Usable non-empty answers only */
+  answers: AshbyAiAnswer[];
+  /**
+   * Normalized label keys for which the API returned empty string / empty array /
+   * null / placeholder — those fields must NOT be filled or soft-matched.
+   */
+  emptyLabelKeys: Set<string>;
+  /** How many API items had an empty/null/[] answer (not set size). */
+  emptyCount: number;
+}
+
+/**
+ * Parse fill API response into usable answers + labels that came back empty.
+ */
+export const parseAshbyAiFillResponse = (
+  response: unknown,
+): AshbyParsedFillResponse => {
+  const answers: AshbyAiAnswer[] = [];
+  const emptyLabelKeys = new Set<string>();
+  let emptyCount = 0;
+
+  if (!response) {
+    return { answers, emptyLabelKeys, emptyCount };
+  }
 
   let payload: any = response;
   if (payload?.data != null && typeof payload.data === "object") {
     payload = payload.data;
   }
-  // Common envelope from job-application-fill
   if (
     payload?.fill_data_list != null &&
     typeof payload.fill_data_list === "object"
@@ -108,50 +189,55 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
     payload = payload.fill_data_list;
   }
 
-  const toAnswer = (item: any): AshbyAiAnswer | null => {
-    if (!item || typeof item !== "object") return null;
+  const markEmpty = (label: string): void => {
+    addLabelKey(emptyLabelKeys, label);
+    emptyCount += 1;
+  };
+
+  const processItem = (item: any): void => {
+    if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
-    if (!label) return null;
+    if (!label) return;
 
-    // Prefer undefined over treating explicit null via `??` fallback chain
-    const raw =
-      item.answer !== undefined
-        ? item.answer
-        : item.value !== undefined
-          ? item.value
-          : item.fill !== undefined
-            ? item.fill
-            : item.text !== undefined
-              ? item.text
-              : undefined;
+    const raw = extractRawAnswer(item);
 
-    // Explicit null / missing → not filled
-    if (raw === null || raw === undefined) return null;
+    // Missing answer, null, "", [], placeholders → mark empty (not filled)
+    if (isEmptyApiAnswer(raw)) {
+      markEmpty(label);
+      return;
+    }
 
     const answer = coerceAnswerString(raw);
-    if (!answer || !isUsableAshbyAnswer(answer)) return null;
+    if (!answer) {
+      markEmpty(label);
+      return;
+    }
 
-    return {
+    answers.push({
       label,
       answer,
       type: item.type ? String(item.type) : undefined,
-    };
+    });
   };
 
   if (Array.isArray(payload)) {
-    return payload.map(toAnswer).filter(Boolean) as AshbyAiAnswer[];
+    payload.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.elements)) {
-    return payload.elements.map(toAnswer).filter(Boolean) as AshbyAiAnswer[];
+    payload.elements.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.answers)) {
-    return payload.answers.map(toAnswer).filter(Boolean) as AshbyAiAnswer[];
+    payload.answers.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (Array.isArray(payload?.fields)) {
-    return payload.fields.map(toAnswer).filter(Boolean) as AshbyAiAnswer[];
+    payload.fields.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
   }
 
   if (typeof payload === "object") {
@@ -172,20 +258,34 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
       "status",
       "error",
     ]);
-    const mapped: AshbyAiAnswer[] = [];
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
-      if (value === null || value === undefined) continue;
-      if (typeof value !== "string" && typeof value !== "number") continue;
+      if (isEmptyApiAnswer(value)) {
+        markEmpty(label);
+        continue;
+      }
+      if (
+        typeof value !== "string" &&
+        typeof value !== "number" &&
+        !Array.isArray(value)
+      ) {
+        continue;
+      }
       const answer = coerceAnswerString(value);
-      if (!answer) continue;
-      mapped.push({ label, answer });
+      if (!answer) {
+        markEmpty(label);
+        continue;
+      }
+      answers.push({ label, answer });
     }
-    return mapped;
   }
 
-  return [];
+  return { answers, emptyLabelKeys, emptyCount };
 };
+
+/** Usable answers only (empty string / [] filtered out). */
+export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] =>
+  parseAshbyAiFillResponse(response).answers;
 
 /**
  * Normalize for option matching while **keeping digits**.
@@ -773,21 +873,23 @@ const fillField = async (
  * Applies AI fill answers to the current Ashby job application form.
  *
  * Stats:
- * - `filled` = only fields where API returned a usable non-empty answer AND DOM write succeeded
- * - empty / null / "null" / "N/A" answers are skipped (not filled)
+ * - `filled` = only fields with a usable non-empty API answer AND successful DOM write
+ * - empty string / empty array / null / placeholders → not filled (skipped)
+ * - labels with empty API values never soft-match other answers
  */
 export const autofillAshbyWithAi = async (
   response: unknown,
 ): Promise<AshbyAiFillResult> => {
-  const answers = normalizeAshbyAiAnswers(response);
+  const { answers, emptyLabelKeys, emptyCount } =
+    parseAshbyAiFillResponse(response);
   const candidates = collectAshbyCandidateFields();
 
   let filled = 0;
   let failed = 0;
   let skipped = 0;
 
-  // No usable answers at all → every form field is "not filled"
-  if (answers.length === 0) {
+  // No usable answers and no empty markers → every form field is "not filled"
+  if (answers.length === 0 && emptyCount === 0) {
     return {
       total: 0,
       filled: 0,
@@ -797,10 +899,16 @@ export const autofillAshbyWithAi = async (
   }
 
   for (const field of candidates) {
+    // API returned "" / [] / null for this label → never fill, never soft-match others
+    if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
+      skipped += 1;
+      continue;
+    }
+
     const match = findAnswerForLabel(field.label, answers);
     const answer = match?.answer;
 
-    // Missing or empty/null/placeholder answer → not filled
+    // Missing or empty answer → not filled
     if (!isUsableAshbyAnswer(answer)) {
       skipped += 1;
       continue;
@@ -828,7 +936,7 @@ export const autofillAshbyWithAi = async (
   }
 
   return {
-    total: answers.length,
+    total: answers.length + emptyCount,
     filled,
     failed,
     skipped,
