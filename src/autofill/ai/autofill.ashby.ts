@@ -94,24 +94,72 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
   return [];
 };
 
+/**
+ * Normalize for option matching while **keeping digits**.
+ * `fromatStirngInLowerCase` strips digits, which breaks Ashby age radios
+ * like "30-39" / "40-49" (they collapse to empty and never match).
+ */
+const normalizeForMatch = (text: string): string =>
+  cleanLabelText(text)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+const YES_ANSWERS = new Set(["yes", "y", "true", "1"]);
+const NO_ANSWERS = new Set(["no", "n", "false", "0"]);
+
 const matchOption = (answer: string, options: string[]): string | null => {
-  const normalizedAnswer = fromatStirngInLowerCase(answer);
+  if (!answer?.trim() || options.length === 0) return null;
+
+  const cleanAnswer = cleanLabelText(answer);
+  const normalizedAnswer = normalizeForMatch(answer);
   if (!normalizedAnswer) return null;
 
+  // 1. Exact (cleaned whitespace / nbsp)
   for (const option of options) {
-    if (fromatStirngInLowerCase(option) === normalizedAnswer) {
-      return option;
+    if (cleanLabelText(option) === cleanAnswer) return option;
+  }
+
+  // 2. Exact after alphanumeric normalize (keeps digits: "30-39" → "3039")
+  for (const option of options) {
+    if (normalizeForMatch(option) === normalizedAnswer) return option;
+  }
+
+  // 3. Also try legacy formatter (letters-only) when both sides survive it
+  const legacyAnswer = fromatStirngInLowerCase(cleanAnswer);
+  if (legacyAnswer) {
+    for (const option of options) {
+      if (fromatStirngInLowerCase(option) === legacyAnswer) return option;
     }
   }
 
-  for (const option of options) {
-    const normalizedOption = fromatStirngInLowerCase(option);
-    if (
-      normalizedOption?.includes(normalizedAnswer) ||
-      normalizedAnswer.includes(normalizedOption ?? "")
-    ) {
-      return option;
+  // 4. Yes/No aliases (AI may return true/false/y/n)
+  if (YES_ANSWERS.has(normalizedAnswer) || YES_ANSWERS.has(legacyAnswer ?? "")) {
+    const hit = options.find((o) => YES_ANSWERS.has(normalizeForMatch(o)));
+    if (hit) return hit;
+  }
+  if (NO_ANSWERS.has(normalizedAnswer) || NO_ANSWERS.has(legacyAnswer ?? "")) {
+    // Prefer exact "No" over soft-matching "None of the above"
+    const hit = options.find((o) => normalizeForMatch(o) === "no");
+    if (hit) return hit;
+  }
+
+  // 5. Soft includes — only when answer token is long enough to avoid
+  // "no" ⊂ "noneoftheabove" false positives
+  if (normalizedAnswer.length >= 4) {
+    let best: { option: string; score: number } | null = null;
+    for (const option of options) {
+      const n = normalizeForMatch(option);
+      if (!n) continue;
+      let score = 0;
+      if (n === normalizedAnswer) score = 100;
+      else if (n.includes(normalizedAnswer)) score = 50 + normalizedAnswer.length;
+      else if (normalizedAnswer.includes(n) && n.length >= 4) score = 40 + n.length;
+      if (score > 0 && (!best || score > best.score)) {
+        best = { option, score };
+      }
     }
+    if (best) return best.option;
   }
 
   return null;
@@ -171,28 +219,93 @@ const isAshbyYesNoStateCheckbox = (checkbox: HTMLInputElement): boolean => {
   return false;
 };
 
-const clickChoiceControl = async (control: HTMLElement): Promise<void> => {
-  control.scrollIntoView({ block: "nearest", inline: "nearest" });
-  if (control instanceof HTMLInputElement) {
-    // Prefer label click for custom-styled Ashby radios/checkboxes
-    if (control.id) {
-      const label = document.querySelector<HTMLElement>(
-        `label[for="${CSS.escape(control.id)}"]`,
-      );
-      if (label) {
-        label.click();
-        await handleValueChanges(control);
-        return;
-      }
+/** Realistic pointer + mouse sequence for Ashby custom controls (React). */
+const fullClick = (element: HTMLElement): void => {
+  element.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const opts = { bubbles: true, cancelable: true, view: window };
+  element.dispatchEvent(new PointerEvent("pointerdown", opts));
+  element.dispatchEvent(new MouseEvent("mousedown", opts));
+  element.dispatchEvent(new PointerEvent("pointerup", opts));
+  element.dispatchEvent(new MouseEvent("mouseup", opts));
+  element.dispatchEvent(new MouseEvent("click", opts));
+  // Fallback for environments where PointerEvent click is ignored
+  try {
+    element.click();
+  } catch {
+    /* ignore */
+  }
+};
+
+/**
+ * Set checked via the native property descriptor so React's onChange can see it.
+ */
+const setNativeChecked = (input: HTMLInputElement, checked: boolean): void => {
+  const proto = Object.getPrototypeOf(input) as HTMLInputElement;
+  const descriptor =
+    Object.getOwnPropertyDescriptor(proto, "checked") ||
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "checked");
+  if (descriptor?.set) {
+    descriptor.set.call(input, checked);
+  } else {
+    input.checked = checked;
+  }
+};
+
+const fireInputChangeEvents = (input: HTMLInputElement): void => {
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  input.dispatchEvent(new Event("click", { bubbles: true }));
+};
+
+/**
+ * Select an Ashby radio/checkbox. Label-only click is often not enough for
+ * custom-styled controls; try option row + native checked setter.
+ */
+const selectChoiceInput = async (input: HTMLInputElement): Promise<boolean> => {
+  const optionRow = input.closest(
+    "[class*='_option_'], [class*='option']",
+  ) as HTMLElement | null;
+  const label = input.id
+    ? document.querySelector<HTMLElement>(`label[for="${CSS.escape(input.id)}"]`)
+    : null;
+  const circle =
+    optionRow?.querySelector<HTMLElement>(
+      "[class*='_circle_'], [class*='_container_']",
+    ) ?? null;
+
+  const trySelect = async (fn: () => void): Promise<boolean> => {
+    try {
+      fn();
+    } catch {
+      /* continue */
     }
-    control.checked = true;
-    control.click();
-    await handleValueChanges(control);
-    return;
+    await delay(40);
+    return input.checked;
+  };
+
+  // Prefer label (associates via `for`)
+  if (label && (await trySelect(() => fullClick(label)))) return true;
+
+  // Visible option row / custom circle
+  if (optionRow && (await trySelect(() => fullClick(optionRow)))) return true;
+  if (circle && (await trySelect(() => fullClick(circle)))) return true;
+
+  // Native + React bridge
+  if (
+    await trySelect(() => {
+      setNativeChecked(input, true);
+      fullClick(input);
+      fireInputChangeEvents(input);
+    })
+  ) {
+    return true;
   }
 
-  control.click();
-  await delay(80);
+  // Last resort
+  setNativeChecked(input, true);
+  await handleValueChanges(input);
+  await delay(40);
+  return input.checked;
 };
 
 const findAnswerForLabel = (
@@ -203,7 +316,32 @@ const findAnswerForLabel = (
   if (exact) return exact;
 
   const normalized = normalizeLabel(label);
-  return answers.find((item) => normalizeLabel(item.label) === normalized);
+  const byNorm = answers.find(
+    (item) => normalizeLabel(item.label) === normalized,
+  );
+  if (byNorm) return byNorm;
+
+  // Soft field match (AI may shorten long Ashby questions)
+  if (normalized.length >= 12) {
+    const soft = answers.find((item) => {
+      const n = normalizeLabel(item.label);
+      if (!n || n.length < 8) return false;
+      return n.includes(normalized) || normalized.includes(n);
+    });
+    if (soft) return soft;
+  }
+
+  // Digit-preserving soft match for option-heavy questions
+  const compact = normalizeForMatch(label);
+  if (compact.length >= 12) {
+    return answers.find((item) => {
+      const n = normalizeForMatch(item.label);
+      if (!n || n.length < 8) return false;
+      return n.includes(compact) || compact.includes(n);
+    });
+  }
+
+  return undefined;
 };
 
 const waitForDomUpdate = (): Promise<void> =>
@@ -244,14 +382,35 @@ const clickOptionElement = (optionEl: HTMLElement): void => {
   optionEl.click();
 };
 
+/**
+ * Set value through the native setter so React controlled inputs pick it up.
+ */
+const setNativeValue = (
+  element: HTMLInputElement | HTMLTextAreaElement,
+  value: string,
+): void => {
+  const proto =
+    element instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
+  const descriptor = Object.getOwnPropertyDescriptor(proto, "value");
+  if (descriptor?.set) {
+    descriptor.set.call(element, value);
+  } else {
+    element.value = value;
+  }
+};
+
 const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
   answer: string,
 ): Promise<boolean> => {
   element.focus();
-  element.value = answer;
+  setNativeValue(element, answer);
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true }));
   await handleValueChanges(element);
-  return true;
+  return element.value === answer || element.value.length > 0;
 };
 
 const fillNativeSelect = async (
@@ -371,21 +530,24 @@ const fillCheckboxGroup = async (
 
   if (checkboxes.length === 0) return false;
 
-  const labeled = checkboxes.map((cb) => ({
-    input: cb,
-    label: getChoiceOptionLabel(cb),
-  })).filter((item) => item.label);
+  const labeled = checkboxes
+    .map((cb) => ({
+      input: cb,
+      label: getChoiceOptionLabel(cb),
+    }))
+    .filter((item) => item.label);
 
   if (labeled.length === 0) return false;
 
   const optionLabels = labeled.map((item) => item.label);
   const parts = parseAnswerList(answer);
-  // Prefer multi-parts; if none matched the full string as single option
+  // Prefer multi-parts; if single part, still try whole string first
+  const wholeMatch = matchOption(answer, optionLabels);
   const candidates =
     parts.length > 1
       ? parts
-      : matchOption(answer, optionLabels)
-        ? [matchOption(answer, optionLabels) as string]
+      : wholeMatch
+        ? [wholeMatch]
         : parts.length === 1
           ? parts
           : [answer];
@@ -397,10 +559,12 @@ const fillCheckboxGroup = async (
     if (!matched) continue;
     const target = labeled.find((item) => item.label === matched);
     if (!target) continue;
-    if (!target.input.checked) {
-      await clickChoiceControl(target.input);
+    if (target.input.checked) {
+      filledAny = true;
+      continue;
     }
-    filledAny = true;
+    const ok = await selectChoiceInput(target.input);
+    if (ok || target.input.checked) filledAny = true;
   }
 
   return filledAny;
@@ -424,14 +588,29 @@ const fillOptionGroup = async (
     entry.querySelectorAll<HTMLInputElement>("input[type='radio']"),
   );
   if (radios.length > 0) {
-    const labels = radios.map((radio) => getChoiceOptionLabel(radio));
+    const labeled = radios.map((radio) => ({
+      input: radio,
+      label: getChoiceOptionLabel(radio),
+    }));
+    const labels = labeled.map((item) => item.label).filter(Boolean);
     const matched = matchOption(answer, labels);
-    if (!matched) return false;
-    const index = labels.indexOf(matched);
-    const radio = radios[index];
-    if (!radio) return false;
-    await clickChoiceControl(radio);
-    return true;
+    if (!matched) {
+      // Try each raw label from sibling text if name only
+      const altLabels = labeled.map((item) => {
+        const row = item.input.closest("[class*='_option_']");
+        return cleanLabelText(row?.textContent ?? item.label);
+      });
+      const altMatch = matchOption(answer, altLabels);
+      if (!altMatch) return false;
+      const idx = altLabels.indexOf(altMatch);
+      const radio = radios[idx];
+      if (!radio) return false;
+      return selectChoiceInput(radio);
+    }
+
+    const target = labeled.find((item) => item.label === matched);
+    if (!target) return false;
+    return selectChoiceInput(target.input);
   }
 
   // Button / role-based choices (Ashby Yes/No toggles)
@@ -456,7 +635,9 @@ const fillOptionGroup = async (
   );
   if (!target) return false;
 
-  await clickChoiceControl(target);
+  fullClick(target);
+  await delay(100);
+  // Ashby yes/no is button-driven; click is sufficient for React state
   return true;
 };
 
