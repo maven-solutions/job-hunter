@@ -44,7 +44,7 @@ const SKIP_INPUT_TYPES = new Set([
 const FIELD_ENTRY_SELECTOR =
   ".ashby-application-form-field-entry, [class*='_fieldEntry_']";
 const FORM_CONTAINER_SELECTOR =
-  ".ashby-application-form-container, [class*='_jobPostingForm_']";
+  ".ashby-application-form-container, [class*='_jobPostingForm_'], .ashby-survey-form-container, [class*='ashby-survey-form']";
 
 const cleanLabelText = (text: string): string =>
   text
@@ -55,6 +55,22 @@ const cleanLabelText = (text: string): string =>
 
 const isInsideExtension = (element: Element): boolean =>
   !!element.closest(`#${EXTENSION_ROOT_ID}`);
+
+/** All Ashby application + survey form roots on the page (first-match query only misses diversity survey). */
+const getAshbyFormRoots = (): HTMLElement[] => {
+  const roots = Array.from(
+    document.querySelectorAll<HTMLElement>(FORM_CONTAINER_SELECTOR),
+  ).filter((el) => !isInsideExtension(el));
+
+  if (roots.length === 0) {
+    return [document.body];
+  }
+
+  // Prefer leaf-most containers so nested survey wrappers don't double-scan children
+  return roots.filter(
+    (root) => !roots.some((other) => other !== root && root.contains(other)),
+  );
+};
 
 const isVisibleElement = (element: HTMLElement): boolean => {
   if (element.closest(".visually-hidden, [aria-hidden='true']")) {
@@ -97,9 +113,11 @@ const getFieldLabel = (element: HTMLElement): string => {
   }
 
   const entry = getAshbyFieldEntry(element);
-  const entryLabel = entry?.querySelector(
-    "label.ashby-application-form-question-title, label[class*='_label_'], label",
-  );
+  const entryLabel =
+    entry?.querySelector(
+      "label.ashby-application-form-question-title, label._heading_f7cvd_52",
+    ) ??
+    entry?.querySelector("label[class*='_label_'], label");
   if (entryLabel?.textContent) {
     return cleanLabelText(entryLabel.textContent);
   }
@@ -170,23 +188,58 @@ const getNativeSelectOptions = (select: HTMLSelectElement): string[] => {
   return options;
 };
 
+/** Resolve the human-readable label for a radio/checkbox option control. */
+const getChoiceOptionLabel = (input: HTMLInputElement): string => {
+  const id = input.id;
+  if (id) {
+    const forLabel = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+    if (forLabel?.textContent) {
+      return cleanLabelText(forLabel.textContent);
+    }
+  }
+
+  const optionWrap = input.closest("[class*='_option_']");
+  const wrapLabel = optionWrap?.querySelector("label");
+  if (wrapLabel?.textContent) {
+    return cleanLabelText(wrapLabel.textContent);
+  }
+
+  const aria = input.getAttribute("aria-label");
+  if (aria) return cleanLabelText(aria);
+
+  // Ashby multi-checkbox uses option text as `name`
+  if (input.name && !input.name.includes("_systemfield") && input.name.length < 120) {
+    return cleanLabelText(input.name);
+  }
+
+  if (input.value) return cleanLabelText(input.value);
+  return "";
+};
+
+/**
+ * True for Ashby's internal yes/no state checkbox (not a labeled survey option).
+ */
+const isAshbyYesNoStateCheckbox = (checkbox: HTMLInputElement): boolean => {
+  if (checkbox.closest("[class*='_yesno_']")) return true;
+  // Hidden state-only checkbox without an option label
+  if (!checkbox.id && !checkbox.closest("[class*='_option_']")) return true;
+  return false;
+};
+
 const extractRadioOrButtonOptions = (entry: HTMLElement): string[] => {
   const options: string[] = [];
   const seen = new Set<string>();
-  const titleLabel = entry.querySelector(
-    "label.ashby-application-form-question-title, label[class*='_label_']",
-  );
+  const titleLabel =
+    entry.querySelector(
+      "label.ashby-application-form-question-title, label._heading_f7cvd_52",
+    ) ?? entry.querySelector("legend");
+  const titleText = cleanLabelText(titleLabel?.textContent ?? "");
 
   const add = (text: string) => {
     const label = cleanLabelText(text);
     if (!label || seen.has(label)) return;
     // Skip the question title itself
-    if (
-      titleLabel &&
-      cleanLabelText(titleLabel.textContent ?? "") === label
-    ) {
-      return;
-    }
+    if (titleText && titleText === label) return;
     seen.add(label);
     options.push(label);
   };
@@ -194,15 +247,17 @@ const extractRadioOrButtonOptions = (entry: HTMLElement): string[] => {
   entry
     .querySelectorAll<HTMLInputElement>("input[type='radio']")
     .forEach((radio) => {
-      const id = radio.id;
-      const radioLabel = id
-        ? document.querySelector(`label[for="${CSS.escape(id)}"]`)
-        : null;
-      if (radioLabel?.textContent) {
-        add(radioLabel.textContent);
-        return;
-      }
-      if (radio.value) add(radio.value);
+      const label = getChoiceOptionLabel(radio);
+      if (label) add(label);
+    });
+
+  // Multi-select survey checkboxes ("select all that apply")
+  entry
+    .querySelectorAll<HTMLInputElement>("input[type='checkbox']")
+    .forEach((checkbox) => {
+      if (isAshbyYesNoStateCheckbox(checkbox)) return;
+      const label = getChoiceOptionLabel(checkbox);
+      if (label) add(label);
     });
 
   if (options.length > 0) return options;
@@ -282,7 +337,8 @@ export type AshbyFieldKind =
   | "text"
   | "combobox"
   | "select"
-  | "option-group";
+  | "option-group"
+  | "checkbox-group";
 
 export interface AshbyCandidateField {
   element: HTMLElement;
@@ -294,117 +350,137 @@ export interface AshbyCandidateField {
 }
 
 /**
- * Collect autofillable Ashby application form fields from the host page.
+ * Collect autofillable Ashby application form fields from the host page
+ * (main application form + optional diversity survey).
  */
 export const collectAshbyCandidateFields = (): AshbyCandidateField[] => {
-  const formRoot =
-    document.querySelector(FORM_CONTAINER_SELECTOR) ?? document.body;
+  const formRoots = getAshbyFormRoots();
   const results: AshbyCandidateField[] = [];
   const seenIds = new Set<string>();
   const seenLabels = new Set<string>();
 
-  const candidates = formRoot.querySelectorAll<HTMLElement>(
-    "input, textarea, select, [role='combobox']",
-  );
+  const collectFromRoot = (formRoot: HTMLElement) => {
+    const candidates = formRoot.querySelectorAll<HTMLElement>(
+      "input, textarea, select, [role='combobox']",
+    );
 
-  candidates.forEach((element) => {
-    if (isInsideExtension(element) || !isVisibleElement(element)) {
-      return;
-    }
-
-    if (element instanceof HTMLInputElement) {
-      const type = (element.type || "text").toLowerCase();
-      if (SKIP_INPUT_TYPES.has(type)) {
+    candidates.forEach((element) => {
+      if (isInsideExtension(element) || !isVisibleElement(element)) {
         return;
       }
-    }
 
-    // Skip non-form buttons that happen to be comboboxes outside a field entry
-    if (
-      element instanceof HTMLButtonElement &&
-      !getAshbyFieldEntry(element) &&
-      element.getAttribute("role") !== "combobox"
-    ) {
-      return;
-    }
+      if (element instanceof HTMLInputElement) {
+        const type = (element.type || "text").toLowerCase();
+        if (SKIP_INPUT_TYPES.has(type)) {
+          return;
+        }
+      }
 
-    const id =
-      element.getAttribute("id") ||
-      element.getAttribute("name") ||
-      `${results.length}`;
-    if (seenIds.has(id)) {
-      return;
-    }
-    seenIds.add(id);
+      // Skip non-form buttons that happen to be comboboxes outside a field entry
+      if (
+        element instanceof HTMLButtonElement &&
+        !getAshbyFieldEntry(element) &&
+        element.getAttribute("role") !== "combobox"
+      ) {
+        return;
+      }
 
-    const label = getFieldLabel(element);
-    if (seenLabels.has(label.toLowerCase())) {
-      return;
-    }
-    seenLabels.add(label.toLowerCase());
+      const id =
+        element.getAttribute("id") ||
+        element.getAttribute("name") ||
+        `${results.length}`;
+      if (seenIds.has(id)) {
+        return;
+      }
+      seenIds.add(id);
 
-    if (element instanceof HTMLSelectElement) {
-      results.push({
-        element,
-        label,
-        required: isRequiredField(element),
-        kind: "select",
-        options: getNativeSelectOptions(element),
-      });
-      return;
-    }
-
-    if (isComboboxInput(element)) {
-      results.push({
-        element,
-        label,
-        required: isRequiredField(element),
-        kind: "combobox",
-      });
-      return;
-    }
-
-    results.push({
-      element,
-      label,
-      required: isRequiredField(element),
-      kind: "text",
-    });
-  });
-
-  // Option groups (Yes/No, multi-choice) that have no text input
-  formRoot
-    .querySelectorAll<HTMLElement>(FIELD_ENTRY_SELECTOR)
-    .forEach((entry) => {
-      if (isInsideExtension(entry)) return;
-
-      const hasTextControl = entry.querySelector(
-        "input:not([type='hidden']):not([type='file']):not([type='radio']):not([type='checkbox']):not([type='submit']):not([type='button']), textarea, select, [role='combobox']",
-      );
-      if (hasTextControl) return;
-
-      const title = entry.querySelector(
-        "label.ashby-application-form-question-title, label[class*='_label_'], label",
-      );
-      const label = cleanLabelText(title?.textContent ?? "");
-      if (!label || seenLabels.has(label.toLowerCase())) return;
-
-      const options = extractRadioOrButtonOptions(entry);
-      if (options.length === 0) return;
-
+      const label = getFieldLabel(element);
+      if (seenLabels.has(label.toLowerCase())) {
+        return;
+      }
       seenLabels.add(label.toLowerCase());
+
+      if (element instanceof HTMLSelectElement) {
+        results.push({
+          element,
+          label,
+          required: isRequiredField(element),
+          kind: "select",
+          options: getNativeSelectOptions(element),
+        });
+        return;
+      }
+
+      if (isComboboxInput(element)) {
+        results.push({
+          element,
+          label,
+          required: isRequiredField(element),
+          kind: "combobox",
+        });
+        return;
+      }
+
       results.push({
-        element: entry,
+        element,
         label,
-        required:
-          !!title &&
-          (Array.from(title.classList).some((c) => c.includes("required")) ||
-            title.textContent?.includes("*") === true),
-        kind: "option-group",
-        options,
+        required: isRequiredField(element),
+        kind: "text",
       });
     });
 
+    // Option groups: Yes/No toggles, radio groups, multi-select checkboxes
+    formRoot
+      .querySelectorAll<HTMLElement>(FIELD_ENTRY_SELECTOR)
+      .forEach((entry) => {
+        if (isInsideExtension(entry)) return;
+
+        const hasTextControl = entry.querySelector(
+          "input:not([type='hidden']):not([type='file']):not([type='radio']):not([type='checkbox']):not([type='submit']):not([type='button']), textarea, select, [role='combobox']",
+        );
+        if (hasTextControl) return;
+
+        const title =
+          entry.querySelector(
+            "label.ashby-application-form-question-title, label._heading_f7cvd_52",
+          ) ??
+          entry.querySelector("legend") ??
+          entry.querySelector("label");
+        const label = cleanLabelText(title?.textContent ?? "");
+        if (!label || seenLabels.has(label.toLowerCase())) return;
+
+        const options = extractRadioOrButtonOptions(entry);
+        if (options.length === 0) return;
+
+        const labeledCheckboxes = Array.from(
+          entry.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
+        ).filter((cb) => !isAshbyYesNoStateCheckbox(cb) && getChoiceOptionLabel(cb));
+
+        const hasRadios =
+          entry.querySelectorAll("input[type='radio']").length > 0;
+        const hasYesNoButtons =
+          !!entry.querySelector("[class*='_yesno_'] button, [class*='_yesno_'] [role='radio']");
+
+        const kind: AshbyFieldKind =
+          labeledCheckboxes.length > 0 && !hasRadios && !hasYesNoButtons
+            ? "checkbox-group"
+            : "option-group";
+
+        seenLabels.add(label.toLowerCase());
+        results.push({
+          element: entry,
+          label,
+          required:
+            !!title &&
+            (Array.from(title.classList).some((c) => c.includes("required")) ||
+              title.textContent?.includes("*") === true),
+          kind,
+          options,
+        });
+      });
+  };
+
+  formRoots.forEach(collectFromRoot);
   return results;
 };
 
@@ -429,7 +505,11 @@ export const scanAshbyHtmlToMakeApiPayload = async (
       continue;
     }
 
-    if (candidate.kind === "select" || candidate.kind === "option-group") {
+    if (
+      candidate.kind === "select" ||
+      candidate.kind === "option-group" ||
+      candidate.kind === "checkbox-group"
+    ) {
       elements.push({
         label: candidate.label,
         required: candidate.required,

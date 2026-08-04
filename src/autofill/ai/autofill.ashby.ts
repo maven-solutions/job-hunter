@@ -35,9 +35,10 @@ export const normalizeAshbyAiAnswers = (response: unknown): AshbyAiAnswer[] => {
   const toAnswer = (item: any): AshbyAiAnswer | null => {
     if (!item || typeof item !== "object") return null;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
-    const answer = String(
-      item.answer ?? item.value ?? item.fill ?? item.text ?? "",
-    ).trim();
+    const raw = item.answer ?? item.value ?? item.fill ?? item.text ?? "";
+    const answer = Array.isArray(raw)
+      ? raw.map((v) => String(v).trim()).filter(Boolean).join(", ")
+      : String(raw).trim();
     if (!label || !answer) return null;
     return {
       label,
@@ -114,6 +115,84 @@ const matchOption = (answer: string, options: string[]): string | null => {
   }
 
   return null;
+};
+
+/** Split multi-select AI answers (comma / pipe / JSON array / newlines). */
+const parseAnswerList = (answer: string): string[] => {
+  const trimmed = answer.trim();
+  if (!trimmed) return [];
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((v) => String(v).trim()).filter(Boolean);
+      }
+    } catch {
+      // fall through to delimiter split
+    }
+  }
+
+  return trimmed
+    .split(/\s*[,;|]\s*|\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+};
+
+const getChoiceOptionLabel = (input: HTMLInputElement): string => {
+  const id = input.id;
+  if (id) {
+    const forLabel = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+    if (forLabel?.textContent) {
+      return cleanLabelText(forLabel.textContent);
+    }
+  }
+
+  const optionWrap = input.closest("[class*='_option_']");
+  const wrapLabel = optionWrap?.querySelector("label");
+  if (wrapLabel?.textContent) {
+    return cleanLabelText(wrapLabel.textContent);
+  }
+
+  const aria = input.getAttribute("aria-label");
+  if (aria) return cleanLabelText(aria);
+
+  if (input.name && !input.name.includes("_systemfield") && input.name.length < 120) {
+    return cleanLabelText(input.name);
+  }
+
+  if (input.value) return cleanLabelText(input.value);
+  return "";
+};
+
+const isAshbyYesNoStateCheckbox = (checkbox: HTMLInputElement): boolean => {
+  if (checkbox.closest("[class*='_yesno_']")) return true;
+  if (!checkbox.id && !checkbox.closest("[class*='_option_']")) return true;
+  return false;
+};
+
+const clickChoiceControl = async (control: HTMLElement): Promise<void> => {
+  control.scrollIntoView({ block: "nearest", inline: "nearest" });
+  if (control instanceof HTMLInputElement) {
+    // Prefer label click for custom-styled Ashby radios/checkboxes
+    if (control.id) {
+      const label = document.querySelector<HTMLElement>(
+        `label[for="${CSS.escape(control.id)}"]`,
+      );
+      if (label) {
+        label.click();
+        await handleValueChanges(control);
+        return;
+      }
+    }
+    control.checked = true;
+    control.click();
+    await handleValueChanges(control);
+    return;
+  }
+
+  control.click();
+  await delay(80);
 };
 
 const findAnswerForLabel = (
@@ -198,6 +277,7 @@ const fillNativeSelect = async (
   return false;
 };
 
+/** Location-style combobox: pick list option, or type free-text when options aren't listed. */
 const fillAshbyCombobox = async (
   element: HTMLElement,
   answer: string,
@@ -211,6 +291,14 @@ const fillAshbyCombobox = async (
   element.click();
   await delay(200);
   await waitForDomUpdate();
+
+  // Type into combobox when it's an input (helps filter remote options)
+  if (element instanceof HTMLInputElement) {
+    element.value = answer;
+    await handleValueChanges(element);
+    await delay(250);
+    await waitForDomUpdate();
+  }
 
   let optionEls = Array.from(
     document.querySelectorAll<HTMLElement>(
@@ -234,69 +322,119 @@ const fillAshbyCombobox = async (
     });
   }
 
-  if (optionEls.length === 0) {
-    closeListbox();
-    return false;
+  if (optionEls.length > 0) {
+    const labels = optionEls.map((opt) => cleanLabelText(opt.textContent ?? ""));
+    const matchedLabel = matchOption(answer, labels);
+    if (matchedLabel) {
+      const target = optionEls.find(
+        (opt) => cleanLabelText(opt.textContent ?? "") === matchedLabel,
+      );
+      if (target) {
+        clickOptionElement(target);
+        await delay(200);
+        if (element instanceof HTMLInputElement) {
+          await handleValueChanges(element);
+        }
+        return true;
+      }
+    }
   }
 
-  const labels = optionEls.map((opt) => cleanLabelText(opt.textContent ?? ""));
-  const matchedLabel = matchOption(answer, labels);
-  if (!matchedLabel) {
-    closeListbox();
-    return false;
-  }
-
-  const target = optionEls.find(
-    (opt) => cleanLabelText(opt.textContent ?? "") === matchedLabel,
-  );
-  if (!target) {
-    closeListbox();
-    return false;
-  }
-
-  clickOptionElement(target);
-  await delay(200);
-
+  // Free-text fallback (e.g. "city and country" location)
   if (element instanceof HTMLInputElement) {
+    element.focus();
+    element.value = answer;
     await handleValueChanges(element);
+    element.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+    );
+    element.dispatchEvent(
+      new KeyboardEvent("keyup", { key: "Enter", bubbles: true }),
+    );
+    await delay(150);
+    closeListbox();
+    return true;
   }
 
-  return true;
+  closeListbox();
+  return false;
+};
+
+/** Multi-select survey checkboxes ("select all that apply"). */
+const fillCheckboxGroup = async (
+  entry: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  const checkboxes = Array.from(
+    entry.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
+  ).filter((cb) => !isAshbyYesNoStateCheckbox(cb));
+
+  if (checkboxes.length === 0) return false;
+
+  const labeled = checkboxes.map((cb) => ({
+    input: cb,
+    label: getChoiceOptionLabel(cb),
+  })).filter((item) => item.label);
+
+  if (labeled.length === 0) return false;
+
+  const optionLabels = labeled.map((item) => item.label);
+  const parts = parseAnswerList(answer);
+  // Prefer multi-parts; if none matched the full string as single option
+  const candidates =
+    parts.length > 1
+      ? parts
+      : matchOption(answer, optionLabels)
+        ? [matchOption(answer, optionLabels) as string]
+        : parts.length === 1
+          ? parts
+          : [answer];
+
+  let filledAny = false;
+
+  for (const part of candidates) {
+    const matched = matchOption(part, optionLabels);
+    if (!matched) continue;
+    const target = labeled.find((item) => item.label === matched);
+    if (!target) continue;
+    if (!target.input.checked) {
+      await clickChoiceControl(target.input);
+    }
+    filledAny = true;
+  }
+
+  return filledAny;
 };
 
 const fillOptionGroup = async (
   entry: HTMLElement,
   answer: string,
 ): Promise<boolean> => {
-  // Native radios
+  // Multi-select checkboxes (ethnicity, communities, etc.)
+  const labeledCheckboxes = Array.from(
+    entry.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
+  ).filter((cb) => !isAshbyYesNoStateCheckbox(cb) && getChoiceOptionLabel(cb));
+
+  if (labeledCheckboxes.length > 0) {
+    return fillCheckboxGroup(entry, answer);
+  }
+
+  // Native radios (diversity age/gender, etc.)
   const radios = Array.from(
     entry.querySelectorAll<HTMLInputElement>("input[type='radio']"),
   );
   if (radios.length > 0) {
-    const labels = radios.map((radio) => {
-      const id = radio.id;
-      const radioLabel = id
-        ? document.querySelector(`label[for="${CSS.escape(id)}"]`)
-        : null;
-      return cleanLabelText(
-        radioLabel?.textContent ??
-          radio.value ??
-          radio.getAttribute("aria-label") ??
-          "",
-      );
-    });
+    const labels = radios.map((radio) => getChoiceOptionLabel(radio));
     const matched = matchOption(answer, labels);
     if (!matched) return false;
     const index = labels.indexOf(matched);
     const radio = radios[index];
     if (!radio) return false;
-    radio.checked = true;
-    radio.click();
-    await handleValueChanges(radio);
+    await clickChoiceControl(radio);
     return true;
   }
 
-  // Button / role-based choices (Ashby Yes/No etc.)
+  // Button / role-based choices (Ashby Yes/No toggles)
   const buttons = Array.from(
     entry.querySelectorAll<HTMLElement>(
       "button, [role='radio'], [role='option']",
@@ -318,8 +456,7 @@ const fillOptionGroup = async (
   );
   if (!target) return false;
 
-  target.click();
-  await delay(100);
+  await clickChoiceControl(target);
   return true;
 };
 
@@ -327,7 +464,7 @@ const fillField = async (
   field: AshbyCandidateField,
   answer: string,
 ): Promise<boolean> => {
-  if (field.kind === "option-group") {
+  if (field.kind === "option-group" || field.kind === "checkbox-group") {
     return fillOptionGroup(field.element, answer);
   }
 
