@@ -181,7 +181,7 @@ const injectScanStyles = (): void => {
     .${SCAN_ICON_WRAPPER_CLASS} {
       position: absolute;
       top: 50%;
-      right: 8px;
+      left: 8px;
       transform: translateY(-50%);
       z-index: 2147483646;
       pointer-events: auto;
@@ -279,9 +279,7 @@ const requestAiAnswerForField = async (
   entry: ScannableFieldEntry,
 ): Promise<string> => {
   if (!requestFieldAnswerFn) {
-    throw new Error(
-      "AI fill is not ready. Run Autofill with AI once first.",
-    );
+    throw new Error("AI fill is not ready. Run Autofill with AI once first.");
   }
 
   const answer = await requestFieldAnswerFn(buildApiElementForField(entry));
