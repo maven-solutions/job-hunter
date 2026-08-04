@@ -10,108 +10,29 @@ const SCAN_ICON_CLASS = "careerai-ashby-scan-field-icon";
 const SCAN_ICON_WRAPPER_CLASS = "careerai-ashby-scan-icon-wrapper";
 const SCAN_STYLE_ID = "careerai-ashby-scan-html-styles";
 
-export type ScannableFieldType =
-  | "text"
-  | "textarea"
-  | "tel"
-  | "email"
-  | "url"
-  | "number"
-  | "select"
-  | "combobox"
-  | "option-group"
-  | "checkbox-group";
+/** Per-field icons are textarea-only on Ashby. */
+export type ScannableFieldType = "textarea";
 
 export interface ScannableFieldData {
   id: string;
   label: string;
   fieldType: ScannableFieldType;
   currentValue: string;
-  options?: string[];
 }
 
 export type ApplicantContext = Record<string, unknown>;
 
 interface ScannableFieldEntry {
   data: ScannableFieldData;
-  element: HTMLElement;
-  selectElement: HTMLSelectElement | null;
-  kind: string;
+  element: HTMLTextAreaElement;
 }
 
 const scannedFields = new Map<string, ScannableFieldEntry>();
 /** Single-field AI fill callback (same job-application-fill API as full scan). */
 let requestFieldAnswerFn: RequestFieldAnswerFn | null = null;
 
-const cleanLabelText = (text: string): string =>
-  text
-    .replace(/\*/g, "")
-    .replace(/\u00a0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const getChoiceOptionLabel = (input: HTMLInputElement): string => {
-  const id = input.id;
-  if (id) {
-    const forLabel = document.querySelector(`label[for="${CSS.escape(id)}"]`);
-    if (forLabel?.textContent) {
-      return cleanLabelText(forLabel.textContent);
-    }
-  }
-  const optionWrap = input.closest("[class*='_option_']");
-  const wrapLabel = optionWrap?.querySelector("label");
-  if (wrapLabel?.textContent) {
-    return cleanLabelText(wrapLabel.textContent);
-  }
-  if (input.name && !input.name.includes("_systemfield") && input.name.length < 120) {
-    return cleanLabelText(input.name);
-  }
-  return cleanLabelText(input.value ?? "");
-};
-
-const isAshbyYesNoStateCheckbox = (checkbox: HTMLInputElement): boolean => {
-  if (checkbox.closest("[class*='_yesno_']")) return true;
-  if (!checkbox.id && !checkbox.closest("[class*='_option_']")) return true;
-  return false;
-};
-
-const getCurrentValue = (element: HTMLElement, kind: string): string => {
-  if (element instanceof HTMLSelectElement) {
-    return (
-      element.options[element.selectedIndex]?.text?.trim() ?? element.value
-    );
-  }
-  if (
-    element instanceof HTMLInputElement ||
-    element instanceof HTMLTextAreaElement
-  ) {
-    return element.value?.trim() ?? "";
-  }
-  if (kind === "checkbox-group") {
-    const checked = Array.from(
-      element.querySelectorAll<HTMLInputElement>("input[type='checkbox']:checked"),
-    )
-      .filter((cb) => !isAshbyYesNoStateCheckbox(cb))
-      .map((cb) => getChoiceOptionLabel(cb))
-      .filter(Boolean);
-    return checked.join(", ");
-  }
-  if (kind === "option-group") {
-    const checkedRadio = element.querySelector<HTMLInputElement>(
-      "input[type='radio']:checked",
-    );
-    if (checkedRadio) {
-      return getChoiceOptionLabel(checkedRadio);
-    }
-    const activeBtn = element.querySelector<HTMLElement>(
-      "button[class*='_active_'], [class*='_yesno_'] button[class*='_active_'], [aria-pressed='true']",
-    );
-    if (activeBtn?.textContent) {
-      return cleanLabelText(activeBtn.textContent);
-    }
-  }
-  return "";
-};
+const getCurrentValue = (element: HTMLTextAreaElement): string =>
+  element.value?.trim() ?? "";
 
 const injectScanStyles = (): void => {
   if (document.getElementById(SCAN_STYLE_ID)) {
@@ -205,25 +126,13 @@ const setIconState = (
 };
 
 /**
- * Build a one-element API payload for this field (same shape as full form scan).
+ * Build a one-element API payload for this textarea (same shape as full form scan).
  */
-const buildApiElementForField = (entry: ScannableFieldEntry): AiFormElement => {
-  const { data, kind } = entry;
-  const options = data.options;
-  const isSearch =
-    kind === "select" ||
-    kind === "combobox" ||
-    kind === "option-group" ||
-    kind === "checkbox-group" ||
-    (options != null && options.length > 0);
-
-  return {
-    label: data.label,
-    required: false,
-    type: isSearch ? "search" : "text",
-    ...(options != null && options.length > 0 ? { options } : {}),
-  };
-};
+const buildApiElementForField = (entry: ScannableFieldEntry): AiFormElement => ({
+  label: entry.data.label,
+  required: false,
+  type: "text",
+});
 
 /**
  * Request AI answer for one field via job-application-fill API
@@ -245,8 +154,8 @@ const requestAiAnswerForField = async (
   return answer;
 };
 
-const fillTextLikeField = async (
-  element: HTMLInputElement | HTMLTextAreaElement,
+const fillTextareaField = async (
+  element: HTMLTextAreaElement,
   answer: string,
 ): Promise<boolean> => {
   element.focus();
@@ -255,208 +164,10 @@ const fillTextLikeField = async (
   return true;
 };
 
-const matchOption = (answer: string, options: string[]): string | null => {
-  const normalizedAnswer = fromatStirngInLowerCase(answer);
-  for (const option of options) {
-    if (fromatStirngInLowerCase(option) === normalizedAnswer) return option;
-  }
-  for (const option of options) {
-    const normalizedOption = fromatStirngInLowerCase(option);
-    if (
-      normalizedOption?.includes(normalizedAnswer ?? "") ||
-      normalizedAnswer?.includes(normalizedOption ?? "")
-    ) {
-      return option;
-    }
-  }
-  return null;
-};
-
-const parseAnswerList = (answer: string): string[] => {
-  const trimmed = answer.trim();
-  if (!trimmed) return [];
-  if (trimmed.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed)) {
-        return parsed.map((v) => String(v).trim()).filter(Boolean);
-      }
-    } catch {
-      /* delimiter split */
-    }
-  }
-  return trimmed
-    .split(/\s*[,;|]\s*|\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-};
-
 const applyScannedFieldAnswer = async (
   entry: ScannableFieldEntry,
   answer: string,
-): Promise<boolean> => {
-  const { element, selectElement, kind } = entry;
-
-  if (kind === "select" && selectElement) {
-    const options = Array.from(selectElement.options).map((opt) =>
-      cleanLabelText(opt.textContent ?? opt.value),
-    );
-    const matched = matchOption(answer, options);
-    if (!matched) return false;
-    for (const option of selectElement.options) {
-      if (cleanLabelText(option.textContent ?? option.value) === matched) {
-        selectElement.value = option.value;
-        option.selected = true;
-        await handleValueChanges(selectElement);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  if (kind === "checkbox-group") {
-    const labeled = Array.from(
-      element.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
-    )
-      .filter((cb) => !isAshbyYesNoStateCheckbox(cb))
-      .map((cb) => ({ input: cb, label: getChoiceOptionLabel(cb) }))
-      .filter((item) => item.label);
-
-    if (labeled.length === 0) return false;
-    const optionLabels = labeled.map((i) => i.label);
-    const parts = parseAnswerList(answer);
-    const candidates =
-      parts.length > 1
-        ? parts
-        : matchOption(answer, optionLabels)
-          ? [matchOption(answer, optionLabels) as string]
-          : parts.length === 1
-            ? parts
-            : [answer];
-
-    let filledAny = false;
-    for (const part of candidates) {
-      const matched = matchOption(part, optionLabels);
-      if (!matched) continue;
-      const target = labeled.find((i) => i.label === matched);
-      if (!target) continue;
-      if (!target.input.checked) {
-        if (target.input.id) {
-          const label = document.querySelector<HTMLElement>(
-            `label[for="${CSS.escape(target.input.id)}"]`,
-          );
-          if (label) {
-            label.click();
-          } else {
-            target.input.checked = true;
-            target.input.click();
-          }
-        } else {
-          target.input.checked = true;
-          target.input.click();
-        }
-        await handleValueChanges(target.input);
-      }
-      filledAny = true;
-    }
-    return filledAny;
-  }
-
-  if (kind === "option-group") {
-    // Radios first
-    const radios = Array.from(
-      element.querySelectorAll<HTMLInputElement>("input[type='radio']"),
-    );
-    if (radios.length > 0) {
-      for (const radio of radios) {
-        const text = getChoiceOptionLabel(radio);
-        if (
-          fromatStirngInLowerCase(text) === fromatStirngInLowerCase(answer) ||
-          fromatStirngInLowerCase(text)?.includes(
-            fromatStirngInLowerCase(answer) ?? "",
-          )
-        ) {
-          if (radio.id) {
-            const label = document.querySelector<HTMLElement>(
-              `label[for="${CSS.escape(radio.id)}"]`,
-            );
-            if (label) label.click();
-            else {
-              radio.checked = true;
-              radio.click();
-            }
-          } else {
-            radio.checked = true;
-            radio.click();
-          }
-          await handleValueChanges(radio);
-          return true;
-        }
-      }
-      return false;
-    }
-
-    const buttons = Array.from(
-      element.querySelectorAll<HTMLElement>(
-        "button, [role='radio'], [role='option']",
-      ),
-    );
-    for (const btn of buttons) {
-      const text = cleanLabelText(btn.textContent ?? "");
-      if (
-        fromatStirngInLowerCase(text) === fromatStirngInLowerCase(answer) ||
-        fromatStirngInLowerCase(text)?.includes(
-          fromatStirngInLowerCase(answer) ?? "",
-        )
-      ) {
-        btn.click();
-        return true;
-      }
-    }
-    return false;
-  }
-
-  if (kind === "combobox") {
-    if (element instanceof HTMLInputElement) {
-      element.focus();
-      element.click();
-      element.value = answer;
-      await handleValueChanges(element);
-      await new Promise((r) => setTimeout(r, 250));
-      const optionEls = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          "[role='listbox'] [role='option'], [role='option']",
-        ),
-      ).filter((opt) => {
-        const style = window.getComputedStyle(opt);
-        return style.display !== "none" && style.visibility !== "hidden";
-      });
-      const labels = optionEls.map((o) => cleanLabelText(o.textContent ?? ""));
-      const matched = matchOption(answer, labels);
-      if (matched) {
-        const target = optionEls.find(
-          (o) => cleanLabelText(o.textContent ?? "") === matched,
-        );
-        target?.click();
-      } else {
-        element.dispatchEvent(
-          new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
-        );
-      }
-      return true;
-    }
-    return false;
-  }
-
-  if (
-    element instanceof HTMLInputElement ||
-    element instanceof HTMLTextAreaElement
-  ) {
-    return fillTextLikeField(element, answer);
-  }
-
-  return false;
-};
+): Promise<boolean> => fillTextareaField(entry.element, answer);
 
 const attachIconToField = (entry: ScannableFieldEntry): void => {
   const { element, data } = entry;
@@ -490,7 +201,7 @@ const attachIconToField = (entry: ScannableFieldEntry): void => {
     setIconState(button, "loading");
 
     try {
-      entry.data.currentValue = getCurrentValue(element, entry.kind);
+      entry.data.currentValue = getCurrentValue(element);
       const answer = await requestAiAnswerForField(entry);
 
       const applied = await applyScannedFieldAnswer(entry, answer);
@@ -524,9 +235,10 @@ export const initAshbyHtmlScanner = (
   removeAshbyHtmlScannerIcons();
   requestFieldAnswerFn = options.requestFieldAnswer ?? null;
 
-  // Per-field "C" button: textarea only (not input / select / checkbox / radio / yes-no)
   const textareaCandidates = collectAshbyCandidateFields().filter(
-    (candidate) => candidate.element instanceof HTMLTextAreaElement,
+    (candidate): candidate is typeof candidate & {
+      element: HTMLTextAreaElement;
+    } => candidate.element instanceof HTMLTextAreaElement,
   );
 
   textareaCandidates.forEach((candidate, index) => {
@@ -540,12 +252,9 @@ export const initAshbyHtmlScanner = (
         id,
         label: candidate.label,
         fieldType: "textarea",
-        currentValue: getCurrentValue(candidate.element, candidate.kind),
-        options: candidate.options,
+        currentValue: getCurrentValue(candidate.element),
       },
       element: candidate.element,
-      selectElement: null,
-      kind: candidate.kind,
     };
 
     attachIconToField(entry);
