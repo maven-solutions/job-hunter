@@ -40,8 +40,8 @@ const ApplicantPickerV2 = ({
           {selectedInitials || "NA"}
         </span>
         <span className="applicant-copy">
-          <strong>{name}</strong>
-          <small>{role}</small>
+          <span className="applicant-copy__name">{name}</span>
+          <span className="applicant-copy__meta">{role}</span>
         </span>
         <svg aria-hidden="true" className="chevron" viewBox="0 0 24 24">
           <path d="M6 9l6 6 6-6" />
@@ -64,9 +64,13 @@ const ApplicantPickerV2 = ({
               onClick={() => handleSelect(option)}
             >
               <span className="avatar avatar--soft">{initials}</span>
-              <span>
-                <strong>{optionName}</strong>
-                <small>{isSelected ? role : "Applicant"}</small>
+              <span className="applicant-copy">
+                <span className="applicant-copy__name applicant-option__name">
+                  {optionName}
+                </span>
+                <span className="applicant-copy__meta">
+                  {isSelected ? role : "Applicant"}
+                </span>
               </span>
               {hasActiveSession && (
                 <span className="applicant-option__session-badge">
