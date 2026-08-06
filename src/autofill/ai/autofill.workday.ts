@@ -278,6 +278,56 @@ const normalizeForMatch = (text: string): string =>
 const YES_ANSWERS = new Set(["yes", "y", "true", "1"]);
 const NO_ANSWERS = new Set(["no", "n", "false", "0"]);
 
+/**
+ * Applicant values we treat as the United States.
+ * Soft-include matching otherwise picks "United States Minor Outlying Islands".
+ */
+const USA_ANSWER_ALIASES = new Set([
+  "unitedstates",
+  "unitedstatesofamerica",
+  "usa",
+  "us",
+  "america",
+  "theus",
+  "theunitedstates",
+  "theunitedstatesofamerica",
+]);
+
+/**
+ * Preferred Workday option labels for the US (first available wins).
+ */
+const USA_OPTION_PRIORITY = [
+  "unitedstatesofamerica",
+  "unitedstates",
+  "usa",
+  "america",
+  "us",
+] as const;
+
+const isUsaAlias = (normalized: string): boolean =>
+  USA_ANSWER_ALIASES.has(normalized);
+
+/**
+ * Exact USA name options only — never territories
+ * (e.g. United States Minor Outlying Islands).
+ */
+const matchUsaCountryOption = (options: string[]): string | null => {
+  const byNorm = new Map<string, string>();
+  for (const option of options) {
+    const n = normalizeForMatch(option);
+    if (!n || !isUsaAlias(n)) continue;
+    if (!byNorm.has(n)) byNorm.set(n, option);
+  }
+
+  for (const preferred of USA_OPTION_PRIORITY) {
+    const hit = byNorm.get(preferred);
+    if (hit) return hit;
+  }
+
+  const first = byNorm.values().next();
+  return first.done ? null : first.value;
+};
+
 const matchOption = (answer: string, options: string[]): string | null => {
   if (!answer?.trim() || options.length === 0) return null;
 
@@ -285,12 +335,20 @@ const matchOption = (answer: string, options: string[]): string | null => {
   const normalizedAnswer = normalizeForMatch(answer);
   if (!normalizedAnswer) return null;
 
+  // 1. Exact label
   for (const option of options) {
     if (cleanLabelText(option) === cleanAnswer) return option;
   }
 
+  // 2. Exact normalized
   for (const option of options) {
     if (normalizeForMatch(option) === normalizedAnswer) return option;
+  }
+
+  // 3. USA aliases before soft-includes (United States → United States of America)
+  if (isUsaAlias(normalizedAnswer)) {
+    const usa = matchUsaCountryOption(options);
+    if (usa) return usa;
   }
 
   const legacyAnswer = fromatStirngInLowerCase(cleanAnswer);
@@ -309,25 +367,48 @@ const matchOption = (answer: string, options: string[]): string | null => {
     if (hit) return hit;
   }
 
-  // Dial-code match: "+91" ⊂ "India (+91)"
+  // Dial-code match: "+91" ⊂ "India (+91)" — exact dial digits, not substring
   const dialMatch = cleanAnswer.match(/\+?\d{1,4}/);
   if (dialMatch) {
     const digit = dialMatch[0].replace(/\D/g, "");
-    const hit = options.find((o) => o.replace(/\D/g, "").includes(digit));
-    if (hit && digit.length >= 1) return hit;
+    if (digit.length >= 1) {
+      const hit = options.find((o) => {
+        const d = (o.match(/\+\d{1,4}/) ?? o.match(/\d{1,4}/))?.[0]?.replace(
+          /\D/g,
+          "",
+        );
+        return d === digit;
+      });
+      if (hit) return hit;
+    }
   }
 
+  // Soft includes — prefer closer (shorter) option labels
   if (normalizedAnswer.length >= 3) {
     let best: { option: string; score: number } | null = null;
     for (const option of options) {
       const n = normalizeForMatch(option);
       if (!n) continue;
+
+      // Block US territories when the answer was a plain USA name
+      if (
+        isUsaAlias(normalizedAnswer) &&
+        n.includes("unitedstates") &&
+        !isUsaAlias(n)
+      ) {
+        continue;
+      }
+
       let score = 0;
-      if (n === normalizedAnswer) score = 100;
-      else if (n.includes(normalizedAnswer))
-        score = 50 + normalizedAnswer.length;
-      else if (normalizedAnswer.includes(n) && n.length >= 3)
-        score = 40 + n.length;
+      if (n === normalizedAnswer) {
+        score = 1000;
+      } else if (n.includes(normalizedAnswer)) {
+        const lengthPenalty = Math.max(0, n.length - normalizedAnswer.length);
+        score = 500 + normalizedAnswer.length * 2 - lengthPenalty;
+      } else if (normalizedAnswer.includes(n) && n.length >= 4) {
+        const lengthPenalty = Math.max(0, normalizedAnswer.length - n.length);
+        score = 300 + n.length * 2 - lengthPenalty;
+      }
       if (score > 0 && (!best || score > best.score)) {
         best = { option, score };
       }
@@ -514,12 +595,17 @@ const fillWorkdayListbox = async (
   await waitForDomUpdate();
 
   // Workday country lists are long — type into any open search/filter input.
+  // Prefer "United States of America" when filtering so "United States" doesn't
+  // surface "United States Minor Outlying Islands" first.
+  const filterQuery = isUsaAlias(normalizeForMatch(answer))
+    ? "United States of America"
+    : answer;
   const filterInput = document.querySelector<HTMLInputElement>(
     '[role="listbox"] input, input[placeholder*="Search" i]:not([data-uxi-multiselect-id]), [data-automation-id*="search"] input',
   );
   if (filterInput && isNodeVisible(filterInput)) {
     filterInput.focus();
-    setNativeValue(filterInput, answer);
+    setNativeValue(filterInput, filterQuery);
     filterInput.dispatchEvent(new Event("input", { bubbles: true }));
     await handleValueChanges(filterInput);
     await delay(350);
