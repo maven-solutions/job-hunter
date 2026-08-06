@@ -95,45 +95,109 @@ const getWorkdayFieldWrapper = (element: Element): HTMLElement | null =>
     '[data-automation-id^="formField-"], [data-fkit-id], .css-7t35fz, fieldset',
   ) as HTMLElement | null;
 
+/**
+ * Panel title for repeated sections (e.g. "Work Experience 1", "Education 1").
+ * Keeps labels unique when multiple entries share the same field name.
+ */
+const getSectionTitle = (element: Element): string => {
+  let current: Element | null = element;
+  while (current) {
+    const group = current.closest('[role="group"]') as HTMLElement | null;
+    if (!group || isInsideExtension(group)) break;
+
+    const labelledBy = group.getAttribute("aria-labelledby");
+    if (labelledBy) {
+      const heading = document.getElementById(labelledBy.split(/\s+/)[0]);
+      const text = cleanLabelText(heading?.textContent ?? "");
+      // Prefer entry panels over section headers ("Work Experience 1" not "Work Experience")
+      if (/^(work experience|education|certification)\s*\d+/i.test(text)) {
+        return text;
+      }
+      if (/-?\d+-panel$/i.test(labelledBy) && text) {
+        return text;
+      }
+    }
+
+    const h5 = group.querySelector(":scope > div > h5, :scope h5");
+    if (h5?.textContent) {
+      const text = cleanLabelText(h5.textContent);
+      if (/^(work experience|education)\s*\d+/i.test(text)) {
+        return text;
+      }
+    }
+
+    current = group.parentElement;
+  }
+
+  const panelRoot = element.closest(".css-1ebprri");
+  const h5 = panelRoot?.querySelector("h5");
+  if (h5?.textContent) {
+    return cleanLabelText(h5.textContent);
+  }
+
+  return "";
+};
+
+/** Prefix field label with section when inside Work Experience N / Education N. */
+export const withSectionLabel = (
+  baseLabel: string,
+  element: Element,
+): string => {
+  const base = cleanLabelText(baseLabel);
+  if (!base) return base;
+  const section = getSectionTitle(element);
+  if (!section) return base;
+  if (base.toLowerCase().startsWith(section.toLowerCase())) return base;
+  return `${section} - ${base}`;
+};
+
 const getFieldLabel = (element: HTMLElement): string => {
+  let base = "";
+
   const id = element.getAttribute("id");
   if (id) {
     const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
     if (label?.textContent) {
-      return cleanLabelText(label.textContent);
+      base = cleanLabelText(label.textContent);
     }
   }
 
-  // Listbox buttons often have verbose aria-label ("Country India Required")
-  // Prefer associated label[for] above, then legend / formField label.
-  const wrapper = getWorkdayFieldWrapper(element);
-  const wrapperLabel =
-    wrapper?.querySelector("legend label, legend, label") ?? null;
-  if (wrapperLabel?.textContent) {
-    const text = cleanLabelText(wrapperLabel.textContent);
-    if (text) return text;
-  }
-
-  const ariaLabel = element.getAttribute("aria-label");
-  if (ariaLabel) {
-    // Strip trailing "Required" / current selection noise when possible
-    return cleanLabelText(
-      ariaLabel
-        .replace(/\s+Required$/i, "")
-        .replace(/\s+Select One$/i, "")
-        .trim(),
-    );
-  }
-
-  const labelledBy = element.getAttribute("aria-labelledby");
-  if (labelledBy) {
-    const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
-    if (labelEl?.textContent) {
-      return cleanLabelText(labelEl.textContent);
+  if (!base) {
+    const wrapper = getWorkdayFieldWrapper(element);
+    const wrapperLabel =
+      wrapper?.querySelector("legend label, legend, label") ?? null;
+    if (wrapperLabel?.textContent) {
+      base = cleanLabelText(wrapperLabel.textContent);
     }
   }
 
-  return id ?? element.getAttribute("name") ?? "Unknown field";
+  if (!base) {
+    const ariaLabel = element.getAttribute("aria-label");
+    if (ariaLabel) {
+      base = cleanLabelText(
+        ariaLabel
+          .replace(/\s+Required$/i, "")
+          .replace(/\s+Select One$/i, "")
+          .trim(),
+      );
+    }
+  }
+
+  if (!base) {
+    const labelledBy = element.getAttribute("aria-labelledby");
+    if (labelledBy) {
+      const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
+      if (labelEl?.textContent) {
+        base = cleanLabelText(labelEl.textContent);
+      }
+    }
+  }
+
+  if (!base) {
+    base = id ?? element.getAttribute("name") ?? "Unknown field";
+  }
+
+  return withSectionLabel(base, element);
 };
 
 const isRequiredField = (element: HTMLElement): boolean => {
@@ -344,7 +408,7 @@ const getMultiselectLabel = (container: HTMLElement): string => {
   if (input) {
     return getFieldLabel(input);
   }
-  return "Unknown field";
+  return withSectionLabel("Unknown field", container);
 };
 
 export type WorkdayFieldKind =
@@ -352,7 +416,9 @@ export type WorkdayFieldKind =
   | "listbox"
   | "multiselect"
   | "select"
-  | "radio-group";
+  | "radio-group"
+  | "date-mmyyyy"
+  | "checkbox";
 
 export interface WorkdayCandidateField {
   element: HTMLElement;
@@ -367,9 +433,12 @@ export interface WorkdayCandidateField {
  * when Country changes. Never scan or AI-fill these fields.
  */
 export const isWorkdayPrefillExcludedLabel = (label: string): boolean => {
-  const key = cleanLabelText(label)
+  const bare = label.includes(" - ")
+    ? label.slice(label.lastIndexOf(" - ") + 3)
+    : label;
+  const key = cleanLabelText(bare)
     .toLowerCase()
-    .replace(/['’`]/g, "")
+    .replace(/['\u2019`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
   return (
     key === "country" ||
@@ -379,28 +448,29 @@ export const isWorkdayPrefillExcludedLabel = (label: string): boolean => {
   );
 };
 
+const isDateSpinbutton = (element: HTMLElement): boolean =>
+  element.getAttribute("role") === "spinbutton" ||
+  !!element.closest('[data-automation-id="dateInputWrapper"]') ||
+  !!element.getAttribute("data-automation-id")?.includes("dateSection");
+
 /**
  * Collect autofillable fields on the **current** Workday apply page.
  * Multi-step flows only expose the active page — re-scan after "Save and Continue".
+ * My Experience: Work Experience N / Education N get section-prefixed labels.
  */
 export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
   const results: WorkdayCandidateField[] = [];
   const seenIds = new Set<string>();
-  const seenLabels = new Set<string>();
 
-  const markSeen = (id: string, label: string): boolean => {
+  // Deduplicate by control id only so multiple WE entries aren't collapsed by label.
+  const markSeen = (id: string): boolean => {
     const idKey = id.toLowerCase();
-    const labelKey = label.toLowerCase();
-    if (seenIds.has(idKey) || (labelKey && seenLabels.has(labelKey))) {
-      return false;
-    }
+    if (seenIds.has(idKey)) return false;
     seenIds.add(idKey);
-    if (labelKey) seenLabels.add(labelKey);
     return true;
   };
 
-  // 1) Custom listbox dropdowns (Country, State, Phone Device Type, …)
-  // Country is set in prepareBeforeScan from applicant data — exclude from scan.
+  // 1) Custom listbox dropdowns (Country, State, Degree, …)
   document
     .querySelectorAll<HTMLButtonElement>(LISTBOX_BUTTON_SELECTOR)
     .forEach((button) => {
@@ -410,6 +480,8 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         button.getAttribute("id") ||
         button.getAttribute("name") ||
         `listbox-${results.length}`;
+      if (!markSeen(id)) return;
+
       const label = getFieldLabel(button);
       if (isWorkdayPrefillExcludedLabel(label)) return;
       if (
@@ -418,7 +490,6 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       ) {
         return;
       }
-      if (!markSeen(id, label)) return;
 
       results.push({
         element: button,
@@ -428,8 +499,7 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       });
     });
 
-  // 2) Multiselect / prompt fields
-  // Country Phone Code auto-updates when Country changes — exclude from scan.
+  // 2) Multiselect / type-to-search (School, Field of Study, Skills, …)
   document
     .querySelectorAll<HTMLElement>(MULTISELECT_SELECTOR)
     .forEach((container) => {
@@ -443,10 +513,11 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         input.getAttribute("id") ||
         container.getAttribute("id") ||
         `multiselect-${results.length}`;
+      if (!markSeen(id)) return;
+
       let label = getMultiselectLabel(container);
-      // Align with Greenhouse phone naming when applicable
       if (/country phone code|phone code/i.test(label)) {
-        label = "Country Phone Code";
+        label = withSectionLabel("Country Phone Code", container);
       }
       if (isWorkdayPrefillExcludedLabel(label)) return;
       if (
@@ -458,48 +529,81 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       ) {
         return;
       }
-      if (!markSeen(id, label)) return;
 
       results.push({
         element: container,
         label,
-        required: isRequiredField(input as HTMLElement) || isRequiredField(container),
+        required:
+          isRequiredField(input as HTMLElement) || isRequiredField(container),
         kind: "multiselect",
       });
     });
 
-  // 3) Radio groups (Yes/No previous worker, etc.)
+  // 3) MM/YYYY date groups (Work Experience From / To)
   document
-    .querySelectorAll<HTMLElement>("fieldset")
-    .forEach((container) => {
-      if (isInsideExtension(container)) return;
+    .querySelectorAll<HTMLElement>('[data-automation-id="dateInputWrapper"]')
+    .forEach((wrapper) => {
+      if (isInsideExtension(wrapper) || !isVisibleElement(wrapper)) return;
 
-      const radios = container.querySelectorAll<HTMLInputElement>(
-        'input[type="radio"]',
+      const id = wrapper.getAttribute("id") || `date-${results.length}`;
+      if (!markSeen(id)) return;
+
+      const fieldset = wrapper.closest("fieldset");
+      const formField = wrapper.closest(
+        '[data-automation-id^="formField-"]',
+      ) as HTMLElement | null;
+      const legendLabel = cleanLabelText(
+        fieldset?.querySelector("legend label, legend")?.textContent ?? "",
       );
-      if (radios.length === 0) return;
-
-      const options = getRadioGroupOptions(container);
-      if (options.length === 0) return;
-
-      const label = getRadioGroupLabel(container);
-      const firstRadio = radios[0];
-      const id =
-        firstRadio.getAttribute("name") ||
-        container.getAttribute("data-automation-id") ||
-        `radio-${results.length}`;
-      if (!markSeen(id, label)) return;
+      const baseLabel = legendLabel || "Date";
+      const label = withSectionLabel(`${baseLabel} (MM/YYYY)`, wrapper);
+      const monthInput = wrapper.querySelector<HTMLElement>(
+        '[data-automation-id="dateSectionMonth-input"]',
+      );
+      const required =
+        isRequiredField(monthInput ?? wrapper) ||
+        !!formField?.querySelector("abbr") ||
+        (fieldset?.querySelector("legend")?.textContent ?? "").includes("*");
 
       results.push({
-        element: container,
+        element: wrapper,
         label,
-        required: isRequiredField(firstRadio) || isRequiredField(container),
-        kind: "radio-group",
-        options,
+        required,
+        kind: "date-mmyyyy",
       });
     });
 
-  // Also catch radio groups that are not wrapped in fieldset
+  // 4) Radio groups (Yes/No previous worker, etc.)
+  document.querySelectorAll<HTMLElement>("fieldset").forEach((container) => {
+    if (isInsideExtension(container)) return;
+    if (container.querySelector('[data-automation-id="dateInputWrapper"]')) {
+      return;
+    }
+
+    const radios = container.querySelectorAll<HTMLInputElement>(
+      'input[type="radio"]',
+    );
+    if (radios.length === 0) return;
+
+    const options = getRadioGroupOptions(container);
+    if (options.length === 0) return;
+
+    const firstRadio = radios[0];
+    const id =
+      firstRadio.getAttribute("name") ||
+      container.getAttribute("data-automation-id") ||
+      `radio-${results.length}`;
+    if (!markSeen(id)) return;
+
+    results.push({
+      element: container,
+      label: getRadioGroupLabel(container),
+      required: isRequiredField(firstRadio) || isRequiredField(container),
+      kind: "radio-group",
+      options,
+    });
+  });
+
   document
     .querySelectorAll<HTMLElement>('[data-automation-id^="formField-"]')
     .forEach((container) => {
@@ -514,30 +618,61 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       const options = getRadioGroupOptions(container);
       if (options.length === 0) return;
 
-      const label = getRadioGroupLabel(container);
       const firstRadio = radios[0];
       const id =
         firstRadio.getAttribute("name") ||
         container.getAttribute("data-automation-id") ||
         `radio-${results.length}`;
-      if (!markSeen(id, label)) return;
+      if (!markSeen(id)) return;
 
       results.push({
         element: container,
-        label,
+        label: getRadioGroupLabel(container),
         required: isRequiredField(firstRadio) || isRequiredField(container),
         kind: "radio-group",
         options,
       });
     });
 
-  // 4) Native text / textarea / select
+  // 5) Labeled checkboxes (e.g. "I currently work here")
+  document
+    .querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+    .forEach((checkbox) => {
+      if (isInsideExtension(checkbox) || !isVisibleElement(checkbox)) return;
+
+      if (
+        checkbox.getAttribute("data-automation-id") === "phone-sms-opt-in" ||
+        checkbox.id?.includes("sms")
+      ) {
+        return;
+      }
+
+      const id =
+        checkbox.getAttribute("id") ||
+        checkbox.getAttribute("name") ||
+        `checkbox-${results.length}`;
+      if (!markSeen(id)) return;
+
+      const label = getFieldLabel(checkbox);
+      if (!label || label === "Unknown field") return;
+
+      results.push({
+        element: checkbox,
+        label,
+        required: isRequiredField(checkbox),
+        kind: "checkbox",
+        options: ["Yes", "No"],
+      });
+    });
+
+  // 6) Native text / textarea / select
   document
     .querySelectorAll<HTMLElement>("input, textarea, select")
     .forEach((element) => {
       if (isInsideExtension(element) || !isVisibleElement(element)) return;
       if (isListboxValueStoreInput(element)) return;
       if (isInsideMultiselect(element)) return;
+      if (isDateSpinbutton(element)) return;
 
       if (element instanceof HTMLInputElement) {
         const type = (element.type || "text").toLowerCase();
@@ -548,14 +683,14 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         element.getAttribute("id") ||
         element.getAttribute("name") ||
         `field-${results.length}`;
+      if (!markSeen(id)) return;
+
       const label = getFieldLabel(element);
       if (!label || label === "Unknown field") {
-        // Skip unlabeled store inputs
         if (!element.getAttribute("id") && !element.getAttribute("name")) {
           return;
         }
       }
-      if (!markSeen(id, label)) return;
 
       if (element instanceof HTMLSelectElement) {
         results.push({
@@ -591,11 +726,21 @@ export const scanWorkdayHtmlToMakeApiPayload = async (
   const elements: ApiFormElement[] = [];
 
   for (const candidate of candidates) {
-    if (candidate.kind === "text") {
+    if (candidate.kind === "text" || candidate.kind === "date-mmyyyy") {
       elements.push({
         label: candidate.label,
         required: candidate.required,
         type: "text",
+      });
+      continue;
+    }
+
+    if (candidate.kind === "checkbox") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+        options: candidate.options ?? ["Yes", "No"],
       });
       continue;
     }
@@ -610,15 +755,19 @@ export const scanWorkdayHtmlToMakeApiPayload = async (
       continue;
     }
 
-    // listbox / multiselect – open and collect options
-    const target =
-      candidate.kind === "multiselect"
-        ? (candidate.element.querySelector<HTMLElement>(
-            'input[data-uxi-widget-type="selectinput"], input[id]',
-          ) ?? candidate.element)
-        : candidate.element;
+    // Multiselect (School, Skills, Field of Study): type-to-search only —
+    // do not harvest remote option lists; AI returns free text to type+select.
+    if (candidate.kind === "multiselect") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+      });
+      continue;
+    }
 
-    const optionList = await openAndScanListboxOptions(target);
+    // listbox – open and collect options (Degree, State, …)
+    const optionList = await openAndScanListboxOptions(candidate.element);
     elements.push({
       label: candidate.label,
       required: candidate.required,

@@ -432,6 +432,25 @@ const findAnswerForLabel = (
   );
   if (byNorm) return byNorm;
 
+  // Bare field name after section prefix: "Work Experience 1 - Job Title" ↔ "Job Title"
+  const bareLabel = label.includes(" - ")
+    ? label.slice(label.lastIndexOf(" - ") + 3).trim()
+    : label;
+  if (bareLabel !== label) {
+    const bareNorm = normalizeLabel(bareLabel);
+    const byBare = answers.find((item) => {
+      const itemBare = item.label.includes(" - ")
+        ? item.label.slice(item.label.lastIndexOf(" - ") + 3).trim()
+        : item.label;
+      return (
+        normalizeLabel(item.label) === bareNorm ||
+        normalizeLabel(itemBare) === bareNorm ||
+        normalizeLabel(itemBare) === normalized
+      );
+    });
+    if (byBare) return byBare;
+  }
+
   // Phone label aliases
   if (/country phone code|phone country code/i.test(label)) {
     const phone = answers.find((item) =>
@@ -708,8 +727,8 @@ export const prepareWorkdayCountryBeforeScan = async (
 };
 
 /**
- * Workday Country Phone Code (and similar prompt multiselects).
- * Clears prior selection when needed, types to filter, then picks option.
+ * Workday Country Phone Code / School / Field of Study / Skills multiselects.
+ * Types to filter, picks option; supports multi-value answers (skills).
  */
 const fillWorkdayMultiselect = async (
   container: HTMLElement,
@@ -717,105 +736,119 @@ const fillWorkdayMultiselect = async (
 ): Promise<boolean> => {
   if (!isUsableWorkdayAnswer(answer)) return false;
 
-  // If already has matching selection, accept it
-  const selectedLabels = Array.from(
-    container.querySelectorAll<HTMLElement>(
-      '[data-automation-id="selectedItem"]',
-    ),
-  )
-    .map(optionLabel)
-    .filter(Boolean);
+  const parts = parseAnswerList(answer);
+  const values = parts.length > 1 ? parts : [answer.trim()];
+  let filledAny = false;
 
-  if (selectedLabels.length > 0) {
-    const already = matchOption(answer, selectedLabels);
-    if (already) return true;
+  for (let i = 0; i < values.length; i++) {
+    const part = values[i];
+    if (!part) continue;
 
-    // Clear existing pill if answer differs
-    const deleteBtn = container.querySelector<HTMLElement>(
-      '[data-automation-id="DELETE_charm"]',
-    );
-    if (deleteBtn) {
-      fullClick(deleteBtn);
-      await delay(150);
+    const selectedLabels = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        '[data-automation-id="selectedItem"]',
+      ),
+    )
+      .map(optionLabel)
+      .filter(Boolean);
+
+    if (selectedLabels.some((s) => matchOption(part, [s]))) {
+      filledAny = true;
+      continue;
     }
-  }
 
-  const input =
-    container.querySelector<HTMLInputElement>(
-      'input[data-uxi-widget-type="selectinput"], input[id]',
-    ) ?? null;
-  const promptIcon = container.querySelector<HTMLElement>(
-    '[data-automation-id="promptIcon"]',
-  );
+    // Only clear when setting a single-value field (School/Degree-like), not multi skills
+    if (i === 0 && values.length === 1 && selectedLabels.length > 0) {
+      const deleteBtn = container.querySelector<HTMLElement>(
+        '[data-automation-id="DELETE_charm"]',
+      );
+      if (deleteBtn) {
+        fullClick(deleteBtn);
+        await delay(150);
+      }
+    }
 
-  if (promptIcon) {
-    fullClick(promptIcon);
-  } else if (input) {
-    fullClick(input);
-  } else {
-    fullClick(container);
-  }
-  await delay(250);
-  await waitForDomUpdate();
+    const input =
+      container.querySelector<HTMLInputElement>(
+        'input[data-uxi-widget-type="selectinput"], input[id]',
+      ) ?? null;
+    const promptIcon = container.querySelector<HTMLElement>(
+      '[data-automation-id="promptIcon"]',
+    );
 
-  // Type to filter long country lists
-  if (input) {
-    input.focus();
-    setNativeValue(input, answer);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    await handleValueChanges(input);
-    await delay(300);
+    if (input) {
+      fullClick(input);
+    } else if (promptIcon) {
+      fullClick(promptIcon);
+    } else {
+      fullClick(container);
+    }
+    await delay(200);
     await waitForDomUpdate();
-  }
 
-  let optionEls = getOpenOptionElements();
-  if (optionEls.length === 0) {
+    if (input) {
+      input.focus();
+      setNativeValue(input, part);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      await handleValueChanges(input);
+      await delay(400);
+      await waitForDomUpdate();
+    }
+
+    let optionEls = getOpenOptionElements();
+    if (optionEls.length === 0) {
+      // Workday school/FOS: press Enter to load matches
+      if (input) {
+        input.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "Enter",
+            code: "Enter",
+            bubbles: true,
+          }),
+        );
+        await delay(400);
+        await waitForDomUpdate();
+        optionEls = getOpenOptionElements();
+      }
+    }
+    if (optionEls.length === 0) {
+      await delay(300);
+      await waitForDomUpdate();
+      optionEls = getOpenOptionElements();
+    }
+
+    if (optionEls.length === 0) {
+      closeListbox();
+      continue;
+    }
+
+    const labels = optionEls.map(optionLabel);
+    let matchedLabel = matchOption(part, labels);
+    // Prefer first visible option when search is reasonably specific
+    if (!matchedLabel && optionEls.length === 1) {
+      matchedLabel = labels[0];
+    }
+    if (!matchedLabel) {
+      // Closest soft match among loaded results
+      matchedLabel = matchOption(part, labels);
+    }
+    if (!matchedLabel) {
+      closeListbox();
+      continue;
+    }
+
+    const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
+    if (!target) {
+      closeListbox();
+      continue;
+    }
+
+    fullClick(target);
     await delay(250);
-    await waitForDomUpdate();
-    optionEls = getOpenOptionElements();
+    filledAny = true;
   }
 
-  if (optionEls.length === 0) {
-    closeListbox();
-    return false;
-  }
-
-  const labels = optionEls.map(optionLabel);
-  const matchedLabel = matchOption(answer, labels);
-  if (!matchedLabel) {
-    closeListbox();
-    return false;
-  }
-
-  const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
-  if (!target) {
-    closeListbox();
-    return false;
-  }
-
-  fullClick(target);
-  await delay(250);
-
-  // Confirm selection via selected pill / instruction text
-  const afterSelected = Array.from(
-    container.querySelectorAll<HTMLElement>(
-      '[data-automation-id="selectedItem"], [data-automation-id="promptOption"]',
-    ),
-  ).map(optionLabel);
-
-  if (afterSelected.some((s) => matchOption(answer, [s]))) {
-    return true;
-  }
-
-  // Prompt instruction sometimes holds "India (+91)"
-  const instruction = container.querySelector(
-    '[data-automation-id="promptAriaInstruction"]',
-  )?.textContent;
-  if (instruction && matchOption(answer, [cleanLabelText(instruction)])) {
-    return true;
-  }
-
-  return afterSelected.length > 0 || !!matchedLabel;
+  return filledAny;
 };
 
 const fillRadioGroup = async (
@@ -875,7 +908,208 @@ const fillRadioGroup = async (
   }
 
   await delay(80);
-  return target.input.checked || target.input.getAttribute("aria-checked") === "true";
+  return (
+    target.input.checked ||
+    target.input.getAttribute("aria-checked") === "true"
+  );
+};
+
+/** Split multi-select AI answers (skills: "Java, Python, React"). */
+const parseAnswerList = (answer: string): string[] => {
+  const trimmed = answer.trim();
+  if (!trimmed) return [];
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((v) => String(v).trim()).filter(Boolean);
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
+  return trimmed
+    .split(/\s*[,;|]\s*|\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+};
+
+const fillCheckbox = async (
+  input: HTMLInputElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableWorkdayAnswer(answer)) return false;
+
+  const n = normalizeForMatch(answer);
+  let target: boolean | null = null;
+
+  if (
+    YES_ANSWERS.has(n) ||
+    n === "true" ||
+    n.includes("currently") ||
+    /^(yes|true|current|i currently work)/i.test(answer.trim())
+  ) {
+    target = true;
+  } else if (
+    NO_ANSWERS.has(n) ||
+    n === "false" ||
+    /^(no|false|not)/i.test(answer.trim())
+  ) {
+    target = false;
+  } else {
+    return false;
+  }
+
+  const isChecked =
+    input.checked || input.getAttribute("aria-checked") === "true";
+  if (isChecked === target) return true;
+
+  const labelEl = input.id
+    ? document.querySelector<HTMLElement>(
+        `label[for="${CSS.escape(input.id)}"]`,
+      )
+    : null;
+  fullClick(labelEl ?? input);
+  if (
+    (input.checked || input.getAttribute("aria-checked") === "true") !== target
+  ) {
+    setNativeChecked(input, target);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    fullClick(input);
+  }
+  await delay(80);
+  const now =
+    input.checked || input.getAttribute("aria-checked") === "true";
+  return now === target;
+};
+
+/**
+ * Fill Workday MM/YYYY spinbutton dates.
+ * Accepts: "01/2020", "1/2020", "2020-01", "Jan 2020", "January 2020", ISO dates.
+ */
+const parseMonthYear = (
+  answer: string,
+): { month: string; year: string } | null => {
+  const raw = cleanLabelText(answer);
+  if (!raw) return null;
+
+  // MM/YYYY or M/YYYY
+  let m = raw.match(/^(\d{1,2})\s*[\/\-.]\s*(\d{4})$/);
+  if (m) {
+    return { month: m[1].padStart(2, "0"), year: m[2] };
+  }
+
+  // YYYY-MM or YYYY/MM
+  m = raw.match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})$/);
+  if (m) {
+    return { month: m[2].padStart(2, "0"), year: m[1] };
+  }
+
+  // Month name YYYY
+  const monthNames: Record<string, string> = {
+    jan: "01",
+    january: "01",
+    feb: "02",
+    february: "02",
+    mar: "03",
+    march: "03",
+    apr: "04",
+    april: "04",
+    may: "05",
+    jun: "06",
+    june: "06",
+    jul: "07",
+    july: "07",
+    aug: "08",
+    august: "08",
+    sep: "09",
+    sept: "09",
+    september: "09",
+    oct: "10",
+    october: "10",
+    nov: "11",
+    november: "11",
+    dec: "12",
+    december: "12",
+  };
+  m = raw.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (m) {
+    const mon = monthNames[m[1].toLowerCase()];
+    if (mon) return { month: mon, year: m[2] };
+  }
+
+  // ISO / Date parse
+  const d = new Date(raw);
+  if (!Number.isNaN(d.getTime())) {
+    return {
+      month: String(d.getMonth() + 1).padStart(2, "0"),
+      year: String(d.getFullYear()),
+    };
+  }
+
+  // Year only → January
+  m = raw.match(/^(\d{4})$/);
+  if (m) return { month: "01", year: m[1] };
+
+  return null;
+};
+
+const fillDateMmyyyy = async (
+  wrapper: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableWorkdayAnswer(answer)) return false;
+
+  // Present / current job end dates
+  if (/present|current|now|ongoing/i.test(answer.trim())) {
+    return false; // leave To empty when currently working; checkbox handles it
+  }
+
+  const parsed = parseMonthYear(answer);
+  if (!parsed) return false;
+
+  const monthInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionMonth-input"], input[aria-label="Month"]',
+  );
+  const yearInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionYear-input"], input[aria-label="Year"]',
+  );
+  if (!monthInput || !yearInput) return false;
+
+  const fillSpin = async (
+    input: HTMLInputElement,
+    value: string,
+  ): Promise<void> => {
+    input.focus();
+    fullClick(input);
+    setNativeValue(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await handleValueChanges(input);
+    // Workday spinbuttons sometimes need key events
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Tab", bubbles: true }),
+    );
+    await delay(50);
+  };
+
+  await fillSpin(monthInput, parsed.month);
+  await fillSpin(yearInput, parsed.year);
+  await delay(100);
+
+  const monthOk =
+    monthInput.value === parsed.month ||
+    monthInput.value === String(Number(parsed.month)) ||
+    monthInput.getAttribute("aria-valuetext") === parsed.month ||
+    monthInput.getAttribute("aria-valuetext") === String(Number(parsed.month));
+  const yearOk =
+    yearInput.value === parsed.year ||
+    yearInput.getAttribute("aria-valuetext") === parsed.year;
+
+  return monthOk || yearOk || !!monthInput.value || !!yearInput.value;
 };
 
 const fillField = async (
@@ -894,6 +1128,14 @@ const fillField = async (
 
   if (field.kind === "multiselect") {
     return fillWorkdayMultiselect(field.element, answer);
+  }
+
+  if (field.kind === "date-mmyyyy") {
+    return fillDateMmyyyy(field.element, answer);
+  }
+
+  if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
+    return fillCheckbox(field.element, answer);
   }
 
   if (field.kind === "select" && field.element instanceof HTMLSelectElement) {
