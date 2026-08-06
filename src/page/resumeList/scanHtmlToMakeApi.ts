@@ -183,6 +183,11 @@ export const scanHtmlToMakeApi = async ({
       source: handler.id,
     });
 
+    // Site-specific prep before scan (e.g. Workday fills Country, waits for layout).
+    if (handler.prepareBeforeScan) {
+      await handler.prepareBeforeScan(applicantData);
+    }
+
     // Field icons use the same AI API for single-field refills.
     const iconCount =
       handler.initFieldScanner?.(applicantData, { requestFieldAnswer }) ?? 0;

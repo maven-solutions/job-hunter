@@ -70,6 +70,11 @@ export interface AiSiteHandler {
     applicantData: Applicant,
     options?: AiFieldScannerOptions,
   ) => number;
+  /**
+   * Optional prep before DOM scan (e.g. Workday: set Country from applicant,
+   * wait for layout to settle). Runs during the scanning phase.
+   */
+  prepareBeforeScan?: (applicantData: Applicant) => Promise<void>;
   /** Read the page form and build the AI fill API payload. */
   buildScanPayload: (options: AiScanPayloadOptions) => Promise<AiScanPayload>;
   /**

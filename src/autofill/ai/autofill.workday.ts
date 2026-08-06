@@ -2,6 +2,7 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   WorkdayCandidateField,
   collectWorkdayCandidateFields,
+  isWorkdayPrefillExcludedLabel,
 } from "./scan.workday";
 
 export interface WorkdayAiAnswer {
@@ -512,9 +513,22 @@ const fillWorkdayListbox = async (
   await delay(250);
   await waitForDomUpdate();
 
+  // Workday country lists are long — type into any open search/filter input.
+  const filterInput = document.querySelector<HTMLInputElement>(
+    '[role="listbox"] input, input[placeholder*="Search" i]:not([data-uxi-multiselect-id]), [data-automation-id*="search"] input',
+  );
+  if (filterInput && isNodeVisible(filterInput)) {
+    filterInput.focus();
+    setNativeValue(filterInput, answer);
+    filterInput.dispatchEvent(new Event("input", { bubbles: true }));
+    await handleValueChanges(filterInput);
+    await delay(350);
+    await waitForDomUpdate();
+  }
+
   let optionEls = getOpenOptionElements();
   if (optionEls.length === 0) {
-    await delay(200);
+    await delay(250);
     await waitForDomUpdate();
     optionEls = getOpenOptionElements();
   }
@@ -540,6 +554,71 @@ const fillWorkdayListbox = async (
   fullClick(target);
   await delay(200);
   return true;
+};
+
+/**
+ * Before scanning a Workday page: set Country from applicant profile, then wait
+ * for the form layout to re-render (State options, local name fields, phone code).
+ * Country Phone Code is auto-filled by Workday after Country changes — not set here.
+ */
+export const prepareWorkdayCountryBeforeScan = async (
+  applicantData: { country?: string | null } | null | undefined,
+): Promise<void> => {
+  const country = String(applicantData?.country ?? "").trim();
+  if (!country) {
+    console.warn(
+      "[CareerAI Workday] No applicant country — skipping country pre-fill",
+    );
+    return;
+  }
+
+  const countryButton =
+    document.querySelector<HTMLElement>(
+      'button[aria-haspopup="listbox"][name="country"], button#country--country, [data-automation-id="formField-country"] button[aria-haspopup="listbox"]',
+    ) ??
+    Array.from(
+      document.querySelectorAll<HTMLElement>(
+        'button[aria-haspopup="listbox"]',
+      ),
+    ).find((btn) => {
+      const label = cleanLabelText(
+        btn
+          .closest('[data-automation-id^="formField-"]')
+          ?.querySelector("label")?.textContent ??
+          btn.getAttribute("aria-label") ??
+          "",
+      );
+      return /^country$/i.test(label) || /^country\b/i.test(label);
+    });
+
+  if (!countryButton) {
+    // Not on My Information (or country control missing) — nothing to prep
+    return;
+  }
+
+  const currentText = cleanLabelText(
+    countryButton.textContent ?? countryButton.getAttribute("aria-label") ?? "",
+  ).replace(/\s+Required$/i, "");
+
+  // Already matches applicant country — no layout change expected
+  if (matchOption(country, [currentText]) || matchOption(currentText, [country])) {
+    return;
+  }
+
+  const filled = await fillWorkdayListbox(countryButton, country);
+  if (!filled) {
+    console.warn(
+      "[CareerAI Workday] Could not set Country to:",
+      country,
+      "(current:",
+      currentText,
+      ")",
+    );
+    return;
+  }
+
+  // Workday rewrites fields/options after country change
+  await delay(3000);
 };
 
 /**
@@ -770,6 +849,12 @@ export const autofillWorkdayWithAi = async (
   }
 
   for (const field of candidates) {
+    // Country / Country Phone Code are pre-filled or auto-filled by Workday
+    if (isWorkdayPrefillExcludedLabel(field.label)) {
+      skipped += 1;
+      continue;
+    }
+
     if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
       skipped += 1;
       continue;

@@ -363,6 +363,23 @@ export interface WorkdayCandidateField {
 }
 
 /**
+ * Pre-filled by Workday prep (applicant country) or auto-filled by the site
+ * when Country changes. Never scan or AI-fill these fields.
+ */
+export const isWorkdayPrefillExcludedLabel = (label: string): boolean => {
+  const key = cleanLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+  return (
+    key === "country" ||
+    key === "countryphonecode" ||
+    key === "phonecountrycode" ||
+    key === "phonecode"
+  );
+};
+
+/**
  * Collect autofillable fields on the **current** Workday apply page.
  * Multi-step flows only expose the active page — re-scan after "Save and Continue".
  */
@@ -383,6 +400,7 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
   };
 
   // 1) Custom listbox dropdowns (Country, State, Phone Device Type, …)
+  // Country is set in prepareBeforeScan from applicant data — exclude from scan.
   document
     .querySelectorAll<HTMLButtonElement>(LISTBOX_BUTTON_SELECTOR)
     .forEach((button) => {
@@ -393,6 +411,13 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         button.getAttribute("name") ||
         `listbox-${results.length}`;
       const label = getFieldLabel(button);
+      if (isWorkdayPrefillExcludedLabel(label)) return;
+      if (
+        button.getAttribute("name") === "country" ||
+        button.id === "country--country"
+      ) {
+        return;
+      }
       if (!markSeen(id, label)) return;
 
       results.push({
@@ -403,7 +428,8 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       });
     });
 
-  // 2) Multiselect / prompt fields (Country Phone Code, …)
+  // 2) Multiselect / prompt fields
+  // Country Phone Code auto-updates when Country changes — exclude from scan.
   document
     .querySelectorAll<HTMLElement>(MULTISELECT_SELECTOR)
     .forEach((container) => {
@@ -421,6 +447,16 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       // Align with Greenhouse phone naming when applicable
       if (/country phone code|phone code/i.test(label)) {
         label = "Country Phone Code";
+      }
+      if (isWorkdayPrefillExcludedLabel(label)) return;
+      if (
+        input.id === "phoneNumber--countryPhoneCode" ||
+        container
+          .closest("[data-automation-id]")
+          ?.getAttribute("data-automation-id")
+          ?.includes("countryPhoneCode")
+      ) {
+        return;
       }
       if (!markSeen(id, label)) return;
 
