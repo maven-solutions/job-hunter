@@ -8,6 +8,7 @@ import { initWorkdayHtmlScanner } from "../cibtn.workday";
 import {
   scanWorkdayHtmlToMakeApiPayload,
   prepareWorkdayExperiencePanels,
+  isWorkdayMyExperiencePage,
   WorkdayScanToMakeApiPayload,
 } from "../scan.workday";
 import { AiFillResult, AiScanPayloadOptions, AiSiteHandler } from "../types";
@@ -75,8 +76,10 @@ const applyFill = async (
   fillData: unknown,
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
-  // Ensure enough WE / Education panels for nested multi-entry answers
-  await prepareWorkdayExperiencePanels(applicantData);
+  // Expand WE / Education panels only on My Experience (not Application Questions)
+  if (isWorkdayMyExperiencePage()) {
+    await prepareWorkdayExperiencePanels(applicantData);
+  }
 
   const fillResult = await autofillWorkdayWithAi(fillData);
 
@@ -92,11 +95,10 @@ const applyFill = async (
 };
 
 /**
- * Workday AI autofill site strategy.
- *
- * My Information: applicant Country prep + flat fields.
- * My Experience: expand panels from employment_history / education counts,
- * nested Employment/Education payload, multi-entry fill.
+ * Workday AI autofill site strategy (section-wise):
+ * - My Information: Country prep + flat fields
+ * - My Experience: panel expand + nested Employment/Education
+ * - Application Questions: rich-text listbox questions
  */
 export const workdayAiHandler: AiSiteHandler = {
   id: "workday",

@@ -6,6 +6,7 @@ import {
   isWorkdayPrefillExcludedLabel,
   prepareWorkdayExperiencePanels,
 } from "./scan.workday";
+import { getWorkdayApplySectionId } from "./workday/detect";
 
 export interface WorkdayAiAnswer {
   label: string;
@@ -956,14 +957,30 @@ export const prepareWorkdayCountryBeforeScan = async (
 };
 
 /**
- * Full Workday pre-scan prep:
+ * Full Workday pre-scan prep (section-aware — only active step is touched):
  * - My Information: fill Country + wait for layout
  * - My Experience: expand Work Experience / Education panels from profile counts
+ * - Application Questions: no pre-fill
  */
 export const prepareWorkdayBeforeScan = async (
   applicantData: Applicant | null | undefined,
 ): Promise<void> => {
+  const section = getWorkdayApplySectionId();
+
+  if (section === "applicationQuestions") {
+    return;
+  }
+
+  if (section === "myExperience") {
+    await prepareWorkdayExperiencePanels(applicantData ?? null);
+    return;
+  }
+
+  // My Information and other personal pages
   await prepareWorkdayCountryBeforeScan(applicantData);
+  if (section === "myInformation") return;
+
+  // Fallback (unknown step): try experience expand if present
   await prepareWorkdayExperiencePanels(applicantData ?? null);
 };
 

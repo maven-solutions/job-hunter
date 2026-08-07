@@ -2,6 +2,16 @@ import { AiNestedFieldSchema } from "./types";
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 import { delay } from "../helper";
 import { Applicant } from "../data";
+import {
+  isWorkdayApplicationQuestionsPage,
+  isWorkdayMyExperiencePage,
+} from "./workday/detect";
+import {
+  buildApplicationQuestionsScanElements,
+  collectApplicationQuestionFields,
+} from "./workday/sections/applicationQuestions";
+
+export { isWorkdayMyExperiencePage };
 
 export type ApiElementType = string;
 
@@ -461,8 +471,30 @@ const isDateSpinbutton = (element: HTMLElement): boolean =>
  * Collect autofillable fields on the **current** Workday apply page.
  * Multi-step flows only expose the active page — re-scan after "Save and Continue".
  * My Experience: Work Experience N / Education N get section-prefixed labels.
+ * Application Questions: rich-text listbox questions (section module).
  */
 export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
+  // Application Questions — dedicated collector (rich-text legends, not aria "Select One")
+  if (isWorkdayApplicationQuestionsPage()) {
+    return collectApplicationQuestionFields().map((field) => {
+      const kind: WorkdayFieldKind =
+        field.kind === "listbox"
+          ? "listbox"
+          : field.kind === "radio-group"
+            ? "radio-group"
+            : field.kind === "checkbox"
+              ? "checkbox"
+              : "text";
+      return {
+        element: field.element,
+        label: field.label,
+        required: field.required,
+        kind,
+        options: field.options,
+      };
+    });
+  }
+
   const results: WorkdayCandidateField[] = [];
   const seenIds = new Set<string>();
 
@@ -718,11 +750,7 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
   return results;
 };
 
-/** True on Workday "My Experience" apply step. */
-export const isWorkdayMyExperiencePage = (): boolean =>
-  !!document.querySelector('[data-automation-id="applyFlowMyExpPage"]') ||
-  !!document.querySelector("#Work-Experience-section") ||
-  !!document.querySelector('[aria-labelledby="Work-Experience-section"]');
+/** Workday My Experience page detector re-exported from workday/detect. */
 
 /** Count entry panels like "Work Experience 1", "Education 2". */
 export const countWorkdayEntryPanels = (
@@ -978,8 +1006,10 @@ const buildWorkdayExperiencePageElements = async (
 
 /**
  * Scans the current Workday apply page and builds an API payload.
- * - My Information: flat text/search fields
+ * Routes by section (only the active step is scanned):
+ * - Application Questions: rich-text listbox questions
  * - My Experience: Employment / Education nested groups (+ skills, LinkedIn, …)
+ * - My Information / other: flat text/search fields
  */
 export const scanWorkdayHtmlToMakeApiPayload = async (
   options: WorkdayScanToMakeApiOptions & {
@@ -989,7 +1019,12 @@ export const scanWorkdayHtmlToMakeApiPayload = async (
   const url = window.location.href;
   let elements: ApiFormElement[] = [];
 
-  if (isWorkdayMyExperiencePage()) {
+  // Section-wise scan: only touch the active step.
+  if (isWorkdayApplicationQuestionsPage()) {
+    elements = (await buildApplicationQuestionsScanElements({
+      applicantData: options.applicantData,
+    })) as ApiFormElement[];
+  } else if (isWorkdayMyExperiencePage()) {
     elements = await buildWorkdayExperiencePageElements(options.applicantData);
   } else {
     const candidates = collectWorkdayCandidateFields();
