@@ -179,9 +179,37 @@ export interface ApplicationQuestionField {
   element: HTMLElement;
   label: string;
   required: boolean;
-  kind: "listbox" | "text" | "textarea" | "radio-group" | "checkbox";
+  kind:
+    | "listbox"
+    | "text"
+    | "textarea"
+    | "radio-group"
+    | "checkbox"
+    | "date-mmddyyyy"
+    | "date-mmyyyy";
   options?: string[];
+  description?: string;
 }
+
+/** Detect Workday date wrapper format: day section present → MM/DD/YYYY. */
+const getDateWrapperFormat = (
+  wrapper: HTMLElement,
+): "mmddyyyy" | "mmyyyy" => {
+  const hasDay = !!wrapper.querySelector(
+    '[data-automation-id="dateSectionDay-input"], input[aria-label="Day"]',
+  );
+  if (hasDay) return "mmddyyyy";
+
+  const help =
+    wrapper.getAttribute("aria-labelledby") ||
+    wrapper
+      .closest("fieldset")
+      ?.querySelector('[id^="helpText-"]')?.textContent ||
+    "";
+  if (/MM\/DD\/YYYY|MM-DD-YYYY|MM\/DD\/YY/i.test(help)) return "mmddyyyy";
+
+  return "mmyyyy";
+};
 
 /**
  * Collect all autofillable Application Questions controls on the current page.
@@ -215,12 +243,49 @@ export const collectApplicationQuestionFields =
           });
         });
 
+      // Date groups (e.g. "Please enter today's date" → MM/DD/YYYY spinbuttons)
+      root
+        .querySelectorAll<HTMLElement>('[data-automation-id="dateInputWrapper"]')
+        .forEach((wrapper) => {
+          const id =
+            wrapper.getAttribute("id") ||
+            wrapper
+              .querySelector('[data-automation-id="dateSectionMonth-input"]')
+              ?.getAttribute("id") ||
+            `date-${results.length}`;
+          if (seen.has(id)) return;
+          seen.add(id);
+
+          if (!isNodeVisible(wrapper)) return;
+
+          const format = getDateWrapperFormat(wrapper);
+          const formatHint = format === "mmddyyyy" ? "MM/DD/YYYY" : "MM/YYYY";
+          const baseLabel =
+            getQuestionnaireQuestionLabel(wrapper) || "Date";
+          // Strip trailing format if already in legend (keep one clean label)
+          const cleanBase = baseLabel
+            .replace(/\s*\(MM\/DD\/YYYY\)\s*$/i, "")
+            .replace(/\s*\(MM\/YYYY\)\s*$/i, "")
+            .trim();
+          const label = `${cleanBase} (${formatHint})`;
+
+          results.push({
+            element: wrapper,
+            label,
+            required: isQuestionnaireRequired(wrapper),
+            kind: format === "mmddyyyy" ? "date-mmddyyyy" : "date-mmyyyy",
+            description: formatHint,
+          });
+        });
+
       // Free-text answers if present (skip companion listbox store inputs)
       root
         .querySelectorAll<HTMLElement>("textarea, input[type='text']")
         .forEach((el) => {
           if (el.closest(LISTBOX_BUTTON_SELECTOR)) return;
           if (el.parentElement?.querySelector(LISTBOX_BUTTON_SELECTOR)) return;
+          // Inside date wrappers (spinbuttons / store inputs) — handled above
+          if (el.closest('[data-automation-id="dateInputWrapper"]')) return;
           // Any listbox in the same form field → store/search companion, not a real answer
           if (
             el
@@ -255,6 +320,7 @@ export const collectApplicationQuestionFields =
 /**
  * Build API payload elements for Application Questions.
  * type "search" + options[] so AI can pick Yes/No/etc.
+ * Dates → type "date" with MM/DD/YYYY or MM/YYYY description.
  */
 export const buildApplicationQuestionsScanElements = async (
   _options?: WorkdaySectionScanOptions,
@@ -270,6 +336,19 @@ export const buildApplicationQuestionsScanElements = async (
         required: field.required,
         type: "search",
         ...(options.length > 0 ? { options } : {}),
+      });
+      continue;
+    }
+
+    if (field.kind === "date-mmddyyyy" || field.kind === "date-mmyyyy") {
+      const format =
+        field.description ||
+        (field.kind === "date-mmddyyyy" ? "MM/DD/YYYY" : "MM/YYYY");
+      elements.push({
+        label: field.label,
+        required: field.required,
+        type: "date",
+        description: format,
       });
       continue;
     }

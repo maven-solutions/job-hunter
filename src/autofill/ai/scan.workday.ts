@@ -432,6 +432,7 @@ export type WorkdayFieldKind =
   | "select"
   | "radio-group"
   | "date-mmyyyy"
+  | "date-mmddyyyy"
   | "checkbox";
 
 export interface WorkdayCandidateField {
@@ -477,14 +478,13 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
   // Application Questions — dedicated collector (rich-text legends, not aria "Select One")
   if (isWorkdayApplicationQuestionsPage()) {
     return collectApplicationQuestionFields().map((field) => {
-      const kind: WorkdayFieldKind =
-        field.kind === "listbox"
-          ? "listbox"
-          : field.kind === "radio-group"
-            ? "radio-group"
-            : field.kind === "checkbox"
-              ? "checkbox"
-              : "text";
+      let kind: WorkdayFieldKind = "text";
+      if (field.kind === "listbox") kind = "listbox";
+      else if (field.kind === "radio-group") kind = "radio-group";
+      else if (field.kind === "checkbox") kind = "checkbox";
+      else if (field.kind === "date-mmddyyyy") kind = "date-mmddyyyy";
+      else if (field.kind === "date-mmyyyy") kind = "date-mmyyyy";
+      else if (field.kind === "textarea") kind = "text";
       return {
         element: field.element,
         label: field.label,

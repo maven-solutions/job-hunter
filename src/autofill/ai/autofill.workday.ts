@@ -1244,6 +1244,33 @@ const fillCheckbox = async (
   return now === target;
 };
 
+const MONTH_NAME_TO_NUM: Record<string, string> = {
+  jan: "01",
+  january: "01",
+  feb: "02",
+  february: "02",
+  mar: "03",
+  march: "03",
+  apr: "04",
+  april: "04",
+  may: "05",
+  jun: "06",
+  june: "06",
+  jul: "07",
+  july: "07",
+  aug: "08",
+  august: "08",
+  sep: "09",
+  sept: "09",
+  september: "09",
+  oct: "10",
+  october: "10",
+  nov: "11",
+  november: "11",
+  dec: "12",
+  december: "12",
+};
+
 /**
  * Fill Workday MM/YYYY spinbutton dates.
  * Accepts: "01/2020", "1/2020", "2020-01", "Jan 2020", "January 2020", ISO dates.
@@ -1267,35 +1294,9 @@ const parseMonthYear = (
   }
 
   // Month name YYYY
-  const monthNames: Record<string, string> = {
-    jan: "01",
-    january: "01",
-    feb: "02",
-    february: "02",
-    mar: "03",
-    march: "03",
-    apr: "04",
-    april: "04",
-    may: "05",
-    jun: "06",
-    june: "06",
-    jul: "07",
-    july: "07",
-    aug: "08",
-    august: "08",
-    sep: "09",
-    sept: "09",
-    september: "09",
-    oct: "10",
-    october: "10",
-    nov: "11",
-    november: "11",
-    dec: "12",
-    december: "12",
-  };
   m = raw.match(/^([A-Za-z]+)\s+(\d{4})$/);
   if (m) {
-    const mon = monthNames[m[1].toLowerCase()];
+    const mon = MONTH_NAME_TO_NUM[m[1].toLowerCase()];
     if (mon) return { month: mon, year: m[2] };
   }
 
@@ -1313,6 +1314,102 @@ const parseMonthYear = (
   if (m) return { month: "01", year: m[1] };
 
   return null;
+};
+
+/** Parse MM/DD/YYYY (+ common variants) for questionnaire/signature dates. */
+const parseMonthDayYear = (
+  answer: string,
+): { month: string; day: string; year: string } | null => {
+  const raw = cleanLabelText(answer);
+  if (!raw) return null;
+
+  // "today" / "current date" → system date (common for signature questionnaire fields)
+  if (/^(today|current\s*date|todays?\s*date|now)$/i.test(raw)) {
+    const d = new Date();
+    return {
+      month: String(d.getMonth() + 1).padStart(2, "0"),
+      day: String(d.getDate()).padStart(2, "0"),
+      year: String(d.getFullYear()),
+    };
+  }
+
+  // MM/DD/YYYY or M/D/YYYY
+  let m = raw.match(
+    /^(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4})$/,
+  );
+  if (m) {
+    return {
+      month: m[1].padStart(2, "0"),
+      day: m[2].padStart(2, "0"),
+      year: m[3],
+    };
+  }
+
+  // YYYY-MM-DD
+  m = raw.match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{1,2})$/);
+  if (m) {
+    return {
+      month: m[2].padStart(2, "0"),
+      day: m[3].padStart(2, "0"),
+      year: m[1],
+    };
+  }
+
+  // Month name DD, YYYY / Month DD YYYY
+  m = raw.match(
+    /^([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/,
+  );
+  if (m) {
+    const mon = MONTH_NAME_TO_NUM[m[1].toLowerCase()];
+    if (mon) {
+      return {
+        month: mon,
+        day: m[2].padStart(2, "0"),
+        year: m[3],
+      };
+    }
+  }
+
+  // ISO / Date parse (includes full datetime strings)
+  const d = new Date(raw);
+  if (!Number.isNaN(d.getTime())) {
+    return {
+      month: String(d.getMonth() + 1).padStart(2, "0"),
+      day: String(d.getDate()).padStart(2, "0"),
+      year: String(d.getFullYear()),
+    };
+  }
+
+  return null;
+};
+
+const fillDateSpinInput = async (
+  input: HTMLInputElement,
+  value: string,
+): Promise<void> => {
+  input.focus();
+  fullClick(input);
+  setNativeValue(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await handleValueChanges(input);
+  input.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "Tab", bubbles: true }),
+  );
+  await delay(50);
+};
+
+const spinValueMatches = (
+  input: HTMLInputElement,
+  expected: string,
+): boolean => {
+  const n = String(Number(expected));
+  return (
+    input.value === expected ||
+    input.value === n ||
+    input.getAttribute("aria-valuetext") === expected ||
+    input.getAttribute("aria-valuetext") === n
+  );
 };
 
 const fillDateMmyyyy = async (
@@ -1337,37 +1434,50 @@ const fillDateMmyyyy = async (
   );
   if (!monthInput || !yearInput) return false;
 
-  const fillSpin = async (
-    input: HTMLInputElement,
-    value: string,
-  ): Promise<void> => {
-    input.focus();
-    fullClick(input);
-    setNativeValue(input, value);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    await handleValueChanges(input);
-    // Workday spinbuttons sometimes need key events
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Tab", bubbles: true }),
-    );
-    await delay(50);
-  };
-
-  await fillSpin(monthInput, parsed.month);
-  await fillSpin(yearInput, parsed.year);
+  await fillDateSpinInput(monthInput, parsed.month);
+  await fillDateSpinInput(yearInput, parsed.year);
   await delay(100);
 
-  const monthOk =
-    monthInput.value === parsed.month ||
-    monthInput.value === String(Number(parsed.month)) ||
-    monthInput.getAttribute("aria-valuetext") === parsed.month ||
-    monthInput.getAttribute("aria-valuetext") === String(Number(parsed.month));
-  const yearOk =
-    yearInput.value === parsed.year ||
-    yearInput.getAttribute("aria-valuetext") === parsed.year;
+  return (
+    spinValueMatches(monthInput, parsed.month) ||
+    spinValueMatches(yearInput, parsed.year) ||
+    !!monthInput.value ||
+    !!yearInput.value
+  );
+};
 
-  return monthOk || yearOk || !!monthInput.value || !!yearInput.value;
+/** Fill Workday MM/DD/YYYY questionnaire date (Month / Day / Year spinbuttons). */
+const fillDateMmddyyyy = async (
+  wrapper: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableWorkdayAnswer(answer)) return false;
+
+  const parsed = parseMonthDayYear(answer);
+  if (!parsed) return false;
+
+  const monthInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionMonth-input"], input[aria-label="Month"]',
+  );
+  const dayInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionDay-input"], input[aria-label="Day"]',
+  );
+  const yearInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionYear-input"], input[aria-label="Year"]',
+  );
+  if (!monthInput || !dayInput || !yearInput) return false;
+
+  await fillDateSpinInput(monthInput, parsed.month);
+  await fillDateSpinInput(dayInput, parsed.day);
+  await fillDateSpinInput(yearInput, parsed.year);
+  await delay(100);
+
+  return (
+    spinValueMatches(monthInput, parsed.month) ||
+    spinValueMatches(dayInput, parsed.day) ||
+    spinValueMatches(yearInput, parsed.year) ||
+    !!(monthInput.value || dayInput.value || yearInput.value)
+  );
 };
 
 const fillField = async (
@@ -1390,6 +1500,10 @@ const fillField = async (
 
   if (field.kind === "date-mmyyyy") {
     return fillDateMmyyyy(field.element, answer);
+  }
+
+  if (field.kind === "date-mmddyyyy") {
+    return fillDateMmddyyyy(field.element, answer);
   }
 
   if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
