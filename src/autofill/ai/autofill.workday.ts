@@ -1,8 +1,10 @@
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { Applicant } from "../data";
 import {
   WorkdayCandidateField,
   collectWorkdayCandidateFields,
   isWorkdayPrefillExcludedLabel,
+  prepareWorkdayExperiencePanels,
 } from "./scan.workday";
 
 export interface WorkdayAiAnswer {
@@ -143,6 +145,146 @@ const isFieldMarkedEmpty = (
   return false;
 };
 
+
+/** Normalize object keys for employment/education field alias maps. */
+const fieldKey = (text: string): string =>
+  cleanLabelText(text)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+/** Coerce employment/education payload into a list of entry objects. */
+const normalizeGroupEntries = (raw: unknown): Record<string, unknown>[] => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => {
+        if (item == null) return null;
+        if (typeof item === "object") return item as Record<string, unknown>;
+        return null;
+      })
+      .filter(Boolean) as Record<string, unknown>[];
+  }
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["jobs", "entries", "items", "data", "records"]) {
+      if (Array.isArray(obj[key])) {
+        return normalizeGroupEntries(obj[key]);
+      }
+    }
+    if (
+      "label" in obj &&
+      ("type" in obj || "options" in obj) &&
+      !("jobTitle" in obj) &&
+      !("company" in obj) &&
+      !("school" in obj)
+    ) {
+      return normalizeGroupEntries(
+        obj.answer ?? obj.value ?? obj.fill ?? obj.data,
+      );
+    }
+    return [obj];
+  }
+  return [];
+};
+
+const EMPLOYMENT_FIELD_MAP: Record<string, string> = {
+  jobtitle: "Job Title",
+  title: "Job Title",
+  position: "Job Title",
+  company: "Company",
+  companyname: "Company",
+  employer: "Company",
+  location: "Location",
+  currentlyworkhere: "I currently work here",
+  icurrentlyworkhere: "I currently work here",
+  current: "I currently work here",
+  iscurrent: "I currently work here",
+  from: "From (MM/YYYY)",
+  startdate: "From (MM/YYYY)",
+  start: "From (MM/YYYY)",
+  to: "To (MM/YYYY)",
+  enddate: "To (MM/YYYY)",
+  end: "To (MM/YYYY)",
+  roledescription: "Role Description",
+  description: "Role Description",
+  responsibilities: "Role Description",
+};
+
+const EDUCATION_FIELD_MAP: Record<string, string> = {
+  school: "School or University",
+  schooloruniversity: "School or University",
+  university: "School or University",
+  college: "School or University",
+  degree: "Degree",
+  fieldofstudy: "Field of Study",
+  major: "Field of Study",
+  field: "Field of Study",
+};
+
+const GROUP_META_KEYS = new Set([
+  "label",
+  "type",
+  "required",
+  "options",
+  "count",
+  "description",
+]);
+
+const flattenGroupEntry = (
+  entry: Record<string, unknown>,
+  kind: "work" | "education",
+): { fieldLabel: string; value: unknown }[] => {
+  const map = kind === "work" ? EMPLOYMENT_FIELD_MAP : EDUCATION_FIELD_MAP;
+  const out: { fieldLabel: string; value: unknown }[] = [];
+  const seen = new Set<string>();
+
+  for (const [key, value] of Object.entries(entry)) {
+    if (value == null) continue;
+    if (GROUP_META_KEYS.has(key.toLowerCase())) continue;
+
+    if (
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      ("answer" in (value as object) || "value" in (value as object))
+    ) {
+      const nested = value as {
+        label?: string;
+        answer?: unknown;
+        value?: unknown;
+      };
+      const fieldLabel =
+        map[fieldKey(nested.label ?? key)] ||
+        cleanLabelText(String(nested.label ?? key));
+      const val = nested.answer ?? nested.value;
+      if (seen.has(fieldLabel)) continue;
+      seen.add(fieldLabel);
+      out.push({ fieldLabel, value: val });
+      continue;
+    }
+
+    const nKey = fieldKey(key);
+    let fieldLabel = map[nKey];
+    if (!fieldLabel) {
+      fieldLabel = cleanLabelText(key);
+      if (/^from$/i.test(fieldLabel)) fieldLabel = "From (MM/YYYY)";
+      if (/^to$/i.test(fieldLabel)) fieldLabel = "To (MM/YYYY)";
+      if (/^school/i.test(fieldLabel) && kind === "education") {
+        fieldLabel = "School or University";
+      }
+    }
+    if (kind === "work" && (fieldLabel === "From" || fieldLabel === "To")) {
+      fieldLabel = `${fieldLabel} (MM/YYYY)`;
+    }
+
+    if (seen.has(fieldLabel)) continue;
+    seen.add(fieldLabel);
+    out.push({ fieldLabel, value });
+  }
+
+  return out;
+};
+
 export interface WorkdayParsedFillResponse {
   answers: WorkdayAiAnswer[];
   emptyLabelKeys: Set<string>;
@@ -176,16 +318,103 @@ export const parseWorkdayAiFillResponse = (
     emptyCount += 1;
   };
 
+  const pushRepeatableGroup = (
+    kind: "work" | "education",
+    raw: unknown,
+  ): void => {
+    const entries = normalizeGroupEntries(raw);
+    if (entries.length === 0) {
+      markEmpty(kind === "work" ? "Employment" : "Education");
+      return;
+    }
+
+    entries.forEach((entry, index) => {
+      const prefix =
+        kind === "work"
+          ? `Work Experience ${index + 1}`
+          : `Education ${index + 1}`;
+      const fields = flattenGroupEntry(entry, kind);
+      for (const { fieldLabel, value } of fields) {
+        if (!isUsableWorkdayAnswer(value)) {
+          markEmpty(`${prefix} - ${fieldLabel}`);
+          continue;
+        }
+        answers.push({
+          label: `${prefix} - ${fieldLabel}`,
+          answer: coerceAnswerString(value),
+        });
+      }
+    });
+  };
+
   const processItem = (item: any): void => {
     if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
     if (!label) return;
 
+    const typeStr = String(item.type ?? "").toLowerCase();
     const raw = extractRawAnswer(item);
+
+    if (
+      typeStr === "employment" ||
+      /^employment$/i.test(label) ||
+      /^work experience$/i.test(label)
+    ) {
+      pushRepeatableGroup(
+        "work",
+        raw ?? item.entries ?? item.jobs ?? item.data ?? item.items,
+      );
+      return;
+    }
+    if (typeStr === "education" || /^education$/i.test(label)) {
+      pushRepeatableGroup(
+        "education",
+        raw ?? item.entries ?? item.data ?? item.items,
+      );
+      return;
+    }
 
     if (isEmptyApiAnswer(raw)) {
       markEmpty(label);
       return;
+    }
+
+    if (
+      Array.isArray(raw) &&
+      raw.every((v) => typeof v !== "object" || v == null)
+    ) {
+      const answer = coerceAnswerString(raw);
+      if (!answer) {
+        markEmpty(label);
+        return;
+      }
+      answers.push({
+        label,
+        answer,
+        type: item.type ? String(item.type) : undefined,
+      });
+      return;
+    }
+
+    if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object") {
+      const sample = raw[0] as Record<string, unknown>;
+      const keys = Object.keys(sample).map((k) => k.toLowerCase());
+      if (
+        keys.some((k) =>
+          /job|title|company|employer|school|degree|university/.test(k),
+        )
+      ) {
+        if (
+          keys.some((k) =>
+            /school|degree|university|education|major/.test(k),
+          )
+        ) {
+          pushRepeatableGroup("education", raw);
+        } else {
+          pushRepeatableGroup("work", raw);
+        }
+        return;
+      }
     }
 
     const answer = coerceAnswerString(raw);
@@ -221,12 +450,28 @@ export const parseWorkdayAiFillResponse = (
     return { answers, emptyLabelKeys, emptyCount };
   }
 
+  if (
+    Array.isArray(payload?.employment) ||
+    Array.isArray(payload?.employment_history)
+  ) {
+    pushRepeatableGroup(
+      "work",
+      payload.employment ?? payload.employment_history,
+    );
+  }
+  if (Array.isArray(payload?.education)) {
+    pushRepeatableGroup("education", payload.education);
+  }
+
   if (typeof payload === "object") {
     const reserved = new Set([
       "elements",
       "answers",
       "fields",
       "fill_data_list",
+      "employment",
+      "employment_history",
+      "education",
       "resumeId",
       "userId",
       "parser",
@@ -241,23 +486,7 @@ export const parseWorkdayAiFillResponse = (
     ]);
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
-      if (isEmptyApiAnswer(value)) {
-        markEmpty(label);
-        continue;
-      }
-      if (
-        typeof value !== "string" &&
-        typeof value !== "number" &&
-        !Array.isArray(value)
-      ) {
-        continue;
-      }
-      const answer = coerceAnswerString(value);
-      if (!answer) {
-        markEmpty(label);
-        continue;
-      }
-      answers.push({ label, answer });
+      processItem({ label, answer: value });
     }
   }
 
@@ -724,6 +953,18 @@ export const prepareWorkdayCountryBeforeScan = async (
 
   // Workday rewrites fields/options after country change
   await delay(3000);
+};
+
+/**
+ * Full Workday pre-scan prep:
+ * - My Information: fill Country + wait for layout
+ * - My Experience: expand Work Experience / Education panels from profile counts
+ */
+export const prepareWorkdayBeforeScan = async (
+  applicantData: Applicant | null | undefined,
+): Promise<void> => {
+  await prepareWorkdayCountryBeforeScan(applicantData);
+  await prepareWorkdayExperiencePanels(applicantData ?? null);
 };
 
 /**

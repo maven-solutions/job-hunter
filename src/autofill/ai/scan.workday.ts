@@ -1,13 +1,17 @@
+import { AiNestedFieldSchema } from "./types";
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 import { delay } from "../helper";
+import { Applicant } from "../data";
 
-export type ApiElementType = "text" | "search";
+export type ApiElementType = string;
 
 export interface ApiFormElement {
   label: string;
   required: boolean;
   type: ApiElementType;
-  options?: string[];
+  options?: string[] | AiNestedFieldSchema[];
+  description?: string;
+  count?: number;
 }
 
 export interface WorkdayScanToMakeApiPayload {
@@ -714,66 +718,329 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
   return results;
 };
 
+/** True on Workday "My Experience" apply step. */
+export const isWorkdayMyExperiencePage = (): boolean =>
+  !!document.querySelector('[data-automation-id="applyFlowMyExpPage"]') ||
+  !!document.querySelector("#Work-Experience-section") ||
+  !!document.querySelector('[aria-labelledby="Work-Experience-section"]');
+
+/** Count entry panels like "Work Experience 1", "Education 2". */
+export const countWorkdayEntryPanels = (
+  kind: "work" | "education",
+): number => {
+  const re =
+    kind === "work"
+      ? /^Work Experience\s*(\d+)$/i
+      : /^Education\s*(\d+)$/i;
+  const nums = new Set<number>();
+  document.querySelectorAll("h5, [id$='-panel']").forEach((el) => {
+    const text = cleanLabelText(el.textContent ?? "");
+    const m = text.match(re);
+    if (m) nums.add(Number(m[1]));
+  });
+  // Fallback: jobTitle / school inputs
+  if (nums.size === 0) {
+    if (kind === "work") {
+      return document.querySelectorAll(
+        'input[name="jobTitle"], [data-automation-id="formField-jobTitle"]',
+      ).length;
+    }
+    return document.querySelectorAll(
+      'input[id*="--school"], [data-automation-id="formField-school"]',
+    ).length;
+  }
+  return nums.size;
+};
+
+const findSectionAddButton = (
+  sectionLabelledBy: string,
+): HTMLButtonElement | null => {
+  const section =
+    document.querySelector<HTMLElement>(
+      `[aria-labelledby="${sectionLabelledBy}"]`,
+    ) ||
+    document
+      .getElementById(sectionLabelledBy)
+      ?.closest('[role="group"]')
+      ?.parentElement;
+
+  if (!section) return null;
+
+  const add =
+    section.querySelector<HTMLButtonElement>(
+      'button[data-automation-id="add-button"]',
+    ) ||
+    Array.from(section.querySelectorAll<HTMLButtonElement>("button")).find(
+      (b) => /add/i.test(b.textContent ?? ""),
+    );
+
+  return add ?? null;
+};
+
 /**
- * Scans the current Workday apply page and builds an API payload
- * with field labels, required flags, types, and select options.
+ * Click "Add Another" until the page has `needed` Work Experience or Education panels.
+ * One panel is usually present already — only add the difference.
  */
-export const scanWorkdayHtmlToMakeApiPayload = async (
-  options: WorkdayScanToMakeApiOptions = {},
-): Promise<WorkdayScanToMakeApiPayload> => {
-  const url = window.location.href;
-  const candidates = collectWorkdayCandidateFields();
+export const ensureWorkdayEntryPanels = async (
+  kind: "work" | "education",
+  needed: number,
+): Promise<void> => {
+  if (!needed || needed < 1) return;
+
+  const sectionId =
+    kind === "work" ? "Work-Experience-section" : "Education-section";
+
+  let current = countWorkdayEntryPanels(kind);
+  // If section has no entry yet but has an Add button, click once to open first panel
+  if (current === 0) {
+    const add = findSectionAddButton(sectionId);
+    if (add) {
+      add.click();
+      await delay(600);
+      current = countWorkdayEntryPanels(kind);
+    }
+  }
+
+  let guard = 0;
+  while (current < needed && guard < 20) {
+    const add = findSectionAddButton(sectionId);
+    if (!add) break;
+    add.click();
+    await delay(700);
+    const next = countWorkdayEntryPanels(kind);
+    if (next <= current) {
+      // DOM still settling
+      await delay(500);
+    }
+    current = countWorkdayEntryPanels(kind);
+    guard += 1;
+  }
+};
+
+/**
+ * Expand Work Experience / Education panels from applicant profile counts
+ * before scanning the My Experience page.
+ */
+export const prepareWorkdayExperiencePanels = async (
+  applicantData: Applicant | null | undefined,
+): Promise<void> => {
+  if (!isWorkdayMyExperiencePage()) return;
+
+  const empCount = Array.isArray(applicantData?.employment_history)
+    ? applicantData!.employment_history!.length
+    : 0;
+  const eduCount = Array.isArray(applicantData?.education)
+    ? applicantData!.education!.length
+    : 0;
+
+  if (empCount > 0) {
+    await ensureWorkdayEntryPanels("work", empCount);
+  }
+  if (eduCount > 0) {
+    await ensureWorkdayEntryPanels("education", eduCount);
+  }
+};
+
+const isRepeatableSectionFieldLabel = (label: string): boolean =>
+  /^(work experience|education)\s*\d+\s*-/i.test(label.trim());
+
+/**
+ * Build nested Employment + Education group payload for My Experience.
+ * Other top-level fields (Skills, LinkedIn) stay flat.
+ */
+const buildWorkdayExperiencePageElements = async (
+  applicantData?: Applicant | null,
+): Promise<ApiFormElement[]> => {
   const elements: ApiFormElement[] = [];
 
+  const empCount = Array.isArray(applicantData?.employment_history)
+    ? Math.max(1, applicantData!.employment_history!.length)
+    : Math.max(1, countWorkdayEntryPanels("work") || 1);
+
+  const eduCount = Array.isArray(applicantData?.education)
+    ? Math.max(1, applicantData!.education!.length)
+    : Math.max(1, countWorkdayEntryPanels("education") || 1);
+
+  // Employment template (API returns one object per job inside the answer)
+  const employmentFields: AiNestedFieldSchema[] = [
+    { type: "text", label: "Job Title" },
+    { type: "text", label: "Company" },
+    { type: "text", label: "Location" },
+    {
+      type: "checkbox",
+      label: "I currently work here",
+      options: ["I currently work here"],
+    },
+    { type: "date", label: "From", description: "MM/YYYY" },
+    { type: "date", label: "To", description: "MM/YYYY" },
+    { type: "text", label: "Role Description" },
+  ];
+
+  elements.push({
+    label: "Employment",
+    required: true,
+    type: "employment",
+    count: empCount,
+    options: employmentFields,
+  });
+
+  // Degree listbox options from first education Degree control
+  let degreeOptions: string[] = [];
+  const degreeBtn = document.querySelector<HTMLElement>(
+    'button[aria-haspopup="listbox"][name="degree"], button[id*="--degree"]',
+  );
+  if (degreeBtn) {
+    degreeOptions = await openAndScanListboxOptions(degreeBtn);
+  }
+  if (degreeOptions.length === 0) {
+    degreeOptions = [
+      "High School Diploma",
+      "General Education Development Diploma (GED)",
+      "Associates Degree",
+      "Bachelor's Degree",
+      "Master's Degree",
+      "Doctorate Degree",
+    ];
+  }
+
+  const educationFields: AiNestedFieldSchema[] = [
+    { type: "multi-select", label: "School or University" },
+    {
+      type: "listbox",
+      label: "Degree",
+      options: degreeOptions,
+    },
+    { type: "multi-select", label: "Field of Study" },
+  ];
+
+  elements.push({
+    label: "Education",
+    required: true,
+    type: "education",
+    count: eduCount,
+    options: educationFields,
+  });
+
+  // Flat companion fields on this page (not part of WE/Edu groups)
+  const candidates = collectWorkdayCandidateFields().filter(
+    (c) => !isRepeatableSectionFieldLabel(c.label),
+  );
+
   for (const candidate of candidates) {
+    // Skip fields that live inside WE/Education panels even if label format differs
+    if (
+      candidate.element.closest(
+        '[aria-labelledby*="Work-Experience-"][aria-labelledby$="-panel"], [aria-labelledby*="Education-"][aria-labelledby$="-panel"]',
+      )
+    ) {
+      continue;
+    }
+    // Skills multiselect, LinkedIn, websites
     if (candidate.kind === "text" || candidate.kind === "date-mmyyyy") {
       elements.push({
-        label: candidate.label,
+        label: candidate.label.replace(/\s*:$/, ""),
         required: candidate.required,
         type: "text",
       });
       continue;
     }
-
-    if (candidate.kind === "checkbox") {
-      elements.push({
-        label: candidate.label,
-        required: candidate.required,
-        type: "search",
-        options: candidate.options ?? ["Yes", "No"],
-      });
-      continue;
-    }
-
-    if (candidate.kind === "select" || candidate.kind === "radio-group") {
-      elements.push({
-        label: candidate.label,
-        required: candidate.required,
-        type: "search",
-        options: candidate.options ?? [],
-      });
-      continue;
-    }
-
-    // Multiselect (School, Skills, Field of Study): type-to-search only —
-    // do not harvest remote option lists; AI returns free text to type+select.
     if (candidate.kind === "multiselect") {
       elements.push({
         label: candidate.label,
         required: candidate.required,
-        type: "search",
+        type: "multi-select",
+        options: [],
       });
       continue;
     }
+    if (candidate.kind === "listbox") {
+      const optionList = await openAndScanListboxOptions(candidate.element);
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "listbox",
+        ...(optionList.length > 0 ? { options: optionList } : {}),
+      });
+      continue;
+    }
+    if (candidate.kind === "checkbox") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "checkbox",
+        options: candidate.options ?? ["Yes", "No"],
+      });
+    }
+  }
 
-    // listbox – open and collect options (Degree, State, …)
-    const optionList = await openAndScanListboxOptions(candidate.element);
-    elements.push({
-      label: candidate.label,
-      required: candidate.required,
-      type: "search",
-      ...(optionList.length > 0 ? { options: optionList } : {}),
-    });
+  return elements;
+};
+
+/**
+ * Scans the current Workday apply page and builds an API payload.
+ * - My Information: flat text/search fields
+ * - My Experience: Employment / Education nested groups (+ skills, LinkedIn, …)
+ */
+export const scanWorkdayHtmlToMakeApiPayload = async (
+  options: WorkdayScanToMakeApiOptions & {
+    applicantData?: Applicant | null;
+  } = {},
+): Promise<WorkdayScanToMakeApiPayload> => {
+  const url = window.location.href;
+  let elements: ApiFormElement[] = [];
+
+  if (isWorkdayMyExperiencePage()) {
+    elements = await buildWorkdayExperiencePageElements(options.applicantData);
+  } else {
+    const candidates = collectWorkdayCandidateFields();
+
+    for (const candidate of candidates) {
+      if (candidate.kind === "text" || candidate.kind === "date-mmyyyy") {
+        elements.push({
+          label: candidate.label,
+          required: candidate.required,
+          type: "text",
+        });
+        continue;
+      }
+
+      if (candidate.kind === "checkbox") {
+        elements.push({
+          label: candidate.label,
+          required: candidate.required,
+          type: "search",
+          options: candidate.options ?? ["Yes", "No"],
+        });
+        continue;
+      }
+
+      if (candidate.kind === "select" || candidate.kind === "radio-group") {
+        elements.push({
+          label: candidate.label,
+          required: candidate.required,
+          type: "search",
+          options: candidate.options ?? [],
+        });
+        continue;
+      }
+
+      if (candidate.kind === "multiselect") {
+        elements.push({
+          label: candidate.label,
+          required: candidate.required,
+          type: "search",
+        });
+        continue;
+      }
+
+      const optionList = await openAndScanListboxOptions(candidate.element);
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+        ...(optionList.length > 0 ? { options: optionList } : {}),
+      });
+    }
   }
 
   return {

@@ -141,7 +141,9 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicationForm,
       selectedUserId,
     );
-    // console.log("vadata::", applicantData);
+    const employment_history_length = applicantData?.employment_history?.length;
+    const education_length = applicantData?.education?.length;
+
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData),
@@ -289,13 +291,13 @@ const AutofillFieldsForVA = (props: any) => {
           <span />
         ))}
 
-      {!isV2Layout && !autoFilling && (
-        <AutofillButton
-          onClick={handleAutofill}
-          resumeList={resumeList}
-          text={iframeUrl ? "Proceed" : "Auto Fill"}
-        />
-      )}
+      {/* {!isV2Layout && !autoFilling && ( */}
+      <AutofillButton
+        onClick={handleAutofill}
+        resumeList={resumeList}
+        text={iframeUrl ? "Proceed" : "Auto Fill"}
+      />
+      {/* )} */}
     </div>
   );
 };

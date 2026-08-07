@@ -198,6 +198,7 @@ export const scanHtmlToMakeApi = async ({
       userId,
       fromAgent: false,
       parser: "internal",
+      applicantData,
     });
 
     fieldsDetected =
