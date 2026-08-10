@@ -1396,7 +1396,7 @@ export const prepareWorkdayBeforeScan = async (
 
 /**
  * Workday Country Phone Code / School / Field of Study / Skills multiselects.
- * School/FOS: type into search → wait for site API results → pick best option.
+ * School/FOS: type into search → wait for site API results → pick exact or closest option.
  * Plain skills: same flow with multi-value support.
  */
 const fillWorkdayMultiselect = async (
@@ -1410,15 +1410,16 @@ const fillWorkdayMultiselect = async (
   ) as HTMLElement | null;
   const formFieldId =
     formField?.getAttribute("data-automation-id")?.toLowerCase() ?? "";
-  const isSchoolOrFos =
-    /formfield-school|formfield-fieldofstudy|formfield-schoolname/.test(
-      formFieldId,
-    ) ||
-    /school|university|field of study/i.test(
-      formField?.querySelector("label")?.textContent ?? "",
-    );
+  const labelText = formField?.querySelector("label")?.textContent ?? "";
+  const isSchool =
+    /formfield-school(?!name)|formfield-schoolname/.test(formFieldId) ||
+    (/school|university/i.test(labelText) && !/field of study/i.test(labelText));
+  const isFieldOfStudy =
+    /formfield-fieldofstudy/.test(formFieldId) ||
+    /field of study/i.test(labelText);
+  const isSearchPrompt = isSchool || isFieldOfStudy;
   // School / Field of Study are single-select prompts; Skills stay multi
-  const isSingleValue = isSchoolOrFos;
+  const isSingleValue = isSearchPrompt;
 
   const parts = parseAnswerList(answer);
   const values =
@@ -1437,13 +1438,24 @@ const fillWorkdayMultiselect = async (
       .map(optionLabel)
       .filter(Boolean);
 
-    if (selectedLabels.some((s) => matchOption(part, [s]))) {
+    if (
+      selectedLabels.some(
+        (s) =>
+          matchOption(part, [s]) ||
+          matchSchoolOrOption(part, [s]) ||
+          matchFieldOfStudyOption(part, [s]),
+      )
+    ) {
       filledAny = true;
       continue;
     }
 
     // Clear existing selection for single-value school/FOS
-    if (i === 0 && (isSingleValue || values.length === 1) && selectedLabels.length > 0) {
+    if (
+      i === 0 &&
+      (isSingleValue || values.length === 1) &&
+      selectedLabels.length > 0
+    ) {
       const deleteBtn = container.querySelector<HTMLElement>(
         '[data-automation-id="DELETE_charm"]',
       );
@@ -1471,9 +1483,11 @@ const fillWorkdayMultiselect = async (
     await delay(250);
     await waitForDomUpdate();
 
-    const searchQueries = isSchoolOrFos
-      ? buildSchoolSearchQueries(part)
-      : [part];
+    const searchQueries = isFieldOfStudy
+      ? buildFieldOfStudySearchQueries(part)
+      : isSchool
+        ? buildSchoolSearchQueries(part)
+        : [part];
 
     let matched = false;
     for (const query of searchQueries) {
@@ -1497,7 +1511,7 @@ const fillWorkdayMultiselect = async (
       input.dispatchEvent(new Event("change", { bubbles: true }));
       await handleValueChanges(input);
 
-      // Trigger Workday's remote school search
+      // Trigger Workday's remote search API
       input.dispatchEvent(
         new KeyboardEvent("keydown", {
           key: "Enter",
@@ -1518,9 +1532,8 @@ const fillWorkdayMultiselect = async (
       );
 
       // Site API is async — poll for Search Results options
-      let optionEls = await waitForPromptOptions(isSchoolOrFos ? 3000 : 1200);
+      let optionEls = await waitForPromptOptions(isSearchPrompt ? 3000 : 1200);
       if (optionEls.length === 0 && input) {
-        // Second Enter / short wait retry
         input.dispatchEvent(
           new KeyboardEvent("keydown", {
             key: "Enter",
@@ -1534,7 +1547,9 @@ const fillWorkdayMultiselect = async (
       if (optionEls.length === 0) continue;
 
       const labels = optionEls.map(optionLabel).filter(Boolean);
-      let matchedLabel = matchSchoolOrOption(part, labels);
+      let matchedLabel = isFieldOfStudy
+        ? matchFieldOfStudyOption(part, labels)
+        : matchSchoolOrOption(part, labels);
       if (!matchedLabel && optionEls.length === 1) {
         matchedLabel = labels[0];
       }
@@ -1554,7 +1569,12 @@ const fillWorkdayMultiselect = async (
       ).map(optionLabel);
 
       if (
-        selectedNow.some((s) => matchOption(part, [s]) || matchOption(matchedLabel!, [s])) ||
+        selectedNow.some(
+          (s) =>
+            matchOption(part, [s]) ||
+            matchOption(matchedLabel!, [s]) ||
+            (isFieldOfStudy && matchFieldOfStudyOption(part, [s])),
+        ) ||
         selectedNow.length > selectedLabels.length
       ) {
         filledAny = true;
@@ -1563,7 +1583,7 @@ const fillWorkdayMultiselect = async (
       }
 
       // Selection click may have worked even if pill text differs slightly
-      if (selectedNow.length > 0 && isSchoolOrFos) {
+      if (selectedNow.length > 0 && isSearchPrompt) {
         filledAny = true;
         matched = true;
         break;
@@ -1584,7 +1604,10 @@ const buildSchoolSearchQueries = (school: string): string[] => {
   if (!cleaned) return [];
   const queries: string[] = [cleaned];
 
-  const noParen = cleaned.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  const noParen = cleaned
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (noParen && noParen !== cleaned) queries.push(noParen);
 
   // "University of Pennsylvania" → also try "Pennsylvania"
@@ -1592,11 +1615,86 @@ const buildSchoolSearchQueries = (school: string): string[] => {
     .replace(/^(the\s+)?(university|college|school)\s+of\s+/i, "")
     .replace(/\s+(university|college|school)$/i, "")
     .trim();
-  if (stripped && stripped.length >= 3 && stripped.toLowerCase() !== cleaned.toLowerCase()) {
+  if (
+    stripped &&
+    stripped.length >= 3 &&
+    stripped.toLowerCase() !== cleaned.toLowerCase()
+  ) {
     queries.push(stripped);
   }
 
   return [...new Set(queries)];
+};
+
+/**
+ * Search variants for Field of Study typeahead.
+ * e.g. "Masters in Business Administration" → MBA / "Business Administration"
+ */
+const buildFieldOfStudySearchQueries = (fos: string): string[] => {
+  const cleaned = cleanLabelText(fos);
+  if (!cleaned) return [];
+  const queries: string[] = [cleaned];
+
+  const noParen = cleaned
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (noParen && noParen !== cleaned) queries.push(noParen);
+
+  // Normalize degree wording for better Workday hits
+  const normalizedDegree = noParen
+    .replace(/\bmasters?\b/gi, "Master")
+    .replace(/\bbachelors?\b/gi, "Bachelor")
+    .replace(/\bin\b/gi, "of")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (
+    normalizedDegree &&
+    normalizedDegree.toLowerCase() !== cleaned.toLowerCase()
+  ) {
+    queries.push(normalizedDegree);
+  }
+
+  // "Master of Business Administration" / "Masters in Business Adminstration"
+  if (/business\s+admin/i.test(cleaned) || /\bmba\b/i.test(cleaned)) {
+    queries.push("Master of Business Administration");
+    queries.push("MBA");
+    queries.push("Business Administration");
+  }
+
+  // Drop leading degree words → "Business Administration"
+  const withoutDegree = noParen
+    .replace(
+      /^(masters?|bachelors?|master'?s?|bachelor'?s?|mba|phd|doctorate|associate'?s?)\s+(in|of)\s+/i,
+      "",
+    )
+    .replace(/^(masters?|bachelors?|mba)\s+/i, "")
+    .trim();
+  if (
+    withoutDegree &&
+    withoutDegree.length >= 3 &&
+    withoutDegree.toLowerCase() !== cleaned.toLowerCase()
+  ) {
+    queries.push(withoutDegree);
+  }
+
+  // Significant last tokens (e.g. "Administration")
+  const tokens = noParen
+    .split(/\s+/)
+    .filter(
+      (t) =>
+        t.length >= 4 &&
+        !/^(master|masters|bachelor|bachelors|in|of|the|and|a)$/i.test(t),
+    );
+  if (tokens.length >= 2) {
+    queries.push(tokens.slice(-2).join(" "));
+  }
+  if (tokens.length >= 1) {
+    const last = tokens[tokens.length - 1];
+    if (last.length >= 5) queries.push(last);
+  }
+
+  return [...new Set(queries.filter(Boolean))];
 };
 
 /** Prefer stronger school-name matches among typeahead results. */
@@ -1620,10 +1718,17 @@ const matchSchoolOrOption = (
     else if (n.includes(answerNorm) || answerNorm.includes(n)) {
       score = 500 + Math.min(n.length, answerNorm.length);
     } else {
-      // Token overlap: "pennsylvania" in both
-      const answerTokens = answerNorm.split(/[^a-z0-9]+/).filter((t) => t.length >= 4);
-      const optTokens = new Set(n.split(/[^a-z0-9]+/).filter((t) => t.length >= 3));
-      const hits = answerTokens.filter((t) => optTokens.has(t) || [...optTokens].some((o) => o.includes(t) || t.includes(o)));
+      const answerTokens = answerNorm
+        .split(/[^a-z0-9]+/)
+        .filter((t) => t.length >= 4);
+      const optTokens = new Set(
+        n.split(/[^a-z0-9]+/).filter((t) => t.length >= 3),
+      );
+      const hits = answerTokens.filter(
+        (t) =>
+          optTokens.has(t) ||
+          [...optTokens].some((o) => o.includes(t) || t.includes(o)),
+      );
       if (hits.length > 0) {
         score = 200 + hits.length * 50 + hits.join("").length;
       }
@@ -1635,6 +1740,112 @@ const matchSchoolOrOption = (
   }
 
   return best?.option ?? null;
+};
+
+/**
+ * Exact Field of Study match first, then closest similar option
+ * (e.g. "Masters in Business Administration" → "Master of Business Administration - India").
+ */
+const matchFieldOfStudyOption = (
+  answer: string,
+  options: string[],
+): string | null => {
+  if (!answer?.trim() || options.length === 0) return null;
+
+  const cleanAnswer = cleanLabelText(answer);
+  const answerNorm = normalizeForMatch(answer);
+  if (!answerNorm) return null;
+
+  // 1. Exact label / normalized
+  for (const option of options) {
+    if (cleanLabelText(option) === cleanAnswer) return option;
+  }
+  for (const option of options) {
+    if (normalizeForMatch(option) === answerNorm) return option;
+  }
+
+  // Expand MBA / Master of Business Administration aliases on both sides
+  const expandFosAliases = (text: string): Set<string> => {
+    const n = normalizeForMatch(text);
+    const set = new Set<string>([n]);
+    if (/businessadmin|mba/.test(n)) {
+      set.add("masterofbusinessadministration");
+      set.add("mastersinbusinessadministration");
+      set.add("mba");
+      set.add("businessadministration");
+    }
+    // Strip concentration / country suffixes for comparison
+    set.add(
+      n
+        .replace(/concentrationin.*$/i, "")
+        .replace(/india$/i, "")
+        .replace(/unitedstates$/i, ""),
+    );
+    return set;
+  };
+
+  const answerAliases = expandFosAliases(answer);
+
+  // 2. Alias exact
+  for (const option of options) {
+    const optAliases = expandFosAliases(option);
+    for (const a of answerAliases) {
+      if (a && optAliases.has(a)) return option;
+    }
+  }
+
+  // 3. Scored similarity — prefer options that contain core answer tokens
+  let best: { option: string; score: number } | null = null;
+  const answerTokens = answerNorm
+    .split(/[^a-z0-9]+/)
+    .filter(
+      (t) =>
+        t.length >= 3 &&
+        !/^(in|of|the|and|a|an)$/.test(t),
+    );
+
+  for (const option of options) {
+    const n = normalizeForMatch(option);
+    if (!n) continue;
+    const optTokens = n.split(/[^a-z0-9]+/).filter((t) => t.length >= 3);
+
+    let score = 0;
+    if (n === answerNorm) score = 1000;
+    else if (n.startsWith(answerNorm) || answerNorm.startsWith(n)) {
+      score = 800;
+    } else if (n.includes(answerNorm)) {
+      // Answer fully contained — strong (exact-ish with suffix)
+      score = 700 + answerNorm.length;
+    } else if (answerNorm.includes(n) && n.length >= 8) {
+      score = 550 + n.length;
+    } else {
+      const hits = answerTokens.filter((t) =>
+        optTokens.some((o) => o === t || o.includes(t) || t.includes(o)),
+      );
+      if (hits.length > 0) {
+        const coverage = hits.length / Math.max(answerTokens.length, 1);
+        score = 200 + Math.round(coverage * 300) + hits.join("").length;
+        // Bonus when core subject words overlap (business, administration, …)
+        if (hits.some((h) => /business|admin|finance|computer|engineer|market|account/.test(h))) {
+          score += 80;
+        }
+      }
+    }
+
+    // Prefer shorter option when scores tie (less "Concentration in …" noise)
+    if (
+      score > 0 &&
+      (!best ||
+        score > best.score ||
+        (score === best.score && option.length < best.option.length))
+    ) {
+      best = { option, score };
+    }
+  }
+
+  // Require a minimum similarity so we don't pick unrelated first results
+  if (best && best.score >= 200) return best.option;
+  return null;
 };
 
 const fillRadioGroup = async (
