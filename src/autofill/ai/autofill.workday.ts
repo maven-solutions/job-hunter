@@ -1144,6 +1144,25 @@ const getOpenOptionElements = (): HTMLElement[] =>
     return true;
   });
 
+/** Prefer Workday prompt options (school/FOS search results) with clean labels. */
+const getPromptOptionElements = (): HTMLElement[] => {
+  const prompts = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[data-automation-id="promptOption"]',
+    ),
+  ).filter((opt) => {
+    if (!opt.isConnected) return false;
+    if (opt.closest('[data-automation-id="selectedItemList"]')) return false;
+    // Prompt popup options can report 0x0 briefly while virtualized — keep if labeled
+    const label =
+      opt.getAttribute("data-automation-label") ?? opt.textContent ?? "";
+    return cleanLabelText(label).length > 0;
+  });
+  if (prompts.length > 0) return prompts;
+
+  return getOpenOptionElements();
+};
+
 const optionLabel = (opt: HTMLElement): string => {
   const raw = cleanLabelText(
     opt.getAttribute("data-automation-label") ??
@@ -1154,8 +1173,32 @@ const optionLabel = (opt: HTMLElement): string => {
   return raw
     .replace(/,?\s*press delete.*$/i, "")
     .replace(/,?\s*press enter.*$/i, "")
+    .replace(/\s+not checked$/i, "")
+    .replace(/\s+checked$/i, "")
     .trim();
 };
+
+const clickPromptOption = (opt: HTMLElement): void => {
+  const prompt =
+    opt.getAttribute("data-automation-id") === "promptOption"
+      ? opt
+      : opt.querySelector<HTMLElement>('[data-automation-id="promptOption"]');
+  fullClick(prompt ?? opt);
+};
+
+const waitForPromptOptions = async (
+  timeoutMs = 2500,
+): Promise<HTMLElement[]> => {
+  const started = Date.now();
+  let options = getPromptOptionElements();
+  while (options.length === 0 && Date.now() - started < timeoutMs) {
+    await delay(200);
+    await waitForDomUpdate();
+    options = getPromptOptionElements();
+  }
+  return options;
+};
+
 
 const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
@@ -1353,7 +1396,8 @@ export const prepareWorkdayBeforeScan = async (
 
 /**
  * Workday Country Phone Code / School / Field of Study / Skills multiselects.
- * Types to filter, picks option; supports multi-value answers (skills).
+ * School/FOS: type into search → wait for site API results → pick best option.
+ * Plain skills: same flow with multi-value support.
  */
 const fillWorkdayMultiselect = async (
   container: HTMLElement,
@@ -1361,8 +1405,24 @@ const fillWorkdayMultiselect = async (
 ): Promise<boolean> => {
   if (!isUsableWorkdayAnswer(answer)) return false;
 
+  const formField = container.closest(
+    '[data-automation-id^="formField-"]',
+  ) as HTMLElement | null;
+  const formFieldId =
+    formField?.getAttribute("data-automation-id")?.toLowerCase() ?? "";
+  const isSchoolOrFos =
+    /formfield-school|formfield-fieldofstudy|formfield-schoolname/.test(
+      formFieldId,
+    ) ||
+    /school|university|field of study/i.test(
+      formField?.querySelector("label")?.textContent ?? "",
+    );
+  // School / Field of Study are single-select prompts; Skills stay multi
+  const isSingleValue = isSchoolOrFos;
+
   const parts = parseAnswerList(answer);
-  const values = parts.length > 1 ? parts : [answer.trim()];
+  const values =
+    isSingleValue || parts.length <= 1 ? [answer.trim()] : parts;
   let filledAny = false;
 
   for (let i = 0; i < values.length; i++) {
@@ -1382,14 +1442,14 @@ const fillWorkdayMultiselect = async (
       continue;
     }
 
-    // Only clear when setting a single-value field (School/Degree-like), not multi skills
-    if (i === 0 && values.length === 1 && selectedLabels.length > 0) {
+    // Clear existing selection for single-value school/FOS
+    if (i === 0 && (isSingleValue || values.length === 1) && selectedLabels.length > 0) {
       const deleteBtn = container.querySelector<HTMLElement>(
         '[data-automation-id="DELETE_charm"]',
       );
       if (deleteBtn) {
         fullClick(deleteBtn);
-        await delay(150);
+        await delay(200);
       }
     }
 
@@ -1408,22 +1468,59 @@ const fillWorkdayMultiselect = async (
     } else {
       fullClick(container);
     }
-    await delay(200);
+    await delay(250);
     await waitForDomUpdate();
 
-    if (input) {
-      input.focus();
-      setNativeValue(input, part);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      await handleValueChanges(input);
-      await delay(400);
-      await waitForDomUpdate();
-    }
+    const searchQueries = isSchoolOrFos
+      ? buildSchoolSearchQueries(part)
+      : [part];
 
-    let optionEls = getOpenOptionElements();
-    if (optionEls.length === 0) {
-      // Workday school/FOS: press Enter to load matches
-      if (input) {
+    let matched = false;
+    for (const query of searchQueries) {
+      if (!input) break;
+
+      input.focus();
+      // Clear previous query
+      setNativeValue(input, "");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      await delay(50);
+
+      setNativeValue(input, query);
+      input.dispatchEvent(
+        new InputEvent("input", {
+          bubbles: true,
+          cancelable: true,
+          data: query,
+          inputType: "insertText",
+        }),
+      );
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      await handleValueChanges(input);
+
+      // Trigger Workday's remote school search
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+        }),
+      );
+      input.dispatchEvent(
+        new KeyboardEvent("keyup", {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+        }),
+      );
+
+      // Site API is async — poll for Search Results options
+      let optionEls = await waitForPromptOptions(isSchoolOrFos ? 3000 : 1200);
+      if (optionEls.length === 0 && input) {
+        // Second Enter / short wait retry
         input.dispatchEvent(
           new KeyboardEvent("keydown", {
             key: "Enter",
@@ -1431,49 +1528,113 @@ const fillWorkdayMultiselect = async (
             bubbles: true,
           }),
         );
-        await delay(400);
-        await waitForDomUpdate();
-        optionEls = getOpenOptionElements();
+        optionEls = await waitForPromptOptions(1500);
+      }
+
+      if (optionEls.length === 0) continue;
+
+      const labels = optionEls.map(optionLabel).filter(Boolean);
+      let matchedLabel = matchSchoolOrOption(part, labels);
+      if (!matchedLabel && optionEls.length === 1) {
+        matchedLabel = labels[0];
+      }
+      if (!matchedLabel) continue;
+
+      const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
+      if (!target) continue;
+
+      clickPromptOption(target);
+      await delay(350);
+      await waitForDomUpdate();
+
+      const selectedNow = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          '[data-automation-id="selectedItem"]',
+        ),
+      ).map(optionLabel);
+
+      if (
+        selectedNow.some((s) => matchOption(part, [s]) || matchOption(matchedLabel!, [s])) ||
+        selectedNow.length > selectedLabels.length
+      ) {
+        filledAny = true;
+        matched = true;
+        break;
+      }
+
+      // Selection click may have worked even if pill text differs slightly
+      if (selectedNow.length > 0 && isSchoolOrFos) {
+        filledAny = true;
+        matched = true;
+        break;
       }
     }
-    if (optionEls.length === 0) {
-      await delay(300);
-      await waitForDomUpdate();
-      optionEls = getOpenOptionElements();
-    }
 
-    if (optionEls.length === 0) {
+    if (!matched) {
       closeListbox();
-      continue;
     }
-
-    const labels = optionEls.map(optionLabel);
-    let matchedLabel = matchOption(part, labels);
-    // Prefer first visible option when search is reasonably specific
-    if (!matchedLabel && optionEls.length === 1) {
-      matchedLabel = labels[0];
-    }
-    if (!matchedLabel) {
-      // Closest soft match among loaded results
-      matchedLabel = matchOption(part, labels);
-    }
-    if (!matchedLabel) {
-      closeListbox();
-      continue;
-    }
-
-    const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
-    if (!target) {
-      closeListbox();
-      continue;
-    }
-
-    fullClick(target);
-    await delay(250);
-    filledAny = true;
   }
 
   return filledAny;
+};
+
+/** Search variants for school typeahead (full name → distinctive token). */
+const buildSchoolSearchQueries = (school: string): string[] => {
+  const cleaned = cleanLabelText(school);
+  if (!cleaned) return [];
+  const queries: string[] = [cleaned];
+
+  const noParen = cleaned.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  if (noParen && noParen !== cleaned) queries.push(noParen);
+
+  // "University of Pennsylvania" → also try "Pennsylvania"
+  const stripped = noParen
+    .replace(/^(the\s+)?(university|college|school)\s+of\s+/i, "")
+    .replace(/\s+(university|college|school)$/i, "")
+    .trim();
+  if (stripped && stripped.length >= 3 && stripped.toLowerCase() !== cleaned.toLowerCase()) {
+    queries.push(stripped);
+  }
+
+  return [...new Set(queries)];
+};
+
+/** Prefer stronger school-name matches among typeahead results. */
+const matchSchoolOrOption = (
+  answer: string,
+  options: string[],
+): string | null => {
+  const direct = matchOption(answer, options);
+  if (direct) return direct;
+
+  const answerNorm = normalizeForMatch(answer);
+  if (!answerNorm || options.length === 0) return null;
+
+  let best: { option: string; score: number } | null = null;
+  for (const option of options) {
+    const n = normalizeForMatch(option);
+    if (!n) continue;
+
+    let score = 0;
+    if (n === answerNorm) score = 1000;
+    else if (n.includes(answerNorm) || answerNorm.includes(n)) {
+      score = 500 + Math.min(n.length, answerNorm.length);
+    } else {
+      // Token overlap: "pennsylvania" in both
+      const answerTokens = answerNorm.split(/[^a-z0-9]+/).filter((t) => t.length >= 4);
+      const optTokens = new Set(n.split(/[^a-z0-9]+/).filter((t) => t.length >= 3));
+      const hits = answerTokens.filter((t) => optTokens.has(t) || [...optTokens].some((o) => o.includes(t) || t.includes(o)));
+      if (hits.length > 0) {
+        score = 200 + hits.length * 50 + hits.join("").length;
+      }
+    }
+
+    if (score > 0 && (!best || score > best.score)) {
+      best = { option, score };
+    }
+  }
+
+  return best?.option ?? null;
 };
 
 const fillRadioGroup = async (

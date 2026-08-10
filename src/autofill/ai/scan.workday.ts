@@ -982,12 +982,12 @@ const buildWorkdayExperiencePageElements = async (
     ];
   }
 
-  // School: text input on some tenants, multiselect on others
+  // School: text input on some tenants, search-multiselect on others
   const schoolIsText = !!document.querySelector(
-    'input[name="schoolName"], input[id*="--schoolName"], [data-automation-id="formField-schoolName"] input[type="text"]',
+    'input[name="schoolName"], input[id*="--schoolName"], [data-automation-id="formField-schoolName"] input[type="text"]:not([data-uxi-widget-type="selectinput"])',
   );
   const schoolIsMultiselect = !!document.querySelector(
-    '[data-automation-id="formField-school"] [data-automation-id="multiSelectContainer"], [data-automation-id="formField-schoolName"] [data-automation-id="multiSelectContainer"]',
+    '[data-automation-id="formField-school"] [data-automation-id="multiSelectContainer"], [data-automation-id="formField-school"] [data-uxi-widget-type="multiselect"], [data-automation-id="formField-schoolName"] [data-automation-id="multiSelectContainer"]',
   );
 
   // Field of Study: usually multiselect; fall back to text if only an input exists
