@@ -3,6 +3,8 @@ import { Applicant } from "../data";
 import {
   WorkdayCandidateField,
   collectWorkdayCandidateFields,
+  ensureWorkdayEntryPanels,
+  getWorkdayWorkSectionTitle,
   isWorkdayPrefillExcludedLabel,
   prepareWorkdayExperiencePanels,
 } from "./scan.workday";
@@ -124,6 +126,14 @@ const addLabelKey = (set: Set<string>, label: string): void => {
   if (compact) set.add(compact);
 };
 
+/** Treat "Employment History N" and "Work Experience N" as the same section. */
+const normalizeExperienceSectionKey = (label: string): string =>
+  normalizeLabel(label)
+    .replace(/employment\s*history/g, "workexperience")
+    .replace(/work\s*experience/g, "workexperience")
+    .replace(/employmenthistory/g, "workexperience")
+    .replace(/[^a-z0-9]+/g, "");
+
 const isFieldMarkedEmpty = (
   label: string,
   emptyLabelKeys: Set<string>,
@@ -136,6 +146,13 @@ const isFieldMarkedEmpty = (
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
   if (compact && emptyLabelKeys.has(compact)) return true;
+
+  const expKey = normalizeExperienceSectionKey(label);
+  if (expKey) {
+    for (const key of emptyLabelKeys) {
+      if (normalizeExperienceSectionKey(key) === expKey) return true;
+    }
+  }
 
   if (n && n.length >= 8) {
     for (const key of emptyLabelKeys) {
@@ -154,16 +171,77 @@ const fieldKey = (text: string): string =>
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
 
+/** Coerce one employment/education entry into a plain field map. */
+const coerceGroupEntryRecord = (
+  item: unknown,
+): Record<string, unknown> | null => {
+  if (item == null) return null;
+
+  // API format: [{ name: "Job Title", value: "..." }, ...]
+  if (Array.isArray(item)) {
+    const record: Record<string, unknown> = {};
+    for (const field of item) {
+      if (field == null || typeof field !== "object") continue;
+      const f = field as Record<string, unknown>;
+      const fieldName = String(f.name ?? f.label ?? f.field ?? "").trim();
+      if (!fieldName) continue;
+      record[fieldName] = f.value ?? f.answer ?? f.fill ?? f.text;
+    }
+    return Object.keys(record).length > 0 ? record : null;
+  }
+
+  if (typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    // Single { name, value } field object — not a full entry
+    if (
+      ("name" in obj || "label" in obj) &&
+      ("value" in obj || "answer" in obj) &&
+      !("jobTitle" in obj) &&
+      !("company" in obj) &&
+      !("school" in obj)
+    ) {
+      const fieldName = String(obj.name ?? obj.label ?? "").trim();
+      if (!fieldName) return null;
+      return { [fieldName]: obj.value ?? obj.answer };
+    }
+    return obj;
+  }
+
+  return null;
+};
+
 /** Coerce employment/education payload into a list of entry objects. */
 const normalizeGroupEntries = (raw: unknown): Record<string, unknown>[] => {
   if (raw == null) return [];
   if (Array.isArray(raw)) {
+    // Nested list of field arrays: [[{name,value},...], ...]
+    if (raw.length > 0 && Array.isArray(raw[0])) {
+      return raw
+        .map((item) => coerceGroupEntryRecord(item))
+        .filter(Boolean) as Record<string, unknown>[];
+    }
+    // Flat list of entry objects OR flat list of {name,value} fields for one entry
+    if (
+      raw.length > 0 &&
+      typeof raw[0] === "object" &&
+      raw[0] != null &&
+      ("name" in (raw[0] as object) || "label" in (raw[0] as object)) &&
+      ("value" in (raw[0] as object) || "answer" in (raw[0] as object)) &&
+      !Array.isArray((raw[0] as any).value) &&
+      typeof (raw[0] as any).value !== "object"
+    ) {
+      // Could be one entry as field list, or multiple entries as objects with name/value
+      // Heuristic: if names look like field labels (Job Title, Company), treat as one entry
+      const firstName = String(
+        (raw[0] as any).name ?? (raw[0] as any).label ?? "",
+      );
+      if (/job title|company|school|degree|from|to|location/i.test(firstName)) {
+        const single = coerceGroupEntryRecord(raw);
+        return single ? [single] : [];
+      }
+    }
     return raw
-      .map((item) => {
-        if (item == null) return null;
-        if (typeof item === "object") return item as Record<string, unknown>;
-        return null;
-      })
+      .map((item) => coerceGroupEntryRecord(item))
       .filter(Boolean) as Record<string, unknown>[];
   }
   if (typeof raw === "object") {
@@ -184,7 +262,8 @@ const normalizeGroupEntries = (raw: unknown): Record<string, unknown>[] => {
         obj.answer ?? obj.value ?? obj.fill ?? obj.data,
       );
     }
-    return [obj];
+    const coerced = coerceGroupEntryRecord(obj);
+    return coerced ? [coerced] : [];
   }
   return [];
 };
@@ -247,16 +326,21 @@ const flattenGroupEntry = (
     if (
       typeof value === "object" &&
       !Array.isArray(value) &&
-      ("answer" in (value as object) || "value" in (value as object))
+      ("answer" in (value as object) ||
+        "value" in (value as object) ||
+        "name" in (value as object) ||
+        "label" in (value as object))
     ) {
       const nested = value as {
+        name?: string;
         label?: string;
         answer?: unknown;
         value?: unknown;
       };
+      const nestedName = nested.name ?? nested.label ?? key;
       const fieldLabel =
-        map[fieldKey(nested.label ?? key)] ||
-        cleanLabelText(String(nested.label ?? key));
+        map[fieldKey(String(nestedName))] ||
+        cleanLabelText(String(nestedName));
       const val = nested.answer ?? nested.value;
       if (seen.has(fieldLabel)) continue;
       seen.add(fieldLabel);
@@ -319,6 +403,25 @@ export const parseWorkdayAiFillResponse = (
     emptyCount += 1;
   };
 
+  const clearEmpty = (label: string): void => {
+    const cleaned = cleanLabelText(label);
+    if (!cleaned) return;
+    const n = normalizeLabel(cleaned);
+    if (n) emptyLabelKeys.delete(n);
+    const compact = cleaned
+      .toLowerCase()
+      .replace(/['’`]/g, "")
+      .replace(/[^a-z0-9]+/g, "");
+    if (compact) emptyLabelKeys.delete(compact);
+  };
+
+  const pushAnswer = (item: WorkdayAiAnswer): void => {
+    clearEmpty(item.label);
+    answers.push(item);
+  };
+
+  const workSectionTitle = getWorkdayWorkSectionTitle();
+
   const pushRepeatableGroup = (
     kind: "work" | "education",
     raw: unknown,
@@ -332,7 +435,7 @@ export const parseWorkdayAiFillResponse = (
     entries.forEach((entry, index) => {
       const prefix =
         kind === "work"
-          ? `Work Experience ${index + 1}`
+          ? `${workSectionTitle} ${index + 1}`
           : `Education ${index + 1}`;
       const fields = flattenGroupEntry(entry, kind);
       for (const { fieldLabel, value } of fields) {
@@ -340,7 +443,7 @@ export const parseWorkdayAiFillResponse = (
           markEmpty(`${prefix} - ${fieldLabel}`);
           continue;
         }
-        answers.push({
+        pushAnswer({
           label: `${prefix} - ${fieldLabel}`,
           answer: coerceAnswerString(value),
         });
@@ -359,7 +462,8 @@ export const parseWorkdayAiFillResponse = (
     if (
       typeStr === "employment" ||
       /^employment$/i.test(label) ||
-      /^work experience$/i.test(label)
+      /^work experience$/i.test(label) ||
+      /^employment history$/i.test(label)
     ) {
       pushRepeatableGroup(
         "work",
@@ -389,7 +493,7 @@ export const parseWorkdayAiFillResponse = (
         markEmpty(label);
         return;
       }
-      answers.push({
+      pushAnswer({
         label,
         answer,
         type: item.type ? String(item.type) : undefined,
@@ -399,16 +503,40 @@ export const parseWorkdayAiFillResponse = (
 
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object") {
       const sample = raw[0] as Record<string, unknown>;
+      // Nested employment: [[{name,value},...], ...]
+      if (Array.isArray(raw[0])) {
+        const firstField = (raw[0] as unknown[])[0] as
+          | Record<string, unknown>
+          | undefined;
+        const fieldName = String(
+          firstField?.name ?? firstField?.label ?? "",
+        ).toLowerCase();
+        if (/job|title|company|employer|location|from|to|role/.test(fieldName)) {
+          pushRepeatableGroup("work", raw);
+          return;
+        }
+        if (/school|degree|university|education|major|field/.test(fieldName)) {
+          pushRepeatableGroup("education", raw);
+          return;
+        }
+      }
       const keys = Object.keys(sample).map((k) => k.toLowerCase());
+      const sampleName = String(
+        sample.name ?? sample.label ?? "",
+      ).toLowerCase();
       if (
         keys.some((k) =>
-          /job|title|company|employer|school|degree|university/.test(k),
-        )
+          /job|title|company|employer|school|degree|university|name|value/.test(
+            k,
+          ),
+        ) ||
+        /job|title|company|school|degree/.test(sampleName)
       ) {
         if (
           keys.some((k) =>
             /school|degree|university|education|major/.test(k),
-          )
+          ) ||
+          /school|degree|university|education|major|field/.test(sampleName)
         ) {
           pushRepeatableGroup("education", raw);
         } else {
@@ -424,7 +552,7 @@ export const parseWorkdayAiFillResponse = (
       return;
     }
 
-    answers.push({
+    pushAnswer({
       label,
       answer,
       type: item.type ? String(item.type) : undefined,
@@ -662,12 +790,44 @@ const findAnswerForLabel = (
   );
   if (byNorm) return byNorm;
 
-  // Bare field name after section prefix: "Work Experience 1 - Job Title" ↔ "Job Title"
+  // Employment History N ↔ Work Experience N
+  const expKey = normalizeExperienceSectionKey(label);
+  if (expKey) {
+    const byExp = answers.find(
+      (item) => normalizeExperienceSectionKey(item.label) === expKey,
+    );
+    if (byExp) return byExp;
+  }
+
+  // Bare field name after section prefix: "Employment History 1 - Job Title" ↔ "Job Title"
   const bareLabel = label.includes(" - ")
     ? label.slice(label.lastIndexOf(" - ") + 3).trim()
     : label;
   if (bareLabel !== label) {
     const bareNorm = normalizeLabel(bareLabel);
+    const sectionMatch = label.match(
+      /^((?:employment history|work experience|education)\s*\d+)\s*-/i,
+    );
+    const sectionPrefix = sectionMatch?.[1] ?? "";
+
+    // Prefer same-section bare match when multiple WE entries share field names
+    if (sectionPrefix) {
+      const sectionKey = normalizeExperienceSectionKey(sectionPrefix);
+      const bySectionBare = answers.find((item) => {
+        const itemBare = item.label.includes(" - ")
+          ? item.label.slice(item.label.lastIndexOf(" - ") + 3).trim()
+          : item.label;
+        const itemSection = item.label.includes(" - ")
+          ? item.label.slice(0, item.label.lastIndexOf(" - ")).trim()
+          : "";
+        return (
+          normalizeLabel(itemBare) === bareNorm &&
+          normalizeExperienceSectionKey(itemSection) === sectionKey
+        );
+      });
+      if (bySectionBare) return bySectionBare;
+    }
+
     const byBare = answers.find((item) => {
       const itemBare = item.label.includes(" - ")
         ? item.label.slice(item.label.lastIndexOf(" - ") + 3).trim()
@@ -1524,6 +1684,20 @@ const fillField = async (
   return false;
 };
 
+/** Count distinct Employment History / Work Experience N indices in answers. */
+export const countWorkdayEmploymentAnswers = (
+  answers: WorkdayAiAnswer[],
+): number => {
+  const nums = new Set<number>();
+  for (const item of answers) {
+    const m = item.label.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)\s*-/i,
+    );
+    if (m) nums.add(Number(m[1]));
+  }
+  return nums.size;
+};
+
 /**
  * Applies AI fill answers to the current Workday job application page.
  * Re-run after "Save and Continue" for subsequent multi-step pages.
@@ -1533,6 +1707,14 @@ export const autofillWorkdayWithAi = async (
 ): Promise<WorkdayAiFillResult> => {
   const { answers, emptyLabelKeys, emptyCount } =
     parseWorkdayAiFillResponse(response);
+
+  // Expand Employment History / Work Experience panels to match API job count
+  // before collecting fields (Add Another is scoped to the experience section).
+  const empNeeded = countWorkdayEmploymentAnswers(answers);
+  if (empNeeded > 0) {
+    await ensureWorkdayEntryPanels("work", empNeeded);
+  }
+
   const candidates = collectWorkdayCandidateFields();
 
   let filled = 0;
@@ -1548,7 +1730,15 @@ export const autofillWorkdayWithAi = async (
     };
   }
 
-  for (const field of candidates) {
+  // Prefer filling "I currently work here" before To dates so Workday can
+  // disable/clear the end-date control when checked.
+  const ordered = [...candidates].sort((a, b) => {
+    const aCurrent = /i currently work here/i.test(a.label) ? 0 : 1;
+    const bCurrent = /i currently work here/i.test(b.label) ? 0 : 1;
+    return aCurrent - bCurrent;
+  });
+
+  for (const field of ordered) {
     // Country / Country Phone Code are pre-filled or auto-filled by Workday
     if (isWorkdayPrefillExcludedLabel(field.label)) {
       skipped += 1;

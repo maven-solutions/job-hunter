@@ -1,8 +1,5 @@
 import { getAiSiteHandler } from "../../autofill/ai/registry";
-import {
-  AiFormElement,
-  RequestFieldAnswerFn,
-} from "../../autofill/ai/types";
+import { AiFormElement, RequestFieldAnswerFn } from "../../autofill/ai/types";
 import { Applicant } from "../../autofill/data";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
@@ -208,7 +205,7 @@ export const scanHtmlToMakeApi = async ({
     const fillResponse = await dispatch(
       getJobApplicationFillWithAi(payload),
     ).unwrap();
-
+    console.log("fillResponse::", fillResponse);
     setAiAutofillPhase("autofilling");
     const fillResult = await handler.applyFill(
       fillResponse?.data?.fill_data_list ?? fillResponse?.data ?? fillResponse,

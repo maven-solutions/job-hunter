@@ -16,7 +16,9 @@ export const isWorkdayMyInformationPage = (): boolean =>
 export const isWorkdayMyExperiencePage = (): boolean =>
   !!document.querySelector('[data-automation-id="applyFlowMyExpPage"]') ||
   !!document.querySelector("#Work-Experience-section") ||
-  !!document.querySelector('[aria-labelledby="Work-Experience-section"]');
+  !!document.querySelector('[aria-labelledby="Work-Experience-section"]') ||
+  !!document.querySelector("#Employment-History-section") ||
+  !!document.querySelector('[aria-labelledby="Employment-History-section"]');
 
 /**
  * Application Questions (primary / secondary / generic questionnaire steps).

@@ -123,8 +123,12 @@ const getSectionTitle = (element: Element): string => {
     if (labelledBy) {
       const heading = document.getElementById(labelledBy.split(/\s+/)[0]);
       const text = cleanLabelText(heading?.textContent ?? "");
-      // Prefer entry panels over section headers ("Work Experience 1" not "Work Experience")
-      if (/^(work experience|education|certification)\s*\d+/i.test(text)) {
+      // Prefer entry panels over section headers ("Employment History 1" / "Work Experience 1")
+      if (
+        /^(employment history|work experience|education|certification)\s*\d+/i.test(
+          text,
+        )
+      ) {
         return text;
       }
       if (/-?\d+-panel$/i.test(labelledBy) && text) {
@@ -135,7 +139,9 @@ const getSectionTitle = (element: Element): string => {
     const h5 = group.querySelector(":scope > div > h5, :scope h5");
     if (h5?.textContent) {
       const text = cleanLabelText(h5.textContent);
-      if (/^(work experience|education)\s*\d+/i.test(text)) {
+      if (
+        /^(employment history|work experience|education)\s*\d+/i.test(text)
+      ) {
         return text;
       }
     }
@@ -752,13 +758,30 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
 
 /** Workday My Experience page detector re-exported from workday/detect. */
 
-/** Count entry panels like "Work Experience 1", "Education 2". */
+/** Detect which work-experience section title style the page uses. */
+export const getWorkdayWorkSectionTitle = ():
+  | "Employment History"
+  | "Work Experience" => {
+  if (
+    document.querySelector(
+      '#Employment-History-section, [aria-labelledby="Employment-History-section"]',
+    ) ||
+    Array.from(document.querySelectorAll("h4, h5")).some((el) =>
+      /^Employment History/i.test(cleanLabelText(el.textContent ?? "")),
+    )
+  ) {
+    return "Employment History";
+  }
+  return "Work Experience";
+};
+
+/** Count entry panels like "Employment History 1" / "Work Experience 1", "Education 2". */
 export const countWorkdayEntryPanels = (
   kind: "work" | "education",
 ): number => {
   const re =
     kind === "work"
-      ? /^Work Experience\s*(\d+)$/i
+      ? /^(?:Employment History|Work Experience)\s*(\d+)$/i
       : /^Education\s*(\d+)$/i;
   const nums = new Set<number>();
   document.querySelectorAll("h5, [id$='-panel']").forEach((el) => {
@@ -794,20 +817,27 @@ const findSectionAddButton = (
 
   if (!section) return null;
 
+  // Scope Add Another to this section only (Education has the same button).
   const add =
     section.querySelector<HTMLButtonElement>(
       'button[data-automation-id="add-button"]',
     ) ||
     Array.from(section.querySelectorAll<HTMLButtonElement>("button")).find(
-      (b) => /add/i.test(b.textContent ?? ""),
+      (b) => /add\s*another/i.test(b.textContent ?? ""),
     );
 
   return add ?? null;
 };
 
+const WORK_SECTION_IDS = [
+  "Employment-History-section",
+  "Work-Experience-section",
+] as const;
+
 /**
- * Click "Add Another" until the page has `needed` Work Experience or Education panels.
- * One panel is usually present already — only add the difference.
+ * Click "Add Another" until the page has `needed` Employment / Work Experience
+ * or Education panels. Scoped to the matching section so Education's button
+ * is never clicked when targeting experience.
  */
 export const ensureWorkdayEntryPanels = async (
   kind: "work" | "education",
@@ -815,13 +845,21 @@ export const ensureWorkdayEntryPanels = async (
 ): Promise<void> => {
   if (!needed || needed < 1) return;
 
-  const sectionId =
-    kind === "work" ? "Work-Experience-section" : "Education-section";
+  const sectionIds =
+    kind === "work" ? [...WORK_SECTION_IDS] : ["Education-section"];
+
+  const findAdd = (): HTMLButtonElement | null => {
+    for (const id of sectionIds) {
+      const btn = findSectionAddButton(id);
+      if (btn) return btn;
+    }
+    return null;
+  };
 
   let current = countWorkdayEntryPanels(kind);
   // If section has no entry yet but has an Add button, click once to open first panel
   if (current === 0) {
-    const add = findSectionAddButton(sectionId);
+    const add = findAdd();
     if (add) {
       add.click();
       await delay(600);
@@ -831,7 +869,7 @@ export const ensureWorkdayEntryPanels = async (
 
   let guard = 0;
   while (current < needed && guard < 20) {
-    const add = findSectionAddButton(sectionId);
+    const add = findAdd();
     if (!add) break;
     add.click();
     await delay(700);
@@ -870,7 +908,9 @@ export const prepareWorkdayExperiencePanels = async (
 };
 
 const isRepeatableSectionFieldLabel = (label: string): boolean =>
-  /^(work experience|education)\s*\d+\s*-/i.test(label.trim());
+  /^(employment history|work experience|education)\s*\d+\s*-/i.test(
+    label.trim(),
+  );
 
 /**
  * Build nested Employment + Education group payload for My Experience.
@@ -958,7 +998,7 @@ const buildWorkdayExperiencePageElements = async (
     // Skip fields that live inside WE/Education panels even if label format differs
     if (
       candidate.element.closest(
-        '[aria-labelledby*="Work-Experience-"][aria-labelledby$="-panel"], [aria-labelledby*="Education-"][aria-labelledby$="-panel"]',
+        '[aria-labelledby*="Employment-History-"][aria-labelledby$="-panel"], [aria-labelledby*="Work-Experience-"][aria-labelledby$="-panel"], [aria-labelledby*="Education-"][aria-labelledby$="-panel"]',
       )
     ) {
       continue;
