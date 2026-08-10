@@ -438,6 +438,7 @@ export type WorkdayFieldKind =
   | "select"
   | "radio-group"
   | "date-mmyyyy"
+  | "date-yyyy"
   | "date-mmddyyyy"
   | "checkbox";
 
@@ -581,7 +582,7 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
       });
     });
 
-  // 3) MM/YYYY date groups (Work Experience From / To)
+  // 3) Date groups: MM/YYYY (employment) or YYYY-only (education From/To)
   document
     .querySelectorAll<HTMLElement>('[data-automation-id="dateInputWrapper"]')
     .forEach((wrapper) => {
@@ -598,12 +599,22 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         fieldset?.querySelector("legend label, legend")?.textContent ?? "",
       );
       const baseLabel = legendLabel || "Date";
-      const label = withSectionLabel(`${baseLabel} (MM/YYYY)`, wrapper);
+
       const monthInput = wrapper.querySelector<HTMLElement>(
-        '[data-automation-id="dateSectionMonth-input"]',
+        '[data-automation-id="dateSectionMonth-input"], input[aria-label="Month"]',
       );
+      const dayInput = wrapper.querySelector<HTMLElement>(
+        '[data-automation-id="dateSectionDay-input"], input[aria-label="Day"]',
+      );
+      const yearInput = wrapper.querySelector<HTMLElement>(
+        '[data-automation-id="dateSectionYear-input"], input[aria-label="Year"]',
+      );
+
+      const isYearOnly = !monthInput && !dayInput && !!yearInput;
+      const formatSuffix = isYearOnly ? "(YYYY)" : "(MM/YYYY)";
+      const label = withSectionLabel(`${baseLabel} ${formatSuffix}`, wrapper);
       const required =
-        isRequiredField(monthInput ?? wrapper) ||
+        isRequiredField((monthInput ?? yearInput ?? wrapper) as HTMLElement) ||
         !!formField?.querySelector("abbr") ||
         (fieldset?.querySelector("legend")?.textContent ?? "").includes("*");
 
@@ -611,7 +622,7 @@ export const collectWorkdayCandidateFields = (): WorkdayCandidateField[] => {
         element: wrapper,
         label,
         required,
-        kind: "date-mmyyyy",
+        kind: isYearOnly ? "date-yyyy" : "date-mmyyyy",
       });
     });
 
@@ -971,15 +982,59 @@ const buildWorkdayExperiencePageElements = async (
     ];
   }
 
+  // School: text input on some tenants, multiselect on others
+  const schoolIsText = !!document.querySelector(
+    'input[name="schoolName"], input[id*="--schoolName"], [data-automation-id="formField-schoolName"] input[type="text"]',
+  );
+  const schoolIsMultiselect = !!document.querySelector(
+    '[data-automation-id="formField-school"] [data-automation-id="multiSelectContainer"], [data-automation-id="formField-schoolName"] [data-automation-id="multiSelectContainer"]',
+  );
+
+  // Field of Study: usually multiselect; fall back to text if only an input exists
+  const fosIsMultiselect = !!document.querySelector(
+    '[data-automation-id="formField-fieldOfStudy"] [data-automation-id="multiSelectContainer"]',
+  );
+
+  // Year-only From/To present on this education form
+  const eduHasYearDates = !!document.querySelector(
+    '[data-automation-id="formField-firstYearAttended"], [data-automation-id="formField-lastYearAttended"]',
+  );
+  const eduHasGpa = !!document.querySelector(
+    '[data-automation-id="formField-gradeAverage"], input[name="gradeAverage"]',
+  );
+
   const educationFields: AiNestedFieldSchema[] = [
-    { type: "multi-select", label: "School or University" },
+    {
+      type: schoolIsText && !schoolIsMultiselect ? "text" : "multi-select",
+      label: "School or University",
+    },
     {
       type: "listbox",
       label: "Degree",
       options: degreeOptions,
     },
-    { type: "multi-select", label: "Field of Study" },
+    {
+      type: fosIsMultiselect ? "multi-select" : "text",
+      label: "Field of Study",
+    },
   ];
+
+  if (eduHasGpa) {
+    educationFields.push({
+      type: "text",
+      label: "Overall Result (GPA)",
+    });
+  }
+  if (eduHasYearDates) {
+    educationFields.push(
+      { type: "date", label: "From", description: "YYYY" },
+      {
+        type: "date",
+        label: "To (Actual or Expected)",
+        description: "YYYY",
+      },
+    );
+  }
 
   elements.push({
     label: "Education",
@@ -1004,7 +1059,7 @@ const buildWorkdayExperiencePageElements = async (
       continue;
     }
     // Skills multiselect, LinkedIn, websites
-    if (candidate.kind === "text" || candidate.kind === "date-mmyyyy") {
+    if (candidate.kind === "text" || candidate.kind === "date-mmyyyy" || candidate.kind === "date-yyyy") {
       elements.push({
         label: candidate.label.replace(/\s*:$/, ""),
         required: candidate.required,
@@ -1070,7 +1125,7 @@ export const scanWorkdayHtmlToMakeApiPayload = async (
     const candidates = collectWorkdayCandidateFields();
 
     for (const candidate of candidates) {
-      if (candidate.kind === "text" || candidate.kind === "date-mmyyyy") {
+      if (candidate.kind === "text" || candidate.kind === "date-mmyyyy" || candidate.kind === "date-yyyy") {
         elements.push({
           label: candidate.label,
           required: candidate.required,

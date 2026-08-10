@@ -114,6 +114,14 @@ const extractRawAnswer = (item: any): unknown => {
 const isEmptyApiAnswer = (raw: unknown): boolean =>
   !isUsableWorkdayAnswer(raw);
 
+/** Treat "Employment History N" and "Work Experience N" as the same section. */
+const normalizeExperienceSectionKey = (label: string): string =>
+  normalizeLabel(label)
+    .replace(/employment\s*history/g, "workexperience")
+    .replace(/work\s*experience/g, "workexperience")
+    .replace(/employmenthistory/g, "workexperience")
+    .replace(/[^a-z0-9]+/g, "");
+
 const addLabelKey = (set: Set<string>, label: string): void => {
   const cleaned = cleanLabelText(label);
   if (!cleaned) return;
@@ -124,16 +132,15 @@ const addLabelKey = (set: Set<string>, label: string): void => {
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
   if (compact) set.add(compact);
+  const expKey = normalizeExperienceSectionKey(cleaned);
+  if (expKey) set.add(expKey);
 };
 
-/** Treat "Employment History N" and "Work Experience N" as the same section. */
-const normalizeExperienceSectionKey = (label: string): string =>
-  normalizeLabel(label)
-    .replace(/employment\s*history/g, "workexperience")
-    .replace(/work\s*experience/g, "workexperience")
-    .replace(/employmenthistory/g, "workexperience")
-    .replace(/[^a-z0-9]+/g, "");
-
+/**
+ * Empty-field skip must be exact for Employment/Education N fields.
+ * Soft includes previously let "Employment History 1 - Location" (empty)
+ * block "Employment History 2 - Location" (present).
+ */
 const isFieldMarkedEmpty = (
   label: string,
   emptyLabelKeys: Set<string>,
@@ -148,10 +155,16 @@ const isFieldMarkedEmpty = (
   if (compact && emptyLabelKeys.has(compact)) return true;
 
   const expKey = normalizeExperienceSectionKey(label);
-  if (expKey) {
-    for (const key of emptyLabelKeys) {
-      if (normalizeExperienceSectionKey(key) === expKey) return true;
-    }
+  if (expKey && emptyLabelKeys.has(expKey)) return true;
+
+  // Numbered WE / Education fields: exact section+field only (no soft includes)
+  if (
+    /^(?:employmenthistory|workexperience|education)\d/.test(compact) ||
+    /^(?:employment history|work experience|education)\s*\d+/i.test(
+      cleanLabelText(label),
+    )
+  ) {
+    return false;
   }
 
   if (n && n.length >= 8) {
@@ -170,6 +183,117 @@ const fieldKey = (text: string): string =>
     .toLowerCase()
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
+
+const entryLooksLikeWork = (entry: Record<string, unknown>): boolean => {
+  const keys = Object.keys(entry).map((k) => fieldKey(k));
+  return keys.some((k) =>
+    /^(jobtitle|title|position|company|companyname|employer|roledescription|currentlyworkhere|icurrentlyworkhere)$/.test(
+      k,
+    ),
+  );
+};
+
+const entryLooksLikeEducation = (entry: Record<string, unknown>): boolean => {
+  const keys = Object.keys(entry).map((k) => fieldKey(k));
+  return keys.some((k) =>
+    /^(school|schooloruniversity|schoolname|university|college|degree|fieldofstudy|major|overallresultgpa|gpa|gradeaverage)$/.test(
+      k,
+    ),
+  );
+};
+
+/**
+ * API sometimes nests employment-shaped rows under "Education" (or vice versa).
+ * Prefer actual field shape over the group label.
+ */
+const resolveGroupKind = (
+  declared: "work" | "education",
+  entries: Record<string, unknown>[],
+): "work" | "education" => {
+  const workScore = entries.filter(entryLooksLikeWork).length;
+  const eduScore = entries.filter(entryLooksLikeEducation).length;
+  if (declared === "education" && workScore > 0 && eduScore === 0) {
+    return "work";
+  }
+  if (declared === "work" && eduScore > 0 && workScore === 0) {
+    return "education";
+  }
+  return declared;
+};
+
+/** "Company Name, Chicago, IL" → "Chicago" when Location is blank. */
+const extractLocationFromCompany = (company: string): string => {
+  const cleaned = cleanLabelText(company);
+  if (!cleaned) return "";
+  // "... , City, ST" or "... , City, ST 12345"
+  const withState = cleaned.match(
+    /,\s*([^,]+),\s*([A-Za-z]{2})(?:\s+\d{5}(?:-\d{4})?)?\s*$/,
+  );
+  if (withState) {
+    const city = cleanLabelText(withState[1]);
+    if (city && !/inc|llc|ltd|corp|company/i.test(city)) return city;
+  }
+  return "";
+};
+
+const ensureWorkLocationField = (
+  fields: { fieldLabel: string; value: unknown }[],
+): { fieldLabel: string; value: unknown }[] => {
+  const locationIdx = fields.findIndex((f) => f.fieldLabel === "Location");
+  const location = locationIdx >= 0 ? fields[locationIdx] : null;
+  if (location && isUsableWorkdayAnswer(location.value)) return fields;
+
+  const company = fields.find((f) => f.fieldLabel === "Company");
+  if (!company || !isUsableWorkdayAnswer(company.value)) return fields;
+
+  const extracted = extractLocationFromCompany(
+    coerceAnswerString(company.value),
+  );
+  if (!extracted) return fields;
+
+  if (locationIdx >= 0) {
+    const next = [...fields];
+    next[locationIdx] = { fieldLabel: "Location", value: extracted };
+    return next;
+  }
+  return [...fields, { fieldLabel: "Location", value: extracted }];
+};
+
+/** Infer Degree listbox value from Field of Study when Degree is empty. */
+const inferDegreeFromFieldOfStudy = (fos: string): string => {
+  const n = fos.toLowerCase();
+  if (/ph\.?d|doctorate|doctoral/.test(n)) return "Doctorate Degree";
+  if (/\bmba\b|master|m\.?\s*s\.?|m\.?\s*a\.?/.test(n)) {
+    return "Master's Degree";
+  }
+  if (/bachelor|b\.?\s*s\.?|b\.?\s*a\.?|\bbba\b/.test(n)) {
+    return "Bachelor's Degree";
+  }
+  if (/associate/.test(n)) return "Associates Degree";
+  if (/high\s*school|ged/.test(n)) return "High School Diploma";
+  return "";
+};
+
+const ensureEducationDegreeField = (
+  fields: { fieldLabel: string; value: unknown }[],
+): { fieldLabel: string; value: unknown }[] => {
+  const degreeIdx = fields.findIndex((f) => f.fieldLabel === "Degree");
+  const degree = degreeIdx >= 0 ? fields[degreeIdx] : null;
+  if (degree && isUsableWorkdayAnswer(degree.value)) return fields;
+
+  const fos = fields.find((f) => f.fieldLabel === "Field of Study");
+  if (!fos || !isUsableWorkdayAnswer(fos.value)) return fields;
+
+  const inferred = inferDegreeFromFieldOfStudy(coerceAnswerString(fos.value));
+  if (!inferred) return fields;
+
+  if (degreeIdx >= 0) {
+    const next = [...fields];
+    next[degreeIdx] = { fieldLabel: "Degree", value: inferred };
+    return next;
+  }
+  return [...fields, { fieldLabel: "Degree", value: inferred }];
+};
 
 /** Coerce one employment/education entry into a plain field map. */
 const coerceGroupEntryRecord = (
@@ -294,12 +418,30 @@ const EMPLOYMENT_FIELD_MAP: Record<string, string> = {
 const EDUCATION_FIELD_MAP: Record<string, string> = {
   school: "School or University",
   schooloruniversity: "School or University",
+  schoolname: "School or University",
   university: "School or University",
   college: "School or University",
   degree: "Degree",
   fieldofstudy: "Field of Study",
   major: "Field of Study",
   field: "Field of Study",
+  overallresultgpa: "Overall Result (GPA)",
+  overallresult: "Overall Result (GPA)",
+  gpa: "Overall Result (GPA)",
+  gradeaverage: "Overall Result (GPA)",
+  grade: "Overall Result (GPA)",
+  from: "From (YYYY)",
+  fromyyyy: "From (YYYY)",
+  firstyearattended: "From (YYYY)",
+  startyear: "From (YYYY)",
+  startdate: "From (YYYY)",
+  to: "To (Actual or Expected) (YYYY)",
+  toyyyy: "To (Actual or Expected) (YYYY)",
+  toactualorexpected: "To (Actual or Expected) (YYYY)",
+  toactualorexpectedyyyy: "To (Actual or Expected) (YYYY)",
+  lastyearattended: "To (Actual or Expected) (YYYY)",
+  endyear: "To (Actual or Expected) (YYYY)",
+  enddate: "To (Actual or Expected) (YYYY)",
 };
 
 const GROUP_META_KEYS = new Set([
@@ -352,14 +494,31 @@ const flattenGroupEntry = (
     let fieldLabel = map[nKey];
     if (!fieldLabel) {
       fieldLabel = cleanLabelText(key);
-      if (/^from$/i.test(fieldLabel)) fieldLabel = "From (MM/YYYY)";
-      if (/^to$/i.test(fieldLabel)) fieldLabel = "To (MM/YYYY)";
-      if (/^school/i.test(fieldLabel) && kind === "education") {
-        fieldLabel = "School or University";
+      if (kind === "work") {
+        if (/^from$/i.test(fieldLabel)) fieldLabel = "From (MM/YYYY)";
+        if (/^to$/i.test(fieldLabel)) fieldLabel = "To (MM/YYYY)";
+      }
+      if (kind === "education") {
+        if (/^from$/i.test(fieldLabel)) fieldLabel = "From (YYYY)";
+        if (/^to$/i.test(fieldLabel) || /^to \(actual/i.test(fieldLabel)) {
+          fieldLabel = "To (Actual or Expected) (YYYY)";
+        }
+        if (/^school/i.test(fieldLabel)) {
+          fieldLabel = "School or University";
+        }
+        if (/gpa|overall result/i.test(fieldLabel)) {
+          fieldLabel = "Overall Result (GPA)";
+        }
       }
     }
     if (kind === "work" && (fieldLabel === "From" || fieldLabel === "To")) {
       fieldLabel = `${fieldLabel} (MM/YYYY)`;
+    }
+    if (kind === "education") {
+      if (fieldLabel === "From") fieldLabel = "From (YYYY)";
+      if (fieldLabel === "To" || fieldLabel === "To (Actual or Expected)") {
+        fieldLabel = "To (Actual or Expected) (YYYY)";
+      }
     }
 
     if (seen.has(fieldLabel)) continue;
@@ -413,6 +572,8 @@ export const parseWorkdayAiFillResponse = (
       .replace(/['’`]/g, "")
       .replace(/[^a-z0-9]+/g, "");
     if (compact) emptyLabelKeys.delete(compact);
+    const expKey = normalizeExperienceSectionKey(cleaned);
+    if (expKey) emptyLabelKeys.delete(expKey);
   };
 
   const pushAnswer = (item: WorkdayAiAnswer): void => {
@@ -432,12 +593,20 @@ export const parseWorkdayAiFillResponse = (
       return;
     }
 
+    const resolvedKind = resolveGroupKind(kind, entries);
+
     entries.forEach((entry, index) => {
       const prefix =
-        kind === "work"
+        resolvedKind === "work"
           ? `${workSectionTitle} ${index + 1}`
           : `Education ${index + 1}`;
-      const fields = flattenGroupEntry(entry, kind);
+      let fields = flattenGroupEntry(entry, resolvedKind);
+      if (resolvedKind === "work") {
+        fields = ensureWorkLocationField(fields);
+      }
+      if (resolvedKind === "education") {
+        fields = ensureEducationDegreeField(fields);
+      }
       for (const { fieldLabel, value } of fields) {
         if (!isUsableWorkdayAnswer(value)) {
           markEmpty(`${prefix} - ${fieldLabel}`);
@@ -503,7 +672,7 @@ export const parseWorkdayAiFillResponse = (
 
     if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "object") {
       const sample = raw[0] as Record<string, unknown>;
-      // Nested employment: [[{name,value},...], ...]
+      // Nested groups: [[{name,value},...], ...]
       if (Array.isArray(raw[0])) {
         const firstField = (raw[0] as unknown[])[0] as
           | Record<string, unknown>
@@ -511,12 +680,17 @@ export const parseWorkdayAiFillResponse = (
         const fieldName = String(
           firstField?.name ?? firstField?.label ?? "",
         ).toLowerCase();
-        if (/job|title|company|employer|location|from|to|role/.test(fieldName)) {
-          pushRepeatableGroup("work", raw);
+        // Prefer education markers before work — "university" must not hit weak "to"
+        if (
+          /\b(school|university|degree|field of study|major)\b/i.test(fieldName)
+        ) {
+          pushRepeatableGroup("education", raw);
           return;
         }
-        if (/school|degree|university|education|major|field/.test(fieldName)) {
-          pushRepeatableGroup("education", raw);
+        if (
+          /\b(job title|company|employer|role description)\b/i.test(fieldName)
+        ) {
+          pushRepeatableGroup("work", raw);
           return;
         }
       }
@@ -777,6 +951,12 @@ const matchOption = (answer: string, options: string[]): string | null => {
   return null;
 };
 
+/** Strip date-format suffixes so "From (YYYY)" matches "From" / "From (MM/YYYY)". */
+const stripDateFormatSuffix = (label: string): string =>
+  cleanLabelText(label)
+    .replace(/\s*\((?:MM\/YYYY|YYYY|MM\/DD\/YYYY)\)\s*$/i, "")
+    .trim();
+
 const findAnswerForLabel = (
   label: string,
   answers: WorkdayAiAnswer[],
@@ -799,18 +979,19 @@ const findAnswerForLabel = (
     if (byExp) return byExp;
   }
 
-  // Bare field name after section prefix: "Employment History 1 - Job Title" ↔ "Job Title"
+  // Bare field name after section prefix: "Education 1 - School or University"
   const bareLabel = label.includes(" - ")
     ? label.slice(label.lastIndexOf(" - ") + 3).trim()
     : label;
   if (bareLabel !== label) {
     const bareNorm = normalizeLabel(bareLabel);
+    const bareNoDate = normalizeLabel(stripDateFormatSuffix(bareLabel));
     const sectionMatch = label.match(
       /^((?:employment history|work experience|education)\s*\d+)\s*-/i,
     );
     const sectionPrefix = sectionMatch?.[1] ?? "";
 
-    // Prefer same-section bare match when multiple WE entries share field names
+    // Prefer same-section bare match when multiple WE/Edu entries share field names
     if (sectionPrefix) {
       const sectionKey = normalizeExperienceSectionKey(sectionPrefix);
       const bySectionBare = answers.find((item) => {
@@ -820,9 +1001,15 @@ const findAnswerForLabel = (
         const itemSection = item.label.includes(" - ")
           ? item.label.slice(0, item.label.lastIndexOf(" - ")).trim()
           : "";
+        const itemBareNorm = normalizeLabel(itemBare);
+        const itemBareNoDate = normalizeLabel(stripDateFormatSuffix(itemBare));
         return (
-          normalizeLabel(itemBare) === bareNorm &&
-          normalizeExperienceSectionKey(itemSection) === sectionKey
+          (itemBareNorm === bareNorm ||
+            itemBareNoDate === bareNoDate ||
+            itemBareNorm === bareNoDate ||
+            itemBareNoDate === bareNorm) &&
+          (normalizeExperienceSectionKey(itemSection) === sectionKey ||
+            normalizeLabel(itemSection) === normalizeLabel(sectionPrefix))
         );
       });
       if (bySectionBare) return bySectionBare;
@@ -832,10 +1019,14 @@ const findAnswerForLabel = (
       const itemBare = item.label.includes(" - ")
         ? item.label.slice(item.label.lastIndexOf(" - ") + 3).trim()
         : item.label;
+      const itemBareNorm = normalizeLabel(itemBare);
+      const itemBareNoDate = normalizeLabel(stripDateFormatSuffix(itemBare));
       return (
         normalizeLabel(item.label) === bareNorm ||
-        normalizeLabel(itemBare) === bareNorm ||
-        normalizeLabel(itemBare) === normalized
+        itemBareNorm === bareNorm ||
+        itemBareNoDate === bareNoDate ||
+        itemBareNorm === bareNoDate ||
+        itemBareNorm === normalized
       );
     });
     if (byBare) return byBare;
@@ -850,9 +1041,25 @@ const findAnswerForLabel = (
   }
 
   if (normalized.length >= 12) {
+    // Avoid soft-matching across different Employment/Education entry indices
+    const sectionMatch = label.match(
+      /^((?:employment history|work experience|education)\s*\d+)\s*-/i,
+    );
     const soft = answers.find((item) => {
       const n = normalizeLabel(item.label);
       if (!n || n.length < 8) return false;
+      if (sectionMatch) {
+        const itemSection = item.label.match(
+          /^((?:employment history|work experience|education)\s*\d+)\s*-/i,
+        )?.[1];
+        if (
+          itemSection &&
+          normalizeExperienceSectionKey(itemSection) !==
+            normalizeExperienceSectionKey(sectionMatch[1])
+        ) {
+          return false;
+        }
+      }
       return n.includes(normalized) || normalized.includes(n);
     });
     if (soft) return soft;
@@ -1640,6 +1847,40 @@ const fillDateMmddyyyy = async (
   );
 };
 
+/** Fill Workday YYYY-only spinbutton dates (education From / To). */
+const fillDateYyyy = async (
+  wrapper: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableWorkdayAnswer(answer)) return false;
+
+  const yearMatch =
+    cleanLabelText(answer).match(/\b(19|20)\d{2}\b/) ??
+    cleanLabelText(answer).match(/^(\d{4})$/);
+  if (!yearMatch) {
+    // Try month/year parsers and take year
+    const my = parseMonthYear(answer);
+    if (!my) return false;
+    const yearInput = wrapper.querySelector<HTMLInputElement>(
+      '[data-automation-id="dateSectionYear-input"], input[aria-label="Year"]',
+    );
+    if (!yearInput) return false;
+    await fillDateSpinInput(yearInput, my.year);
+    await delay(100);
+    return spinValueMatches(yearInput, my.year) || !!yearInput.value;
+  }
+
+  const year = yearMatch[0];
+  const yearInput = wrapper.querySelector<HTMLInputElement>(
+    '[data-automation-id="dateSectionYear-input"], input[aria-label="Year"]',
+  );
+  if (!yearInput) return false;
+
+  await fillDateSpinInput(yearInput, year);
+  await delay(100);
+  return spinValueMatches(yearInput, year) || !!yearInput.value;
+};
+
 const fillField = async (
   field: WorkdayCandidateField,
   answer: string,
@@ -1660,6 +1901,10 @@ const fillField = async (
 
   if (field.kind === "date-mmyyyy") {
     return fillDateMmyyyy(field.element, answer);
+  }
+
+  if (field.kind === "date-yyyy") {
+    return fillDateYyyy(field.element, answer);
   }
 
   if (field.kind === "date-mmddyyyy") {
@@ -1698,6 +1943,18 @@ export const countWorkdayEmploymentAnswers = (
   return nums.size;
 };
 
+/** Count distinct Education N indices in answers. */
+export const countWorkdayEducationAnswers = (
+  answers: WorkdayAiAnswer[],
+): number => {
+  const nums = new Set<number>();
+  for (const item of answers) {
+    const m = item.label.match(/^Education\s*(\d+)\s*-/i);
+    if (m) nums.add(Number(m[1]));
+  }
+  return nums.size;
+};
+
 /**
  * Applies AI fill answers to the current Workday job application page.
  * Re-run after "Save and Continue" for subsequent multi-step pages.
@@ -1708,11 +1965,15 @@ export const autofillWorkdayWithAi = async (
   const { answers, emptyLabelKeys, emptyCount } =
     parseWorkdayAiFillResponse(response);
 
-  // Expand Employment History / Work Experience panels to match API job count
-  // before collecting fields (Add Another is scoped to the experience section).
+  // Expand Employment / Education panels to match API entry counts
+  // before collecting fields (Add Another is scoped per section).
   const empNeeded = countWorkdayEmploymentAnswers(answers);
   if (empNeeded > 0) {
     await ensureWorkdayEntryPanels("work", empNeeded);
+  }
+  const eduNeeded = countWorkdayEducationAnswers(answers);
+  if (eduNeeded > 0) {
+    await ensureWorkdayEntryPanels("education", eduNeeded);
   }
 
   const candidates = collectWorkdayCandidateFields();
