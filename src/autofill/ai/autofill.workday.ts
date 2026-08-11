@@ -1523,13 +1523,11 @@ const fillWorkdayMultiselect = async (
       let matchedLabel = isFieldOfStudy
         ? matchFieldOfStudyOption(part, labels)
         : matchSchoolOrOption(part, labels);
-      if (!matchedLabel && optionEls.length === 1) {
-        matchedLabel = labels[0];
+      // School only: allow the sole result when it soft-matches the query
+      if (!matchedLabel && isSchool && labels.length === 1) {
+        matchedLabel = matchSchoolOrOption(part, labels);
       }
-      // Fall back to best/first result so education still gets a value
-      if (!matchedLabel && isSearchPrompt && labels.length > 0) {
-        matchedLabel = labels[0];
-      }
+      // Field of Study: never pick a random/top result — must match API value
       if (!matchedLabel) continue;
 
       const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
@@ -1545,23 +1543,27 @@ const fillWorkdayMultiselect = async (
         ),
       ).map(optionLabel);
 
-      if (
-        selectedNow.some(
-          (s) =>
-            matchOption(part, [s]) ||
-            matchOption(matchedLabel!, [s]) ||
-            (isFieldOfStudy && matchFieldOfStudyOption(part, [s])) ||
-            (isSchool && matchSchoolOrOption(part, [s])),
-        ) ||
-        selectedNow.length > selectedLabels.length
-      ) {
+      const selectionMatches = selectedNow.some(
+        (s) =>
+          matchOption(part, [s]) ||
+          matchOption(matchedLabel!, [s]) ||
+          (isFieldOfStudy && matchFieldOfStudyOption(part, [s])) ||
+          (isSchool && matchSchoolOrOption(part, [s])),
+      );
+
+      if (selectionMatches || selectedNow.length > selectedLabels.length) {
+        // For FOS, require the selected pill to actually match the API value
+        if (isFieldOfStudy && !selectionMatches) {
+          closeListbox();
+          continue;
+        }
         filledAny = true;
         matched = true;
         break;
       }
 
-      // Selection click may have worked even if pill text differs slightly
-      if (selectedNow.length > 0 && isSearchPrompt) {
+      // School: selection click may have worked even if pill text differs slightly
+      if (selectedNow.length > 0 && isSchool) {
         filledAny = true;
         matched = true;
         break;
@@ -1740,8 +1742,9 @@ const matchSchoolOrOption = (
 };
 
 /**
- * Exact Field of Study match first, then closest similar option
- * (e.g. "Masters in Business Administration" → "Master of Business Administration - India").
+ * Field of Study: exact / strong match only.
+ * If nothing similar appears (e.g. "Master in computer science" with unrelated
+ * results), return null — never pick the top list item.
  */
 const matchFieldOfStudyOption = (
   answer: string,
@@ -1787,61 +1790,80 @@ const matchFieldOfStudyOption = (
   for (const option of options) {
     const optAliases = expandFosAliases(option);
     for (const a of answerAliases) {
-      if (a && optAliases.has(a)) return option;
+      if (a && a.length >= 6 && optAliases.has(a)) return option;
     }
   }
 
-  // 3. Scored similarity — prefer options that contain core answer tokens
-  let best: { option: string; score: number } | null = null;
-  const answerTokens = answerNorm
+  // Subject tokens only — ignore degree noise ("master", "bachelor", "in", …)
+  const DEGREE_STOP = new Set([
+    "master",
+    "masters",
+    "bachelor",
+    "bachelors",
+    "mba",
+    "phd",
+    "doctorate",
+    "degree",
+    "in",
+    "of",
+    "the",
+    "and",
+    "a",
+    "an",
+    "program",
+    "studies",
+  ]);
+  const subjectTokens = answerNorm
     .split(/[^a-z0-9]+/)
-    .filter(
-      (t) =>
-        t.length >= 3 &&
-        !/^(in|of|the|and|a|an)$/.test(t),
-    );
+    .filter((t) => t.length >= 3 && !DEGREE_STOP.has(t));
 
+  // 3. Strong containment (full subject phrase)
+  const subjectPhrase = subjectTokens.join("");
+  if (subjectPhrase.length >= 6) {
+    for (const option of options) {
+      const n = normalizeForMatch(option);
+      if (!n) continue;
+      if (n.includes(subjectPhrase) || subjectPhrase.includes(n)) {
+        // Avoid tiny option swallowing a long answer (e.g. "science" alone)
+        if (n.length >= Math.min(8, subjectPhrase.length)) return option;
+      }
+    }
+  }
+
+  // 4. Token coverage — require most subject words to appear in the option
+  let best: { option: string; score: number; coverage: number } | null = null;
   for (const option of options) {
     const n = normalizeForMatch(option);
     if (!n) continue;
-    const optTokens = n.split(/[^a-z0-9]+/).filter((t) => t.length >= 3);
+    const optTokens = n
+      .split(/[^a-z0-9]+/)
+      .filter((t) => t.length >= 3 && !DEGREE_STOP.has(t));
 
-    let score = 0;
-    if (n === answerNorm) score = 1000;
-    else if (n.startsWith(answerNorm) || answerNorm.startsWith(n)) {
-      score = 800;
-    } else if (n.includes(answerNorm)) {
-      // Answer fully contained — strong (exact-ish with suffix)
-      score = 700 + answerNorm.length;
-    } else if (answerNorm.includes(n) && n.length >= 8) {
-      score = 550 + n.length;
-    } else {
-      const hits = answerTokens.filter((t) =>
-        optTokens.some((o) => o === t || o.includes(t) || t.includes(o)),
-      );
-      if (hits.length > 0) {
-        const coverage = hits.length / Math.max(answerTokens.length, 1);
-        score = 200 + Math.round(coverage * 300) + hits.join("").length;
-        // Bonus when core subject words overlap (business, administration, …)
-        if (hits.some((h) => /business|admin|finance|computer|engineer|market|account/.test(h))) {
-          score += 80;
-        }
-      }
+    if (subjectTokens.length === 0) {
+      // Answer was only degree words — require near-exact normalized match only
+      continue;
     }
 
-    // Prefer shorter option when scores tie (less "Concentration in …" noise)
+    const hits = subjectTokens.filter((t) =>
+      optTokens.some((o) => o === t || (t.length >= 5 && (o.includes(t) || t.includes(o)))),
+    );
+    const coverage = hits.length / subjectTokens.length;
+    if (coverage < 0.75) continue;
+    // At least one real subject hit beyond a single short token when multiple exist
+    if (subjectTokens.length >= 2 && hits.length < 2) continue;
+
+    const score = Math.round(coverage * 400) + hits.join("").length;
     if (
-      score > 0 &&
-      (!best ||
-        score > best.score ||
-        (score === best.score && option.length < best.option.length))
+      !best ||
+      score > best.score ||
+      (score === best.score && option.length < best.option.length)
     ) {
-      best = { option, score };
+      best = { option, score, coverage };
     }
   }
 
-  // Require a minimum similarity so we don't pick unrelated first results
-  if (best && best.score >= 200) return best.option;
+  // Strong match only (e.g. computer+science both present)
+  if (best && best.coverage >= 0.75 && best.score >= 300) return best.option;
   return null;
 };
 
