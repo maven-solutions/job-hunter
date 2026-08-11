@@ -259,42 +259,6 @@ const ensureWorkLocationField = (
   return [...fields, { fieldLabel: "Location", value: extracted }];
 };
 
-/** Infer Degree listbox value from Field of Study when Degree is empty. */
-const inferDegreeFromFieldOfStudy = (fos: string): string => {
-  const n = fos.toLowerCase();
-  if (/ph\.?d|doctorate|doctoral/.test(n)) return "Doctorate Degree";
-  if (/\bmba\b|master|m\.?\s*s\.?|m\.?\s*a\.?/.test(n)) {
-    return "Master's Degree";
-  }
-  if (/bachelor|b\.?\s*s\.?|b\.?\s*a\.?|\bbba\b/.test(n)) {
-    return "Bachelor's Degree";
-  }
-  if (/associate/.test(n)) return "Associates Degree";
-  if (/high\s*school|ged/.test(n)) return "High School Diploma";
-  return "";
-};
-
-const ensureEducationDegreeField = (
-  fields: { fieldLabel: string; value: unknown }[],
-): { fieldLabel: string; value: unknown }[] => {
-  const degreeIdx = fields.findIndex((f) => f.fieldLabel === "Degree");
-  const degree = degreeIdx >= 0 ? fields[degreeIdx] : null;
-  if (degree && isUsableWorkdayAnswer(degree.value)) return fields;
-
-  const fos = fields.find((f) => f.fieldLabel === "Field of Study");
-  if (!fos || !isUsableWorkdayAnswer(fos.value)) return fields;
-
-  const inferred = inferDegreeFromFieldOfStudy(coerceAnswerString(fos.value));
-  if (!inferred) return fields;
-
-  if (degreeIdx >= 0) {
-    const next = [...fields];
-    next[degreeIdx] = { fieldLabel: "Degree", value: inferred };
-    return next;
-  }
-  return [...fields, { fieldLabel: "Degree", value: inferred }];
-};
-
 /** Coerce one employment/education entry into a plain field map. */
 const coerceGroupEntryRecord = (
   item: unknown,
@@ -603,9 +567,6 @@ export const parseWorkdayAiFillResponse = (
       let fields = flattenGroupEntry(entry, resolvedKind);
       if (resolvedKind === "work") {
         fields = ensureWorkLocationField(fields);
-      }
-      if (resolvedKind === "education") {
-        fields = ensureEducationDegreeField(fields);
       }
       for (const { fieldLabel, value } of fields) {
         if (!isUsableWorkdayAnswer(value)) {
@@ -1483,11 +1444,13 @@ const fillWorkdayMultiselect = async (
     await delay(250);
     await waitForDomUpdate();
 
-    const searchQueries = isFieldOfStudy
-      ? buildFieldOfStudySearchQueries(part)
-      : isSchool
-        ? buildSchoolSearchQueries(part)
-        : [part];
+    const searchQueries = (
+      isFieldOfStudy
+        ? buildFieldOfStudySearchQueries(part)
+        : isSchool
+          ? buildSchoolSearchQueries(part)
+          : [part]
+    ).slice(0, 3); // each attempt waits ~2.5–3s for Workday API
 
     let matched = false;
     for (const query of searchQueries) {
@@ -1497,7 +1460,7 @@ const fillWorkdayMultiselect = async (
       // Clear previous query
       setNativeValue(input, "");
       input.dispatchEvent(new Event("input", { bubbles: true }));
-      await delay(50);
+      await delay(80);
 
       setNativeValue(input, query);
       input.dispatchEvent(
@@ -1510,8 +1473,9 @@ const fillWorkdayMultiselect = async (
       );
       input.dispatchEvent(new Event("change", { bubbles: true }));
       await handleValueChanges(input);
+      await delay(200);
 
-      // Trigger Workday's remote search API
+      // Instructional text: type a few letters and press ENTER
       input.dispatchEvent(
         new KeyboardEvent("keydown", {
           key: "Enter",
@@ -1531,8 +1495,16 @@ const fillWorkdayMultiselect = async (
         }),
       );
 
-      // Site API is async — poll for Search Results options
-      let optionEls = await waitForPromptOptions(isSearchPrompt ? 3000 : 1200);
+      // Remote school/FOS search — always wait 2.5–3s for results to load
+      if (isSearchPrompt) {
+        await delay(2800);
+        await waitForDomUpdate();
+      }
+
+      let optionEls = getPromptOptionElements();
+      if (optionEls.length === 0) {
+        optionEls = await waitForPromptOptions(isSearchPrompt ? 2000 : 1200);
+      }
       if (optionEls.length === 0 && input) {
         input.dispatchEvent(
           new KeyboardEvent("keydown", {
@@ -1541,6 +1513,7 @@ const fillWorkdayMultiselect = async (
             bubbles: true,
           }),
         );
+        if (isSearchPrompt) await delay(2000);
         optionEls = await waitForPromptOptions(1500);
       }
 
@@ -1553,13 +1526,17 @@ const fillWorkdayMultiselect = async (
       if (!matchedLabel && optionEls.length === 1) {
         matchedLabel = labels[0];
       }
+      // Fall back to best/first result so education still gets a value
+      if (!matchedLabel && isSearchPrompt && labels.length > 0) {
+        matchedLabel = labels[0];
+      }
       if (!matchedLabel) continue;
 
       const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
       if (!target) continue;
 
       clickPromptOption(target);
-      await delay(350);
+      await delay(400);
       await waitForDomUpdate();
 
       const selectedNow = Array.from(
@@ -1573,7 +1550,8 @@ const fillWorkdayMultiselect = async (
           (s) =>
             matchOption(part, [s]) ||
             matchOption(matchedLabel!, [s]) ||
-            (isFieldOfStudy && matchFieldOfStudyOption(part, [s])),
+            (isFieldOfStudy && matchFieldOfStudyOption(part, [s])) ||
+            (isSchool && matchSchoolOrOption(part, [s])),
         ) ||
         selectedNow.length > selectedLabels.length
       ) {
@@ -1591,6 +1569,9 @@ const fillWorkdayMultiselect = async (
     }
 
     if (!matched) {
+      closeListbox();
+    } else {
+      await delay(300);
       closeListbox();
     }
   }
@@ -1628,7 +1609,7 @@ const buildSchoolSearchQueries = (school: string): string[] => {
 
 /**
  * Search variants for Field of Study typeahead.
- * e.g. "Masters in Business Administration" → MBA / "Business Administration"
+ * e.g. "Business Administration Technology" → full + "Business Administration"
  */
 const buildFieldOfStudySearchQueries = (fos: string): string[] => {
   const cleaned = cleanLabelText(fos);
@@ -1655,14 +1636,21 @@ const buildFieldOfStudySearchQueries = (fos: string): string[] => {
     queries.push(normalizedDegree);
   }
 
-  // "Master of Business Administration" / "Masters in Business Adminstration"
+  // "Master of Business Administration" / MBA aliases
   if (/business\s+admin/i.test(cleaned) || /\bmba\b/i.test(cleaned)) {
+    queries.push("Business Administration");
     queries.push("Master of Business Administration");
     queries.push("MBA");
-    queries.push("Business Administration");
   }
 
-  // Drop leading degree words → "Business Administration"
+  // "General Business And Management" → "Business Management" / "Business"
+  if (/business/i.test(cleaned) && /management/i.test(cleaned)) {
+    queries.push("Business Management");
+    queries.push("General Business");
+    queries.push("Management");
+  }
+
+  // Drop leading degree words → "Business Administration Technology"
   const withoutDegree = noParen
     .replace(
       /^(masters?|bachelors?|master'?s?|bachelor'?s?|mba|phd|doctorate|associate'?s?)\s+(in|of)\s+/i,
@@ -1678,20 +1666,29 @@ const buildFieldOfStudySearchQueries = (fos: string): string[] => {
     queries.push(withoutDegree);
   }
 
-  // Significant last tokens (e.g. "Administration")
+  // Drop trailing "Technology" / similar for broader hits
+  const withoutTech = noParen.replace(/\s+technology$/i, "").trim();
+  if (
+    withoutTech &&
+    withoutTech.length >= 4 &&
+    withoutTech.toLowerCase() !== cleaned.toLowerCase()
+  ) {
+    queries.push(withoutTech);
+  }
+
+  // Significant last tokens
   const tokens = noParen
     .split(/\s+/)
     .filter(
       (t) =>
         t.length >= 4 &&
-        !/^(master|masters|bachelor|bachelors|in|of|the|and|a)$/i.test(t),
+        !/^(master|masters|bachelor|bachelors|in|of|the|and|a|general)$/i.test(
+          t,
+        ),
     );
   if (tokens.length >= 2) {
+    queries.push(tokens.slice(0, 2).join(" "));
     queries.push(tokens.slice(-2).join(" "));
-  }
-  if (tokens.length >= 1) {
-    const last = tokens[tokens.length - 1];
-    if (last.length >= 5) queries.push(last);
   }
 
   return [...new Set(queries.filter(Boolean))];
@@ -2363,13 +2360,53 @@ export const autofillWorkdayWithAi = async (
     };
   }
 
-  // Prefer filling "I currently work here" before To dates so Workday can
-  // disable/clear the end-date control when checked.
-  const ordered = [...candidates].sort((a, b) => {
-    const aCurrent = /i currently work here/i.test(a.label) ? 0 : 1;
-    const bCurrent = /i currently work here/i.test(b.label) ? 0 : 1;
-    return aCurrent - bCurrent;
-  });
+  // Fill order:
+  // 1) "I currently work here" before To dates
+  // 2) Education panels in order: School → Degree → Field of Study → other
+  // 3) Employment panels by index
+  const fieldSortKey = (label: string): number => {
+    if (/i currently work here/i.test(label)) return 0;
+
+    const edu = label.match(/^Education\s*(\d+)\s*-\s*(.+)$/i);
+    if (edu) {
+      const idx = Number(edu[1]) || 1;
+      const bare = edu[2].toLowerCase();
+      let fieldOrder = 50;
+      if (/school|university/.test(bare)) fieldOrder = 1;
+      else if (/^degree/.test(bare)) fieldOrder = 2;
+      else if (/field of study/.test(bare)) fieldOrder = 3;
+      else if (/overall result|gpa/.test(bare)) fieldOrder = 4;
+      else if (/^from/.test(bare)) fieldOrder = 5;
+      else if (/^to/.test(bare)) fieldOrder = 6;
+      return 100 + idx * 20 + fieldOrder;
+    }
+
+    const work = label.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)\s*-\s*(.+)$/i,
+    );
+    if (work) {
+      const idx = Number(work[1]) || 1;
+      const bare = work[2].toLowerCase();
+      let fieldOrder = 50;
+      if (/job title/.test(bare)) fieldOrder = 1;
+      else if (/^company/.test(bare)) fieldOrder = 2;
+      else if (/location/.test(bare)) fieldOrder = 3;
+      else if (/currently work/.test(bare)) fieldOrder = 4;
+      else if (/^from/.test(bare)) fieldOrder = 5;
+      else if (/^to/.test(bare)) fieldOrder = 6;
+      else if (/role description/.test(bare)) fieldOrder = 7;
+      return 1000 + idx * 20 + fieldOrder;
+    }
+
+    // Skills / LinkedIn after repeatable groups
+    if (/skill/i.test(label)) return 5000;
+    if (/linkedin/i.test(label)) return 5100;
+    return 4000;
+  };
+
+  const ordered = [...candidates].sort(
+    (a, b) => fieldSortKey(a.label) - fieldSortKey(b.label),
+  );
 
   for (const field of ordered) {
     // Country / Country Phone Code are pre-filled or auto-filled by Workday
@@ -2409,7 +2446,15 @@ export const autofillWorkdayWithAi = async (
       failed += 1;
     }
 
-    await delay(200);
+    // Extra settle time after school/FOS search selects before next field
+    if (
+      field.kind === "multiselect" &&
+      /school|university|field of study/i.test(field.label)
+    ) {
+      await delay(500);
+    } else {
+      await delay(200);
+    }
   }
 
   return {
