@@ -1001,6 +1001,12 @@ const findAnswerForLabel = (
     if (phone) return phone;
   }
 
+  // Skills field aliases: "Skills" ↔ "Type to Add Skills"
+  if (/skill/i.test(label)) {
+    const skills = answers.find((item) => /skill/i.test(item.label));
+    if (skills) return skills;
+  }
+
   if (normalized.length >= 12) {
     // Avoid soft-matching across different Employment/Education entry indices
     const sectionMatch = label.match(
@@ -1044,10 +1050,35 @@ const closeListbox = (): void => {
 
 const fullClick = (element: HTMLElement): void => {
   element.scrollIntoView({ block: "nearest", inline: "nearest" });
-  const opts = { bubbles: true, cancelable: true, view: window };
-  element.dispatchEvent(new PointerEvent("pointerdown", opts));
+  const rect = element.getBoundingClientRect();
+  const clientX = rect.left + Math.max(rect.width / 2, 1);
+  const clientY = rect.top + Math.max(Math.min(rect.height / 2, 14), 1);
+  const opts: MouseEventInit = {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    clientX,
+    clientY,
+    button: 0,
+    buttons: 1,
+  };
+  element.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      ...opts,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+    }),
+  );
   element.dispatchEvent(new MouseEvent("mousedown", opts));
-  element.dispatchEvent(new PointerEvent("pointerup", opts));
+  element.dispatchEvent(
+    new PointerEvent("pointerup", {
+      ...opts,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+    }),
+  );
   element.dispatchEvent(new MouseEvent("mouseup", opts));
   element.dispatchEvent(new MouseEvent("click", opts));
   try {
@@ -1055,6 +1086,45 @@ const fullClick = (element: HTMLElement): void => {
   } catch {
     /* ignore */
   }
+};
+
+/**
+ * One click only — Workday skill checkboxes toggle; fullClick's synthetic+native
+ * double-fire selects then immediately deselects.
+ */
+const singleClick = (element: HTMLElement): void => {
+  element.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const rect = element.getBoundingClientRect();
+  const clientX = rect.left + Math.max(rect.width / 2, 1);
+  const clientY = rect.top + Math.max(Math.min(rect.height / 2, 14), 1);
+  const opts: MouseEventInit = {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    clientX,
+    clientY,
+    button: 0,
+    buttons: 1,
+  };
+  element.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      ...opts,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+    }),
+  );
+  element.dispatchEvent(new MouseEvent("mousedown", opts));
+  element.dispatchEvent(
+    new PointerEvent("pointerup", {
+      ...opts,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+    }),
+  );
+  element.dispatchEvent(new MouseEvent("mouseup", opts));
+  element.dispatchEvent(new MouseEvent("click", opts));
 };
 
 const setNativeValue = (
@@ -1145,6 +1215,187 @@ const clickPromptOption = (opt: HTMLElement): void => {
       ? opt
       : opt.querySelector<HTMLElement>('[data-automation-id="promptOption"]');
   fullClick(prompt ?? opt);
+};
+
+/** True when a skills list option is checked (Workday multiSelectPrompt). */
+const isSkillOptionChecked = (row: HTMLElement): boolean => {
+  const leaf =
+    row.querySelector<HTMLElement>('[data-automation-id="promptLeafNode"]') ??
+    (row.getAttribute("data-automation-id") === "promptLeafNode" ? row : null);
+
+  if (leaf?.getAttribute("data-automation-checked") === "Checked") return true;
+  if (leaf?.getAttribute("data-uxi-multiselectlistitem-isselected") === "true") {
+    return true;
+  }
+  if (row.getAttribute("aria-selected") === "true") return true;
+  if (row.getAttribute("data-automation-selected") === "true") return true;
+  if (/\bchecked$/i.test(row.getAttribute("aria-label") ?? "")) return true;
+
+  const wrap = row.querySelector<HTMLElement>(
+    '[data-automation-id="checkbox"]',
+  );
+  if (wrap?.getAttribute("data-automationcheckboxchecked") === "true") {
+    return true;
+  }
+
+  const checkbox = row.querySelector<HTMLInputElement>(
+    'input[type="checkbox"][data-automation-id="checkboxPanel"], input[type="checkbox"]',
+  );
+  if (
+    checkbox &&
+    (checkbox.checked || checkbox.getAttribute("aria-checked") === "true")
+  ) {
+    return true;
+  }
+  return false;
+};
+
+/** Poll until skill option is checked (avoids double-click toggle). */
+const waitUntilSkillChecked = async (
+  row: HTMLElement,
+  timeoutMs = 700,
+): Promise<boolean> => {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (isSkillOptionChecked(row)) return true;
+    await delay(80);
+  }
+  return isSkillOptionChecked(row);
+};
+
+/**
+ * Select one skills multi-select option.
+ * Workday uses promptLeafNode + custom checkbox — click ONCE (extra clicks toggle off).
+ */
+const selectSkillMultiselectOption = async (
+  opt: HTMLElement,
+): Promise<boolean> => {
+  const row =
+    (opt.closest(
+      '[role="option"][data-automation-id="menuItem"], [data-automation-id="menuItem"], [role="option"]',
+    ) as HTMLElement | null) ?? opt;
+
+  row.scrollIntoView({ block: "nearest", inline: "nearest" });
+  await delay(100);
+
+  if (isSkillOptionChecked(row)) return true;
+
+  const leaf =
+    row.querySelector<HTMLElement>('[data-automation-id="promptLeafNode"]') ??
+    row;
+  const checkboxWrap = row.querySelector<HTMLElement>(
+    '[data-automation-id="checkbox"]',
+  );
+  const checkbox = row.querySelector<HTMLInputElement>(
+    'input[type="checkbox"][data-automation-id="checkboxPanel"], input[type="checkbox"]',
+  );
+  const prompt = row.querySelector<HTMLElement>(
+    '[data-automation-id="promptOption"]',
+  );
+
+  // Prefer the visible checkbox chrome, then leaf, then label — one click each,
+  // waiting between so we never toggle a successful selection off.
+  const clickTargets: HTMLElement[] = [];
+  if (checkboxWrap) clickTargets.push(checkboxWrap);
+  if (leaf && leaf !== checkboxWrap) clickTargets.push(leaf);
+  if (prompt && !clickTargets.includes(prompt)) clickTargets.push(prompt);
+  if (!clickTargets.includes(row)) clickTargets.push(row);
+
+  for (const target of clickTargets) {
+    if (isSkillOptionChecked(row)) return true;
+    singleClick(target);
+    if (await waitUntilSkillChecked(row, 700)) return true;
+  }
+
+  // Native checkbox property (hidden input often ignores pointer clicks)
+  if (checkbox && !isSkillOptionChecked(row)) {
+    setNativeChecked(checkbox, true);
+    checkbox.dispatchEvent(new Event("input", { bubbles: true }));
+    checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+    if (await waitUntilSkillChecked(row, 500)) return true;
+  }
+
+  // Keyboard: Space toggles multi-select options
+  if (!isSkillOptionChecked(row)) {
+    row.focus?.();
+    leaf.focus?.();
+    leaf.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: " ",
+        code: "Space",
+        keyCode: 32,
+        which: 32,
+        bubbles: true,
+      }),
+    );
+    leaf.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        key: " ",
+        code: "Space",
+        keyCode: 32,
+        which: 32,
+        bubbles: true,
+      }),
+    );
+    if (await waitUntilSkillChecked(row, 500)) return true;
+  }
+
+  return isSkillOptionChecked(row);
+};
+
+/** Wait until a new skill pill appears or the list option stays checked. */
+const waitForSkillPillAdded = async (
+  container: HTMLElement,
+  prevCount: number,
+  matchedLabel: string,
+  skillQuery: string,
+  optionRow?: HTMLElement | null,
+  timeoutMs = 1800,
+): Promise<boolean> => {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (optionRow && isSkillOptionChecked(optionRow)) {
+      // List shows checked — pill usually follows shortly
+      const selectedNow = Array.from(
+        container.querySelectorAll<HTMLElement>(
+          '[data-automation-id="selectedItem"]',
+        ),
+      ).map(optionLabel);
+      if (
+        selectedNow.length > prevCount ||
+        selectedNow.some(
+          (s) =>
+            matchOption(matchedLabel, [s]) != null ||
+            matchSkillOption(skillQuery, [s]) != null,
+        )
+      ) {
+        return true;
+      }
+      // Checked in list is enough success for multi-select
+      if (Date.now() - started > 600) return true;
+    }
+
+    const selectedNow = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        '[data-automation-id="selectedItem"]',
+      ),
+    ).map(optionLabel);
+
+    if (selectedNow.length > prevCount) return true;
+    if (
+      selectedNow.some(
+        (s) =>
+          matchOption(matchedLabel, [s]) != null ||
+          matchSkillOption(skillQuery, [s]) != null ||
+          matchOption(skillQuery, [s]) != null,
+      )
+    ) {
+      return true;
+    }
+    await delay(150);
+    await waitForDomUpdate();
+  }
+  return false;
 };
 
 const waitForPromptOptions = async (
@@ -1357,8 +1608,8 @@ export const prepareWorkdayBeforeScan = async (
 
 /**
  * Workday Country Phone Code / School / Field of Study / Skills multiselects.
- * School/FOS: type into search → wait for site API results → pick exact or closest option.
- * Plain skills: same flow with multi-value support.
+ * School/FOS: single-select search → wait → pick matching option.
+ * Skills: multi-select — search each skill, wait, pick similar match, then next.
  */
 const fillWorkdayMultiselect = async (
   container: HTMLElement,
@@ -1372,19 +1623,37 @@ const fillWorkdayMultiselect = async (
   const formFieldId =
     formField?.getAttribute("data-automation-id")?.toLowerCase() ?? "";
   const labelText = formField?.querySelector("label")?.textContent ?? "";
+  const inputId =
+    container
+      .querySelector<HTMLElement>(
+        'input[data-uxi-widget-type="selectinput"], input[id]',
+      )
+      ?.getAttribute("id")
+      ?.toLowerCase() ?? "";
+
   const isSchool =
     /formfield-school(?!name)|formfield-schoolname/.test(formFieldId) ||
-    (/school|university/i.test(labelText) && !/field of study/i.test(labelText));
+    (/school|university/i.test(labelText) &&
+      !/field of study/i.test(labelText));
   const isFieldOfStudy =
     /formfield-fieldofstudy/.test(formFieldId) ||
     /field of study/i.test(labelText);
-  const isSearchPrompt = isSchool || isFieldOfStudy;
-  // School / Field of Study are single-select prompts; Skills stay multi
-  const isSingleValue = isSearchPrompt;
+  const isSkills =
+    /formfield-skill|skills--skills|^skills$/i.test(formFieldId) ||
+    /skill/i.test(inputId) ||
+    /^(type to add )?skills?$/i.test(cleanLabelText(labelText)) ||
+    /type to add skills/i.test(labelText);
+  const isSearchPrompt = isSchool || isFieldOfStudy || isSkills;
+  // School / Field of Study are single-select; Skills stay multi
+  const isSingleValue = isSchool || isFieldOfStudy;
 
   const parts = parseAnswerList(answer);
-  const values =
+  let values =
     isSingleValue || parts.length <= 1 ? [answer.trim()] : parts;
+  // Cap skills so autofill doesn't run forever on huge lists
+  if (isSkills && values.length > 20) {
+    values = values.slice(0, 20);
+  }
   let filledAny = false;
 
   for (let i = 0; i < values.length; i++) {
@@ -1400,21 +1669,22 @@ const fillWorkdayMultiselect = async (
       .filter(Boolean);
 
     if (
-      selectedLabels.some(
-        (s) =>
-          matchOption(part, [s]) ||
-          matchSchoolOrOption(part, [s]) ||
-          matchFieldOfStudyOption(part, [s]),
+      selectedLabels.some((s) =>
+        isSkills
+          ? matchSkillOption(part, [s]) != null || matchOption(part, [s]) != null
+          : matchOption(part, [s]) ||
+            matchSchoolOrOption(part, [s]) ||
+            matchFieldOfStudyOption(part, [s]),
       )
     ) {
       filledAny = true;
       continue;
     }
 
-    // Clear existing selection for single-value school/FOS
+    // Clear existing selection only for single-value school/FOS (never for skills)
     if (
       i === 0 &&
-      (isSingleValue || values.length === 1) &&
+      isSingleValue &&
       selectedLabels.length > 0
     ) {
       const deleteBtn = container.querySelector<HTMLElement>(
@@ -1449,15 +1719,14 @@ const fillWorkdayMultiselect = async (
         ? buildFieldOfStudySearchQueries(part)
         : isSchool
           ? buildSchoolSearchQueries(part)
-          : [part]
-    ).slice(0, 3); // each attempt waits ~2.5–3s for Workday API
+          : [part.trim()]
+    ).slice(0, isSkills ? 1 : 3);
 
     let matched = false;
     for (const query of searchQueries) {
       if (!input) break;
 
       input.focus();
-      // Clear previous query
       setNativeValue(input, "");
       input.dispatchEvent(new Event("input", { bubbles: true }));
       await delay(80);
@@ -1475,7 +1744,7 @@ const fillWorkdayMultiselect = async (
       await handleValueChanges(input);
       await delay(200);
 
-      // Instructional text: type a few letters and press ENTER
+      // Type + ENTER to trigger Workday remote search
       input.dispatchEvent(
         new KeyboardEvent("keydown", {
           key: "Enter",
@@ -1495,9 +1764,9 @@ const fillWorkdayMultiselect = async (
         }),
       );
 
-      // Remote school/FOS search — always wait 2.5–3s for results to load
+      // Wait for search API results (skills / school / FOS)
       if (isSearchPrompt) {
-        await delay(2800);
+        await delay(isSkills ? 2200 : 2800);
         await waitForDomUpdate();
       }
 
@@ -1513,25 +1782,61 @@ const fillWorkdayMultiselect = async (
             bubbles: true,
           }),
         );
-        if (isSearchPrompt) await delay(2000);
+        if (isSearchPrompt) await delay(isSkills ? 1500 : 2000);
         optionEls = await waitForPromptOptions(1500);
       }
 
       if (optionEls.length === 0) continue;
 
       const labels = optionEls.map(optionLabel).filter(Boolean);
-      let matchedLabel = isFieldOfStudy
-        ? matchFieldOfStudyOption(part, labels)
-        : matchSchoolOrOption(part, labels);
-      // School only: allow the sole result when it soft-matches the query
-      if (!matchedLabel && isSchool && labels.length === 1) {
+      let matchedLabel: string | null = null;
+      if (isFieldOfStudy) {
+        matchedLabel = matchFieldOfStudyOption(part, labels);
+      } else if (isSkills) {
+        matchedLabel = matchSkillOption(part, labels);
+      } else if (isSchool) {
         matchedLabel = matchSchoolOrOption(part, labels);
+        if (!matchedLabel && labels.length === 1) {
+          matchedLabel = matchSchoolOrOption(part, labels);
+        }
+      } else {
+        matchedLabel = matchOption(part, labels);
       }
-      // Field of Study: never pick a random/top result — must match API value
+
+      // Never pick a random top result when nothing matches
       if (!matchedLabel) continue;
 
-      const target = optionEls.find((opt) => optionLabel(opt) === matchedLabel);
+      // Prefer the menuItem/option row that owns this promptOption (checkbox lives there)
+      let target: HTMLElement | undefined = optionEls.find(
+        (opt) => optionLabel(opt) === matchedLabel,
+      );
+      if (target) {
+        const row = target.closest(
+          '[role="option"], [data-automation-id="menuItem"]',
+        ) as HTMLElement | null;
+        if (row) target = row;
+      }
       if (!target) continue;
+
+      const prevCount = selectedLabels.length;
+      if (isSkills) {
+        // Select via promptLeafNode/checkbox — single click only (no toggle-off)
+        const checked = await selectSkillMultiselectOption(target);
+        const added = await waitForSkillPillAdded(
+          container,
+          prevCount,
+          matchedLabel,
+          part,
+          target,
+          1800,
+        );
+        if (checked || added || isSkillOptionChecked(target)) {
+          filledAny = true;
+          matched = true;
+          break;
+        }
+        continue;
+      }
 
       clickPromptOption(target);
       await delay(400);
@@ -1552,9 +1857,7 @@ const fillWorkdayMultiselect = async (
       );
 
       if (selectionMatches || selectedNow.length > selectedLabels.length) {
-        // For FOS, require the selected pill to actually match the API value
         if (isFieldOfStudy && !selectionMatches) {
-          closeListbox();
           continue;
         }
         filledAny = true;
@@ -1562,8 +1865,7 @@ const fillWorkdayMultiselect = async (
         break;
       }
 
-      // School: selection click may have worked even if pill text differs slightly
-      if (selectedNow.length > 0 && isSchool) {
+      if (selectedNow.length > selectedLabels.length && isSchool) {
         filledAny = true;
         matched = true;
         break;
@@ -1571,11 +1873,33 @@ const fillWorkdayMultiselect = async (
     }
 
     if (!matched) {
-      closeListbox();
+      if (isSkills && input) {
+        // Keep prompt open; clear query and move to next skill
+        setNativeValue(input, "");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        await delay(150);
+      } else {
+        closeListbox();
+      }
     } else {
-      await delay(300);
-      closeListbox();
+      await delay(200);
+      // Clear search box for next skill; keep selected pills — don't Escape
+      // between skills (closes prompt and drops pending selection).
+      if (isSkills && input) {
+        setNativeValue(input, "");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        await delay(150);
+      } else {
+        closeListbox();
+        await delay(200);
+      }
     }
+  }
+
+  // Close skills prompt once all skills attempted
+  if (isSkills) {
+    closeListbox();
+    await delay(150);
   }
 
   return filledAny;
@@ -1739,6 +2063,64 @@ const matchSchoolOrOption = (
   }
 
   return best?.option ?? null;
+};
+
+/**
+ * Skills multi-select: pick the closest catalog skill (e.g. "Jira" → "Atlassian JIRA").
+ * Skip unrelated results — never force the top item when nothing matches.
+ */
+const matchSkillOption = (
+  answer: string,
+  options: string[],
+): string | null => {
+  if (!answer?.trim() || options.length === 0) return null;
+
+  const cleanAnswer = cleanLabelText(answer);
+  const answerNorm = normalizeForMatch(answer);
+  if (!answerNorm || answerNorm.length < 2) return null;
+
+  for (const option of options) {
+    if (cleanLabelText(option) === cleanAnswer) return option;
+  }
+  for (const option of options) {
+    if (normalizeForMatch(option) === answerNorm) return option;
+  }
+
+  let best: { option: string; score: number } | null = null;
+  for (const option of options) {
+    const n = normalizeForMatch(option);
+    if (!n) continue;
+    const tokens = n.split(/[^a-z0-9]+/).filter((t) => t.length >= 2);
+
+    let score = 0;
+    if (n === answerNorm) {
+      score = 1000;
+    } else if (tokens.some((t) => t === answerNorm)) {
+      // Whole-word token: "jira" in "Atlassian JIRA"
+      score = 850;
+      score += Math.max(0, 80 - n.length);
+      if (tokens[tokens.length - 1] === answerNorm) score += 40;
+    } else if (
+      answerNorm.length >= 3 &&
+      tokens.some((t) => t.startsWith(answerNorm) || answerNorm.startsWith(t))
+    ) {
+      score = 500;
+    } else if (answerNorm.length >= 3 && n.includes(answerNorm)) {
+      score = 350;
+    } else if (
+      answerNorm.length >= 4 &&
+      tokens.some((t) => t.includes(answerNorm) || answerNorm.includes(t))
+    ) {
+      score = 250;
+    }
+
+    if (score > 0 && (!best || score > best.score)) {
+      best = { option, score };
+    }
+  }
+
+  if (best && best.score >= 350) return best.option;
+  return null;
 };
 
 /**
