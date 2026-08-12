@@ -157,8 +157,9 @@ const extractLocation = (): string | null => {
   const tertiary = document.querySelector(
     ".job-details-jobs-unified-top-card__tertiary-description",
   );
-  const tertiaryLocation = (tertiary?.childNodes?.[1] as HTMLElement | undefined)
-    ?.textContent?.trim();
+  const tertiaryLocation = (
+    tertiary?.childNodes?.[1] as HTMLElement | undefined
+  )?.textContent?.trim();
   if (tertiaryLocation) return tertiaryLocation;
 
   const listLocation = document
@@ -336,7 +337,7 @@ const getCompanyDetails = (): CompanyDetails => {
   const ariaLabel = companyBlock.getAttribute("aria-label");
   companyDetails.name = ariaLabel?.startsWith("Company,")
     ? ariaLabel.replace(/^Company,\s*/i, "").trim()
-    : companyLink?.textContent?.trim() ?? null;
+    : (companyLink?.textContent?.trim() ?? null);
 
   companyDetails.logo =
     companyBlock.querySelector<HTMLImageElement>("img")?.src ||
@@ -369,9 +370,9 @@ const getHiringTeamDetails = (): RecruiterDetails => {
     hiringSectionEle.querySelector<HTMLAnchorElement>("a")?.href ?? null;
 
   recruiterDetails.profileImage =
-    hiringSectionEle.previousElementSibling
-      ?.querySelector?.<HTMLImageElement>("img")
-      ?.src ?? null;
+    hiringSectionEle.previousElementSibling?.querySelector?.<HTMLImageElement>(
+      "img",
+    )?.src ?? null;
 
   recruiterDetails.title =
     hiringSectionEle
@@ -427,17 +428,16 @@ export const getContentFromLinkedInJobs = async (
 ): Promise<void> => {
   try {
     clearStateAndCity?.();
-    console.log("LinkedIn extraction started::", window?.location?.href);
 
     const ready = await waitForJobPanel();
-    console.log("LinkedIn job panel ready::", ready, {
-      sduiRoot: !!getSduiRoot(),
-      aboutJob: !!document.querySelector('[id^="JobDetails_AboutTheJob_"]'),
-      expandable: !!document.querySelector(
-        '[data-testid="expandable-text-box"]',
-      ),
-      jobViewLink: !!document.querySelector('a[href*="/jobs/view/"]'),
-    });
+    // console.log("LinkedIn job panel ready::", ready, {
+    //   sduiRoot: !!getSduiRoot(),
+    //   aboutJob: !!document.querySelector('[id^="JobDetails_AboutTheJob_"]'),
+    //   expandable: !!document.querySelector(
+    //     '[data-testid="expandable-text-box"]',
+    //   ),
+    //   jobViewLink: !!document.querySelector('a[href*="/jobs/view/"]'),
+    // });
 
     // Give lazy About-the-job section a moment to hydrate
     await sleep(400);
@@ -454,8 +454,8 @@ export const getContentFromLinkedInJobs = async (
       extracted = collectExtractedJob(isDateString);
     }
 
-    console.log("LinkedIn extracted job data::", extracted);
-    console.log("LinkedIn job description text::", extracted.description);
+    // console.log("LinkedIn extracted job data::", extracted);
+    // console.log("LinkedIn job description text::", extracted.description);
 
     setPostUrl?.(extracted.postUrl);
     setJobstitle?.(extracted.title);
@@ -471,6 +471,6 @@ export const getContentFromLinkedInJobs = async (
     setCompanyDetails?.(extracted.companyDetails ?? {});
     setRecruiterDetails?.(extracted.recruiterDetails ?? {});
   } catch (error) {
-    console.log("LinkedIn extraction error::", error);
+    // console.log("LinkedIn extraction error::", error);
   }
 };
