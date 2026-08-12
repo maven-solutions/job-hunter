@@ -1,12 +1,35 @@
 import { Applicant } from "../data";
 
-export type AiFormElementType = "text" | "search";
+/** Base types used by Greenhouse / most sites; Workday also uses nested group types. */
+export type AiFormElementType =
+  | "text"
+  | "search"
+  | "employment"
+  | "education"
+  | "multi-select"
+  | "listbox"
+  | "date"
+  | "checkbox";
+
+/** Nested field schema inside employment / education group elements. */
+export interface AiNestedFieldSchema {
+  type: string;
+  label: string;
+  description?: string;
+  options?: string[] | AiNestedFieldSchema[];
+  required?: boolean;
+}
 
 export interface AiFormElement {
   label: string;
   required: boolean;
-  type: AiFormElementType;
-  options?: string[];
+  /** API type — keep string so new ATS types don't break older callers. */
+  type: string;
+  /** String options (select/search) or nested field schemas (employment/education). */
+  options?: string[] | AiNestedFieldSchema[];
+  description?: string;
+  /** Hint for how many repeatable entries the applicant has (Workday). */
+  count?: number;
 }
 
 /** Options for building the scan → API payload (shared across sites). */
@@ -16,6 +39,8 @@ export interface AiScanPayloadOptions {
   userId?: string;
   fromAgent?: boolean;
   parser?: string;
+  /** Passed through when the site needs applicant profile for nested groups. */
+  applicantData?: Applicant | null;
 }
 
 /** Payload shape sent to getJobApplicationFillWithAi. */
@@ -70,6 +95,11 @@ export interface AiSiteHandler {
     applicantData: Applicant,
     options?: AiFieldScannerOptions,
   ) => number;
+  /**
+   * Optional prep before DOM scan (e.g. Workday: set Country from applicant,
+   * wait for layout to settle; expand Work Experience / Education panels).
+   */
+  prepareBeforeScan?: (applicantData: Applicant) => Promise<void>;
   /** Read the page form and build the AI fill API payload. */
   buildScanPayload: (options: AiScanPayloadOptions) => Promise<AiScanPayload>;
   /**

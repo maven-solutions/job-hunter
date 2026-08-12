@@ -1,8 +1,5 @@
 import { getAiSiteHandler } from "../../autofill/ai/registry";
-import {
-  AiFormElement,
-  RequestFieldAnswerFn,
-} from "../../autofill/ai/types";
+import { AiFormElement, RequestFieldAnswerFn } from "../../autofill/ai/types";
 import { Applicant } from "../../autofill/data";
 import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
@@ -183,6 +180,11 @@ export const scanHtmlToMakeApi = async ({
       source: handler.id,
     });
 
+    // Site-specific prep before scan (e.g. Workday fills Country, waits for layout).
+    if (handler.prepareBeforeScan) {
+      await handler.prepareBeforeScan(applicantData);
+    }
+
     // Field icons use the same AI API for single-field refills.
     const iconCount =
       handler.initFieldScanner?.(applicantData, { requestFieldAnswer }) ?? 0;
@@ -193,6 +195,7 @@ export const scanHtmlToMakeApi = async ({
       userId,
       fromAgent: false,
       parser: "internal",
+      applicantData,
     });
 
     fieldsDetected =
@@ -202,7 +205,7 @@ export const scanHtmlToMakeApi = async ({
     const fillResponse = await dispatch(
       getJobApplicationFillWithAi(payload),
     ).unwrap();
-
+    console.log("fillResponse::", fillResponse);
     setAiAutofillPhase("autofilling");
     const fillResult = await handler.applyFill(
       fillResponse?.data?.fill_data_list ?? fillResponse?.data ?? fillResponse,

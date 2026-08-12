@@ -2,11 +2,23 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { BASE_URL } from "../../../config/urlconfig";
 import axiosInstance from "../../../config/axiosInstance";
 
+export interface JobApplicationFillNestedField {
+  type: string;
+  label: string;
+  description?: string;
+  options?: string[] | JobApplicationFillNestedField[];
+  required?: boolean;
+}
+
 export interface JobApplicationFillElement {
   label: string;
   required: boolean;
-  type: "text" | "search" | string;
-  options?: string[];
+  type: string;
+  /** Select options or nested employment/education field schemas. */
+  options?: string[] | JobApplicationFillNestedField[];
+  description?: string;
+  /** How many repeatable entries (Workday employment/education). */
+  count?: number;
 }
 
 export interface JobApplicationFillPayload {
