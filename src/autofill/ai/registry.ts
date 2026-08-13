@@ -1,6 +1,7 @@
 import { ashbyAiHandler } from "./sites/ashby";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
+import { leverAiHandler } from "./sites/lever";
 import { workdayAiHandler } from "./sites/workday";
 import { AiSiteHandler } from "./types";
 
@@ -10,17 +11,13 @@ import { AiSiteHandler } from "./types";
  * To support a new ATS:
  * 1. Create `sites/<name>.ts` implementing AiSiteHandler
  * 2. Add it to this array (order matters — first match wins)
- *
- * Example:
- *   import { leverAiHandler } from "./sites/lever";
- *   const AI_SITE_HANDLERS = [greenhouseAiHandler, leverAiHandler];
  */
 const AI_SITE_HANDLERS: AiSiteHandler[] = [
   greenhouseAiHandler,
   ashbyAiHandler,
   workdayAiHandler,
   icimsAiHandler,
-  // leverAiHandler,
+  leverAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */
