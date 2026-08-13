@@ -65,23 +65,39 @@ const isInsideExtension = (element: Element): boolean =>
 
 export const getLeverFormRoot = (): HTMLElement => {
   const form =
+    document.querySelector<HTMLElement>("form#application-form") ||
     document.querySelector<HTMLElement>("#application-form") ||
-    document.querySelector<HTMLElement>("form.application-form") ||
-    document.querySelector<HTMLElement>(".application-form");
+    document.querySelector<HTMLElement>("form[enctype='multipart/form-data']") ||
+    document.querySelector<HTMLElement>("form.application-form");
   return form && !isInsideExtension(form) ? form : document.body;
 };
 
+const isDisabledField = (element: HTMLElement): boolean =>
+  element.hasAttribute("disabled") ||
+  element.getAttribute("aria-disabled") === "true";
+
+/**
+ * Lever EEO (Gender / Race / Veteran) lives in `.eeo-section.hidden` until a
+ * location is chosen. Those native <select>s must still be scanned.
+ */
+const isEeoQuestion = (element: HTMLElement): boolean =>
+  !!element.closest(".eeo-section, [data-qa='eeo-section']") ||
+  !!element.querySelector("select[name^='eeo[']") ||
+  (element instanceof HTMLSelectElement &&
+    (element.name.startsWith("eeo[") || element.name.startsWith("eeo")));
+
 const isVisibleElement = (element: HTMLElement): boolean => {
+  if (isDisabledField(element)) {
+    return false;
+  }
+  // EEO selects are in the form even while the section is display:none
+  if (isEeoQuestion(element)) {
+    return true;
+  }
   if (
     element.closest(
       ".hidden, [hidden], .visually-hidden, [aria-hidden='true']",
     )
-  ) {
-    return false;
-  }
-  if (
-    element.hasAttribute("disabled") ||
-    element.getAttribute("aria-disabled") === "true"
   ) {
     return false;
   }
@@ -100,13 +116,15 @@ const getQuestionLabel = (question: HTMLElement): string => {
   }
 
   const labelEl = question.querySelector(".application-label");
-  if (labelEl?.textContent) {
-    return cleanLabelText(labelEl.textContent);
-  }
-
-  const wrappingLabel = question.querySelector("label");
-  if (wrappingLabel?.textContent) {
-    return cleanLabelText(wrappingLabel.textContent);
+  if (labelEl) {
+    const clone = labelEl.cloneNode(true) as HTMLElement;
+    clone
+      .querySelectorAll(
+        ".required, .eeo-more-info-button, a, svg, .eeo-expandable-description",
+      )
+      .forEach((el) => el.remove());
+    const text = cleanLabelText(clone.textContent ?? "");
+    if (text) return text;
   }
 
   return "";
@@ -202,15 +220,12 @@ const getNativeSelectOptions = (select: HTMLSelectElement): string[] => {
 };
 
 const isSkipQuestion = (question: HTMLElement): boolean => {
-  if (isInsideExtension(question) || !isVisibleElement(question)) {
-    return true;
-  }
+  if (isInsideExtension(question)) return true;
   if (question.classList.contains("resume")) return true;
   if (question.classList.contains("awli-application-row")) return true;
-  if (question.closest(".eeo-section") && !isVisibleElement(question)) {
-    return true;
-  }
-  return false;
+  // Native selects (location + EEO Gender/Race/Veteran) are always scanned
+  if (question.querySelector("select")) return false;
+  return !isVisibleElement(question);
 };
 
 const isLocationInput = (element: HTMLElement): boolean =>
@@ -218,9 +233,31 @@ const isLocationInput = (element: HTMLElement): boolean =>
   element.classList.contains("location-input") ||
   element.getAttribute("data-qa") === "location-input";
 
+const pushSelectField = (
+  select: HTMLSelectElement,
+  question: HTMLElement | null,
+  results: LeverCandidateField[],
+  remember: (id: string | null | undefined) => boolean,
+): boolean => {
+  if (isDisabledField(select) || isInsideExtension(select)) return false;
+  if (!remember(select.getAttribute("name") || select.id)) return false;
+
+  const label =
+    (question && getQuestionLabel(question)) || getFieldLabel(select);
+  results.push({
+    element: select,
+    label,
+    required: isRequiredField(select, question),
+    kind: "select",
+    options: getNativeSelectOptions(select),
+  });
+  return true;
+};
+
 /**
  * Collect autofillable Lever application fields from `#application-form`.
- * Resume/file, LinkedIn Apply, hidden EEO, and hidden inputs are skipped.
+ * Resume/file, LinkedIn Apply, and hidden inputs are skipped.
+ * Native selects (including hidden EEO Gender/Race/Veteran) are always included.
  */
 export const collectLeverCandidateFields = (): LeverCandidateField[] => {
   const form = getLeverFormRoot();
@@ -242,15 +279,8 @@ export const collectLeverCandidateFields = (): LeverCandidateField[] => {
       const label = getQuestionLabel(question);
 
       const select = question.querySelector<HTMLSelectElement>("select");
-      if (select && isVisibleElement(select)) {
-        if (!remember(select.getAttribute("name") || select.id)) return;
-        results.push({
-          element: select,
-          label: label || getFieldLabel(select),
-          required: isRequiredField(select, question),
-          kind: "select",
-          options: getNativeSelectOptions(select),
-        });
+      if (select) {
+        pushSelectField(select, question, results, remember);
         return;
       }
 
@@ -319,6 +349,18 @@ export const collectLeverCandidateFields = (): LeverCandidateField[] => {
         });
       }
     });
+
+  // Catch native selects missed above (EEO often sits in a sibling `.eeo-section`).
+  const selectRoot =
+    document.querySelector("form#application-form") ||
+    document.querySelector("#application-form") ||
+    document;
+  selectRoot.querySelectorAll<HTMLSelectElement>("select").forEach((select) => {
+    const question = select.closest(
+      ".application-question",
+    ) as HTMLElement | null;
+    pushSelectField(select, question, results, remember);
+  });
 
   return results;
 };
