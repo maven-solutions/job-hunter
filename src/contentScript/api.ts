@@ -43,7 +43,9 @@ export const checkJobStatus = async (
   }
 };
 
-export const saveJobPayload = async (data: Record<string, unknown>) => {
+export const saveJobPayload = async (
+  data: Record<string, unknown> | Record<string, unknown>[]
+) => {
   const url = `${BASE_URL}/jobs`;
   const fetchResponse = await fetch(url, {
     method: "POST",

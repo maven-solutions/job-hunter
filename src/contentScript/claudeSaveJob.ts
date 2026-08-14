@@ -6,7 +6,7 @@ let observerStarted = false;
 let debounceTimer: number | null = null;
 
 const isJobPayload = (data: unknown): data is Record<string, any> => {
-  if (!data || typeof data !== "object") return false;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return false;
   const job = data as Record<string, unknown>;
   return Boolean(job.companyName && job.jobTitle && job.jobLink);
 };
@@ -16,6 +16,14 @@ const parseJobJson = (rawText: string) => {
   try {
     return JSON.parse(trimmed);
   } catch (error) {
+    const arrayStart = trimmed.indexOf("[");
+    const arrayEnd = trimmed.lastIndexOf("]");
+    if (arrayStart >= 0 && arrayEnd > arrayStart) {
+      try {
+        return JSON.parse(trimmed.slice(arrayStart, arrayEnd + 1));
+      } catch (arrayError) {}
+    }
+
     const start = trimmed.indexOf("{");
     const end = trimmed.lastIndexOf("}");
     if (start >= 0 && end > start) {
@@ -44,14 +52,19 @@ const toApiPayload = (job: Record<string, any>) => ({
   location: job.location ?? "",
 });
 
-const getJobFromBlock = (block: Element) => {
+const toJobList = (parsed: unknown): Record<string, any>[] => {
+  const items = Array.isArray(parsed) ? parsed : [parsed];
+  return items.filter(isJobPayload);
+};
+
+const getJobsFromBlock = (block: Element) => {
   const code = block.querySelector("code.language-json, pre code");
   const rawText = code?.textContent?.trim() ?? "";
   if (!rawText || !rawText.includes('"companyName"')) return null;
 
   try {
-    const parsed = parseJobJson(rawText);
-    return isJobPayload(parsed) ? parsed : null;
+    const jobs = toJobList(parseJobJson(rawText));
+    return jobs.length ? jobs : null;
   } catch (error) {
     return null;
   }
@@ -86,8 +99,8 @@ const handleSaveClick = async (
     return;
   }
 
-  const job = getJobFromBlock(block);
-  if (!job) {
+  const jobs = getJobsFromBlock(block);
+  if (!jobs) {
     setButtonState(button, "error", "Invalid JSON");
     return;
   }
@@ -95,17 +108,17 @@ const handleSaveClick = async (
   setButtonState(button, "saving");
 
   try {
-    const result = await saveJobPayload(toApiPayload(job));
+    const result = await saveJobPayload(jobs.map(toApiPayload));
     const status = result?.status;
 
     if (status === "success") {
-      savedJobLinks.add(String(job.jobLink));
+      jobs.forEach((job) => savedJobLinks.add(String(job.jobLink)));
       setButtonState(button, "done");
       return;
     }
 
     if (status === "duplicate-jobs" || status === "failed") {
-      savedJobLinks.add(String(job.jobLink));
+      jobs.forEach((job) => savedJobLinks.add(String(job.jobLink)));
       setButtonState(button, "done", "Saved");
       return;
     }
@@ -119,8 +132,8 @@ const handleSaveClick = async (
 const attachButtonToBlock = (block: Element) => {
   if (block.querySelector(`.${SAVE_BUTTON_CLASS}`)) return;
 
-  const job = getJobFromBlock(block);
-  if (!job) return;
+  const jobs = getJobsFromBlock(block);
+  if (!jobs) return;
 
   const wrap = document.createElement("div");
   wrap.className = "careerai-claude-save-wrap";
@@ -128,10 +141,11 @@ const attachButtonToBlock = (block: Element) => {
   const button = document.createElement("button");
   button.type = "button";
   button.className = SAVE_BUTTON_CLASS;
-  button.setAttribute("aria-label", "Save this job to CareerAI");
+  button.setAttribute("aria-label", "Save these jobs to CareerAI");
   setButtonState(button, "idle");
 
-  if (savedJobLinks.has(String(job.jobLink))) {
+  const allSaved = jobs.every((job) => savedJobLinks.has(String(job.jobLink)));
+  if (allSaved) {
     setButtonState(button, "done");
   }
 

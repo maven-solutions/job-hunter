@@ -5,34 +5,37 @@ const JOB_JSON_PROMPT = `
 
 Also format the result as a ${PROMPT_MARKER}.
 
-Return ONLY one JSON object (no markdown code fences, no extra text) with this exact shape and keys:
+Return ONLY one JSON array of job objects (no markdown code fences, no extra text). Each object must use this exact shape and keys:
 
-{
-  "companyName": "string",
-  "jobTitle": "string",
-  "jobLink": "https://...",
-  "posted_on": "YYYY-MM-DD",
-  "description": "<strong>About the company</strong><br><br>Full HTML job description using <strong> and <br> tags",
-  "jobType": "remote | on-site | hybrid",
-  "category": "product owner | scrum master | project manager | business analyst | agile coach | product manager | clinical research | program manager",
-  "employment": "part-time | full-time | contract",
-  "jobBoard": "linkedin | indeed | dice | ziprecruiter | glassdoor | simplyhired | builtin",
-  "state": "USA",
-  "easyApply": 1,
-  "recruiterDetails": {},
-  "companyDetails": {
-    "link": "https://...",
-    "name": "string",
-    "logo": "https://...",
-    "description": "string"
-  },
-  "jobOverview": ["Full-time"],
-  "location": "City, Region, Country"
-}
+[
+  {
+    "companyName": "string",
+    "jobTitle": "string",
+    "jobLink": "https://...",
+    "posted_on": "YYYY-MM-DD",
+    "description": "<strong>About the company</strong><br><br>Full HTML job description using <strong> and <br> tags",
+    "jobType": "remote | on-site | hybrid",
+    "category": "product owner | scrum master | project manager | business analyst | agile coach | product manager | clinical research | program manager",
+    "employment": "part-time | full-time | contract",
+    "jobBoard": "linkedin | indeed | dice | ziprecruiter | glassdoor | simplyhired | builtin",
+    "state": "USA",
+    "easyApply": 1,
+    "recruiterDetails": {},
+    "companyDetails": {
+      "link": "https://...",
+      "name": "string",
+      "logo": "https://...",
+      "description": "string"
+    },
+    "jobOverview": ["Full-time"],
+    "location": "City, Region, Country"
+  }
+]
 
 Field rules:
-- Use a real, currently posted job that matches the request above.
-- jobLink must be the actual public job URL.
+- Return multiple currently posted jobs that match the request above, not just one.
+- Each item must be a complete job object with all keys above.
+- jobLink must be the actual public job URL and unique per job.
 - posted_on must be ISO date YYYY-MM-DD.
 - description must be HTML (not markdown). Keep <strong> and <br>.
 - jobType must be one of: remote, on-site, hybrid.
@@ -112,7 +115,7 @@ const createCiButton = () => {
   button.type = "button";
   button.className = "careerai-claude-ci-btn";
   button.textContent = "CI";
-  button.setAttribute("aria-label", "Append CareerAI job JSON prompt");
+  button.setAttribute("aria-label", "Append CareerAI jobs JSON prompt");
   button.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
