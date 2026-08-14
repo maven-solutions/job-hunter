@@ -17,8 +17,9 @@ import { saveAudofillJob } from "../../utils/autofillJobSavApi";
 import { dataTrackerHandler } from "../../autofill/data.tracker";
 import { Bookmark, Camera, Zap } from "react-feather";
 import { handleScreenshot } from "./handleScreenshot";
+import { isAiAutofillSupported } from "../../autofill/ai/registry";
 
-const extractInfo = (resumeData, applicationForm, selectedUserId) => {
+export const extractInfo = (resumeData, applicationForm, selectedUserId) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
   const {
     firstName,
@@ -140,7 +141,9 @@ const AutofillFieldsForVA = (props: any) => {
       userdetails.applicationForm,
       selectedUserId,
     );
-    // console.log("vadata::", applicantData);
+    const employment_history_length = applicantData?.employment_history?.length;
+    const education_length = applicantData?.education?.length;
+
     localStorage.setItem(
       LOCALSTORAGE.CI_AUTOFILL_USERINFO,
       JSON.stringify(applicantData),
@@ -231,7 +234,7 @@ const AutofillFieldsForVA = (props: any) => {
         isV2Layout ? "ci_va_v2_button_stack" : "ci_va_two_button_section"
       }
     >
-      {isV2Layout && (
+      {isV2Layout && !isAiAutofillSupported() && (
         <div className="ci_va_v2_primary_button">
           <AutofillButton
             onClick={handleAutofill}
@@ -288,13 +291,13 @@ const AutofillFieldsForVA = (props: any) => {
           <span />
         ))}
 
-      {!isV2Layout && !autoFilling && (
-        <AutofillButton
-          onClick={handleAutofill}
-          resumeList={resumeList}
-          text={iframeUrl ? "Proceed" : "Auto Fill"}
-        />
-      )}
+      {/* {!isV2Layout && !autoFilling && ( */}
+      <AutofillButton
+        onClick={handleAutofill}
+        resumeList={resumeList}
+        text={iframeUrl ? "Proceed" : "Auto Fill"}
+      />
+      {/* )} */}
     </div>
   );
 };

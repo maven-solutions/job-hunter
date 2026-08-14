@@ -68,3 +68,50 @@ export function getHighestEducation(education) {
   return highestDegree;
 }
 // Example cases to test
+
+type UserListItem = { label: string; value: number };
+type ApplicantItem = { id: number; fullName?: string; [key: string]: any };
+
+export const getUserDetailsById = (
+  id: number | string | null,
+  applicantMode: "va" | "individual",
+  resumeList: {
+    individualApplicantData?: ApplicantItem[];
+    applicantData?: ApplicantItem[];
+  },
+) => {
+  const pool =
+    applicantMode === "individual"
+      ? resumeList.individualApplicantData
+      : resumeList.applicantData;
+  const filteredArray = pool?.filter((data) => id === data.id);
+  if (!filteredArray || filteredArray.length === 0) return null;
+  return filteredArray[0];
+};
+
+export const getSessionUserName = (
+  userId: number | undefined | null,
+  resumeList: {
+    individualUserList?: UserListItem[];
+    userList?: UserListItem[];
+  },
+): string => {
+  if (userId == null) return "";
+  const match =
+    resumeList.individualUserList?.find(
+      (user) => user.value === userId,
+    ) ??
+    resumeList.userList?.find((user) => user.value === userId);
+  return match?.label ?? "";
+};
+
+export const getOrgSessionUserName = (
+  userId: number | undefined | null,
+  resumeList: {
+    applicantData?: ApplicantItem[];
+  },
+): string => {
+  if (userId == null) return "";
+  const match = resumeList.applicantData?.find((user) => user.id === userId);
+  return match?.fullName ?? "";
+};

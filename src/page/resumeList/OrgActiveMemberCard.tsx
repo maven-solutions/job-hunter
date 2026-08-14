@@ -83,8 +83,8 @@ const OrgActiveMemberCard = ({
       </span>
 
       <span className="applicant-copy">
-        <strong>{fullName}</strong>
-        {email && <small>{email}</small>}
+        <span className="applicant-copy__name">{fullName}</span>
+        {email && <span className="applicant-copy__meta">{email}</span>}
       </span>
     </div>
   );

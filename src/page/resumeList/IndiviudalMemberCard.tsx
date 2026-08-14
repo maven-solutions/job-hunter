@@ -41,15 +41,6 @@ const IndiviudalMemberCard = ({
 }: OrgActiveMemberCardProps) => {
   const dispatch = useAppDispatch();
 
-  const resumeList: any = useAppSelector((store: RootStore) => {
-    return store.ResumeListSlice;
-  });
-  const authState: any = useAppSelector((store: RootStore) => {
-    return store.AuthSlice;
-  });
-  const orgState: any = useAppSelector((store: RootStore) => {
-    return store.OrgSlice;
-  });
   const activeApplicant = useMemo(() => {
     if (activeUserId == null) {
       return undefined;
@@ -92,8 +83,8 @@ const IndiviudalMemberCard = ({
       </span>
 
       <span className="applicant-copy">
-        <strong>{fullName}</strong>
-        {email && <small>{email}</small>}
+        <span className="applicant-copy__name">{fullName}</span>
+        {email && <span className="applicant-copy__meta">{email}</span>}
       </span>
     </div>
   );
