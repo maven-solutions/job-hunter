@@ -29,7 +29,7 @@ const App: React.FC<{}> = () => {
         "glassdoor",
         "simplyhired",
         "builtin",
-        "claude",
+        // "claude",
       ].some((domain) => window.location.href.includes(domain))
     ) {
       setShowIcon(true);
