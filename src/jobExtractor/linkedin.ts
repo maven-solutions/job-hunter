@@ -194,15 +194,78 @@ const extractLocation = (): string | null => {
   return null;
 };
 
+const formatYyyyMmDd = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const parsePostedDate = (raw: string): string => {
+  const text = raw
+    .replace(/^(Posted|Reposted)\s+(on\s+)?/i, "")
+    .replace(/\.$/, "")
+    .trim();
+  if (!text) return "n/a";
+
+  const today = new Date();
+
+  if (
+    /^(just now|today|now)$/i.test(text) ||
+    /\b(minute|hour)s?\s+ago\b/i.test(text)
+  ) {
+    return formatYyyyMmDd(today);
+  }
+
+  if (/^yesterday$/i.test(text)) {
+    today.setDate(today.getDate() - 1);
+    return formatYyyyMmDd(today);
+  }
+
+  const relative = text.match(
+    /(\d+)\s*(minute|hour|day|week|month|year)s?\s*ago/i,
+  );
+  if (relative) {
+    const amount = Number(relative[1]);
+    const unit = relative[2].toLowerCase();
+    const date = new Date();
+
+    switch (unit) {
+      case "minute":
+      case "hour":
+        break;
+      case "day":
+        date.setDate(date.getDate() - amount);
+        break;
+      case "week":
+        date.setDate(date.getDate() - amount * 7);
+        break;
+      case "month":
+        date.setMonth(date.getMonth() - amount);
+        break;
+      case "year":
+        date.setFullYear(date.getFullYear() - amount);
+        break;
+    }
+
+    return formatYyyyMmDd(date);
+  }
+
+  const parsed = new Date(text);
+  if (!isNaN(parsed.getTime())) {
+    return formatYyyyMmDd(parsed);
+  }
+
+  return "n/a";
+};
+
 const extractPostedDate = (): string => {
   const nextElement = document.querySelector("#job-details")
     ?.nextElementSibling as HTMLElement | null;
 
-  if (nextElement?.innerHTML) {
-    const modifiedDate = nextElement.innerHTML
-      .replace("Posted on ", "")
-      .replace(".", "");
-    return "n/a";
+  if (nextElement?.textContent) {
+    const parsed = parsePostedDate(nextElement.textContent);
+    if (parsed !== "n/a") return parsed;
   }
 
   const root = getSduiRoot() || document.body;
@@ -213,7 +276,7 @@ const extractPostedDate = (): string => {
       /\bago\b/i.test(text) ||
       /\b\d+\s*(day|hour|week|month|minute)s?\b/i.test(text)
     ) {
-      return text;
+      return parsePostedDate(text);
     }
   }
 
@@ -224,7 +287,7 @@ const extractPostedDate = (): string => {
         .split("·")
         .map((part) => part.trim())
         .find((part) => /\bago\b/i.test(part));
-      if (posted) return posted;
+      if (posted) return parsePostedDate(posted);
     }
   }
 
