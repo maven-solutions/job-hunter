@@ -25,7 +25,7 @@ const JobFrom = (props: any) => {
   const [location, setLocation] = useState<string>("");
   const [jobsTitle, setJobstitle] = useState<string>("");
   const [jobDescription, setJobDescription] = useState<any>(
-    "<b>Job Description</b>"
+    "<b>Job Description</b>",
   );
   const [postUrl, setPostUrl] = useState<string>("");
   const [postedDate, setPostedDate] = useState<any>("");
@@ -42,7 +42,7 @@ const JobFrom = (props: any) => {
     localStorage.getItem("lock_status") === "true" &&
       localStorage.getItem("categoryOption")
       ? JSON.parse(localStorage.getItem("categoryOption"))
-      : null
+      : null,
   );
   const [state, setState] = useState<any>(null);
   const [city, setCity] = useState<any>(null);
@@ -50,7 +50,7 @@ const JobFrom = (props: any) => {
   const [alreadySavedStatus, setAlreadySavedStatus] = useState<Boolean>(false);
   const [alreadySavedInfo, SetAlreadySavedInfo] = useState<Boolean>(false);
   const [locked, setLocked] = useState<Boolean>(
-    localStorage.getItem("lock_status") === "true" ? true : false
+    localStorage.getItem("lock_status") === "true" ? true : false,
   );
 
   const [easyApply, setEasyApply] = useState<any>(0);
@@ -111,7 +111,7 @@ const JobFrom = (props: any) => {
       dom,
       dom2,
       setJoboverview,
-      setLocation
+      setLocation,
     );
   };
 
@@ -123,7 +123,7 @@ const JobFrom = (props: any) => {
         clearStateAndCity,
         setJobstitle,
         setJobDescription,
-        isDateString,
+        // isDateString,
         setPostedDate,
         setEasyApply,
         setJobType,
@@ -133,7 +133,7 @@ const JobFrom = (props: any) => {
         setCompanyDetails,
         setRecruiterDetails,
         setJoboverview,
-        setLocation
+        setLocation,
       );
     }
     if (window.location.href.includes("indeed.")) {
@@ -149,7 +149,7 @@ const JobFrom = (props: any) => {
         setSource,
         setCompanyName,
         setJoboverview,
-        setLocation
+        setLocation,
       );
     }
     if (window.location.href.includes("dice.")) {
@@ -165,7 +165,7 @@ const JobFrom = (props: any) => {
         setSource,
         setCompanyName,
         setJoboverview,
-        setLocation
+        setLocation,
       );
     }
     if (window.location.href.includes("ziprecruiter.")) {
@@ -181,7 +181,7 @@ const JobFrom = (props: any) => {
         setSource,
         setCompanyName,
         setJoboverview,
-        setLocation
+        setLocation,
       );
     }
     if (
@@ -197,7 +197,7 @@ const JobFrom = (props: any) => {
         setCompanyName,
         setEmployment,
         setJobType,
-        setEasyApply
+        setEasyApply,
       );
     }
 
@@ -219,7 +219,7 @@ const JobFrom = (props: any) => {
         setCity,
         setState,
         setJoboverview,
-        setLocation
+        setLocation,
       );
     }
 
@@ -395,7 +395,7 @@ const JobFrom = (props: any) => {
       handleSuccess,
       setSavedNotification,
       postUrl,
-      setAlreadySavedStatus
+      setAlreadySavedStatus,
     );
   };
 
@@ -404,7 +404,7 @@ const JobFrom = (props: any) => {
       postUrl,
       setAlreadySavedStatus,
       setSavedNotification,
-      SetAlreadySavedInfo
+      SetAlreadySavedInfo,
     );
   }, [postUrl]);
 

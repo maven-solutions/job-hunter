@@ -194,7 +194,7 @@ const extractLocation = (): string | null => {
   return null;
 };
 
-const extractPostedDate = (isDateString?: (str: string) => boolean): string => {
+const extractPostedDate = (): string => {
   const nextElement = document.querySelector("#job-details")
     ?.nextElementSibling as HTMLElement | null;
 
@@ -202,7 +202,7 @@ const extractPostedDate = (isDateString?: (str: string) => boolean): string => {
     const modifiedDate = nextElement.innerHTML
       .replace("Posted on ", "")
       .replace(".", "");
-    return isDateString?.(modifiedDate) ? modifiedDate : "n/a";
+    return "n/a";
   }
 
   const root = getSduiRoot() || document.body;
@@ -382,9 +382,7 @@ const getHiringTeamDetails = (): RecruiterDetails => {
   return recruiterDetails;
 };
 
-const collectExtractedJob = (
-  isDateString?: (str: string) => boolean,
-): ExtractedLinkedInJob => {
+const collectExtractedJob = (): ExtractedLinkedInJob => {
   const jobType = extractJobType();
   const companyDetails = getCompanyDetails();
   const secondLiText =
@@ -397,7 +395,7 @@ const collectExtractedJob = (
     title: extractTitle(),
     companyName: extractCompanyName() || companyDetails?.name || null,
     location: extractLocation(),
-    postedDate: extractPostedDate(isDateString),
+    postedDate: extractPostedDate(),
     description: extractDescription(),
     jobType,
     employment: jobType,
@@ -414,7 +412,7 @@ export const getContentFromLinkedInJobs = async (
   clearStateAndCity?,
   setJobstitle?,
   setJobDescription?,
-  isDateString?,
+  // isDateString?,
   setPostedDate?,
   setEasyApply?,
   setJobType?,
@@ -444,18 +442,18 @@ export const getContentFromLinkedInJobs = async (
     expandJobDescription();
     await sleep(200);
 
-    let extracted = collectExtractedJob(isDateString);
+    let extracted = collectExtractedJob();
 
     // Retry description once if still missing (lazy section)
     if (!extracted.description) {
       await sleep(800);
       expandJobDescription();
       await sleep(200);
-      extracted = collectExtractedJob(isDateString);
+      extracted = collectExtractedJob();
     }
 
-    // console.log("LinkedIn extracted job data::", extracted);
-    // console.log("LinkedIn job description text::", extracted.description);
+    // console.log("LinkedIn extracted job data::", isDateString);
+    console.log("LinkedIn job description text::", extracted);
 
     setPostUrl?.(extracted.postUrl);
     setJobstitle?.(extracted.title);
