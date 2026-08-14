@@ -43,6 +43,19 @@ export const checkJobStatus = async (
   }
 };
 
+export const saveJobPayload = async (data: Record<string, unknown>) => {
+  const url = `${BASE_URL}/jobs`;
+  const fetchResponse = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return fetchResponse.json();
+};
+
 export const saveJobs = async (
   data,
   setLoading,

@@ -12,6 +12,8 @@ import {
   addButtonToGlassdoorWebsite,
   addButtonToSimplyHired,
 } from "../component/CareerAibutton";
+import { addCiButtonToClaude } from "./claudeCiButton";
+import { addSaveButtonsToClaudeResponses } from "./claudeSaveJob";
 
 const App: React.FC<{}> = () => {
   const [showFrom, setShowFrom] = useState<boolean>(false);
@@ -49,6 +51,15 @@ const App: React.FC<{}> = () => {
     if (window.location.href === "https://www.simplyhired.com/") {
       simplyHiredNotiification();
       intervalId = setInterval(addButtonToSimplyHired, 3000);
+    }
+
+    if (window.location.hostname.includes("claude.ai")) {
+      const enhanceClaudePage = () => {
+        addCiButtonToClaude();
+        addSaveButtonsToClaudeResponses();
+      };
+      enhanceClaudePage();
+      intervalId = setInterval(enhanceClaudePage, 2000);
     }
     // Clear the interval when the component unmounts
     return () => clearInterval(intervalId);
