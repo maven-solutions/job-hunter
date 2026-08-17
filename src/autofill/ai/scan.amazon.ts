@@ -46,7 +46,8 @@ export type AmazonFieldKind =
   | "select"
   | "select2"
   | "phone-country"
-  | "radio-group";
+  | "radio-group"
+  | "date";
 
 export interface AmazonCandidateField {
   element: HTMLElement;
@@ -59,11 +60,50 @@ export const cleanAmazonLabelText = (text: string): string =>
   text
     .replace(/\*/g, "")
     .replace(/auto-save unavailable for this section/gi, "")
+    .replace(/\s*Date:\s*Year-Month-Day\s*/gi, " ")
     .replace(/^Question\s+/i, "")
     .replace(/\s+required\s*$/i, "")
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+export const isAmazonDateInput = (
+  element: HTMLElement,
+): element is HTMLInputElement =>
+  element instanceof HTMLInputElement &&
+  (!!element.closest(".application-date-field") ||
+    (element.getAttribute("data-provide") ?? "").toLowerCase().includes(
+      "datepicker",
+    ) ||
+    /yyyy-mm/i.test(element.getAttribute("placeholder") ?? ""));
+
+export const isAmazonEducationLevelField = (
+  element: HTMLElement,
+  label: string = "",
+): boolean => {
+  if (/^education level$/i.test(label.trim())) return true;
+  const questionId =
+    element.closest("[data-questionid]")?.getAttribute("data-questionid") ??
+    "";
+  return /HIGHEST_DEGREE/i.test(questionId);
+};
+
+export const isAmazonCurrentlyStudentField = (
+  element: HTMLElement,
+  label: string = "",
+): boolean => {
+  if (/currently a student/i.test(label)) return true;
+  const questionId =
+    element.closest("[data-questionid]")?.getAttribute("data-questionid") ??
+    "";
+  return /CURRENTLY_A_STUDENT/i.test(questionId);
+};
+
+const amazonLabelKey = (label: string): string =>
+  cleanAmazonLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
 
 const isInsideExtension = (element: Element): boolean =>
   !!element.closest(`#${EXTENSION_ROOT_ID}`);
@@ -103,7 +143,7 @@ const isInScannableSection = (element: HTMLElement): boolean => {
 };
 
 const isVisibleAmazonField = (element: HTMLElement): boolean => {
-  if (isAmazonSelect2NativeSelect(element)) {
+  if (isAmazonSelect2NativeSelect(element) || isAmazonDateInput(element)) {
     return isInScannableSection(element);
   }
 
@@ -139,6 +179,14 @@ const getAmazonQuestionLabel = (element: HTMLElement): string => {
 };
 
 export const getAmazonFieldLabel = (element: HTMLElement): string => {
+  if (isAmazonDateInput(element)) {
+    const ariaLabel = element.getAttribute("aria-label");
+    if (ariaLabel) {
+      const cleaned = cleanAmazonLabelText(ariaLabel);
+      if (cleaned) return cleaned;
+    }
+  }
+
   const questionLabel = getAmazonQuestionLabel(element);
   if (questionLabel) {
     return questionLabel;
@@ -382,10 +430,12 @@ export const collectAmazonCandidateFields = (): AmazonCandidateField[] => {
       }
     }
 
+    const label = getAmazonFieldLabel(element);
     const id =
       element.getAttribute("id") ||
       element.getAttribute("name") ||
-      `${getAmazonFieldLabel(element)}-${results.length}`;
+      (isAmazonDateInput(element) ? `date:${amazonLabelKey(label)}` : "") ||
+      `${label}-${results.length}`;
     if (seenIds.has(id)) {
       return;
     }
@@ -397,6 +447,16 @@ export const collectAmazonCandidateFields = (): AmazonCandidateField[] => {
         label: getAmazonFieldLabel(element),
         required: isAmazonRequiredField(element),
         kind: isAmazonSelect2NativeSelect(element) ? "select2" : "select",
+      });
+      return;
+    }
+
+    if (isAmazonDateInput(element)) {
+      results.push({
+        element,
+        label: getAmazonFieldLabel(element),
+        required: isAmazonRequiredField(element),
+        kind: "date",
       });
       return;
     }
@@ -441,6 +501,26 @@ export const collectAmazonCandidateFields = (): AmazonCandidateField[] => {
       });
     });
 
+  document
+    .querySelectorAll<HTMLInputElement>(
+      ".application-date-field input, input[data-provide*='datepicker']",
+    )
+    .forEach((input) => {
+      if (isInsideExtension(input) || !isInScannableSection(input)) {
+        return;
+      }
+      const label = getAmazonFieldLabel(input);
+      const id = input.id || `date:${amazonLabelKey(label)}`;
+      if (seenIds.has(id)) return;
+      seenIds.add(id);
+      results.push({
+        element: input,
+        label,
+        required: isAmazonRequiredField(input),
+        kind: "date",
+      });
+    });
+
   const phoneRoot =
     document.querySelector<HTMLElement>(
       "#CONTACT_DETAILS .phone-number, .contact-information .phone-number, .phone-number",
@@ -462,6 +542,51 @@ export const collectAmazonCandidateFields = (): AmazonCandidateField[] => {
   return results;
 };
 
+/** Follow-ups that Amazon mounts after Education level is chosen. */
+const EDUCATION_FOLLOW_UP_ELEMENTS: ApiFormElement[] = [
+  { label: "School name", required: false, type: "search" },
+  { label: "Area(s) of study", required: false, type: "text" },
+  {
+    label: "Are you currently a student?",
+    required: true,
+    type: "search",
+    options: ["Yes", "No"],
+  },
+  {
+    label: "When did you graduate?",
+    required: true,
+    type: "search",
+    options: [
+      "Less than 1 year ago",
+      "1–2 years ago",
+      "2–3 years ago",
+      "More than 3 years ago",
+    ],
+  },
+  { label: "Expected graduation date", required: false, type: "text" },
+  {
+    label: "Have you had relevant non-internship professional experience?",
+    required: true,
+    type: "search",
+    options: ["Yes", "No"],
+  },
+];
+
+const mergeAmazonEducationFollowUps = (
+  elements: ApiFormElement[],
+): ApiFormElement[] => {
+  const hasEducationLevel = elements.some((item) =>
+    /^education level$/i.test(item.label.trim()),
+  );
+  if (!hasEducationLevel) return elements;
+
+  const existing = new Set(elements.map((item) => amazonLabelKey(item.label)));
+  const extras = EDUCATION_FOLLOW_UP_ELEMENTS.filter(
+    (item) => !existing.has(amazonLabelKey(item.label)),
+  );
+  return extras.length > 0 ? [...elements, ...extras] : elements;
+};
+
 /**
  * Scans the amazon.jobs application form (the visible section, e.g.
  * Contact information or General questions) and builds an API payload.
@@ -477,7 +602,7 @@ export const scanAmazonHtmlToMakeApiPayload = async (
   const elements: ApiFormElement[] = [];
 
   for (const candidate of candidates) {
-    if (candidate.kind === "text") {
+    if (candidate.kind === "text" || candidate.kind === "date") {
       elements.push({
         label: candidate.label,
         required: candidate.required,
@@ -518,7 +643,7 @@ export const scanAmazonHtmlToMakeApiPayload = async (
   }
 
   return {
-    elements,
+    elements: mergeAmazonEducationFollowUps(elements),
     token: options.token ?? "",
     url,
     parser: options.parser ?? "internal",

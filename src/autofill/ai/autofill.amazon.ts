@@ -6,6 +6,9 @@ import {
   ensureAmazonSectionEditable,
   getAmazonNativeSelectOptions,
   getAmazonRadioOptionLabel,
+  isAmazonCurrentlyStudentField,
+  isAmazonDateInput,
+  isAmazonEducationLevelField,
   isAmazonSelect2NativeSelect,
 } from "./scan.amazon";
 
@@ -387,14 +390,95 @@ const isStateProvinceLabel = (label: string): boolean => {
   return n.includes("province") || n.includes("state");
 };
 
-/** Phone/country first; radios & selects before text so "Other" can reveal follow-ups. */
+/** Phone/country first; education level before its follow-ups; radios/selects before text. */
 const amazonFillRank = (field: DomField): number => {
   if (field.kind === "phone-country") return 0;
   if (isCountryRegionLabel(field.label)) return 1;
-  if (field.kind === "radio-group") return 2;
-  if (field.kind === "select2" || field.kind === "select") return 3;
+  if (isAmazonEducationLevelField(field.element, field.label)) return 2;
+  if (field.kind === "radio-group") return 3;
+  if (field.kind === "select2" || field.kind === "select") return 4;
+  if (field.kind === "date") return 5;
   if (isStateProvinceLabel(field.label)) return 10;
-  return 5;
+  return 6;
+};
+
+const fillAmazonDateField = async (
+  element: HTMLInputElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableAmazonAnswer(answer)) return false;
+  const value = toYearMonth(answer);
+  if (!value) return false;
+
+  element.focus();
+  setNativeValue(element, value);
+  element.dispatchEvent(
+    new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      data: value,
+      inputType: "insertText",
+    }),
+  );
+  await handleValueChanges(element);
+  element.dispatchEvent(
+    new KeyboardEvent("keyup", { key: "Enter", bubbles: true }),
+  );
+  element.blur();
+  return /year-month|yyyy-mm/i.test(element.placeholder || "")
+    ? /^\d{4}-\d{2}/.test(element.value) || element.value.includes(value)
+    : isUsableAmazonAnswer(element.value);
+};
+
+const MONTH_NAME_TO_NUM: Record<string, string> = {
+  jan: "01",
+  january: "01",
+  feb: "02",
+  february: "02",
+  mar: "03",
+  march: "03",
+  apr: "04",
+  april: "04",
+  may: "05",
+  jun: "06",
+  june: "06",
+  jul: "07",
+  july: "07",
+  aug: "08",
+  august: "08",
+  sep: "09",
+  sept: "09",
+  september: "09",
+  oct: "10",
+  october: "10",
+  nov: "11",
+  november: "11",
+  dec: "12",
+  december: "12",
+};
+
+const toYearMonth = (answer: string): string => {
+  const raw = cleanAmazonLabelText(answer);
+  if (!raw) return "";
+
+  let m = raw.match(/^(\d{4})\s*[\/\-.]\s*(\d{1,2})(?:\s*[\/\-.]\s*\d{1,2})?$/);
+  if (m) return `${m[1]}-${m[2].padStart(2, "0")}`;
+
+  m = raw.match(/^(\d{1,2})\s*[\/\-.]\s*(\d{4})$/);
+  if (m) return `${m[2]}-${m[1].padStart(2, "0")}`;
+
+  m = raw.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (m) {
+    const month = MONTH_NAME_TO_NUM[m[1].toLowerCase()];
+    if (month) return `${m[2]}-${month}`;
+  }
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  return raw;
 };
 
 const fillTextLikeField = async (
@@ -511,21 +595,19 @@ const fillAmazonSelect2 = async (
 ): Promise<boolean> => {
   if (!isUsableAmazonAnswer(answer)) return false;
 
-  if (select.disabled || select.options.length === 0) {
-    const ready = await waitUntil(
-      () => !select.disabled && select.options.length > 0,
-      6000,
-    );
+  if (select.disabled) {
+    const ready = await waitUntil(() => !select.disabled, 6000);
     if (!ready) return false;
     await delay(150);
   }
 
   const nativeOptions = getAmazonNativeSelectOptions(select);
+  const isAjaxSearch = nativeOptions.length === 0;
   const matchedNative = matchOption(answer, nativeOptions) ?? answer;
 
   const selection = getSelect2Selection(select);
   if (!selection) {
-    return fillNativeSelect(select, matchedNative);
+    return isAjaxSearch ? false : fillNativeSelect(select, matchedNative);
   }
 
   clickElement(selection);
@@ -540,14 +622,14 @@ const fillAmazonSelect2 = async (
     2000,
   );
   if (!opened) {
-    return fillNativeSelect(select, matchedNative);
+    return isAjaxSearch ? false : fillNativeSelect(select, matchedNative);
   }
 
   await typeSelect2Search(matchedNative);
 
   let scanned = getOpenSelect2Options();
   if (scanned.length === 0) {
-    await delay(250);
+    await waitUntil(() => getOpenSelect2Options().length > 0, isAjaxSearch ? 2500 : 400);
     scanned = getOpenSelect2Options();
   }
 
@@ -556,9 +638,30 @@ const fillAmazonSelect2 = async (
   );
   const matchedLabel = matchOption(matchedNative, labels);
   if (!matchedLabel) {
+    if (isAjaxSearch) {
+      const search = document.querySelector<HTMLInputElement>(
+        ".select2-container--open .select2-search__field, .select2-search--dropdown .select2-search__field",
+      );
+      search?.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      await delay(250);
+      const rendered = cleanAmazonLabelText(
+        getSelect2Selection(select)?.querySelector(
+          ".select2-selection__rendered",
+        )?.textContent ?? "",
+      );
+      if (rendered && matchOption(matchedNative, [rendered])) {
+        return true;
+      }
+    }
     closeSelect2();
     await delay(100);
-    return fillNativeSelect(select, matchedNative);
+    return isAjaxSearch ? false : fillNativeSelect(select, matchedNative);
   }
 
   const target = scanned.find(
@@ -592,7 +695,7 @@ const fillAmazonSelect2 = async (
       !/select a country|no states/i.test(renderedClean) &&
       matchOption(matchedNative, [renderedClean]) != null);
 
-  return looksSelected || fillNativeSelect(select, matchedNative);
+  return looksSelected || (!isAjaxSearch && fillNativeSelect(select, matchedNative));
 };
 
 const fillPhoneCountryCode = async (
@@ -756,6 +859,12 @@ const fillField = async (field: DomField, answer: string): Promise<boolean> => {
     return fillNativeSelect(field.element, answer);
   }
 
+  if (field.kind === "date" || isAmazonDateInput(field.element)) {
+    if (field.element instanceof HTMLInputElement) {
+      return fillAmazonDateField(field.element, answer);
+    }
+  }
+
   if (
     field.element instanceof HTMLInputElement ||
     field.element instanceof HTMLTextAreaElement
@@ -806,7 +915,11 @@ const fillCandidateList = async (
         if (isCountryRegionLabel(field.label)) {
           await waitForAmazonStateOptions();
         }
-        if (field.kind === "select2" || field.kind === "radio-group") {
+        if (isAmazonEducationLevelField(field.element, field.label)) {
+          await delay(2000);
+        } else if (isAmazonCurrentlyStudentField(field.element, field.label)) {
+          await delay(1000);
+        } else if (field.kind === "select2" || field.kind === "radio-group") {
           await delay(250);
         }
       } else {
@@ -858,30 +971,43 @@ export const autofillAmazonWithAi = async (
     emptyLabelKeys,
   );
 
-  // Conditional follow-ups (e.g. If "Other" please specify) may mount after
-  // a select/radio change — pick them up and fill if the API answered them.
-  await delay(300);
+  // Education level (and "currently a student") mount follow-up questions.
+  // Re-scan the live DOM and fill anything new the API already answered.
+  let filled = firstPass.filled;
+  let failed = firstPass.failed;
+  let skipped = firstPass.skipped;
   const seen = new Set(candidates.map(fieldKey));
-  const extras = collectAmazonCandidateFields()
-    .map(
-      (candidate): DomField => ({
-        element: candidate.element,
-        label: candidate.label,
-        kind: candidate.kind,
-      }),
-    )
-    .filter((field) => !seen.has(fieldKey(field)))
-    .sort((a, b) => amazonFillRank(a) - amazonFillRank(b));
 
-  const extraPass =
-    extras.length > 0
-      ? await fillCandidateList(extras, answers, emptyLabelKeys)
-      : { filled: 0, failed: 0, skipped: 0 };
+  for (let pass = 0; pass < 3; pass += 1) {
+    await delay(pass === 0 ? 200 : 400);
+    const extras = collectAmazonCandidateFields()
+      .map(
+        (candidate): DomField => ({
+          element: candidate.element,
+          label: candidate.label,
+          kind: candidate.kind,
+        }),
+      )
+      .filter((field) => !seen.has(fieldKey(field)))
+      .sort((a, b) => amazonFillRank(a) - amazonFillRank(b));
+
+    if (extras.length === 0) break;
+
+    extras.forEach((field) => seen.add(fieldKey(field)));
+    const extraPass = await fillCandidateList(
+      extras,
+      answers,
+      emptyLabelKeys,
+    );
+    filled += extraPass.filled;
+    failed += extraPass.failed;
+    skipped += extraPass.skipped;
+  }
 
   return {
     total: answers.length + emptyCount,
-    filled: firstPass.filled + extraPass.filled,
-    failed: firstPass.failed + extraPass.failed,
-    skipped: firstPass.skipped + extraPass.skipped,
+    filled,
+    failed,
+    skipped,
   };
 };
