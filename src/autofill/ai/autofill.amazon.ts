@@ -3,7 +3,9 @@ import {
   AmazonCandidateField,
   cleanAmazonLabelText,
   collectAmazonCandidateFields,
+  ensureAmazonSectionEditable,
   getAmazonNativeSelectOptions,
+  getAmazonRadioOptionLabel,
   isAmazonSelect2NativeSelect,
 } from "./scan.amazon";
 
@@ -279,11 +281,13 @@ const matchOption = (answer: string, options: string[]): string | null => {
     }
   }
 
+  // Skip short options ("Yes"/"No") for substring matching — "not" would match "No".
   for (const option of options) {
     const normalizedOption = fromatStirngInLowerCase(option);
+    if (!normalizedOption || normalizedOption.length < 4) continue;
     if (
-      normalizedOption?.includes(normalizedAnswer) ||
-      normalizedAnswer.includes(normalizedOption ?? "")
+      normalizedOption.includes(normalizedAnswer) ||
+      normalizedAnswer.includes(normalizedOption)
     ) {
       return option;
     }
@@ -383,10 +387,12 @@ const isStateProvinceLabel = (label: string): boolean => {
   return n.includes("province") || n.includes("state");
 };
 
-/** Country/phone-country first so Province/State can load options. */
+/** Phone/country first; radios & selects before text so "Other" can reveal follow-ups. */
 const amazonFillRank = (field: DomField): number => {
   if (field.kind === "phone-country") return 0;
   if (isCountryRegionLabel(field.label)) return 1;
+  if (field.kind === "radio-group") return 2;
+  if (field.kind === "select2" || field.kind === "select") return 3;
   if (isStateProvinceLabel(field.label)) return 10;
   return 5;
 };
@@ -440,7 +446,7 @@ const getSelect2Selection = (
   select: HTMLSelectElement,
 ): HTMLElement | null => {
   const wrapper = select.closest(
-    ".country-dropdown, .form-group, .select2-container",
+    ".drop-down-menu-select, .drop-down-menu, .country-dropdown, .form-group, .select2-container",
   );
   return (
     wrapper?.querySelector<HTMLElement>(
@@ -640,6 +646,81 @@ const fillPhoneCountryCode = async (
   return true;
 };
 
+const setNativeChecked = (
+  input: HTMLInputElement,
+  checked: boolean,
+): void => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "checked",
+  );
+  if (descriptor?.set) {
+    descriptor.set.call(input, checked);
+  } else {
+    input.checked = checked;
+  }
+};
+
+const fillAmazonRadioGroup = async (
+  group: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableAmazonAnswer(answer)) return false;
+
+  const radios = Array.from(
+    group.querySelectorAll<HTMLInputElement>("input[type='radio']"),
+  );
+  if (radios.length === 0) return false;
+
+  const labeled = radios.map((radio) => ({
+    input: radio,
+    label: getAmazonRadioOptionLabel(radio),
+    value: cleanAmazonLabelText(radio.value || ""),
+  }));
+
+  const matchedLabel =
+    matchOption(
+      answer,
+      labeled.map((item) => item.label).filter(Boolean),
+    ) ??
+    matchOption(
+      answer,
+      labeled.map((item) => item.value).filter(Boolean),
+    );
+  if (!matchedLabel) return false;
+
+  const target =
+    labeled.find((item) => item.label === matchedLabel) ??
+    labeled.find((item) => item.value === matchedLabel);
+  if (!target) return false;
+
+  const { input } = target;
+  const optionLabel = input.id
+    ? document.querySelector<HTMLElement>(
+        `label[for="${CSS.escape(input.id)}"]`,
+      )
+    : input
+        .closest(".custom-radio, .custom-control")
+        ?.querySelector<HTMLElement>("label");
+
+  if (optionLabel) {
+    clickElement(optionLabel);
+  } else {
+    clickElement(input);
+  }
+
+  setNativeChecked(input, true);
+  input.dispatchEvent(new Event("click", { bubbles: true }));
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await delay(150);
+
+  return (
+    input.checked ||
+    input.getAttribute("aria-checked") === "true"
+  );
+};
+
 const waitForAmazonStateOptions = async (): Promise<void> => {
   const stateSelect = document.querySelector<HTMLSelectElement>(
     "select.state-province, select.select2-hidden-accessible.state-province",
@@ -658,6 +739,10 @@ const fillField = async (field: DomField, answer: string): Promise<boolean> => {
 
   if (field.kind === "phone-country") {
     return fillPhoneCountryCode(field.element, answer);
+  }
+
+  if (field.kind === "radio-group") {
+    return fillAmazonRadioGroup(field.element, answer);
   }
 
   if (field.kind === "select2" && field.element instanceof HTMLSelectElement) {
@@ -681,37 +766,17 @@ const fillField = async (field: DomField, answer: string): Promise<boolean> => {
   return false;
 };
 
-/**
- * Applies AI fill answers to the current amazon.jobs application section.
- */
-export const autofillAmazonWithAi = async (
-  response: unknown,
-): Promise<AmazonAiFillResult> => {
-  const { answers, emptyLabelKeys, emptyCount } =
-    parseAmazonAiFillResponse(response);
+const fieldKey = (field: DomField): string =>
+  `${field.kind}:${normalizeLabel(field.label)}`;
 
-  const candidates = collectAmazonCandidateFields()
-    .map(
-      (candidate): DomField => ({
-        element: candidate.element,
-        label: candidate.label,
-        kind: candidate.kind,
-      }),
-    )
-    .sort((a, b) => amazonFillRank(a) - amazonFillRank(b));
-
+const fillCandidateList = async (
+  candidates: DomField[],
+  answers: AmazonAiAnswer[],
+  emptyLabelKeys: Set<string>,
+): Promise<{ filled: number; failed: number; skipped: number }> => {
   let filled = 0;
   let failed = 0;
   let skipped = 0;
-
-  if (answers.length === 0 && emptyCount === 0) {
-    return {
-      total: 0,
-      filled: 0,
-      failed: 0,
-      skipped: candidates.length,
-    };
-  }
 
   for (const field of candidates) {
     if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
@@ -741,6 +806,9 @@ export const autofillAmazonWithAi = async (
         if (isCountryRegionLabel(field.label)) {
           await waitForAmazonStateOptions();
         }
+        if (field.kind === "select2" || field.kind === "radio-group") {
+          await delay(250);
+        }
       } else {
         failed += 1;
       }
@@ -751,10 +819,69 @@ export const autofillAmazonWithAi = async (
     await delay(200);
   }
 
+  return { filled, failed, skipped };
+};
+
+/**
+ * Applies AI fill answers to the current amazon.jobs application section.
+ */
+export const autofillAmazonWithAi = async (
+  response: unknown,
+): Promise<AmazonAiFillResult> => {
+  const { answers, emptyLabelKeys, emptyCount } =
+    parseAmazonAiFillResponse(response);
+
+  await ensureAmazonSectionEditable();
+
+  const candidates = collectAmazonCandidateFields()
+    .map(
+      (candidate): DomField => ({
+        element: candidate.element,
+        label: candidate.label,
+        kind: candidate.kind,
+      }),
+    )
+    .sort((a, b) => amazonFillRank(a) - amazonFillRank(b));
+
+  if (answers.length === 0 && emptyCount === 0) {
+    return {
+      total: 0,
+      filled: 0,
+      failed: 0,
+      skipped: candidates.length,
+    };
+  }
+
+  const firstPass = await fillCandidateList(
+    candidates,
+    answers,
+    emptyLabelKeys,
+  );
+
+  // Conditional follow-ups (e.g. If "Other" please specify) may mount after
+  // a select/radio change — pick them up and fill if the API answered them.
+  await delay(300);
+  const seen = new Set(candidates.map(fieldKey));
+  const extras = collectAmazonCandidateFields()
+    .map(
+      (candidate): DomField => ({
+        element: candidate.element,
+        label: candidate.label,
+        kind: candidate.kind,
+      }),
+    )
+    .filter((field) => !seen.has(fieldKey(field)))
+    .sort((a, b) => amazonFillRank(a) - amazonFillRank(b));
+
+  const extraPass =
+    extras.length > 0
+      ? await fillCandidateList(extras, answers, emptyLabelKeys)
+      : { filled: 0, failed: 0, skipped: 0 };
+
   return {
     total: answers.length + emptyCount,
-    filled,
-    failed,
-    skipped,
+    filled: firstPass.filled + extraPass.filled,
+    failed: firstPass.failed + extraPass.failed,
+    skipped: firstPass.skipped + extraPass.skipped,
   };
 };
