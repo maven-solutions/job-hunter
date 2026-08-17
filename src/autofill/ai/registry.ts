@@ -1,3 +1,4 @@
+import { amazonAiHandler } from "./sites/amazon";
 import { ashbyAiHandler } from "./sites/ashby";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
@@ -20,6 +21,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   icimsAiHandler,
   leverAiHandler,
   metacareersAiHandler,
+  amazonAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */

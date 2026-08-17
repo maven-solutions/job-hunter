@@ -1,13 +1,3 @@
-# job-hunter
-
-Copy-paste this prompt next time you add a site:
-
----
-
-## Prompt: Add AI Autofill support for a new ATS / career site
-
-### Goal
-
 Add **Autofill with AI** for a new website, following the **same architecture, business flow, and naming conventions** as Greenhouse.
 
 Do **not** rewrite the shared UI or shared pipeline. Only add domain-specific site code and register it.
@@ -209,17 +199,3 @@ Implement `AiSiteHandler`:
   _(paste here)_
 
 ---
-
-### Example filled header (for Ashby)
-
-```
-Site name: Ashby / id: ashby
-Hosts: jobs.ashbyhq.com
-Form HTML:
-```
-
-_(paste Ashby HTML)_
-
----
-
-Save this and next time only fill site name, hosts, and HTML.
