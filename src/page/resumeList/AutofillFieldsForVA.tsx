@@ -291,13 +291,13 @@ const AutofillFieldsForVA = (props: any) => {
           <span />
         ))}
 
-      {/* {!isV2Layout && !autoFilling && ( */}
-      <AutofillButton
-        onClick={handleAutofill}
-        resumeList={resumeList}
-        text={iframeUrl ? "Proceed" : "Auto Fill"}
-      />
-      {/* )} */}
+      {!isV2Layout && !autoFilling && (
+        <AutofillButton
+          onClick={handleAutofill}
+          resumeList={resumeList}
+          text={iframeUrl ? "Proceed" : "Auto Fill"}
+        />
+      )}
     </div>
   );
 };
