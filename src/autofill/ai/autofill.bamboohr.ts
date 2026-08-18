@@ -17,9 +17,6 @@ export interface BambooHrAiFillResult {
   skipped: number;
 }
 
-const MENU_ITEM_SELECTOR =
-  '[role="menuitem"], [role="option"], .fab-Menu__item, [data-fabric-component="MenuItem"]';
-
 const cleanLabelText = (text: string): string =>
   text
     .replace(/\*/g, "")
@@ -361,13 +358,6 @@ const findAnswerForLabel = (
   return undefined;
 };
 
-const waitForDomUpdate = (): Promise<void> =>
-  new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => resolve());
-    });
-  });
-
 const fullClick = (element: HTMLElement): void => {
   element.scrollIntoView({ block: "nearest", inline: "nearest" });
   const opts = { bubbles: true, cancelable: true, view: window };
@@ -477,53 +467,76 @@ const fillNativeSelect = async (
   return false;
 };
 
-const getFabricToggle = (wrapper: HTMLElement): HTMLButtonElement | null =>
-  wrapper.querySelector<HTMLButtonElement>("button.fab-SelectToggle") ||
-  wrapper.querySelector<HTMLButtonElement>(".fab-SelectToggle__toggleButton") ||
-  wrapper.querySelector<HTMLButtonElement>("button[aria-haspopup='true']");
+interface FabricSelectControls {
+  outerButton: HTMLButtonElement | null;
+  chevron: HTMLElement | null;
+  menuId: string | null;
+}
 
-const collectVisibleMenuItems = (): HTMLElement[] =>
-  Array.from(document.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR)).filter(
-    (item) => {
-      const style = window.getComputedStyle(item);
-      if (style.display === "none" || style.visibility === "hidden") {
-        return false;
-      }
-      const rect = item.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    },
+const getFabricSelectControls = (
+  wrapper: HTMLElement,
+): FabricSelectControls => {
+  const outerButton =
+    wrapper.querySelector<HTMLButtonElement>("button.fab-SelectToggle") ||
+    wrapper.querySelector<HTMLButtonElement>("button[aria-haspopup='true']");
+  const chevron = wrapper.querySelector<HTMLElement>(
+    ".fab-SelectToggle__toggleButton",
+  );
+  const menuId =
+    outerButton?.getAttribute("data-menu-id") ||
+    wrapper.querySelector("[data-menu-id]")?.getAttribute("data-menu-id") ||
+    null;
+  return { outerButton, chevron, menuId };
+};
+
+const FABRIC_SELECT_SETTLE_MS = 2000;
+
+const clickFabricSelectButton = (button: HTMLElement): void => {
+  button.scrollIntoView({ block: "center", inline: "nearest" });
+  button.focus();
+  button.click();
+};
+
+const scrapeOpenMenuItems = (): HTMLElement[] => {
+  const menus = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[data-fabric-component="Select Menu"], .fab-MenuVessel, .fab-MenuList[role="menu"]',
+    ),
   );
 
-const waitForMenuItems = (timeoutMs = 800): Promise<HTMLElement[]> =>
-  new Promise((resolve) => {
-    const existing = collectVisibleMenuItems();
-    if (existing.length > 0) {
-      resolve(existing);
-      return;
-    }
+  if (menus.length > 0) {
+    return menus.flatMap((menu) =>
+      Array.from(
+        menu.querySelectorAll<HTMLElement>('.fab-MenuOption, [role="menuitem"]'),
+      ),
+    );
+  }
 
-    const observer = new MutationObserver(() => {
-      const items = collectVisibleMenuItems();
-      if (items.length > 0) {
-        observer.disconnect();
-        window.clearTimeout(timer);
-        resolve(items);
-      }
-    });
+  return Array.from(
+    document.querySelectorAll<HTMLElement>('.fab-MenuOption, [role="menuitem"]'),
+  );
+};
 
-    observer.observe(document.body, { childList: true, subtree: true });
-    const timer = window.setTimeout(() => {
-      observer.disconnect();
-      resolve(collectVisibleMenuItems());
-    }, timeoutMs);
-  });
-
-const closeFabricMenu = async (): Promise<void> => {
+const closeFabricMenu = async (
+  controls?: FabricSelectControls,
+): Promise<void> => {
   document.dispatchEvent(
     new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
   );
-  await delay(80);
+  await delay(100);
+
+  if (controls?.outerButton?.getAttribute("aria-expanded") === "true") {
+    clickFabricSelectButton(controls.outerButton);
+    await delay(100);
+  }
 };
+
+const menuItemLabel = (item: HTMLElement): string =>
+  cleanLabelText(
+    item.querySelector(".fab-MenuOption__row")?.textContent ??
+      item.textContent ??
+      "",
+  );
 
 const fillFabricSelect = async (
   wrapper: HTMLElement,
@@ -531,47 +544,39 @@ const fillFabricSelect = async (
 ): Promise<boolean> => {
   if (!isUsableBambooHrAnswer(answer)) return false;
 
-  const toggle = getFabricToggle(wrapper);
-  if (!toggle) return false;
+  const controls = getFabricSelectControls(wrapper);
+  const button = controls.outerButton;
+  if (!button) return false;
 
-  if (toggle.getAttribute("aria-expanded") === "true") {
-    await closeFabricMenu();
+  if (button.getAttribute("aria-expanded") === "true") {
+    await closeFabricMenu(controls);
   }
 
-  toggle.scrollIntoView({ block: "center", inline: "nearest" });
-  toggle.focus();
-  fullClick(toggle);
-  await waitForDomUpdate();
+  clickFabricSelectButton(button);
+  await delay(FABRIC_SELECT_SETTLE_MS);
 
-  let items = await waitForMenuItems();
+  const items = scrapeOpenMenuItems();
   if (items.length === 0) {
-    await delay(250);
-    items = collectVisibleMenuItems();
-  }
-
-  if (items.length === 0) {
-    await closeFabricMenu();
+    await closeFabricMenu(controls);
     return false;
   }
 
-  const labels = items.map((item) => cleanLabelText(item.textContent ?? ""));
+  const labels = items.map(menuItemLabel);
   const matched = matchOption(answer, labels);
   if (!matched) {
-    await closeFabricMenu();
+    await closeFabricMenu(controls);
     return false;
   }
 
-  const target = items.find(
-    (item) => cleanLabelText(item.textContent ?? "") === matched,
-  );
+  const target = items.find((item) => menuItemLabel(item) === matched);
   if (!target) {
-    await closeFabricMenu();
+    await closeFabricMenu(controls);
     return false;
   }
 
   fullClick(target);
   await delay(150);
-  await handleValueChanges(toggle);
+  await handleValueChanges(button);
   return true;
 };
 

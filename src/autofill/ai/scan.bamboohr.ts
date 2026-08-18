@@ -49,8 +49,6 @@ const FABRIC_SELECT_WRAPPER =
 const FABRIC_SELECT = '[data-fabric-component="Select"], .fab-Select';
 const RADIO_GROUP =
   'fieldset[data-fabric-component="RadioGroup"], fieldset.CandidateField';
-const MENU_ITEM_SELECTOR =
-  '[role="menuitem"], [role="option"], .fab-Menu__item, [data-fabric-component="MenuItem"]';
 
 const cleanLabelText = (text: string): string =>
   text
@@ -289,93 +287,109 @@ const isRadioGroupRequired = (fieldset: HTMLElement): boolean => {
   return !!legend?.textContent?.includes("*");
 };
 
-const waitForDomUpdate = (): Promise<void> =>
-  new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => resolve());
-    });
-  });
+interface FabricSelectControls {
+  outerButton: HTMLButtonElement | null;
+  chevron: HTMLElement | null;
+  menuId: string | null;
+}
 
-const collectVisibleMenuItems = (): HTMLElement[] =>
-  Array.from(document.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR)).filter(
-    (item) => {
-      const style = window.getComputedStyle(item);
-      if (style.display === "none" || style.visibility === "hidden") {
-        return false;
-      }
-      const rect = item.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    },
+const getFabricSelectControls = (
+  wrapper: HTMLElement,
+): FabricSelectControls => {
+  const outerButton =
+    wrapper.querySelector<HTMLButtonElement>("button.fab-SelectToggle") ||
+    wrapper.querySelector<HTMLButtonElement>("button[aria-haspopup='true']");
+  const chevron = wrapper.querySelector<HTMLElement>(
+    ".fab-SelectToggle__toggleButton",
   );
-
-const waitForMenuItems = (timeoutMs = 700): Promise<HTMLElement[]> =>
-  new Promise((resolve) => {
-    const existing = collectVisibleMenuItems();
-    if (existing.length > 0) {
-      resolve(existing);
-      return;
-    }
-
-    const observer = new MutationObserver(() => {
-      const items = collectVisibleMenuItems();
-      if (items.length > 0) {
-        observer.disconnect();
-        window.clearTimeout(timer);
-        resolve(items);
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    const timer = window.setTimeout(() => {
-      observer.disconnect();
-      resolve(collectVisibleMenuItems());
-    }, timeoutMs);
-  });
-
-const closeFabricMenu = async (): Promise<void> => {
-  document.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-  );
-  await delay(80);
+  const menuId =
+    outerButton?.getAttribute("data-menu-id") ||
+    wrapper.querySelector("[data-menu-id]")?.getAttribute("data-menu-id") ||
+    null;
+  return { outerButton, chevron, menuId };
 };
 
-const getFabricToggle = (wrapper: HTMLElement): HTMLButtonElement | null =>
-  wrapper.querySelector<HTMLButtonElement>("button.fab-SelectToggle") ||
-  wrapper.querySelector<HTMLButtonElement>(".fab-SelectToggle__toggleButton") ||
-  wrapper.querySelector<HTMLButtonElement>("button[aria-haspopup='true']");
+const FABRIC_SELECT_SETTLE_MS = 2000;
 
-const openAndScanFabricSelectOptions = async (
-  wrapper: HTMLElement,
-): Promise<string[]> => {
-  const toggle = getFabricToggle(wrapper);
-  if (!toggle) return [];
+const clickFabricSelectButton = (button: HTMLElement): void => {
+  button.scrollIntoView({ block: "center", inline: "nearest" });
+  button.focus();
+  button.click();
+};
 
-  if (toggle.getAttribute("aria-expanded") === "true") {
-    await closeFabricMenu();
-  }
-
-  toggle.focus();
-  toggle.click();
-  await waitForDomUpdate();
-
-  let items = await waitForMenuItems();
-  if (items.length === 0) {
-    await delay(200);
-    items = collectVisibleMenuItems();
-  }
-
+const scrapeOpenMenuOptions = (): string[] => {
   const options: string[] = [];
   const seen = new Set<string>();
+
+  const menus = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[data-fabric-component="Select Menu"], .fab-MenuVessel, .fab-MenuList[role="menu"]',
+    ),
+  );
+
+  const items =
+    menus.length > 0
+      ? menus.flatMap((menu) =>
+          Array.from(
+            menu.querySelectorAll<HTMLElement>(
+              '.fab-MenuOption, [role="menuitem"]',
+            ),
+          ),
+        )
+      : Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '.fab-MenuOption, [role="menuitem"]',
+          ),
+        );
+
   items.forEach((item) => {
-    const label = cleanLabelText(item.textContent ?? "");
+    const label = cleanLabelText(
+      item.querySelector(".fab-MenuOption__row")?.textContent ??
+        item.textContent ??
+        "",
+    );
     if (!label || seen.has(label) || isPlaceholderOption(label)) return;
     if (/^clear selection$/i.test(label)) return;
     seen.add(label);
     options.push(label);
   });
 
-  await closeFabricMenu();
+  return options;
+};
+
+const closeFabricMenu = async (
+  controls?: FabricSelectControls,
+): Promise<void> => {
+  document.dispatchEvent(
+    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+  );
+  await delay(100);
+
+  if (controls?.outerButton?.getAttribute("aria-expanded") === "true") {
+    clickFabricSelectButton(controls.outerButton);
+    await delay(100);
+  }
+};
+
+/**
+ * Click `button.fab-SelectToggle`, wait for the portal menu, then read options.
+ */
+const openAndScanFabricSelectOptions = async (
+  wrapper: HTMLElement,
+): Promise<string[]> => {
+  const controls = getFabricSelectControls(wrapper);
+  const button = controls.outerButton;
+  if (!button) return [];
+
+  if (button.getAttribute("aria-expanded") === "true") {
+    await closeFabricMenu(controls);
+  }
+
+  clickFabricSelectButton(button);
+  await delay(FABRIC_SELECT_SETTLE_MS);
+
+  const options = scrapeOpenMenuOptions();
+  await closeFabricMenu(controls);
   return options;
 };
 
@@ -443,22 +457,28 @@ export const collectBambooHrCandidateFields = (): BambooHrCandidateField[] => {
   };
 
   selectWrappers.forEach((wrapper, index) => {
-    const toggle = getFabricToggle(wrapper);
+    const controls = getFabricSelectControls(wrapper);
+    if (!controls.outerButton) return;
+
     const hiddenSelect = wrapper.querySelector("select");
-    const label = getWrapperLabel(wrapper) || (toggle ? getFieldLabel(toggle) : "");
+    const label =
+      getWrapperLabel(wrapper) ||
+      (controls.outerButton ? getFieldLabel(controls.outerButton) : "");
     if (!label) return;
 
     const id =
       hiddenSelect?.getAttribute("id") ||
       hiddenSelect?.getAttribute("name") ||
-      toggle?.getAttribute("data-menu-id") ||
+      controls.menuId ||
       `fabric-select-${index}`;
     if (!markSeen(id, label)) return;
 
     results.push({
       element: wrapper,
       label,
-      required: isRequiredField(wrapper) || isRequiredField(toggle ?? wrapper),
+      required:
+        isRequiredField(wrapper) ||
+        isRequiredField(controls.outerButton ?? wrapper),
       kind: "fabric-select",
       options: hiddenSelect ? getNativeSelectOptions(hiddenSelect) : [],
     });
@@ -573,7 +593,7 @@ export const scanBambooHrHtmlToMakeApiPayload = async (
       continue;
     }
 
-    // Fabric custom dropdown — native <select> is empty until opened
+    // Fabric custom dropdown — click toggle, wait, then read portal menu
     const fabricOptions = await openAndScanFabricSelectOptions(candidate.element);
     const optionsList =
       fabricOptions.length > 0 ? fabricOptions : candidate.options ?? [];
@@ -581,7 +601,7 @@ export const scanBambooHrHtmlToMakeApiPayload = async (
       label: candidate.label,
       required: candidate.required,
       type: "search",
-      ...(optionsList.length > 0 ? { options: optionsList } : {}),
+      options: optionsList,
     });
   }
 
