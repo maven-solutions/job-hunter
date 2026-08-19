@@ -28,24 +28,85 @@ export const isBambooHrUrl = (url: string = window.location.href): boolean => {
   }
 };
 
+const getFileUploadRoot = (element: HTMLElement): HTMLElement =>
+  (element.closest("[data-fabric-component='FileUpload']") as HTMLElement) ||
+  element;
+
+const getFileUploadLabel = (element: HTMLElement): string => {
+  const root = getFileUploadRoot(element);
+  const flex =
+    (root.closest("[data-fabric-component='Flex']") as HTMLElement | null) ||
+    (root.parentElement as HTMLElement | null);
+  const text =
+    flex?.querySelector("[data-fabric-component='BodyText']")?.textContent ||
+    "";
+  return text.replace(/\*/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+};
+
+const isCoverLetterUpload = (element: HTMLElement): boolean => {
+  const root = getFileUploadRoot(element);
+  if (
+    root.querySelector(
+      "input[name='coverLetterFileId'], input[name*='coverLetter' i], input[name*='cover_letter' i]",
+    )
+  ) {
+    return true;
+  }
+  const label = getFileUploadLabel(element);
+  return label.includes("cover letter") || label.includes("coverletter");
+};
+
+const isResumeUpload = (element: HTMLElement): boolean => {
+  if (isCoverLetterUpload(element)) return false;
+  const root = getFileUploadRoot(element);
+  if (
+    root.querySelector(
+      "input[name='resumeFileId'], input[name*='resume' i]",
+    )
+  ) {
+    return true;
+  }
+  const label = getFileUploadLabel(element);
+  return label === "resume" || label.startsWith("resume");
+};
+
+/**
+ * BambooHR often has Cover Letter + Resume file inputs that share
+ * `aria-label="file-input"`. Cover Letter comes first in the DOM — never
+ * treat that as the resume field.
+ */
 const findBambooHrResumeFileInput = (): HTMLInputElement | null => {
   const form = getBambooHrFormRoot();
-  const selectors = [
-    "[data-fabric-component='FileUpload'] input[type='file']",
-    "input[aria-label='file-input']",
-    "input[type='file'][name*='resume' i]",
-    "input[type='file'][id*='resume' i]",
-    "form#job-application-form input[type='file']",
-  ];
 
-  for (const selector of selectors) {
-    const scoped = (
-      selector.startsWith("form#") ? document : form
-    ).querySelector<HTMLInputElement>(selector);
-    if (scoped?.type === "file") return scoped;
+  const resumeHidden = form.querySelector<HTMLInputElement>(
+    "input[name='resumeFileId']",
+  );
+  if (resumeHidden) {
+    const upload = getFileUploadRoot(resumeHidden);
+    const fileInput = upload.querySelector<HTMLInputElement>(
+      "input[type='file'][aria-label='file-input'], input[type='file']",
+    );
+    if (fileInput && !isCoverLetterUpload(fileInput)) return fileInput;
   }
 
-  return form.querySelector<HTMLInputElement>("input[type='file']");
+  const uploads = Array.from(
+    form.querySelectorAll<HTMLElement>("[data-fabric-component='FileUpload']"),
+  );
+  for (const upload of uploads) {
+    if (!isResumeUpload(upload)) continue;
+    const fileInput = upload.querySelector<HTMLInputElement>(
+      "input[type='file']",
+    );
+    if (fileInput) return fileInput;
+  }
+
+  const fileInputs = Array.from(
+    form.querySelectorAll<HTMLInputElement>(
+      "input[type='file'][aria-label='file-input'], input[type='file']",
+    ),
+  ).filter((input) => !isCoverLetterUpload(input));
+
+  return fileInputs.find((input) => isResumeUpload(input)) ?? null;
 };
 
 const uploadBambooHrResume = async (
