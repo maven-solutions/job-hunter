@@ -309,7 +309,7 @@ const getFabricSelectControls = (
   return { outerButton, chevron, menuId };
 };
 
-const FABRIC_SELECT_SETTLE_MS = 1000;
+const FABRIC_SELECT_SETTLE_MS = 3000;
 
 const isFabricMenuVisible = (menu: HTMLElement): boolean => {
   const style = window.getComputedStyle(menu);
@@ -429,14 +429,14 @@ export const closeBambooHrFabricMenu = async (): Promise<void> => {
       cancelable: true,
     }),
   );
-  await delay(150);
+  await delay(400);
 };
 
 const isSelectExpanded = (button: HTMLElement | null): boolean =>
   button?.getAttribute("aria-expanded") === "true";
 
 /**
- * Dispatch click on `button.fab-SelectToggle`, wait 1s for the portal menu.
+ * Dispatch click on `button.fab-SelectToggle`, wait 3s for the portal menu.
  * Leaves the menu open so fill can click an option.
  */
 export const openBambooHrFabricSelectMenu = async (
@@ -463,7 +463,7 @@ export const openBambooHrFabricSelectMenu = async (
 
   let items = scrapeBambooHrFabricMenuItems(menuId);
   if (items.length === 0) {
-    await delay(400);
+    await delay(1000);
     items = scrapeBambooHrFabricMenuItems(menuId);
   }
 

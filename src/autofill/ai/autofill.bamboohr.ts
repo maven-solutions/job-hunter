@@ -504,7 +504,9 @@ const fillFabricSelect = async (
 
   dispatchBambooHrSelectClick(target);
   fullClick(target);
-  await delay(150);
+  await delay(500);
+  await closeBambooHrFabricMenu();
+  await delay(500);
   return true;
 };
 
@@ -668,8 +670,8 @@ export const autofillBambooHrWithAi = async (
       if (ok) {
         filled += 1;
         if (fillOrderRank(field.label) === 0) {
-          // Country change reloads State options
-          await delay(350);
+          // Country change reloads State / Province options
+          await delay(2000);
         }
       } else {
         failed += 1;
@@ -678,7 +680,7 @@ export const autofillBambooHrWithAi = async (
       failed += 1;
     }
 
-    await delay(150);
+    await delay(field.kind === "fabric-select" ? 800 : 150);
   }
 
   return {
