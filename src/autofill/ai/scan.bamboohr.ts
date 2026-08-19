@@ -309,40 +309,101 @@ const getFabricSelectControls = (
   return { outerButton, chevron, menuId };
 };
 
-const FABRIC_SELECT_SETTLE_MS = 2000;
+const FABRIC_SELECT_SETTLE_MS = 1000;
 
-const clickFabricSelectButton = (button: HTMLElement): void => {
-  button.scrollIntoView({ block: "center", inline: "nearest" });
-  button.focus();
-  button.click();
+const isFabricMenuVisible = (menu: HTMLElement): boolean => {
+  const style = window.getComputedStyle(menu);
+  if (style.display === "none" || style.visibility === "hidden") return false;
+  const rect = menu.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
 };
 
-const scrapeOpenMenuOptions = (): string[] => {
-  const options: string[] = [];
-  const seen = new Set<string>();
+/**
+ * Fabric only opens when a real pointer/mouse sequence is dispatched on
+ * `button.fab-SelectToggle` (native `.click()` is ignored).
+ */
+export const dispatchBambooHrSelectClick = (element: HTMLElement): void => {
+  element.scrollIntoView({ block: "center", inline: "nearest" });
+  try {
+    element.focus({ preventScroll: true });
+  } catch {
+    element.focus();
+  }
+
+  const rect = element.getBoundingClientRect();
+  const clientX = rect.left + rect.width / 2;
+  const clientY = rect.top + rect.height / 2;
+  const mouseInit: MouseEventInit = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    view: window,
+    detail: 1,
+    buttons: 1,
+    clientX,
+    clientY,
+    screenX: clientX,
+    screenY: clientY,
+  };
+  const pointerInit: PointerEventInit = {
+    ...mouseInit,
+    pointerId: 1,
+    pointerType: "mouse",
+    isPrimary: true,
+  };
+
+  element.dispatchEvent(new PointerEvent("pointerdown", pointerInit));
+  element.dispatchEvent(new MouseEvent("mousedown", mouseInit));
+  element.dispatchEvent(new PointerEvent("pointerup", pointerInit));
+  element.dispatchEvent(new MouseEvent("mouseup", mouseInit));
+  element.dispatchEvent(new MouseEvent("click", mouseInit));
+};
+
+const findOpenFabricMenu = (menuId?: string | null): HTMLElement | null => {
+  if (menuId) {
+    const scoped = document.querySelector<HTMLElement>(
+      `[data-fabric-component="Select Menu"][data-helium-id="${CSS.escape(menuId)}"]`,
+    );
+    if (scoped && isFabricMenuVisible(scoped)) return scoped;
+
+    const byHelium = document.querySelector<HTMLElement>(
+      `[data-helium-id="${CSS.escape(menuId)}"]`,
+    );
+    if (byHelium && isFabricMenuVisible(byHelium)) {
+      return (
+        byHelium.closest<HTMLElement>("[data-fabric-component='Select Menu']") ||
+        byHelium
+      );
+    }
+  }
 
   const menus = Array.from(
     document.querySelectorAll<HTMLElement>(
-      '[data-fabric-component="Select Menu"], .fab-MenuVessel, .fab-MenuList[role="menu"]',
+      '[data-fabric-component="Select Menu"]',
     ),
-  );
+  ).filter(isFabricMenuVisible);
+  return menus[0] ?? null;
+};
 
-  const items =
-    menus.length > 0
-      ? menus.flatMap((menu) =>
-          Array.from(
-            menu.querySelectorAll<HTMLElement>(
-              '.fab-MenuOption, [role="menuitem"]',
-            ),
-          ),
-        )
-      : Array.from(
-          document.querySelectorAll<HTMLElement>(
-            '.fab-MenuOption, [role="menuitem"]',
-          ),
-        );
+export const scrapeBambooHrFabricMenuItems = (
+  menuId?: string | null,
+): HTMLElement[] => {
+  const menu = findOpenFabricMenu(menuId);
+  const root: ParentNode = menu ?? document;
+  return Array.from(
+    root.querySelectorAll<HTMLElement>(
+      '.fab-MenuOption[role="menuitem"], .fab-MenuOption, [role="menuitem"]',
+    ),
+  ).filter((item) => !item.closest(".fab-MenuSearch"));
+};
 
-  items.forEach((item) => {
+export const scrapeBambooHrFabricMenuOptions = (
+  menuId?: string | null,
+): string[] => {
+  const options: string[] = [];
+  const seen = new Set<string>();
+
+  scrapeBambooHrFabricMenuItems(menuId).forEach((item) => {
     const label = cleanLabelText(
       item.querySelector(".fab-MenuOption__row")?.textContent ??
         item.textContent ??
@@ -350,6 +411,7 @@ const scrapeOpenMenuOptions = (): string[] => {
     );
     if (!label || seen.has(label) || isPlaceholderOption(label)) return;
     if (/^clear selection$/i.test(label)) return;
+    if (/^search/i.test(label)) return;
     seen.add(label);
     options.push(label);
   });
@@ -357,18 +419,55 @@ const scrapeOpenMenuOptions = (): string[] => {
   return options;
 };
 
-const closeFabricMenu = async (
-  controls?: FabricSelectControls,
-): Promise<void> => {
+export const closeBambooHrFabricMenu = async (): Promise<void> => {
   document.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+    new KeyboardEvent("keydown", {
+      key: "Escape",
+      code: "Escape",
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true,
+    }),
   );
-  await delay(100);
+  await delay(150);
+};
 
-  if (controls?.outerButton?.getAttribute("aria-expanded") === "true") {
-    clickFabricSelectButton(controls.outerButton);
-    await delay(100);
+const isSelectExpanded = (button: HTMLElement | null): boolean =>
+  button?.getAttribute("aria-expanded") === "true";
+
+/**
+ * Dispatch click on `button.fab-SelectToggle`, wait 1s for the portal menu.
+ * Leaves the menu open so fill can click an option.
+ */
+export const openBambooHrFabricSelectMenu = async (
+  wrapper: HTMLElement,
+): Promise<HTMLElement[]> => {
+  const { outerButton, chevron, menuId } = getFabricSelectControls(wrapper);
+  if (!outerButton) return [];
+
+  if (isSelectExpanded(outerButton)) {
+    const existing = scrapeBambooHrFabricMenuItems(menuId);
+    if (existing.length > 0) return existing;
+    await closeBambooHrFabricMenu();
+  } else {
+    await closeBambooHrFabricMenu();
   }
+
+  dispatchBambooHrSelectClick(outerButton);
+  await delay(FABRIC_SELECT_SETTLE_MS);
+
+  if (!isSelectExpanded(outerButton) && chevron) {
+    dispatchBambooHrSelectClick(chevron);
+    await delay(FABRIC_SELECT_SETTLE_MS);
+  }
+
+  let items = scrapeBambooHrFabricMenuItems(menuId);
+  if (items.length === 0) {
+    await delay(400);
+    items = scrapeBambooHrFabricMenuItems(menuId);
+  }
+
+  return items;
 };
 
 /**
@@ -377,19 +476,10 @@ const closeFabricMenu = async (
 const openAndScanFabricSelectOptions = async (
   wrapper: HTMLElement,
 ): Promise<string[]> => {
-  const controls = getFabricSelectControls(wrapper);
-  const button = controls.outerButton;
-  if (!button) return [];
-
-  if (button.getAttribute("aria-expanded") === "true") {
-    await closeFabricMenu(controls);
-  }
-
-  clickFabricSelectButton(button);
-  await delay(FABRIC_SELECT_SETTLE_MS);
-
-  const options = scrapeOpenMenuOptions();
-  await closeFabricMenu(controls);
+  const { menuId } = getFabricSelectControls(wrapper);
+  await openBambooHrFabricSelectMenu(wrapper);
+  const options = scrapeBambooHrFabricMenuOptions(menuId);
+  await closeBambooHrFabricMenu();
   return options;
 };
 

@@ -2,6 +2,9 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   BambooHrCandidateField,
   collectBambooHrCandidateFields,
+  dispatchBambooHrSelectClick,
+  openBambooHrFabricSelectMenu,
+  closeBambooHrFabricMenu,
 } from "./scan.bamboohr";
 
 export interface BambooHrAiAnswer {
@@ -467,70 +470,6 @@ const fillNativeSelect = async (
   return false;
 };
 
-interface FabricSelectControls {
-  outerButton: HTMLButtonElement | null;
-  chevron: HTMLElement | null;
-  menuId: string | null;
-}
-
-const getFabricSelectControls = (
-  wrapper: HTMLElement,
-): FabricSelectControls => {
-  const outerButton =
-    wrapper.querySelector<HTMLButtonElement>("button.fab-SelectToggle") ||
-    wrapper.querySelector<HTMLButtonElement>("button[aria-haspopup='true']");
-  const chevron = wrapper.querySelector<HTMLElement>(
-    ".fab-SelectToggle__toggleButton",
-  );
-  const menuId =
-    outerButton?.getAttribute("data-menu-id") ||
-    wrapper.querySelector("[data-menu-id]")?.getAttribute("data-menu-id") ||
-    null;
-  return { outerButton, chevron, menuId };
-};
-
-const FABRIC_SELECT_SETTLE_MS = 2000;
-
-const clickFabricSelectButton = (button: HTMLElement): void => {
-  button.scrollIntoView({ block: "center", inline: "nearest" });
-  button.focus();
-  button.click();
-};
-
-const scrapeOpenMenuItems = (): HTMLElement[] => {
-  const menus = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      '[data-fabric-component="Select Menu"], .fab-MenuVessel, .fab-MenuList[role="menu"]',
-    ),
-  );
-
-  if (menus.length > 0) {
-    return menus.flatMap((menu) =>
-      Array.from(
-        menu.querySelectorAll<HTMLElement>('.fab-MenuOption, [role="menuitem"]'),
-      ),
-    );
-  }
-
-  return Array.from(
-    document.querySelectorAll<HTMLElement>('.fab-MenuOption, [role="menuitem"]'),
-  );
-};
-
-const closeFabricMenu = async (
-  controls?: FabricSelectControls,
-): Promise<void> => {
-  document.dispatchEvent(
-    new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-  );
-  await delay(100);
-
-  if (controls?.outerButton?.getAttribute("aria-expanded") === "true") {
-    clickFabricSelectButton(controls.outerButton);
-    await delay(100);
-  }
-};
-
 const menuItemLabel = (item: HTMLElement): string =>
   cleanLabelText(
     item.querySelector(".fab-MenuOption__row")?.textContent ??
@@ -544,39 +483,28 @@ const fillFabricSelect = async (
 ): Promise<boolean> => {
   if (!isUsableBambooHrAnswer(answer)) return false;
 
-  const controls = getFabricSelectControls(wrapper);
-  const button = controls.outerButton;
-  if (!button) return false;
-
-  if (button.getAttribute("aria-expanded") === "true") {
-    await closeFabricMenu(controls);
-  }
-
-  clickFabricSelectButton(button);
-  await delay(FABRIC_SELECT_SETTLE_MS);
-
-  const items = scrapeOpenMenuItems();
+  const items = await openBambooHrFabricSelectMenu(wrapper);
   if (items.length === 0) {
-    await closeFabricMenu(controls);
+    await closeBambooHrFabricMenu();
     return false;
   }
 
   const labels = items.map(menuItemLabel);
   const matched = matchOption(answer, labels);
   if (!matched) {
-    await closeFabricMenu(controls);
+    await closeBambooHrFabricMenu();
     return false;
   }
 
   const target = items.find((item) => menuItemLabel(item) === matched);
   if (!target) {
-    await closeFabricMenu(controls);
+    await closeBambooHrFabricMenu();
     return false;
   }
 
+  dispatchBambooHrSelectClick(target);
   fullClick(target);
   await delay(150);
-  await handleValueChanges(button);
   return true;
 };
 
