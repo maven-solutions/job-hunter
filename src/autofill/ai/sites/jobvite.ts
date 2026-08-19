@@ -1,10 +1,8 @@
 import { Applicant } from "../../data";
 import { createFile } from "../../FromFiller/fileTypeDataFiller";
-import { delay } from "../../helper";
 import { autofillJobviteWithAi } from "../autofill.jobvite";
 import { initJobviteHtmlScanner } from "../cibtn.jobvite";
 import {
-  getJobviteFormRoot,
   scanJobviteHtmlToMakeApiPayload,
   JobviteScanToMakeApiOptions,
   JobviteScanToMakeApiPayload,
@@ -36,50 +34,77 @@ export const isJobviteUrl = (url: string = window.location.href): boolean => {
   }
 };
 
-const isCoverLetterFileInput = (input: HTMLInputElement): boolean => {
-  if (input.closest(".jv-additional-files")) return true;
-  const label = (
-    input.getAttribute("aria-label") ||
-    input.closest("[attachment-label]")?.getAttribute("attachment-label") ||
-    ""
-  ).toLowerCase();
-  return label.includes("cover letter") || label.includes("coverletter");
+const isResumeAlreadyAttached = (): boolean => {
+  const list = document.querySelector("#attachResume .jv-file-list");
+  if (list && list.querySelector("li")) return true;
+
+  const selectWrap = document.querySelector<HTMLElement>(
+    "#attachResume [ng-show='!resumeName']",
+  );
+  if (selectWrap?.classList.contains("ng-hide")) return true;
+
+  return false;
 };
 
+const getJobviteAttachmentDropdown = (): HTMLElement | null => {
+  const dropdown = document.getElementById("attachmentDropdown");
+  if (!dropdown) return null;
+  if (dropdown.classList.contains("ng-hide")) return null;
+  if (dropdown.getAttribute("aria-hidden") === "true") return null;
+  const style = window.getComputedStyle(dropdown);
+  if (style.display === "none" || style.visibility === "hidden") return null;
+  return dropdown;
+};
+
+/**
+ * File input lives in `#attachmentDropdown` (opened by Resume Select),
+ * not inside `#attachResume`. Prefer `#file-input-0` / the File row.
+ */
 const findJobviteResumeFileInput = (): HTMLInputElement | null => {
-  const form = getJobviteFormRoot();
-  const scoped =
-    form.querySelector<HTMLInputElement>(
-      "#attachResume input[type='file'], .jv-apply-with input[type='file']",
-    ) ||
-    document.querySelector<HTMLInputElement>(
-      "#attachResume input[type='file'], .jv-apply-with input[type='file']",
-    );
-  if (scoped && !isCoverLetterFileInput(scoped)) return scoped;
+  const dropdown = getJobviteAttachmentDropdown();
+  const root: ParentNode = dropdown ?? document;
 
-  const inputs = Array.from(
-    form.querySelectorAll<HTMLInputElement>("input[type='file']"),
-  ).filter((input) => !isCoverLetterFileInput(input));
+  const byId = root.querySelector<HTMLInputElement>(
+    "#file-input-0, input[id^='file-input-']",
+  );
+  if (byId && byId.type === "file") return byId;
 
-  return inputs[0] ?? null;
+  const fileRow = Array.from(
+    root.querySelectorAll<HTMLElement>(".jv-add-attachment-item"),
+  ).find((item) => /(?:^|\s)file(?:\s|$)/i.test(item.textContent ?? ""));
+  const fromRow = fileRow?.querySelector<HTMLInputElement>("input[type='file']");
+  if (fromRow) return fromRow;
+
+  return (
+    root.querySelector<HTMLInputElement>(
+      "[jv-file-input] input[type='file'], label[jv-file-input] + input[type='file']",
+    ) ?? dropdown?.querySelector<HTMLInputElement>("input[type='file']") ??
+    null
+  );
 };
 
-const clickJobviteResumeSelect = (): void => {
-  const button =
-    document.querySelector<HTMLButtonElement>(
-      "#attachResume button[jv-add-attachment], .jv-apply-with button[jv-add-attachment]",
-    ) ||
-    document.querySelector<HTMLButtonElement>(
-      "#attachResume button.jv-button, .jv-apply-with button.jv-button",
-    );
-  button?.click();
+const clickJobviteResumeSelect = (): boolean => {
+  const button = document.querySelector<HTMLButtonElement>(
+    "#attachResume button[jv-add-attachment], .jv-apply-with#attachResume button.jv-button, #attachResume button.jv-button",
+  );
+  if (!button) return false;
+
+  button.dispatchEvent(
+    new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }),
+  );
+  button.dispatchEvent(
+    new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }),
+  );
+  button.click();
+  return true;
 };
 
-const waitForJobviteResumeFileInput = (
-  timeoutMs = 1500,
-): Promise<HTMLInputElement | null> =>
+const waitForPredicate = <T>(
+  getter: () => T | null,
+  timeoutMs: number,
+): Promise<T | null> =>
   new Promise((resolve) => {
-    const existing = findJobviteResumeFileInput();
+    const existing = getter();
     if (existing) {
       resolve(existing);
       return;
@@ -88,34 +113,76 @@ const waitForJobviteResumeFileInput = (
     let observer: MutationObserver | null = null;
     const timer = window.setTimeout(() => {
       observer?.disconnect();
-      resolve(findJobviteResumeFileInput());
+      resolve(getter());
     }, timeoutMs);
 
     observer = new MutationObserver(() => {
-      const input = findJobviteResumeFileInput();
-      if (input) {
+      const value = getter();
+      if (value) {
         window.clearTimeout(timer);
         observer?.disconnect();
-        resolve(input);
+        resolve(value);
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-hidden"],
+    });
   });
 
-const clickDeviceMenuItem = (): boolean => {
-  const items = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      ".jv-add-attachment a, .jv-add-attachment button, .jv-add-attachment li, [jv-add-attachment] ~ * a, [jv-add-attachment] ~ * button",
-    ),
+const callAngularChange = (element: HTMLElement): boolean => {
+  const angular = (window as any).angular;
+  if (!angular?.element) return false;
+
+  try {
+    const ngEl = angular.element(element);
+    const scopes = [ngEl.scope?.(), ngEl.isolateScope?.()].filter(Boolean);
+    for (const scope of scopes) {
+      if (typeof scope.change !== "function") continue;
+      if (!scope.$$phase && !scope.$root?.$$phase) {
+        scope.$apply(() => scope.change());
+      } else {
+        scope.change();
+      }
+      return true;
+    }
+    ngEl.triggerHandler?.("change");
+  } catch {
+    // Angular missing or digest already in progress
+  }
+  return false;
+};
+
+/**
+ * Jobvite File row uses:
+ * `onchange="angular.element(this).scope().change()"`
+ * `change` may live on the input scope or the `jv-file-input` isolate scope.
+ */
+const notifyJobviteFileChange = (fileInput: HTMLInputElement): void => {
+  const label =
+    (fileInput.previousElementSibling instanceof HTMLElement &&
+    fileInput.previousElementSibling.matches("[jv-file-input], label")
+      ? fileInput.previousElementSibling
+      : null) ||
+    (fileInput.id
+      ? document.querySelector<HTMLElement>(
+          `label[for="${CSS.escape(fileInput.id)}"]`,
+        )
+      : null);
+
+  if (callAngularChange(fileInput) || (label && callAngularChange(label))) {
+    return;
+  }
+
+  fileInput.dispatchEvent(new Event("input", { bubbles: true }));
+  fileInput.dispatchEvent(
+    new Event("change", { bubbles: true, cancelable: false }),
   );
-  const match = items.find((el) =>
-    /device|computer|upload|from file|my computer/i.test(
-      el.textContent ?? "",
-    ),
-  );
-  if (!match) return false;
-  match.click();
-  return true;
+  if (typeof fileInput.onchange === "function") {
+    fileInput.onchange(new Event("change") as any);
+  }
 };
 
 const assignFileAndNotify = async (
@@ -131,49 +198,46 @@ const assignFileAndNotify = async (
 
   fileInput.setAttribute("ci-aria-file-uploaded", "true");
   fileInput.files = dt.files;
-  fileInput.dispatchEvent(
-    new Event("change", { bubbles: true, cancelable: false }),
-  );
-  fileInput.dispatchEvent(
-    new Event("input", { bubbles: true, cancelable: false }),
-  );
-
-  const angular = (window as any).angular;
-  if (angular?.element) {
-    try {
-      angular.element(fileInput).triggerHandler("change");
-    } catch {
-      // ignore
-    }
-  }
-
+  notifyJobviteFileChange(fileInput);
   return true;
 };
 
 /**
- * Jobvite resume uses `jv-add-attachment` (often no file input until Select
- * is opened). Best-effort: reveal the picker, then set files on the input.
+ * Resume flow: click `#attachResume` Select → wait for `#attachmentDropdown`
+ * → set files on `#file-input-0` → Angular `scope().change()`.
  */
 const uploadJobviteResume = async (
   applicantData: Applicant,
 ): Promise<boolean> => {
   if (!applicantData?.pdf_url) return false;
+  if (isResumeAlreadyAttached()) return true;
 
-  let fileInput = findJobviteResumeFileInput();
-  if (!fileInput) {
-    clickJobviteResumeSelect();
-    await delay(200);
-    clickDeviceMenuItem();
-    fileInput = await waitForJobviteResumeFileInput();
+  if (!getJobviteAttachmentDropdown()) {
+    if (!clickJobviteResumeSelect()) {
+      console.warn("[CareerAI Jobvite] Resume Select button not found");
+      return false;
+    }
   }
 
+  const dropdown = await waitForPredicate(getJobviteAttachmentDropdown, 3000);
+  if (!dropdown) {
+    console.warn("[CareerAI Jobvite] Attachment dropdown did not open");
+    return false;
+  }
+
+  const fileInput = await waitForPredicate(findJobviteResumeFileInput, 2000);
   if (!fileInput) {
-    console.warn("[CareerAI Jobvite] Resume file input not found");
+    console.warn("[CareerAI Jobvite] Resume file input not found in dropdown");
     return false;
   }
 
   try {
-    return await assignFileAndNotify(fileInput, applicantData);
+    await assignFileAndNotify(fileInput, applicantData);
+    const attached = await waitForPredicate(
+      () => (isResumeAlreadyAttached() ? true : null),
+      8000,
+    );
+    return !!attached || !!fileInput.files?.length;
   } catch (error) {
     console.error("[CareerAI Jobvite] Resume upload failed:", error);
     return false;
