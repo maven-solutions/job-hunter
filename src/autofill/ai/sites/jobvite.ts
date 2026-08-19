@@ -255,13 +255,12 @@ const applyFill = async (
   fillData: unknown,
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
-  const fillResult = await autofillJobviteWithAi(fillData);
-
-  // Resume is not returned by the AI fill API — upload from local applicant data.
-  // Do NOT increment `filled` for resume: it is not one of the scanned form fields.
+  // Resume is required before Jobvite will advance to step 2 (prescreen).
   if (applicantData?.pdf_url) {
     await uploadJobviteResume(applicantData);
   }
+
+  const fillResult = await autofillJobviteWithAi(fillData);
 
   return {
     total: fillResult.total,

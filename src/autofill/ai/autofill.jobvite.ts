@@ -1,6 +1,8 @@
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   collectJobviteCandidateFields,
+  getJobviteNextButton,
+  isJobviteStep2Visible,
   JobviteCandidateField,
 } from "./scan.jobvite";
 
@@ -392,7 +394,7 @@ const getChoiceLabel = (input: HTMLInputElement): string => {
   const wrappingLabel = input.closest("label");
   if (wrappingLabel) {
     const clone = wrappingLabel.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("input, svg, .jv-required-label").forEach((el) =>
+    clone.querySelectorAll("input, svg, i, .jv-required-label").forEach((el) =>
       el.remove(),
     );
     const text = cleanLabelText(clone.textContent ?? "");
@@ -410,6 +412,27 @@ const getChoiceLabel = (input: HTMLInputElement): string => {
 
 const selectChoiceInput = async (input: HTMLInputElement): Promise<boolean> => {
   const label = input.closest("label") as HTMLElement | null;
+  const icon = label?.querySelector<HTMLElement>(
+    "i[role='radio'], i[role='checkbox'], i.icon",
+  );
+
+  if (icon) {
+    icon.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: " ",
+        code: "Space",
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    icon.click();
+    await delay(40);
+    if (input.checked) {
+      syncJobviteAngular(input, input.value);
+      return true;
+    }
+  }
+
   if (label) {
     label.click();
     await delay(40);
@@ -426,6 +449,38 @@ const selectChoiceInput = async (input: HTMLInputElement): Promise<boolean> => {
   syncJobviteAngular(input, input.value);
   await delay(40);
   return input.checked;
+};
+
+const isAffirmativeAnswer = (answer: string): boolean => {
+  const n = fromatStirngInLowerCase(answer) ?? "";
+  return (
+    /^(yes|true|agree|iagree|ok|checked)$/.test(n) ||
+    n.includes("agree") ||
+    n.includes("accept")
+  );
+};
+
+const toDateInputValue = (answer: string): string => {
+  const trimmed = answer.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+  const us = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+  if (us) {
+    const month = us[1].padStart(2, "0");
+    const day = us[2].padStart(2, "0");
+    const year = us[3].length === 2 ? `20${us[3]}` : us[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  const parsed = Date.parse(trimmed);
+  if (!Number.isNaN(parsed)) {
+    const date = new Date(parsed);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${date.getFullYear()}-${month}-${day}`;
+  }
+
+  return trimmed;
 };
 
 const extractCurrencyAmount = (answer: string): string => {
@@ -545,6 +600,15 @@ const fillCheckboxGroup = async (
   if (labeled.length === 0) return false;
 
   const optionLabels = labeled.map((item) => item.label);
+  if (
+    optionLabels.length === 1 &&
+    /agree/i.test(optionLabels[0]) &&
+    isAffirmativeAnswer(answer)
+  ) {
+    const target = labeled[0];
+    if (target.input.checked) return true;
+    return selectChoiceInput(target.input);
+  }
   const parts = parseAnswerList(answer);
   const wholeMatch = matchOption(answer, optionLabels);
   const candidates =
@@ -630,6 +694,13 @@ const fillField = async (
   }
 
   if (
+    field.element instanceof HTMLInputElement &&
+    field.element.type === "date"
+  ) {
+    return fillTextLikeField(field.element, toDateInputValue(answer));
+  }
+
+  if (
     field.element instanceof HTMLInputElement ||
     field.element instanceof HTMLTextAreaElement
   ) {
@@ -639,35 +710,21 @@ const fillField = async (
   return false;
 };
 
-/**
- * Applies AI fill answers to the current Jobvite job application form.
- *
- * Stats:
- * - `filled` = only fields with a usable non-empty API answer AND successful DOM write
- * - empty string / empty array / null / placeholders → skipped
- */
-export const autofillJobviteWithAi = async (
-  response: unknown,
-): Promise<JobviteAiFillResult> => {
-  const { answers, emptyLabelKeys, emptyCount } =
-    parseJobviteAiFillResponse(response);
-
-  const candidates = collectJobviteCandidateFields();
-
+const fillCandidates = async (
+  candidates: JobviteCandidateField[],
+  answers: JobviteAiAnswer[],
+  emptyLabelKeys: Set<string>,
+  alreadyTried: Set<string>,
+): Promise<{ filled: number; failed: number; skipped: number }> => {
   let filled = 0;
   let failed = 0;
   let skipped = 0;
 
-  if (answers.length === 0 && emptyCount === 0) {
-    return {
-      total: 0,
-      filled: 0,
-      failed: 0,
-      skipped: candidates.length,
-    };
-  }
-
   for (const field of candidates) {
+    const fieldKey = `${field.kind}:${field.label}`;
+    if (alreadyTried.has(fieldKey)) continue;
+    alreadyTried.add(fieldKey);
+
     if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
       skipped += 1;
       continue;
@@ -700,6 +757,96 @@ export const autofillJobviteWithAi = async (
     }
 
     await delay(200);
+  }
+
+  return { filled, failed, skipped };
+};
+
+const waitForJobviteStep2 = (timeoutMs = 4000): Promise<boolean> =>
+  new Promise((resolve) => {
+    if (isJobviteStep2Visible()) {
+      resolve(true);
+      return;
+    }
+
+    let observer: MutationObserver | null = null;
+    const timer = window.setTimeout(() => {
+      observer?.disconnect();
+      resolve(isJobviteStep2Visible());
+    }, timeoutMs);
+
+    observer = new MutationObserver(() => {
+      if (isJobviteStep2Visible()) {
+        window.clearTimeout(timer);
+        observer?.disconnect();
+        resolve(true);
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
+  });
+
+const goToJobviteStep2 = async (): Promise<boolean> => {
+  if (isJobviteStep2Visible()) return true;
+  const next = getJobviteNextButton();
+  if (!next) return false;
+  next.click();
+  await delay(300);
+  return waitForJobviteStep2();
+};
+
+/**
+ * Applies AI fill answers to the current Jobvite job application form.
+ *
+ * Stats:
+ * - `filled` = only fields with a usable non-empty API answer AND successful DOM write
+ * - empty string / empty array / null / placeholders → skipped
+ * After step 1, clicks Next and fills Canada Screening / prescreen radios.
+ */
+export const autofillJobviteWithAi = async (
+  response: unknown,
+): Promise<JobviteAiFillResult> => {
+  const { answers, emptyLabelKeys, emptyCount } =
+    parseJobviteAiFillResponse(response);
+
+  const alreadyTried = new Set<string>();
+  const firstPass = collectJobviteCandidateFields();
+
+  if (answers.length === 0 && emptyCount === 0) {
+    return {
+      total: 0,
+      filled: 0,
+      failed: 0,
+      skipped: firstPass.length,
+    };
+  }
+
+  const first = await fillCandidates(
+    firstPass,
+    answers,
+    emptyLabelKeys,
+    alreadyTried,
+  );
+
+  let filled = first.filled;
+  let failed = first.failed;
+  let skipped = first.skipped;
+
+  const reachedStep2 = await goToJobviteStep2();
+  if (reachedStep2) {
+    const second = await fillCandidates(
+      collectJobviteCandidateFields(),
+      answers,
+      emptyLabelKeys,
+      alreadyTried,
+    );
+    filled += second.filled;
+    failed += second.failed;
+    skipped += second.skipped;
   }
 
   return {

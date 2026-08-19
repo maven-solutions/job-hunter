@@ -116,11 +116,59 @@ export const isVisibleJobviteElement = (element: HTMLElement): boolean => {
   return true;
 };
 
+const getLegendLabel = (wrapper: HTMLElement): string => {
+  const legend = wrapper.querySelector(".jv-form-field-legend");
+  if (legend?.textContent) {
+    return cleanLabelText(legend.textContent);
+  }
+  return "";
+};
+
+const getPrescreenPrompt = (wrapper: HTMLElement): string => {
+  const element = wrapper.closest(
+    ".jv-prescreen-element",
+  ) as HTMLElement | null;
+  if (!element) return "";
+
+  const readParagraph = (root: Element | null): string => {
+    if (!root) return "";
+    const paragraph = root.querySelector(
+      ".jv-form-field-p .ng-binding, .jv-form-field-p span, .JVA_TEXT span, p.ng-scope",
+    );
+    return cleanLabelText(paragraph?.textContent ?? "");
+  };
+
+  let text = readParagraph(element);
+  if (!text) {
+    text = readParagraph(element.previousElementSibling);
+  }
+  if (text.length > 180) {
+    return `${text.slice(0, 180).trim()}…`;
+  }
+  return text;
+};
+
 const getWrapperLabel = (wrapper: HTMLElement): string => {
   const label = wrapper.querySelector(".jv-form-field-label");
   if (label?.textContent) {
     return cleanLabelText(label.textContent);
   }
+
+  const legend = getLegendLabel(wrapper);
+  if (legend) return legend;
+
+  return "";
+};
+
+const labelForUnlabeledInput = (
+  wrapper: HTMLElement,
+  input: HTMLInputElement,
+): string => {
+  const prompt = getPrescreenPrompt(wrapper);
+  const id = (input.id || input.name || "").toLowerCase();
+  if (prompt && /from/.test(id)) return `${prompt} (From)`;
+  if (prompt && /(^|-)to/.test(id)) return `${prompt} (To)`;
+  if (prompt) return prompt;
   return "";
 };
 
@@ -171,6 +219,9 @@ const isRequiredField = (
   if (scope?.querySelector(".jv-form-field-label")?.textContent?.includes("*")) {
     return true;
   }
+  if (scope?.querySelector(".jv-form-field-legend")?.textContent?.includes("*")) {
+    return true;
+  }
 
   return false;
 };
@@ -200,7 +251,7 @@ const getChoiceLabel = (input: HTMLInputElement): string => {
   const wrappingLabel = input.closest("label");
   if (wrappingLabel) {
     const clone = wrappingLabel.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("input, svg, .jv-required-label").forEach((el) =>
+    clone.querySelectorAll("input, svg, i, .jv-required-label").forEach((el) =>
       el.remove(),
     );
     const text = cleanLabelText(clone.textContent ?? "");
@@ -227,6 +278,16 @@ const rememberKey = (
   return true;
 };
 
+const isStaticTextWrapper = (wrapper: HTMLElement): boolean => {
+  if (wrapper.querySelector(".jv-form-field-p, .JVA_TEXT p")) {
+    const hasControl = wrapper.querySelector(
+      "input, textarea, select, fieldset.jv-input-group",
+    );
+    return !hasControl;
+  }
+  return false;
+};
+
 const collectFromWrapper = (
   wrapper: HTMLElement,
   results: JobviteCandidateField[],
@@ -235,12 +296,16 @@ const collectFromWrapper = (
   if (!isVisibleJobviteElement(wrapper) || isSkippedControl(wrapper)) {
     return;
   }
+  if (isStaticTextWrapper(wrapper)) {
+    return;
+  }
 
   const label = getWrapperLabel(wrapper);
 
+  // Native radios/checkboxes are often visually hidden behind Jobvite icons.
   const radios = Array.from(
     wrapper.querySelectorAll<HTMLInputElement>("input[type='radio']"),
-  ).filter((radio) => isVisibleJobviteElement(radio) && !isSkippedControl(radio));
+  ).filter((radio) => !isSkippedControl(radio) && !isDisabledField(radio));
   if (radios.length > 0) {
     if (!rememberKey(seenIds, radios[0].getAttribute("name"), `radio-${results.length}`)) {
       return;
@@ -257,7 +322,7 @@ const collectFromWrapper = (
 
   const checkboxes = Array.from(
     wrapper.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
-  ).filter((cb) => isVisibleJobviteElement(cb) && !isSkippedControl(cb));
+  ).filter((cb) => !isSkippedControl(cb) && !isDisabledField(cb));
   if (checkboxes.length > 0) {
     if (
       !rememberKey(
@@ -268,12 +333,18 @@ const collectFromWrapper = (
     ) {
       return;
     }
+    const optionLabels = checkboxes.map(getChoiceLabel).filter(Boolean);
+    const checkboxLabel =
+      label ||
+      getPrescreenPrompt(wrapper) ||
+      optionLabels[0] ||
+      getFieldLabel(checkboxes[0]);
     results.push({
       element: wrapper,
-      label: label || getFieldLabel(checkboxes[0]),
+      label: checkboxLabel,
       required: isRequiredField(checkboxes[0], wrapper),
       kind: "checkbox-group",
-      options: checkboxes.map(getChoiceLabel).filter(Boolean),
+      options: optionLabels,
     });
     return;
   }
@@ -377,7 +448,7 @@ const collectFromWrapper = (
     }
     results.push({
       element: textInput,
-      label: label || getFieldLabel(textInput),
+      label: label || labelForUnlabeledInput(wrapper, textInput) || getFieldLabel(textInput),
       required: isRequiredField(textInput, wrapper),
       kind: "text",
     });
@@ -398,6 +469,295 @@ export const collectJobviteCandidateFields = (): JobviteCandidateField[] => {
   });
 
   return results;
+};
+
+export const getJobviteNextButton = (): HTMLButtonElement | null => {
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>(
+      ".jv-apply-form-actions button, button[aria-label='Next']",
+    ),
+  );
+  return (
+    buttons.find((button) => {
+      if (button.classList.contains("ng-hide") || isDisabledField(button)) {
+        return false;
+      }
+      if (!isVisibleJobviteElement(button)) return false;
+      const label = `${button.getAttribute("aria-label") || ""} ${button.textContent || ""}`;
+      return /next/i.test(label);
+    }) ?? null
+  );
+};
+
+export const isJobviteStep2Visible = (): boolean => {
+  const step2 =
+    document.querySelector<HTMLElement>('[ng-form="scopeData.step2"]') ||
+    document.querySelector<HTMLElement>(".jv-prescreen-section");
+  return !!step2 && isVisibleJobviteElement(step2);
+};
+
+const SKIP_ANGULAR_FIELD_TYPES = new Set([
+  "p",
+  "heading",
+  "hr",
+  "html",
+]);
+
+const PAGE_PRESCREEN_EVENT = "careerai-jobvite-prescreen";
+
+interface JobviteAngularPrescreenField {
+  type?: string;
+  required?: boolean;
+  desktopLabel?: string;
+  prompt?: string;
+  viewFieldEId?: string;
+  values?: Array<{ key?: string; value?: string }>;
+}
+
+const flattenPrescreenSections = (sections: any[]): JobviteAngularPrescreenField[] => {
+  const out: JobviteAngularPrescreenField[] = [];
+  sections.forEach((section: any) => {
+    const group = Array.isArray(section?.element)
+      ? section.element
+      : Array.isArray(section?.fields)
+        ? [{ fields: section.fields }]
+        : [];
+    group.forEach((item: any) => {
+      const fields = Array.isArray(item?.fields) ? item.fields : [];
+      const prompt =
+        fields.find((f: any) => String(f?.type || "").toLowerCase() === "p")
+          ?.name ||
+        fields.find((f: any) => String(f?.type || "").toLowerCase() === "p")
+          ?.desktopLabel ||
+        "";
+      fields.forEach((field: any) => {
+        out.push({
+          type: field?.type,
+          required: !!field?.required,
+          desktopLabel:
+            field?.desktopLabel ||
+            field?.mobileLabel ||
+            field?.name ||
+            field?.label ||
+            "",
+          prompt,
+          viewFieldEId: String(field?.viewFieldEId || field?.fieldId || ""),
+          values: Array.isArray(field?.values)
+            ? field.values.map((value: any) => ({
+                key: value?.key,
+                value: value?.value ?? value?.label ?? value?.key,
+              }))
+            : [],
+        });
+      });
+    });
+  });
+  return out;
+};
+
+const readAngularPrescreenFromIsolatedWorld = (): JobviteAngularPrescreenField[] => {
+  const angular = (window as any).angular;
+  if (!angular?.element) return [];
+
+  const form = getJobviteFormRoot();
+  let scope = angular.element(form).scope?.();
+  for (let i = 0; i < 10 && scope; i += 1) {
+    const sections =
+      scope.prescreenFields?.section ||
+      scope.scopeData?.prescreenFields?.section ||
+      scope.applyData?.prescreenFields?.section;
+    if (Array.isArray(sections) && sections.length > 0) {
+      return flattenPrescreenSections(sections);
+    }
+    scope = scope.$parent;
+  }
+  return [];
+};
+
+/**
+ * Content scripts cannot see page `window.angular`. Dump a JSON-safe
+ * prescreen field list from the page world via a CustomEvent.
+ */
+const readAngularPrescreenFromPageWorld = (): Promise<
+  JobviteAngularPrescreenField[]
+> =>
+  new Promise((resolve) => {
+    const finish = (fields: JobviteAngularPrescreenField[]) => {
+      window.removeEventListener(PAGE_PRESCREEN_EVENT, onEvent as EventListener);
+      resolve(fields);
+    };
+
+    const onEvent = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      finish(Array.isArray(detail) ? detail : []);
+    };
+
+    window.addEventListener(PAGE_PRESCREEN_EVENT, onEvent as EventListener);
+
+    const script = document.createElement("script");
+    script.textContent = `(() => {
+      const eventName = ${JSON.stringify(PAGE_PRESCREEN_EVENT)};
+      const empty = () =>
+        window.dispatchEvent(new CustomEvent(eventName, { detail: [] }));
+      try {
+        const form = document.querySelector(
+          'form[name="scopeData.applyForm"], form.jv-apply-form, .jv-apply-form form'
+        );
+        const angular = window.angular;
+        if (!angular || !form) {
+          empty();
+          return;
+        }
+        let scope = angular.element(form).scope && angular.element(form).scope();
+        let sections = [];
+        for (let i = 0; i < 10 && scope; i += 1) {
+          const found =
+            (scope.prescreenFields && scope.prescreenFields.section) ||
+            (scope.scopeData &&
+              scope.scopeData.prescreenFields &&
+              scope.scopeData.prescreenFields.section);
+          if (found && found.length) {
+            sections = found;
+            break;
+          }
+          scope = scope.$parent;
+        }
+        const out = [];
+        (sections || []).forEach((section) => {
+          const group = section.element || (section.fields ? [{ fields: section.fields }] : []);
+          group.forEach((item) => {
+            const fields = (item && item.fields) || [];
+            const promptField = fields.find(
+              (f) => String((f && f.type) || "").toLowerCase() === "p"
+            );
+            const prompt =
+              (promptField && (promptField.name || promptField.desktopLabel)) || "";
+            fields.forEach((field) => {
+              out.push({
+                type: field && field.type,
+                required: !!(field && field.required),
+                desktopLabel:
+                  (field &&
+                    (field.desktopLabel ||
+                      field.mobileLabel ||
+                      field.name ||
+                      field.label)) ||
+                  "",
+                prompt: prompt,
+                viewFieldEId: String(
+                  (field && (field.viewFieldEId || field.fieldId)) || ""
+                ),
+                values: ((field && field.values) || []).map((value) => ({
+                  key: value && value.key,
+                  value:
+                    (value && (value.value || value.label || value.key)) || "",
+                })),
+              });
+            });
+          });
+        });
+        window.dispatchEvent(new CustomEvent(eventName, { detail: out }));
+      } catch (e) {
+        empty();
+      }
+    })();`;
+
+    (document.head || document.documentElement).appendChild(script);
+    script.remove();
+
+    window.setTimeout(() => finish([]), 500);
+  });
+
+const angularFieldLabel = (field: JobviteAngularPrescreenField): string =>
+  cleanLabelText(String(field?.desktopLabel || ""));
+
+const angularFieldOptions = (field: JobviteAngularPrescreenField): string[] => {
+  const values = Array.isArray(field?.values) ? field.values : [];
+  const options: string[] = [];
+  const seen = new Set<string>();
+  values.forEach((value) => {
+    const label = cleanLabelText(String(value?.value ?? value?.key ?? ""));
+    if (!label || seen.has(label) || isPlaceholderOption(label)) return;
+    seen.add(label);
+    options.push(label);
+  });
+  return options;
+};
+
+const mapAngularPrescreenFields = (
+  fields: JobviteAngularPrescreenField[],
+): ApiFormElement[] => {
+  const elements: ApiFormElement[] = [];
+  const seen = new Set<string>();
+
+  fields.forEach((field) => {
+    const type = String(field?.type || "").toLowerCase();
+    if (SKIP_ANGULAR_FIELD_TYPES.has(type)) return;
+
+    let label = angularFieldLabel(field);
+    const prompt = cleanLabelText(field?.prompt || "");
+    if (!label && prompt) {
+      const id = String(field?.viewFieldEId || "").toLowerCase();
+      if (/from/.test(id)) label = `${prompt} (From)`;
+      else if (/(^|[-_])to\b/.test(id) || /to\d/.test(id))
+        label = `${prompt} (To)`;
+      else label = prompt;
+    }
+    if (!label) return;
+
+    const key = label.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+
+    const required = !!field?.required;
+    if (type === "radio" || type === "checkbox" || type === "select") {
+      elements.push({
+        label,
+        required,
+        type: "search",
+        options: angularFieldOptions(field),
+      });
+      return;
+    }
+
+    elements.push({
+      label,
+      required,
+      type: "text",
+    });
+  });
+
+  return elements;
+};
+
+/**
+ * Step 2 (`ng-if="showStep(2)"`) is not in the DOM on step 1.
+ * Read Angular `prescreenFields` so the AI payload still includes those questions.
+ */
+export const collectJobvitePrescreenElementsFromAngular = async (): Promise<
+  ApiFormElement[]
+> => {
+  const fromPage = await readAngularPrescreenFromPageWorld();
+  if (fromPage.length > 0) {
+    return mapAngularPrescreenFields(fromPage);
+  }
+  return mapAngularPrescreenFields(readAngularPrescreenFromIsolatedWorld());
+};
+
+const mergeApiElements = (
+  primary: ApiFormElement[],
+  extra: ApiFormElement[],
+): ApiFormElement[] => {
+  const seen = new Set(
+    primary.map((item) => item.label.replace(/\s+/g, " ").trim().toLowerCase()),
+  );
+  extra.forEach((item) => {
+    const key = item.label.replace(/\s+/g, " ").trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    primary.push(item);
+  });
+  return primary;
 };
 
 /**
@@ -428,6 +788,8 @@ export const scanJobviteHtmlToMakeApiPayload = async (
       options: candidate.options ?? [],
     });
   }
+
+  mergeApiElements(elements, await collectJobvitePrescreenElementsFromAngular());
 
   return {
     elements,
