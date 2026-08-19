@@ -3,6 +3,7 @@ import { ashbyAiHandler } from "./sites/ashby";
 import { bamboohrAiHandler } from "./sites/bamboohr";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
+import { jobviteAiHandler } from "./sites/jobvite";
 import { leverAiHandler } from "./sites/lever";
 import { metacareersAiHandler } from "./sites/metacareers";
 import { workdayAiHandler } from "./sites/workday";
@@ -24,6 +25,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   metacareersAiHandler,
   amazonAiHandler,
   bamboohrAiHandler,
+  jobviteAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */
