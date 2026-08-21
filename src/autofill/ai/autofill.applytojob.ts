@@ -492,6 +492,95 @@ const fillRadioGroup = async (
   return selectRadioInput(target.input);
 };
 
+const selectCheckboxInput = async (
+  input: HTMLInputElement,
+  checked: boolean,
+): Promise<boolean> => {
+  if (input.checked === checked) {
+    await handleValueChanges(input);
+    return true;
+  }
+
+  const label = input.closest("label") as HTMLElement | null;
+  // Click toggles checkboxes — only click when state still needs to change.
+  if (label) {
+    label.click();
+  } else {
+    input.click();
+  }
+
+  if (input.checked !== checked) {
+    setNativeChecked(input, checked);
+  }
+  await handleValueChanges(input);
+  return input.checked === checked;
+};
+
+const syncQuestionnaireHiddenAnswer = (
+  wrapper: HTMLElement,
+  value: string,
+): void => {
+  const hidden = wrapper.querySelector<HTMLInputElement>(
+    "input.resumator-questionnaire-checkbox-answer[type='hidden']",
+  );
+  if (!hidden) return;
+  hidden.value = value;
+  hidden.dispatchEvent(new Event("input", { bubbles: true }));
+  hidden.dispatchEvent(new Event("change", { bubbles: true }));
+};
+
+const fillCheckboxGroup = async (
+  wrapper: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableApplyToJobAnswer(answer)) return false;
+
+  const checkboxes = Array.from(
+    wrapper.querySelectorAll<HTMLInputElement>("input[type='checkbox']"),
+  );
+  if (checkboxes.length === 0) return false;
+
+  const labeled = checkboxes.map((checkbox) => ({
+    input: checkbox,
+    label: getApplyToJobRadioChoiceLabel(checkbox),
+    value: String(checkbox.value ?? "").trim(),
+  }));
+
+  const matched =
+    matchOption(
+      answer,
+      labeled.map((item) => item.label).filter(Boolean),
+    ) ||
+    matchOption(
+      answer,
+      labeled.map((item) => item.value).filter(Boolean),
+    );
+
+  const target = labeled.find(
+    (item) =>
+      item.label === matched ||
+      item.value === matched ||
+      normalizeOptionText(item.label) === normalizeOptionText(answer) ||
+      item.value === answer.trim(),
+  );
+  if (!target) return false;
+
+  // JazzHR questionnaire Yes/No checkboxes are exclusive; keep one checked.
+  for (const item of labeled) {
+    if (item.input === target.input) continue;
+    if (item.input.checked) {
+      await selectCheckboxInput(item.input, false);
+    }
+  }
+
+  const ok = await selectCheckboxInput(target.input, true);
+  syncQuestionnaireHiddenAnswer(
+    wrapper,
+    target.value || target.label,
+  );
+  return ok || target.input.checked;
+};
+
 const fillField = async (
   field: ApplyToJobCandidateField,
   answer: string,
@@ -500,6 +589,10 @@ const fillField = async (
 
   if (field.kind === "radio-group") {
     return fillRadioGroup(field.element, answer);
+  }
+
+  if (field.kind === "checkbox-group") {
+    return fillCheckboxGroup(field.element, answer);
   }
 
   if (field.kind === "select" && field.element instanceof HTMLSelectElement) {

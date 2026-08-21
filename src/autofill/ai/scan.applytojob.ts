@@ -28,7 +28,11 @@ export interface ApplyToJobScanToMakeApiOptions {
   parser?: string;
 }
 
-export type ApplyToJobFieldKind = "text" | "select" | "radio-group";
+export type ApplyToJobFieldKind =
+  | "text"
+  | "select"
+  | "radio-group"
+  | "checkbox-group";
 
 export interface ApplyToJobCandidateField {
   element: HTMLElement;
@@ -43,7 +47,6 @@ const SKIP_INPUT_TYPES = new Set([
   "submit",
   "button",
   "reset",
-  "checkbox",
   "password",
   "image",
 ]);
@@ -242,26 +245,26 @@ const getNativeSelectOptions = (select: HTMLSelectElement): string[] => {
   return options;
 };
 
-const getRadioGroupWrapper = (radio: HTMLInputElement): HTMLElement =>
-  (radio.closest(
-    ".resumator-field-wrapper, .form-group, fieldset",
+const getChoiceGroupWrapper = (control: HTMLInputElement): HTMLElement =>
+  (control.closest(
+    ".form-group, .resumator-field-wrapper, fieldset",
   ) as HTMLElement | null) ||
-  radio.parentElement ||
-  radio;
+  control.parentElement ||
+  control;
 
-const getRadioGroupLabel = (
+const getChoiceGroupLabel = (
   wrapper: HTMLElement,
-  radio: HTMLInputElement,
+  control: HTMLInputElement,
 ): string => {
   const groupLabel = wrapper.querySelector(
-    ".resumator-label, legend, :scope > label.control-label, :scope > .control-label",
+    ".resumator-label, legend, :scope > label.control-label, :scope > .control-label, label.control-label",
   );
-  if (groupLabel && !groupLabel.contains(radio)) {
+  if (groupLabel && !groupLabel.contains(control)) {
     const text = getLabelOwnText(groupLabel);
     if (text) return text;
   }
 
-  const labelledBy = radio.getAttribute("aria-labelledby");
+  const labelledBy = control.getAttribute("aria-labelledby");
   if (labelledBy) {
     const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
     if (labelEl) {
@@ -270,7 +273,57 @@ const getRadioGroupLabel = (
     }
   }
 
-  return getFieldLabel(wrapper) || radio.getAttribute("name") || "Unknown field";
+  const hiddenAnswer = wrapper.querySelector<HTMLInputElement>(
+    "input.resumator-questionnaire-checkbox-answer[type='hidden']",
+  );
+  if (hiddenAnswer?.id) {
+    const forLabel = document.querySelector(
+      `label[for="${CSS.escape(hiddenAnswer.id)}"]`,
+    );
+    if (forLabel) {
+      const text = getLabelOwnText(forLabel);
+      if (text) return text;
+    }
+  }
+
+  return (
+    getFieldLabel(wrapper) ||
+    control.getAttribute("name") ||
+    "Unknown field"
+  );
+};
+
+const getCheckboxGroupKey = (
+  wrapper: HTMLElement,
+  checkbox: HTMLInputElement,
+): string => {
+  const hidden = wrapper.querySelector<HTMLInputElement>(
+    "input.resumator-questionnaire-checkbox-answer[type='hidden']",
+  );
+  if (hidden?.id) return `checkbox:${hidden.id}`;
+  if (hidden?.name) return `checkbox:${hidden.name}`;
+  if (wrapper.id) return `checkbox-wrapper:${wrapper.id}`;
+
+  const id = checkbox.getAttribute("id") || checkbox.getAttribute("name") || "";
+  const prefix = id.replace(/-\d+$/, "");
+  return `checkbox:${prefix || wrapper.tagName}`;
+};
+
+const getCheckboxGroupOptions = (wrapper: HTMLElement): string[] => {
+  const checkboxes = Array.from(
+    wrapper.querySelectorAll<HTMLInputElement>(
+      "input[type='checkbox'].resumator-questionnaire-checkbox, input[type='checkbox']",
+    ),
+  );
+  const options: string[] = [];
+  const seen = new Set<string>();
+  checkboxes.forEach((checkbox) => {
+    const label = getApplyToJobRadioChoiceLabel(checkbox);
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+    options.push(label);
+  });
+  return options;
 };
 
 export const getApplyToJobRadioChoiceLabel = (
@@ -339,8 +392,8 @@ export const collectApplyToJobCandidateFields = (): ApplyToJobCandidateField[] =
         }
         seenIds.add(key);
 
-        const wrapper = getRadioGroupWrapper(element);
-        const label = getRadioGroupLabel(wrapper, element);
+        const wrapper = getChoiceGroupWrapper(element);
+        const label = getChoiceGroupLabel(wrapper, element);
         if (!label) return;
 
         results.push({
@@ -348,6 +401,26 @@ export const collectApplyToJobCandidateFields = (): ApplyToJobCandidateField[] =
           label,
           required: isRequiredField(wrapper) || isRequiredField(element),
           kind: "radio-group",
+        });
+        return;
+      }
+
+      if (type === "checkbox") {
+        const wrapper = getChoiceGroupWrapper(element);
+        const key = getCheckboxGroupKey(wrapper, element);
+        if (seenIds.has(key)) {
+          return;
+        }
+        seenIds.add(key);
+
+        const label = getChoiceGroupLabel(wrapper, element);
+        if (!label) return;
+
+        results.push({
+          element: wrapper,
+          label,
+          required: isRequiredField(wrapper) || isRequiredField(element),
+          kind: "checkbox-group",
         });
         return;
       }
@@ -428,6 +501,16 @@ export const scanApplyToJobHtmlToMakeApiPayload = async (
         required: candidate.required,
         type: "search",
         options: radioOptions,
+      });
+      continue;
+    }
+
+    if (candidate.kind === "checkbox-group") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+        options: getCheckboxGroupOptions(candidate.element),
       });
       continue;
     }
