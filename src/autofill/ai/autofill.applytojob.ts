@@ -264,22 +264,43 @@ export const normalizeApplyToJobAiAnswers = (
   response: unknown,
 ): ApplyToJobAiAnswer[] => parseApplyToJobAiFillResponse(response).answers;
 
+/**
+ * Keep digits — JazzHR salary ranges are values like "80,000-89,999".
+ * `fromatStirngInLowerCase` strips numbers and would turn those into "".
+ */
+const normalizeOptionText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9+]+/g, "");
+
 const matchOption = (answer: string, options: string[]): string | null => {
   if (!isUsableApplyToJobAnswer(answer)) return null;
-  const normalizedAnswer = fromatStirngInLowerCase(answer);
-  if (!normalizedAnswer) return null;
+
+  const compactAnswer = normalizeOptionText(answer);
+  if (!compactAnswer) return null;
 
   for (const option of options) {
-    if (fromatStirngInLowerCase(option) === normalizedAnswer) {
+    if (normalizeOptionText(option) === compactAnswer) {
       return option;
     }
   }
 
+  const letterAnswer = fromatStirngInLowerCase(answer);
+  if (letterAnswer) {
+    for (const option of options) {
+      if (fromatStirngInLowerCase(option) === letterAnswer) {
+        return option;
+      }
+    }
+  }
+
   for (const option of options) {
-    const normalizedOption = fromatStirngInLowerCase(option);
+    const compactOption = normalizeOptionText(option);
     if (
-      normalizedOption?.includes(normalizedAnswer) ||
-      normalizedAnswer.includes(normalizedOption ?? "")
+      compactOption &&
+      (compactOption.includes(compactAnswer) ||
+        compactAnswer.includes(compactOption))
     ) {
       return option;
     }
@@ -367,26 +388,37 @@ const fillNativeSelect = async (
   answer: string,
 ): Promise<boolean> => {
   if (!isUsableApplyToJobAnswer(answer)) return false;
-  const options = Array.from(select.options).map((opt) =>
-    cleanLabelText(opt.textContent ?? opt.label ?? opt.value),
-  );
-  const matched = matchOption(answer, options);
-  if (!matched) return false;
 
-  for (const option of select.options) {
-    const optionText = cleanLabelText(
-      option.textContent ?? option.label ?? option.value,
+  const labeled = Array.from(select.options).map((opt) => ({
+    option: opt,
+    label: cleanLabelText(opt.textContent ?? opt.label ?? opt.value),
+    value: String(opt.value ?? "").trim(),
+  }));
+
+  const matched =
+    matchOption(
+      answer,
+      labeled.map((item) => item.label),
+    ) ||
+    matchOption(
+      answer,
+      labeled.map((item) => item.value).filter(Boolean),
     );
-    if (optionText !== matched) continue;
 
-    select.value = option.value;
-    option.selected = true;
-    select.dispatchEvent(new Event("input", { bubbles: true }));
-    await handleValueChanges(select);
-    return true;
-  }
+  const target = labeled.find(
+    (item) =>
+      item.label === matched ||
+      item.value === matched ||
+      normalizeOptionText(item.value) === normalizeOptionText(answer) ||
+      item.value === answer.trim(),
+  );
+  if (!target) return false;
 
-  return false;
+  select.value = target.option.value;
+  target.option.selected = true;
+  select.dispatchEvent(new Event("input", { bubbles: true }));
+  await handleValueChanges(select);
+  return true;
 };
 
 const fillField = async (
