@@ -1,5 +1,9 @@
 import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import { collectApplyToJobCandidateFields } from "./scan.applytojob";
+import {
+  ApplyToJobCandidateField,
+  collectApplyToJobCandidateFields,
+  getApplyToJobRadioChoiceLabel,
+} from "./scan.applytojob";
 
 export interface ApplyToJobAiAnswer {
   label: string;
@@ -297,10 +301,13 @@ const matchOption = (answer: string, options: string[]): string | null => {
 
   for (const option of options) {
     const compactOption = normalizeOptionText(option);
+    if (!compactOption) continue;
+    const shorter = Math.min(compactAnswer.length, compactOption.length);
+    // Avoid "no" matching "not a protected veteran".
+    if (shorter < 8) continue;
     if (
-      compactOption &&
-      (compactOption.includes(compactAnswer) ||
-        compactAnswer.includes(compactOption))
+      compactOption.includes(compactAnswer) ||
+      compactAnswer.includes(compactOption)
     ) {
       return option;
     }
@@ -421,22 +428,89 @@ const fillNativeSelect = async (
   return true;
 };
 
-const fillField = async (
-  element: HTMLElement,
-  kind: "text" | "select",
+const setNativeChecked = (input: HTMLInputElement, checked: boolean): void => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "checked",
+  );
+  if (descriptor?.set) {
+    descriptor.set.call(input, checked);
+  } else {
+    input.checked = checked;
+  }
+};
+
+const selectRadioInput = async (input: HTMLInputElement): Promise<boolean> => {
+  const label = input.closest("label") as HTMLElement | null;
+  setNativeChecked(input, true);
+  if (label) {
+    label.click();
+  } else {
+    input.click();
+  }
+  await handleValueChanges(input);
+  return input.checked;
+};
+
+const fillRadioGroup = async (
+  wrapper: HTMLElement,
   answer: string,
 ): Promise<boolean> => {
   if (!isUsableApplyToJobAnswer(answer)) return false;
 
-  if (kind === "select" && element instanceof HTMLSelectElement) {
-    return fillNativeSelect(element, answer);
+  const radios = Array.from(
+    wrapper.querySelectorAll<HTMLInputElement>("input[type='radio']"),
+  );
+  if (radios.length === 0) return false;
+
+  const labeled = radios.map((radio) => ({
+    input: radio,
+    label: getApplyToJobRadioChoiceLabel(radio),
+    value: String(radio.value ?? "").trim(),
+  }));
+
+  const matched =
+    matchOption(
+      answer,
+      labeled.map((item) => item.label).filter(Boolean),
+    ) ||
+    matchOption(
+      answer,
+      labeled.map((item) => item.value).filter(Boolean),
+    );
+
+  const target = labeled.find(
+    (item) =>
+      item.label === matched ||
+      item.value === matched ||
+      normalizeOptionText(item.label) === normalizeOptionText(answer) ||
+      item.value === answer.trim(),
+  );
+  if (!target) return false;
+
+  if (target.input.checked) return true;
+  return selectRadioInput(target.input);
+};
+
+const fillField = async (
+  field: ApplyToJobCandidateField,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableApplyToJobAnswer(answer)) return false;
+
+  if (field.kind === "radio-group") {
+    return fillRadioGroup(field.element, answer);
+  }
+
+  if (field.kind === "select" && field.element instanceof HTMLSelectElement) {
+    return fillNativeSelect(field.element, answer);
   }
 
   if (
-    element instanceof HTMLInputElement ||
-    element instanceof HTMLTextAreaElement
+    field.element instanceof HTMLInputElement ||
+    field.element instanceof HTMLTextAreaElement
   ) {
-    return fillTextLikeField(element, answer);
+    return fillTextLikeField(field.element, answer);
   }
 
   return false;
@@ -488,7 +562,7 @@ export const autofillApplyToJobWithAi = async (
       });
       await delay(150);
 
-      const ok = await fillField(field.element, field.kind, answer as string);
+      const ok = await fillField(field, answer as string);
       if (ok) {
         filled += 1;
       } else {

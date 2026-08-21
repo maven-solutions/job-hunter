@@ -28,7 +28,7 @@ export interface ApplyToJobScanToMakeApiOptions {
   parser?: string;
 }
 
-export type ApplyToJobFieldKind = "text" | "select";
+export type ApplyToJobFieldKind = "text" | "select" | "radio-group";
 
 export interface ApplyToJobCandidateField {
   element: HTMLElement;
@@ -44,7 +44,6 @@ const SKIP_INPUT_TYPES = new Set([
   "button",
   "reset",
   "checkbox",
-  "radio",
   "password",
   "image",
 ]);
@@ -210,7 +209,9 @@ const isRequiredField = (element: HTMLElement): boolean => {
   const wrapper = element.closest(
     ".form-group, .resumator-field-wrapper, #resumator-address",
   );
-  const wrapperLabel = wrapper?.querySelector(":scope > label, .control-label");
+  const wrapperLabel = wrapper?.querySelector(
+    ":scope > label, .control-label, .resumator-label",
+  );
   if (
     wrapperLabel?.querySelector(".asterisk") ||
     wrapperLabel?.textContent?.includes("*")
@@ -241,6 +242,77 @@ const getNativeSelectOptions = (select: HTMLSelectElement): string[] => {
   return options;
 };
 
+const getRadioGroupWrapper = (radio: HTMLInputElement): HTMLElement =>
+  (radio.closest(
+    ".resumator-field-wrapper, .form-group, fieldset",
+  ) as HTMLElement | null) ||
+  radio.parentElement ||
+  radio;
+
+const getRadioGroupLabel = (
+  wrapper: HTMLElement,
+  radio: HTMLInputElement,
+): string => {
+  const groupLabel = wrapper.querySelector(
+    ".resumator-label, legend, :scope > label.control-label, :scope > .control-label",
+  );
+  if (groupLabel && !groupLabel.contains(radio)) {
+    const text = getLabelOwnText(groupLabel);
+    if (text) return text;
+  }
+
+  const labelledBy = radio.getAttribute("aria-labelledby");
+  if (labelledBy) {
+    const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
+    if (labelEl) {
+      const text = getLabelOwnText(labelEl);
+      if (text) return text;
+    }
+  }
+
+  return getFieldLabel(wrapper) || radio.getAttribute("name") || "Unknown field";
+};
+
+export const getApplyToJobRadioChoiceLabel = (
+  input: HTMLInputElement,
+): string => {
+  const wrappingLabel = input.closest("label");
+  if (wrappingLabel) {
+    const text = getLabelOwnText(wrappingLabel);
+    if (text) return text;
+  }
+
+  const id = input.getAttribute("id");
+  if (id) {
+    const forLabel = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+    if (forLabel) {
+      const text = getLabelOwnText(forLabel);
+      if (text) return text;
+    }
+  }
+
+  return cleanLabelText(input.value || input.getAttribute("aria-label") || "");
+};
+
+const getRadioGroupOptions = (
+  wrapper: HTMLElement,
+  name: string,
+): string[] => {
+  const radios = Array.from(
+    wrapper.querySelectorAll<HTMLInputElement>("input[type='radio']"),
+  ).filter((radio) => !name || radio.name === name);
+
+  const options: string[] = [];
+  const seen = new Set<string>();
+  radios.forEach((radio) => {
+    const label = getApplyToJobRadioChoiceLabel(radio);
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+    options.push(label);
+  });
+  return options;
+};
+
 export const collectApplyToJobCandidateFields = (): ApplyToJobCandidateField[] => {
   const root = getApplyToJobFormRoot();
   const candidates = root.querySelectorAll<HTMLElement>(
@@ -259,6 +331,27 @@ export const collectApplyToJobCandidateFields = (): ApplyToJobCandidateField[] =
 
     if (element instanceof HTMLInputElement) {
       const type = (element.type || "text").toLowerCase();
+      if (type === "radio") {
+        const name = element.getAttribute("name") || element.getAttribute("id") || "";
+        const key = `radio:${name || results.length}`;
+        if (seenIds.has(key)) {
+          return;
+        }
+        seenIds.add(key);
+
+        const wrapper = getRadioGroupWrapper(element);
+        const label = getRadioGroupLabel(wrapper, element);
+        if (!label) return;
+
+        results.push({
+          element: wrapper,
+          label,
+          required: isRequiredField(wrapper) || isRequiredField(element),
+          kind: "radio-group",
+        });
+        return;
+      }
+
       if (SKIP_INPUT_TYPES.has(type)) {
         return;
       }
@@ -318,6 +411,23 @@ export const scanApplyToJobHtmlToMakeApiPayload = async (
         required: candidate.required,
         type: "search",
         options: selectOptions,
+      });
+      continue;
+    }
+
+    if (candidate.kind === "radio-group") {
+      const firstRadio = candidate.element.querySelector<HTMLInputElement>(
+        "input[type='radio']",
+      );
+      const radioOptions = getRadioGroupOptions(
+        candidate.element,
+        firstRadio?.getAttribute("name") || "",
+      );
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+        options: radioOptions,
       });
       continue;
     }
