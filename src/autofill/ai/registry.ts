@@ -1,4 +1,5 @@
 import { amazonAiHandler } from "./sites/amazon";
+import { applytojobAiHandler } from "./sites/applytojob";
 import { ashbyAiHandler } from "./sites/ashby";
 import { bamboohrAiHandler } from "./sites/bamboohr";
 import { greenhouseAiHandler } from "./sites/greenhouse";
@@ -26,6 +27,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   amazonAiHandler,
   bamboohrAiHandler,
   jobviteAiHandler,
+  applytojobAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */
