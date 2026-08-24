@@ -7,6 +7,7 @@ import { icimsAiHandler } from "./sites/icims";
 import { jobviteAiHandler } from "./sites/jobvite";
 import { leverAiHandler } from "./sites/lever";
 import { metacareersAiHandler } from "./sites/metacareers";
+import { ultiproAiHandler } from "./sites/ultipro";
 import { workdayAiHandler } from "./sites/workday";
 import { AiSiteHandler } from "./types";
 
@@ -28,6 +29,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   bamboohrAiHandler,
   jobviteAiHandler,
   applytojobAiHandler,
+  ultiproAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */
