@@ -3,8 +3,11 @@ import {
   UltiproCandidateField,
   collectUltiproCandidateFields,
   getUltiproNativeSelectOptions,
+  getUltiproRadioChoiceLabel,
   isUltiproCountryField,
+  isUltiproReferralDetailField,
   isUltiproStateField,
+  isVisibleUltiproElement,
 } from "./scan.ultipro";
 
 export interface UltiproAiAnswer {
@@ -354,6 +357,8 @@ const findAnswerForLabel = (
   return undefined;
 };
 
+const SELECT_SETTLE_MS = 2000;
+
 const setNativeValue = (
   element: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
   value: string,
@@ -372,16 +377,30 @@ const setNativeValue = (
   }
 };
 
+const getJquery = (): any => (window as any).jQuery || (window as any).$;
+
 const notifyUltiproControl = async (element: HTMLElement): Promise<void> => {
   element.dispatchEvent(new Event("input", { bubbles: true }));
   element.dispatchEvent(new Event("change", { bubbles: true }));
   await handleValueChanges(element);
 
-  const jquery = (window as any).jQuery || (window as any).$;
   try {
-    jquery?.(element)?.trigger?.("change");
+    getJquery()?.(element)?.trigger?.("change");
   } catch {
     // jQuery is optional — native events already fired.
+  }
+};
+
+/** Knockout selects reset if we click them after setting value — skip click. */
+const notifyUltiproSelect = async (select: HTMLSelectElement): Promise<void> => {
+  select.dispatchEvent(new Event("input", { bubbles: true }));
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+
+  try {
+    const jquery = getJquery();
+    jquery?.(select)?.val?.(select.value)?.trigger?.("change")?.trigger?.("input");
+  } catch {
+    // jQuery is optional.
   }
 };
 
@@ -406,6 +425,16 @@ const fillTextLikeField = async (
   setNativeValue(element, value);
   await notifyUltiproControl(element);
   return isUsableUltiproAnswer(element.value);
+};
+
+const applySelectValue = (select: HTMLSelectElement, value: string): void => {
+  Array.from(select.options).forEach((opt) => {
+    opt.selected = opt.value === value;
+  });
+  setNativeValue(select, value);
+  select.selectedIndex = Array.from(select.options).findIndex(
+    (opt) => opt.value === value,
+  );
 };
 
 const fillNativeSelect = async (
@@ -439,11 +468,216 @@ const fillNativeSelect = async (
   );
   if (!target) return false;
 
-  target.option.selected = true;
-  setNativeValue(select, target.option.value);
-  select.focus();
-  await notifyUltiproControl(select);
+  applySelectValue(select, target.option.value);
+  await notifyUltiproSelect(select);
+  await delay(SELECT_SETTLE_MS);
+
+  if (select.value !== target.option.value) {
+    applySelectValue(select, target.option.value);
+    await notifyUltiproSelect(select);
+    await delay(SELECT_SETTLE_MS);
+  }
+
   return select.value === target.option.value;
+};
+
+const toWholeNumber = (answer: string): string => {
+  const stripped = answer.replace(/,/g, "").replace(/[^\d.-]/g, " ");
+  const match = stripped.match(/-?\d+/);
+  return match ? match[0] : "";
+};
+
+const fillNumericField = async (
+  element: HTMLInputElement,
+  answer: string,
+): Promise<boolean> => {
+  const numeric = toWholeNumber(answer);
+  if (!numeric) return false;
+
+  element.focus();
+
+  const jquery = getJquery();
+  try {
+    if (jquery?.fn?.autoNumeric) {
+      jquery(element).autoNumeric("set", numeric);
+    }
+  } catch {
+    // Fall through to native setter.
+  }
+
+  setNativeValue(element, numeric);
+  await notifyUltiproControl(element);
+  return isUsableUltiproAnswer(element.value);
+};
+
+const setNativeChecked = (input: HTMLInputElement, checked: boolean): void => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "checked",
+  );
+  if (descriptor?.set) {
+    descriptor.set.call(input, checked);
+  } else {
+    input.checked = checked;
+  }
+};
+
+const selectRadioInput = async (input: HTMLInputElement): Promise<boolean> => {
+  const label = input.closest("label") as HTMLElement | null;
+  setNativeChecked(input, true);
+  if (label) {
+    label.click();
+  } else {
+    input.click();
+  }
+  await notifyUltiproControl(input);
+  return input.checked || input.getAttribute("value") != null;
+};
+
+const fillRadioGroup = async (
+  wrapper: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableUltiproAnswer(answer)) return false;
+
+  const radios = Array.from(
+    wrapper.querySelectorAll<HTMLInputElement>("input[type='radio']"),
+  );
+  if (radios.length === 0) return false;
+
+  const labeled = radios.map((radio) => ({
+    input: radio,
+    label: getUltiproRadioChoiceLabel(radio),
+    value: String(radio.value ?? "").trim(),
+  }));
+
+  const matched =
+    matchOption(
+      answer,
+      labeled.map((item) => item.label).filter(Boolean),
+    ) ||
+    matchOption(
+      answer,
+      labeled.map((item) => item.value).filter(Boolean),
+    );
+
+  const compactAnswer = normalizeOptionText(answer);
+  const target = labeled.find(
+    (item) =>
+      item.label === matched ||
+      item.value === matched ||
+      normalizeOptionText(item.label) === compactAnswer ||
+      normalizeOptionText(item.value) === compactAnswer ||
+      item.value === answer.trim(),
+  );
+  if (!target) return false;
+
+  if (target.input.checked) return true;
+  return selectRadioInput(target.input);
+};
+
+const pad2 = (value: number): string => String(value).padStart(2, "0");
+
+const parseDateAnswer = (
+  answer: string,
+): { iso: string; mdy: string } | null => {
+  const trimmed = answer.trim();
+  if (!trimmed) return null;
+
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      const iso = `${year}-${pad2(month)}-${pad2(day)}`;
+      return { iso, mdy: `${pad2(month)}/${pad2(day)}/${year}` };
+    }
+  }
+
+  const mdyMatch = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})/);
+  if (mdyMatch) {
+    let year = Number(mdyMatch[3]);
+    if (year < 100) year += 2000;
+    const month = Number(mdyMatch[1]);
+    const day = Number(mdyMatch[2]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      const iso = `${year}-${pad2(month)}-${pad2(day)}`;
+      return { iso, mdy: `${pad2(month)}/${pad2(day)}/${year}` };
+    }
+  }
+
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    const year = parsed.getFullYear();
+    const month = parsed.getMonth() + 1;
+    const day = parsed.getDate();
+    const iso = `${year}-${pad2(month)}-${pad2(day)}`;
+    return { iso, mdy: `${pad2(month)}/${pad2(day)}/${year}` };
+  }
+
+  return null;
+};
+
+const setUkgHostValue = (host: HTMLElement, iso: string): void => {
+  try {
+    (host as any).value = iso;
+  } catch {
+    // Custom element may not expose a JS value setter.
+  }
+  host.setAttribute("value", iso);
+  host.setAttribute("data-date-value", iso);
+  host.dispatchEvent(new Event("input", { bubbles: true }));
+  host.dispatchEvent(new Event("change", { bubbles: true }));
+  host.dispatchEvent(
+    new CustomEvent("ukgChange", { bubbles: true, detail: { value: iso } }),
+  );
+};
+
+const fillUkgDatePicker = async (
+  host: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  const parsed = parseDateAnswer(answer);
+  if (!parsed) return false;
+
+  const ukgInput =
+    (host.matches("ukg-input") ? host : null) ||
+    host.querySelector<HTMLElement>("ukg-input[type='date'], [data-automation='ukg-datepicker-input']") ||
+    host;
+
+  setUkgHostValue(ukgInput, parsed.iso);
+
+  const dateText = ukgInput.querySelector<HTMLElement>("ukg-date-input-text");
+  if (dateText) {
+    dateText.setAttribute("value", parsed.iso);
+    try {
+      (dateText as any).value = parsed.iso;
+    } catch {
+      // ignore
+    }
+  }
+
+  const shadowInput =
+    ((ukgInput as any).shadowRoot as ShadowRoot | null)?.querySelector(
+      "input",
+    ) || dateText?.shadowRoot?.querySelector("input");
+  if (shadowInput instanceof HTMLInputElement) {
+    setNativeValue(shadowInput, parsed.iso);
+    shadowInput.dispatchEvent(new Event("input", { bubbles: true }));
+    shadowInput.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  const lightInput = ukgInput.querySelector<HTMLInputElement>(
+    "input[type='date'], input[type='text']",
+  );
+  if (lightInput) {
+    setNativeValue(lightInput, parsed.iso);
+    await notifyUltiproControl(lightInput);
+  }
+
+  await delay(300);
+  return true;
 };
 
 const findStateSelect = (
@@ -490,6 +724,37 @@ const waitForSelectOptions = (
     });
   });
 
+const waitUntilVisible = (
+  element: HTMLElement,
+  timeoutMs = 3000,
+): Promise<boolean> =>
+  new Promise((resolve) => {
+    if (isVisibleUltiproElement(element)) {
+      resolve(true);
+      return;
+    }
+
+    let observer: MutationObserver | null = null;
+    const timer = window.setTimeout(() => {
+      observer?.disconnect();
+      resolve(isVisibleUltiproElement(element));
+    }, timeoutMs);
+
+    observer = new MutationObserver(() => {
+      if (isVisibleUltiproElement(element)) {
+        window.clearTimeout(timer);
+        observer?.disconnect();
+        resolve(true);
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "hidden"],
+    });
+  });
+
 const fillField = async (
   field: UltiproCandidateField,
   answer: string,
@@ -498,6 +763,21 @@ const fillField = async (
 
   if (field.kind === "select" && field.element instanceof HTMLSelectElement) {
     return fillNativeSelect(field.element, answer);
+  }
+
+  if (field.kind === "radio-group") {
+    return fillRadioGroup(field.element, answer);
+  }
+
+  if (field.kind === "date") {
+    return fillUkgDatePicker(field.element, answer);
+  }
+
+  if (
+    field.kind === "numeric" &&
+    field.element instanceof HTMLInputElement
+  ) {
+    return fillNumericField(field.element, answer);
   }
 
   if (
@@ -515,8 +795,12 @@ const sortFieldsForFill = (
 ): UltiproCandidateField[] => {
   const score = (field: UltiproCandidateField): number => {
     if (isUltiproCountryField(field.element)) return 10;
-    if (isUltiproStateField(field.element)) return 90;
-    return 50;
+    if (field.kind === "select" && !isUltiproStateField(field.element)) return 20;
+    if (isUltiproStateField(field.element)) return 30;
+    if (field.kind === "radio-group") return 40;
+    if (field.kind === "date") return 50;
+    if (isUltiproReferralDetailField(field.element)) return 80;
+    return 60;
   };
   return [...fields].sort((a, b) => score(a) - score(b));
 };
@@ -524,6 +808,7 @@ const sortFieldsForFill = (
 /**
  * Applies AI fill answers to the current UKG / Ultipro apply form.
  * Country is filled before State so Knockout can load state options.
+ * Native selects settle for ~2s so Knockout keeps the chosen value.
  */
 export const autofillUltiproWithAi = async (
   response: unknown,
@@ -576,6 +861,14 @@ export const autofillUltiproWithAi = async (
         await waitForSelectOptions(field.element);
       }
 
+      if (isUltiproReferralDetailField(field.element)) {
+        const visible = await waitUntilVisible(field.element);
+        if (!visible) {
+          skipped += 1;
+          continue;
+        }
+      }
+
       const ok = await fillField(field, answer as string);
       if (ok) {
         filled += 1;
@@ -583,7 +876,6 @@ export const autofillUltiproWithAi = async (
         if (isUltiproCountryField(field.element)) {
           const stateSelect = findStateSelect(candidates);
           if (stateSelect) {
-            await delay(200);
             await waitForSelectOptions(stateSelect);
           }
         }
@@ -594,7 +886,9 @@ export const autofillUltiproWithAi = async (
       failed += 1;
     }
 
-    await delay(200);
+    if (field.kind !== "select") {
+      await delay(200);
+    }
   }
 
   return {
