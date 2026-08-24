@@ -2,6 +2,7 @@ import { amazonAiHandler } from "./sites/amazon";
 import { applytojobAiHandler } from "./sites/applytojob";
 import { ashbyAiHandler } from "./sites/ashby";
 import { bamboohrAiHandler } from "./sites/bamboohr";
+import { dayforcehcmAiHandler } from "./sites/dayforcehcm";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
 import { jobviteAiHandler } from "./sites/jobvite";
@@ -30,6 +31,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   jobviteAiHandler,
   applytojobAiHandler,
   ultiproAiHandler,
+  dayforcehcmAiHandler,
 ];
 
 /** Resolve the site handler for a URL (defaults to current page). */
