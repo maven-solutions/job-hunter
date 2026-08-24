@@ -71,6 +71,24 @@ const APPLY_SECTION_SELECTOR = [
 const KO_TEMPLATE_STUB_SELECTOR =
   "#MultipleChoiceTemplate, #TextTemplate, #NumericTemplate";
 
+/** Panels UKG fills from the resume — do not scan, payload, or AI-fill. */
+const SKIPPED_PANEL_NAMES = new Set([
+  "skills",
+  "work experience",
+  "experience",
+  "education",
+]);
+
+const SKIPPED_SECTION_SELECTOR = [
+  "[data-automation='skills-panel']",
+  "[data-automation='skill']",
+  "[data-automation='proficiency-dropdown']",
+  "[data-automation='work-experience-panel']",
+  "[data-automation='education-panel']",
+  "[id^='NewWorkExperience_']",
+  "[id^='NewEducation_']",
+].join(", ");
+
 const cleanLabelText = (text: string): string =>
   text
     .replace(/[✱*]/g, "")
@@ -84,6 +102,64 @@ const isInsideExtension = (element: Element): boolean =>
 export const isUltiproKoTemplateStub = (element: Element): boolean =>
   !!element.closest(KO_TEMPLATE_STUB_SELECTOR);
 
+const normalizePanelName = (text: string): string =>
+  text.replace(/\s+/g, " ").trim().toLowerCase();
+
+const isSkippedPanelName = (text: string): boolean =>
+  SKIPPED_PANEL_NAMES.has(normalizePanelName(text));
+
+/** True when this node is a Skills / Work Experience / Education panel. */
+export const isUltiproSkippedPanelRoot = (element: Element): boolean => {
+  const automation = element.getAttribute("data-automation") || "";
+  if (
+    automation === "skills-panel" ||
+    automation === "work-experience-panel" ||
+    automation === "education-panel"
+  ) {
+    return true;
+  }
+
+  const aria = element.getAttribute("aria-label");
+  if (aria && isSkippedPanelName(aria)) return true;
+
+  const title = element.querySelector(":scope [data-automation='panel-title']");
+  if (title && isSkippedPanelName(title.textContent ?? "")) return true;
+
+  return false;
+};
+
+/** @deprecated Use isUltiproSkippedPanelRoot */
+export const isUltiproSkillsRoot = isUltiproSkippedPanelRoot;
+
+/**
+ * Skills, Work Experience, and Education are parsed by UKG from the resume —
+ * skip scan, payload, and fill for these sections.
+ */
+export const isInsideUltiproSkippedSection = (element: Element): boolean => {
+  if (element.closest(SKIPPED_SECTION_SELECTOR)) {
+    return true;
+  }
+
+  const id = element.getAttribute("id") || "";
+  if (
+    id.startsWith("NewWorkExperience_") ||
+    id.startsWith("NewEducation_")
+  ) {
+    return true;
+  }
+
+  let current: Element | null = element;
+  while (current) {
+    if (isUltiproSkippedPanelRoot(current)) return true;
+    current = current.parentElement;
+  }
+
+  return false;
+};
+
+/** @deprecated Use isInsideUltiproSkippedSection */
+export const isInsideUltiproSkillsSection = isInsideUltiproSkippedSection;
+
 /**
  * UKG / Ultipro apply containers. Contact Information and Questions are
  * sibling panels; collect from each so later sections can be added the same way.
@@ -91,7 +167,12 @@ export const isUltiproKoTemplateStub = (element: Element): boolean =>
 export const getUltiproScanRoots = (): HTMLElement[] => {
   const sections = Array.from(
     document.querySelectorAll<HTMLElement>(APPLY_SECTION_SELECTOR),
-  ).filter((el) => !isInsideExtension(el));
+  ).filter(
+    (el) =>
+      !isInsideExtension(el) &&
+      !isUltiproSkippedPanelRoot(el) &&
+      !isInsideUltiproSkippedSection(el),
+  );
 
   const roots = sections.filter(
     (el) => !sections.some((other) => other !== el && other.contains(el)),
@@ -408,7 +489,13 @@ const findUkgDatePickers = (root: HTMLElement): HTMLElement[] => {
   );
 
   return pickers.filter((el, index, list) => {
-    if (isInsideExtension(el) || isUltiproKoTemplateStub(el)) return false;
+    if (
+      isInsideExtension(el) ||
+      isUltiproKoTemplateStub(el) ||
+      isInsideUltiproSkippedSection(el)
+    ) {
+      return false;
+    }
     return !list.some((other, otherIndex) => otherIndex !== index && other.contains(el));
   });
 };
@@ -423,7 +510,11 @@ const collectFromRoot = (
   );
 
   candidates.forEach((element) => {
-    if (isInsideExtension(element) || isUltiproKoTemplateStub(element)) {
+    if (
+      isInsideExtension(element) ||
+      isUltiproKoTemplateStub(element) ||
+      isInsideUltiproSkippedSection(element)
+    ) {
       return;
     }
 

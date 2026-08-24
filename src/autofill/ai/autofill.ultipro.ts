@@ -4,6 +4,7 @@ import {
   collectUltiproCandidateFields,
   getUltiproNativeSelectOptions,
   getUltiproRadioChoiceLabel,
+  isInsideUltiproSkippedSection,
   isUltiproCountryField,
   isUltiproReferralDetailField,
   isUltiproStateField,
@@ -832,6 +833,11 @@ export const autofillUltiproWithAi = async (
   }
 
   for (const field of candidates) {
+    if (isInsideUltiproSkippedSection(field.element)) {
+      skipped += 1;
+      continue;
+    }
+
     if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
       skipped += 1;
       continue;
