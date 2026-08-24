@@ -5,6 +5,7 @@ import {
   getUltiproNativeSelectOptions,
   getUltiproRadioChoiceLabel,
   isInsideUltiproSkippedSection,
+  isUltiproAddressField,
   isUltiproCountryField,
   isUltiproReferralDetailField,
   isUltiproStateField,
@@ -116,6 +117,10 @@ const coerceAnswerString = (raw: unknown): string => {
 
 const extractRawAnswer = (item: any): unknown => {
   if (item == null || typeof item !== "object") return undefined;
+  const candidates = [item.answer, item.value, item.fill, item.text, item.data];
+  for (const candidate of candidates) {
+    if (isUsableUltiproAnswer(candidate)) return candidate;
+  }
   if ("answer" in item) return item.answer;
   if ("value" in item) return item.value;
   if ("fill" in item) return item.fill;
@@ -167,6 +172,35 @@ export interface UltiproParsedFillResponse {
   emptyCount: number;
 }
 
+const collectNameValuePairs = (
+  node: unknown,
+  out: any[],
+  depth = 0,
+): void => {
+  if (node == null || depth > 8) return;
+  if (Array.isArray(node)) {
+    node.forEach((item) => collectNameValuePairs(item, out, depth + 1));
+    return;
+  }
+  if (typeof node !== "object") return;
+
+  const obj = node as Record<string, unknown>;
+  const label = obj.label ?? obj.field ?? obj.name;
+  const hasValue =
+    obj.value != null ||
+    obj.answer != null ||
+    obj.fill != null ||
+    obj.text != null;
+  if (label != null && String(label).trim() && hasValue) {
+    out.push(obj);
+    return;
+  }
+
+  Object.values(obj).forEach((value) => {
+    collectNameValuePairs(value, out, depth + 1);
+  });
+};
+
 export const parseUltiproAiFillResponse = (
   response: unknown,
 ): UltiproParsedFillResponse => {
@@ -176,17 +210,6 @@ export const parseUltiproAiFillResponse = (
 
   if (!response) {
     return { answers, emptyLabelKeys, emptyCount };
-  }
-
-  let payload: any = response;
-  if (payload?.data != null && typeof payload.data === "object") {
-    payload = payload.data;
-  }
-  if (
-    payload?.fill_data_list != null &&
-    typeof payload.fill_data_list === "object"
-  ) {
-    payload = payload.fill_data_list;
   }
 
   const markEmpty = (label: string): void => {
@@ -219,23 +242,26 @@ export const parseUltiproAiFillResponse = (
     });
   };
 
+  const pairs: any[] = [];
+  collectNameValuePairs(response, pairs);
+  if (pairs.length > 0) {
+    pairs.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
+  }
+
+  let payload: any = response;
+  if (payload?.data != null && typeof payload.data === "object") {
+    payload = payload.data;
+  }
+  if (
+    payload?.fill_data_list != null &&
+    typeof payload.fill_data_list === "object"
+  ) {
+    payload = payload.fill_data_list;
+  }
+
   if (Array.isArray(payload)) {
     payload.forEach(processItem);
-    return { answers, emptyLabelKeys, emptyCount };
-  }
-
-  if (Array.isArray(payload?.elements)) {
-    payload.elements.forEach(processItem);
-    return { answers, emptyLabelKeys, emptyCount };
-  }
-
-  if (Array.isArray(payload?.answers)) {
-    payload.answers.forEach(processItem);
-    return { answers, emptyLabelKeys, emptyCount };
-  }
-
-  if (Array.isArray(payload?.fields)) {
-    payload.fields.forEach(processItem);
     return { answers, emptyLabelKeys, emptyCount };
   }
 
@@ -334,25 +360,80 @@ const matchOption = (answer: string, options: string[]): string | null => {
   return null;
 };
 
+const compactLabel = (label: string): string =>
+  cleanLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+const ADDRESS_LABEL_ALIASES: Record<string, string> = {
+  address1: "address1",
+  addressline1: "address1",
+  addresslineone: "address1",
+  line1: "address1",
+  address2: "address2",
+  addressline2: "address2",
+  addresslinetwo: "address2",
+  line2: "address2",
+  zip: "postalcode",
+  zipcode: "postalcode",
+  postalcode: "postalcode",
+  zippostalcode: "postalcode",
+};
+
+const canonicalLabelKey = (label: string): string => {
+  const compact = compactLabel(label);
+  return ADDRESS_LABEL_ALIASES[compact] ?? compact;
+};
+
 const findAnswerForLabel = (
   label: string,
   answers: UltiproAiAnswer[],
 ): UltiproAiAnswer | undefined => {
-  const exact = answers.find((item) => item.label === label);
+  const cleaned = cleanLabelText(label);
+  const exact = answers.find(
+    (item) => cleanLabelText(item.label) === cleaned,
+  );
   if (exact) return exact;
 
+  const compact = compactLabel(label);
+  const byCompact = answers.find((item) => compactLabel(item.label) === compact);
+  if (byCompact) return byCompact;
+
+  const canonical = canonicalLabelKey(label);
+  const byCanonical = answers.find(
+    (item) => canonicalLabelKey(item.label) === canonical,
+  );
+  if (byCanonical) return byCanonical;
+
   const normalized = normalizeLabel(label);
-  const byNorm = answers.find(
+  const normMatches = answers.filter(
     (item) => normalizeLabel(item.label) === normalized,
   );
-  if (byNorm) return byNorm;
+  if (normMatches.length === 1) return normMatches[0];
 
-  if (normalized.length >= 12) {
-    return answers.find((item) => {
-      const n = normalizeLabel(item.label);
-      if (!n || n.length < 8) return false;
-      return n.includes(normalized) || normalized.includes(n);
-    });
+  return undefined;
+};
+
+const findAnswerForField = (
+  field: UltiproCandidateField,
+  answers: UltiproAiAnswer[],
+): UltiproAiAnswer | undefined => {
+  const byLabel = findAnswerForLabel(field.label, answers);
+  if (byLabel) return byLabel;
+
+  const id = field.element.getAttribute("id") || "";
+  if (id) {
+    const byId = findAnswerForLabel(id, answers);
+    if (byId) return byId;
+  }
+
+  const automation = field.element.getAttribute("data-automation") || "";
+  if (automation === "address-line1-textbox") {
+    return findAnswerForLabel("Address 1", answers);
+  }
+  if (automation === "address-line2-textbox") {
+    return findAnswerForLabel("Address 2", answers);
   }
 
   return undefined;
@@ -416,6 +497,32 @@ const clipToMaxLength = (
   return answer;
 };
 
+const writeKnockoutValue = (element: HTMLElement, value: string): void => {
+  const ko = (window as any).ko;
+  if (!ko) return;
+
+  try {
+    ko.utils?.triggerEvent?.(element, "change");
+    const data = ko.dataFor?.(element);
+    const address = data?.Address;
+    if (!address) return;
+
+    const id = (element.getAttribute("id") || "").toLowerCase();
+    const setObs = (obs: unknown): void => {
+      if (typeof obs === "function") {
+        (obs as (next: string) => void)(value);
+      }
+    };
+
+    if (id === "addressline1") setObs(address.Line1);
+    if (id === "addressline2") setObs(address.Line2);
+    if (id === "city") setObs(address.City);
+    if (id === "postalcode") setObs(address.PostalCode);
+  } catch {
+    // Knockout context may not exist on this node.
+  }
+};
+
 const fillTextLikeField = async (
   element: HTMLInputElement | HTMLTextAreaElement,
   answer: string,
@@ -424,8 +531,47 @@ const fillTextLikeField = async (
   const value = clipToMaxLength(element, answer);
   element.focus();
   setNativeValue(element, value);
+  writeKnockoutValue(element, value);
   await notifyUltiproControl(element);
+  try {
+    getJquery()?.(element)?.val?.(value)?.trigger?.("input")?.trigger?.("change");
+  } catch {
+    // jQuery is optional.
+  }
+  writeKnockoutValue(element, value);
   return isUsableUltiproAnswer(element.value);
+};
+
+const KNOWN_TEXT_INPUTS: { id: string; labels: string[] }[] = [
+  { id: "AddressLine1", labels: ["Address 1", "Address Line 1", "AddressLine1"] },
+  { id: "AddressLine2", labels: ["Address 2", "Address Line 2", "AddressLine2"] },
+  { id: "City", labels: ["City"] },
+  {
+    id: "PostalCode",
+    labels: ["Zip / Postal Code", "Postal Code", "Zip", "PostalCode"],
+  },
+];
+
+/** Always apply address answers to known UKG ids, even if scan skipped the field. */
+const fillKnownUltiproTextInputs = async (
+  answers: UltiproAiAnswer[],
+): Promise<number> => {
+  let filled = 0;
+  for (const known of KNOWN_TEXT_INPUTS) {
+    const match = known.labels
+      .map((label) => findAnswerForLabel(label, answers))
+      .find((item) => item && isUsableUltiproAnswer(item.answer));
+    if (!match) continue;
+
+    const input = document.getElementById(known.id);
+    if (!(input instanceof HTMLInputElement)) continue;
+
+    await waitUntilVisible(input);
+    const ok = await fillTextLikeField(input, match.answer);
+    if (ok) filled += 1;
+    await delay(150);
+  }
+  return filled;
 };
 
 const applySelectValue = (select: HTMLSelectElement, value: string): void => {
@@ -798,6 +944,7 @@ const sortFieldsForFill = (
     if (isUltiproCountryField(field.element)) return 10;
     if (field.kind === "select" && !isUltiproStateField(field.element)) return 20;
     if (isUltiproStateField(field.element)) return 30;
+    if (isUltiproAddressField(field.element)) return 35;
     if (field.kind === "radio-group") return 40;
     if (field.kind === "date") return 50;
     if (isUltiproReferralDetailField(field.element)) return 80;
@@ -843,7 +990,7 @@ export const autofillUltiproWithAi = async (
       continue;
     }
 
-    const match = findAnswerForLabel(field.label, answers);
+    const match = findAnswerForField(field, answers);
     const answer = match?.answer;
 
     if (!isUsableUltiproAnswer(answer)) {
@@ -867,12 +1014,11 @@ export const autofillUltiproWithAi = async (
         await waitForSelectOptions(field.element);
       }
 
-      if (isUltiproReferralDetailField(field.element)) {
-        const visible = await waitUntilVisible(field.element);
-        if (!visible) {
-          skipped += 1;
-          continue;
-        }
+      if (
+        isUltiproReferralDetailField(field.element) ||
+        isUltiproAddressField(field.element)
+      ) {
+        await waitUntilVisible(field.element);
       }
 
       const ok = await fillField(field, answer as string);
@@ -883,6 +1029,10 @@ export const autofillUltiproWithAi = async (
           const stateSelect = findStateSelect(candidates);
           if (stateSelect) {
             await waitForSelectOptions(stateSelect);
+          }
+          const addressLine1 = document.getElementById("AddressLine1");
+          if (addressLine1 instanceof HTMLElement) {
+            await waitUntilVisible(addressLine1);
           }
         }
       } else {
@@ -896,6 +1046,8 @@ export const autofillUltiproWithAi = async (
       await delay(200);
     }
   }
+
+  filled += await fillKnownUltiproTextInputs(answers);
 
   return {
     total: answers.length + emptyCount,

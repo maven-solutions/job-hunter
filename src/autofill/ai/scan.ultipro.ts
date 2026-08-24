@@ -122,10 +122,17 @@ export const isUltiproSkippedPanelRoot = (element: Element): boolean => {
   const aria = element.getAttribute("aria-label");
   if (aria && isSkippedPanelName(aria)) return true;
 
-  const title = element.querySelector(":scope [data-automation='panel-title']");
-  if (title && isSkippedPanelName(title.textContent ?? "")) return true;
+  const tag = element.tagName.toLowerCase();
+  const isPanel =
+    element.classList.contains("panel") ||
+    tag === "collapsible-panel" ||
+    element.getAttribute("role") === "region";
+  if (!isPanel) return false;
 
-  return false;
+  const title = element.querySelector(
+    ":scope > .panel-heading [data-automation='panel-title'], :scope > * > .panel-heading [data-automation='panel-title']",
+  );
+  return !!(title && isSkippedPanelName(title.textContent ?? ""));
 };
 
 /** @deprecated Use isUltiproSkippedPanelRoot */
@@ -312,6 +319,26 @@ export const isUltiproStateField = (element: HTMLElement): boolean => {
     .replace(/[^a-z]/gi, "")
     .toLowerCase();
   return compact.includes("state") || compact.includes("province");
+};
+
+const ADDRESS_FIELD_IDS = new Set([
+  "addressline1",
+  "addressline2",
+  "city",
+  "postalcode",
+]);
+
+/** Address lines stay collapsed until Country is chosen. */
+export const isUltiproAddressField = (element: HTMLElement): boolean => {
+  const id = (element.getAttribute("id") || "").toLowerCase();
+  if (ADDRESS_FIELD_IDS.has(id)) return true;
+  const automation = (element.getAttribute("data-automation") || "").toLowerCase();
+  return (
+    automation === "address-line1-textbox" ||
+    automation === "address-line2-textbox" ||
+    automation === "city-textbox" ||
+    automation === "postal-code-textbox"
+  );
 };
 
 export const isUltiproReferralDetailField = (element: HTMLElement): boolean => {
@@ -520,7 +547,8 @@ const collectFromRoot = (
 
     const includeHiddenDependent =
       (element instanceof HTMLSelectElement && isUltiproStateField(element)) ||
-      isUltiproReferralDetailField(element);
+      isUltiproReferralDetailField(element) ||
+      isUltiproAddressField(element);
 
     if (!includeHiddenDependent && !isVisibleUltiproElement(element)) {
       return;
