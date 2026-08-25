@@ -7,6 +7,7 @@ import {
   getDayforceHcmComboboxInput,
   getDayforceHcmEducationIndex,
   getDayforceHcmListbox,
+  getDayforceHcmRadioChoiceLabel,
   isDayforceHcmEducationStateField,
   isDayforceHcmFieldFilled,
   isDayforceHcmPhoneCountryCombobox,
@@ -1056,11 +1057,55 @@ const fillCheckboxField = (
   return element.checked === want;
 };
 
+const fillRadioGroup = async (
+  group: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableDayforceHcmAnswer(answer)) return false;
+
+  const radios = Array.from(
+    group.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+  );
+  if (radios.length === 0) return false;
+
+  const labeled = radios.map((input) => ({
+    input,
+    label: getDayforceHcmRadioChoiceLabel(input),
+  }));
+  const labels = labeled.map((item) => item.label).filter(Boolean);
+
+  let matched = matchOption(answer, labels);
+  if (!matched) {
+    const compact = compactLabelKey(answer);
+    if (/^(true|yes|y|1)$/.test(compact)) {
+      matched = matchOption("Yes", labels);
+    } else if (/^(false|no|n|0)$/.test(compact)) {
+      matched = matchOption("No", labels);
+    }
+  }
+  if (!matched) return false;
+
+  const target = labeled.find((item) => item.label === matched);
+  if (!target) return false;
+  if (target.input.checked) return true;
+
+  const clickTarget =
+    (target.input.closest(".ant-radio-wrapper") as HTMLElement | null) ??
+    target.input;
+  clickTarget.click();
+  await delay(80);
+  return target.input.checked;
+};
+
 const fillField = async (
   field: DayforceHcmCandidateField,
   answer: string,
 ): Promise<boolean> => {
   if (!isUsableDayforceHcmAnswer(answer)) return false;
+
+  if (field.kind === "radio-group") {
+    return fillRadioGroup(field.element, answer);
+  }
 
   if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
     return fillCheckboxField(field.element, answer);

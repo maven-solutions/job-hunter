@@ -40,7 +40,8 @@ export type DayforceHcmFieldKind =
   | "select"
   | "checkbox"
   | "date"
-  | "number";
+  | "number"
+  | "radio-group";
 
 export interface DayforceHcmCandidateField {
   element: HTMLElement;
@@ -49,6 +50,7 @@ export interface DayforceHcmCandidateField {
   label: string;
   required: boolean;
   kind: DayforceHcmFieldKind;
+  options?: string[];
 }
 
 const SKIP_INPUT_TYPES = new Set([
@@ -241,12 +243,18 @@ const getFormItem = (element: Element): HTMLElement | null =>
 
 const getFormItemLabelText = (formItem: HTMLElement | null): string => {
   if (!formItem) return "";
+  const sanitized = formItem.querySelector<HTMLElement>(
+    ".ant-form-item-label .sanitized-html",
+  );
+  if (sanitized?.textContent) {
+    return cleanLabelText(sanitized.textContent);
+  }
   const label =
     formItem.querySelector<HTMLElement>(".ant-form-item-label label") ??
     formItem.querySelector<HTMLElement>("label");
-  return cleanLabelText(
-    label?.textContent ?? label?.getAttribute("title") ?? "",
-  );
+  const raw = label?.textContent ?? label?.getAttribute("title") ?? "";
+  if (raw.trim() === "[object Object]") return "";
+  return cleanLabelText(raw);
 };
 
 export const isDayforceHcmPhoneCountryCombobox = (
@@ -279,7 +287,11 @@ export const getDayforceHcmFieldLabel = (element: HTMLElement): string => {
     }
 
     const ariaLabel = element.getAttribute("aria-label");
-    if (ariaLabel && !/country dialing code/i.test(ariaLabel)) {
+    if (
+      ariaLabel &&
+      ariaLabel.trim() !== "[object Object]" &&
+      !/country dialing code/i.test(ariaLabel)
+    ) {
       return cleanLabelText(ariaLabel);
     }
 
@@ -328,9 +340,48 @@ export const isDayforceHcmRequiredField = (element: HTMLElement): boolean => {
   return false;
 };
 
+export const getDayforceHcmRadioChoiceLabel = (
+  input: HTMLInputElement,
+): string => {
+  const wrapper = input.closest("label") as HTMLElement | null;
+  if (wrapper) {
+    const clone = wrapper.cloneNode(true) as HTMLElement;
+    clone
+      .querySelectorAll("input, .ant-radio, svg")
+      .forEach((el) => el.remove());
+    const text = cleanLabelText(clone.textContent ?? "");
+    if (text) return text;
+  }
+  return cleanLabelText(input.getAttribute("value") ?? "");
+};
+
+const getRadioGroupOptions = (group: HTMLElement): string[] => {
+  const options: string[] = [];
+  const seen = new Set<string>();
+  group
+    .querySelectorAll<HTMLInputElement>('input[type="radio"]')
+    .forEach((radio) => {
+      const label = getDayforceHcmRadioChoiceLabel(radio);
+      if (!label || seen.has(label)) return;
+      seen.add(label);
+      options.push(label);
+    });
+  return options;
+};
+
+const getCheckedRadioLabel = (group: HTMLElement): string => {
+  const checked = group.querySelector<HTMLInputElement>(
+    'input[type="radio"]:checked',
+  );
+  return checked ? getDayforceHcmRadioChoiceLabel(checked) : "";
+};
+
 export const getDayforceHcmFieldValue = (
   field: DayforceHcmCandidateField,
 ): string => {
+  if (field.kind === "radio-group") {
+    return getCheckedRadioLabel(field.element);
+  }
   if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
     return field.element.checked ? "true" : "";
   }
@@ -838,6 +889,26 @@ export const collectDayforceHcmCandidateFields =
         });
       });
 
+    document.querySelectorAll<HTMLElement>(".ant-radio-group").forEach((group) => {
+      if (isInsideExtension(group)) return;
+      const formItem = getFormItem(group);
+      if (
+        !isDisplayVisible(group) &&
+        !(formItem && isDisplayVisible(formItem))
+      ) {
+        return;
+      }
+      const options = getRadioGroupOptions(group);
+      if (options.length === 0) return;
+      add({
+        element: group,
+        label: getDayforceHcmFieldLabel(group),
+        required: isDayforceHcmRequiredField(group),
+        kind: "radio-group",
+        options,
+      });
+    });
+
     document.querySelectorAll<HTMLSelectElement>("select").forEach((element) => {
       if (!isVisibleTextControl(element)) return;
       add({
@@ -908,6 +979,16 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
         required: candidate.required,
         type: "checkbox",
         options: ["Yes", "No"],
+      });
+      continue;
+    }
+
+    if (candidate.kind === "radio-group") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "search",
+        options: candidate.options ?? [],
       });
       continue;
     }
