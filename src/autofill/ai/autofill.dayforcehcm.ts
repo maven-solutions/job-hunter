@@ -2,8 +2,10 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   collectDayforceHcmCandidateFields,
   DayforceHcmCandidateField,
+  ensureDayforceHcmEducationRecords,
   getDayforceHcmAntSelectRoot,
   getDayforceHcmComboboxInput,
+  getDayforceHcmEducationIndex,
   getDayforceHcmListbox,
   isDayforceHcmFieldFilled,
   isDayforceHcmPhoneCountryCombobox,
@@ -112,6 +114,8 @@ const compactLabelKey = (label: string): string =>
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
 
+const fieldKey = (text: string): string => compactLabelKey(text);
+
 const addLabelKey = (set: Set<string>, label: string): void => {
   const compact = compactLabelKey(label);
   if (compact) set.add(compact);
@@ -124,6 +128,235 @@ const isFieldMarkedEmpty = (
   if (emptyLabelKeys.size === 0) return false;
   const compact = compactLabelKey(label);
   return !!(compact && emptyLabelKeys.has(compact));
+};
+
+/** Map API education keys onto Dayforce Education History labels. */
+const EDUCATION_FIELD_MAP: Record<string, string> = {
+  school: "School",
+  schooloruniversity: "School",
+  schoolname: "School",
+  university: "School",
+  college: "School",
+  degree: "Degree",
+  degreename: "Degree",
+  fieldofstudy: "Major",
+  major: "Major",
+  majorname: "Major",
+  field: "Major",
+  minor: "Minor",
+  minorname: "Minor",
+  overallresultgpa: "G.P.A.",
+  overallresult: "G.P.A.",
+  gpa: "G.P.A.",
+  gradeaverage: "G.P.A.",
+  grade: "G.P.A.",
+  from: "Start Date",
+  fromyyyy: "Start Date",
+  firstyearattended: "Start Date",
+  startyear: "Start Date",
+  startdate: "Start Date",
+  start: "Start Date",
+  effectivestart: "Start Date",
+  to: "End Date",
+  toyyyy: "End Date",
+  toactualorexpected: "End Date",
+  lastyearattended: "End Date",
+  endyear: "End Date",
+  enddate: "End Date",
+  end: "End Date",
+  effectiveend: "End Date",
+  country: "Country",
+  countrycode: "Country",
+  countryregion: "Country",
+  state: "State/Province",
+  statecode: "State/Province",
+  stateprovince: "State/Province",
+  province: "State/Province",
+  city: "City",
+  notcompleted: "Not Completed",
+  incomplete: "Not Completed",
+  educationnotcompleted: "Not Completed",
+};
+
+const EDUCATION_LABEL_ALIASES: string[][] = [
+  ["school", "schooloruniversity", "schoolname", "university", "college"],
+  ["degree", "degreename"],
+  ["major", "majorname", "fieldofstudy", "field"],
+  ["minor", "minorname"],
+  ["gpa", "overallresultgpa", "overallresult", "gradeaverage", "grade"],
+  ["startdate", "from", "fromyyyy", "effectivestart", "start", "startyear"],
+  ["enddate", "to", "toyyyy", "effectiveend", "end", "endyear"],
+  ["country", "countrycode", "countryregion"],
+  ["stateprovince", "state", "statecode", "province"],
+  ["city"],
+  ["notcompleted", "incomplete", "educationnotcompleted"],
+];
+
+const parseEducationPrefixedLabel = (
+  label: string,
+): { index: number; field: string } | null => {
+  const m = cleanLabelText(label).match(/^Education\s*(\d+)\s*-\s*(.+)$/i);
+  if (!m) return null;
+  return { index: Number(m[1]), field: compactLabelKey(m[2]) };
+};
+
+const educationFieldsAliasMatch = (a: string, b: string): boolean => {
+  for (const aliases of EDUCATION_LABEL_ALIASES) {
+    if (aliases.includes(a) && aliases.includes(b)) return true;
+  }
+  return false;
+};
+
+const GROUP_META_KEYS = new Set([
+  "label",
+  "type",
+  "required",
+  "options",
+  "count",
+  "description",
+]);
+
+const coerceGroupEntryRecord = (
+  item: unknown,
+): Record<string, unknown> | null => {
+  if (item == null) return null;
+
+  if (Array.isArray(item)) {
+    const record: Record<string, unknown> = {};
+    for (const field of item) {
+      if (field == null || typeof field !== "object") continue;
+      const f = field as Record<string, unknown>;
+      const fieldName = String(f.name ?? f.label ?? f.field ?? "").trim();
+      if (!fieldName) continue;
+      record[fieldName] = f.value ?? f.answer ?? f.fill ?? f.text;
+    }
+    return Object.keys(record).length > 0 ? record : null;
+  }
+
+  if (typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    if (
+      ("name" in obj || "label" in obj) &&
+      ("value" in obj || "answer" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj)
+    ) {
+      const fieldName = String(obj.name ?? obj.label ?? "").trim();
+      if (!fieldName) return null;
+      return { [fieldName]: obj.value ?? obj.answer };
+    }
+    return obj;
+  }
+
+  return null;
+};
+
+const normalizeGroupEntries = (raw: unknown): Record<string, unknown>[] => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    if (raw.length > 0 && Array.isArray(raw[0])) {
+      return raw
+        .map((item) => coerceGroupEntryRecord(item))
+        .filter(Boolean) as Record<string, unknown>[];
+    }
+    if (
+      raw.length > 0 &&
+      typeof raw[0] === "object" &&
+      raw[0] != null &&
+      ("name" in (raw[0] as object) || "label" in (raw[0] as object)) &&
+      ("value" in (raw[0] as object) || "answer" in (raw[0] as object)) &&
+      !Array.isArray((raw[0] as any).value) &&
+      typeof (raw[0] as any).value !== "object"
+    ) {
+      const firstName = String(
+        (raw[0] as any).name ?? (raw[0] as any).label ?? "",
+      );
+      if (/school|degree|major|gpa|from|to|start|end/i.test(firstName)) {
+        const single = coerceGroupEntryRecord(raw);
+        return single ? [single] : [];
+      }
+    }
+    return raw
+      .map((item) => coerceGroupEntryRecord(item))
+      .filter(Boolean) as Record<string, unknown>[];
+  }
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["entries", "items", "data", "records"]) {
+      if (Array.isArray(obj[key])) {
+        return normalizeGroupEntries(obj[key]);
+      }
+    }
+    if (
+      "label" in obj &&
+      ("type" in obj || "options" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj)
+    ) {
+      return normalizeGroupEntries(
+        obj.answer ?? obj.value ?? obj.fill ?? obj.data,
+      );
+    }
+    const coerced = coerceGroupEntryRecord(obj);
+    return coerced ? [coerced] : [];
+  }
+  return [];
+};
+
+const resolveEducationFieldLabel = (rawLabel: string): string => {
+  const mapped = EDUCATION_FIELD_MAP[fieldKey(rawLabel)];
+  if (mapped) return mapped;
+  let fieldLabel = cleanLabelText(rawLabel);
+  if (/^school/i.test(fieldLabel)) return "School";
+  if (/field of study/i.test(fieldLabel)) return "Major";
+  if (/gpa|overall result/i.test(fieldLabel)) return "G.P.A.";
+  if (/^from/i.test(fieldLabel) || /^start/i.test(fieldLabel)) {
+    return "Start Date";
+  }
+  if (/^to/i.test(fieldLabel) || /^end/i.test(fieldLabel)) return "End Date";
+  return fieldLabel;
+};
+
+const flattenEducationEntry = (
+  entry: Record<string, unknown>,
+): { fieldLabel: string; value: unknown }[] => {
+  const out: { fieldLabel: string; value: unknown }[] = [];
+  const seen = new Set<string>();
+
+  for (const [key, value] of Object.entries(entry)) {
+    if (value == null) continue;
+    if (GROUP_META_KEYS.has(key.toLowerCase())) continue;
+
+    if (
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      ("answer" in (value as object) ||
+        "value" in (value as object) ||
+        "name" in (value as object) ||
+        "label" in (value as object))
+    ) {
+      const nested = value as {
+        name?: string;
+        label?: string;
+        answer?: unknown;
+        value?: unknown;
+      };
+      const fieldLabel = resolveEducationFieldLabel(
+        String(nested.name ?? nested.label ?? key),
+      );
+      if (seen.has(fieldLabel)) continue;
+      seen.add(fieldLabel);
+      out.push({ fieldLabel, value: nested.answer ?? nested.value });
+      continue;
+    }
+
+    const fieldLabel = resolveEducationFieldLabel(key);
+    if (seen.has(fieldLabel)) continue;
+    seen.add(fieldLabel);
+    out.push({ fieldLabel, value });
+  }
+
+  return out;
 };
 
 export interface DayforceHcmParsedFillResponse {
@@ -159,12 +392,48 @@ export const parseDayforceHcmAiFillResponse = (
     emptyCount += 1;
   };
 
+  const pushAnswer = (item: DayforceHcmAiAnswer): void => {
+    answers.push(item);
+  };
+
+  const pushEducationGroup = (raw: unknown): void => {
+    const entries = normalizeGroupEntries(raw);
+    if (entries.length === 0) {
+      markEmpty("Education");
+      return;
+    }
+
+    entries.forEach((entry, index) => {
+      const prefix = `Education ${index + 1}`;
+      const fields = flattenEducationEntry(entry);
+      for (const { fieldLabel, value } of fields) {
+        if (!isUsableDayforceHcmAnswer(value)) {
+          markEmpty(`${prefix} - ${fieldLabel}`);
+          continue;
+        }
+        pushAnswer({
+          label: `${prefix} - ${fieldLabel}`,
+          answer: coerceAnswerString(value),
+        });
+      }
+    });
+  };
+
   const processItem = (item: any): void => {
     if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
     if (!label) return;
 
+    const typeStr = String(item.type ?? "").toLowerCase();
     const raw = extractRawAnswer(item);
+
+    if (typeStr === "education" || /^education$/i.test(label)) {
+      pushEducationGroup(
+        raw ?? item.entries ?? item.data ?? item.items,
+      );
+      return;
+    }
+
     if (!isUsableDayforceHcmAnswer(raw)) {
       markEmpty(label);
       return;
@@ -204,11 +473,16 @@ export const parseDayforceHcmAiFillResponse = (
   }
 
   if (typeof payload === "object") {
+    if (Array.isArray(payload.education)) {
+      pushEducationGroup(payload.education);
+    }
+
     const reserved = new Set([
       "elements",
       "answers",
       "fields",
       "fill_data_list",
+      "education",
       "resumeId",
       "userId",
       "parser",
@@ -223,6 +497,10 @@ export const parseDayforceHcmAiFillResponse = (
     ]);
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
+      if (/^education$/i.test(label) && typeof value === "object") {
+        pushEducationGroup(value);
+        continue;
+      }
       if (!isUsableDayforceHcmAnswer(value)) {
         markEmpty(label);
         continue;
@@ -393,6 +671,19 @@ const findAnswerForLabel = (
     (item) => compactLabelKey(item.label) === compact,
   );
   if (byCompact) return byCompact;
+
+  const parsedField = parseEducationPrefixedLabel(label);
+  if (parsedField) {
+    const aliased = answers.find((item) => {
+      const parsedAnswer = parseEducationPrefixedLabel(item.label);
+      if (!parsedAnswer || parsedAnswer.index !== parsedField.index) {
+        return false;
+      }
+      if (parsedAnswer.field === parsedField.field) return true;
+      return educationFieldsAliasMatch(parsedField.field, parsedAnswer.field);
+    });
+    if (aliased) return aliased;
+  }
 
   const normalized = normalizeLabel(label);
   const normMatches = answers.filter(
@@ -692,17 +983,28 @@ const fillDayforceHcmCombobox = async (
 };
 
 const isCountryField = (label: string): boolean => {
-  const n = normalizeLabel(label);
-  return n === "country" || n === "countryregion";
+  const compact = compactLabelKey(label);
+  if (/phone|dialing/i.test(label) && /country code/i.test(label)) {
+    return false;
+  }
+  if (compact.includes("phonecountry") || compact.endsWith("countrycode")) {
+    return false;
+  }
+  return compact === "country" || compact.endsWith("country");
 };
 
-const waitForStateSelectEnabled = async (): Promise<void> => {
-  const stateInput = document.querySelector<HTMLInputElement>(
-    "#jobPostingApplication_personalInfo_stateCode",
-  );
+const waitForStateSelectEnabled = async (
+  context?: HTMLElement,
+): Promise<void> => {
+  const scope: ParentNode = context?.closest("form") ?? document;
+  const stateInput =
+    scope.querySelector<HTMLInputElement>("[id$='_stateCode']") ||
+    document.querySelector<HTMLInputElement>(
+      "#jobPostingApplication_personalInfo_stateCode",
+    );
   const root =
     (stateInput && getDayforceHcmAntSelectRoot(stateInput)) ||
-    (document
+    (scope
       .querySelector<HTMLElement>("[test-id='state-province-selector']")
       ?.querySelector(".ant-select") as HTMLElement | null);
   if (!root) return;
@@ -711,11 +1013,60 @@ const waitForStateSelectEnabled = async (): Promise<void> => {
   await delay(200);
 };
 
+const isTruthyCheckboxAnswer = (answer: string): boolean =>
+  /^(true|yes|y|1|checked|on|not completed|incomplete)$/i.test(answer.trim());
+
+const coerceToIsoDate = (answer: string): string => {
+  const t = answer.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+
+  const ymd = t.match(/^(\d{4})[/.](\d{1,2})[/.](\d{1,2})$/);
+  if (ymd) {
+    return `${ymd[1]}-${ymd[2].padStart(2, "0")}-${ymd[3].padStart(2, "0")}`;
+  }
+
+  const ym = t.match(/^(\d{4})[/\-.](\d{1,2})$/);
+  if (ym) return `${ym[1]}-${ym[2].padStart(2, "0")}-01`;
+
+  const my = t.match(/^(\d{1,2})[/\-.](\d{4})$/);
+  if (my) return `${my[2]}-${my[1].padStart(2, "0")}-01`;
+
+  const y = t.match(/^(\d{4})$/);
+  if (y) return `${y[1]}-06-01`;
+
+  const parsed = Date.parse(t);
+  if (!Number.isNaN(parsed)) {
+    const d = new Date(parsed);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  }
+
+  return t;
+};
+
+const fillCheckboxField = (
+  element: HTMLInputElement,
+  answer: string,
+): boolean => {
+  const want = isTruthyCheckboxAnswer(answer);
+  if (element.checked === want) return true;
+  const clickTarget =
+    (element.closest(".ant-checkbox-wrapper") as HTMLElement | null) ??
+    element;
+  clickTarget.click();
+  return element.checked === want;
+};
+
 const fillField = async (
   field: DayforceHcmCandidateField,
   answer: string,
 ): Promise<boolean> => {
   if (!isUsableDayforceHcmAnswer(answer)) return false;
+
+  if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
+    return fillCheckboxField(field.element, answer);
+  }
 
   if (field.kind === "select" && field.element instanceof HTMLSelectElement) {
     return fillNativeSelect(field.element, answer);
@@ -729,10 +1080,64 @@ const fillField = async (
     field.element instanceof HTMLInputElement ||
     field.element instanceof HTMLTextAreaElement
   ) {
-    return fillTextLikeField(field.element, answer);
+    const value =
+      field.kind === "date" ||
+      (field.element instanceof HTMLInputElement &&
+        field.element.type === "date")
+        ? coerceToIsoDate(answer)
+        : answer;
+    return fillTextLikeField(field.element, value);
   }
 
   return false;
+};
+
+const countEducationAnswers = (answers: DayforceHcmAiAnswer[]): number => {
+  const nums = new Set<number>();
+  for (const item of answers) {
+    const m = item.label.match(/^Education\s*(\d+)\s*-/i);
+    if (m) nums.add(Number(m[1]));
+  }
+  return nums.size;
+};
+
+const educationFieldSortKey = (label: string): number => {
+  const edu = label.match(/^Education\s*(\d+)\s*-\s*(.+)$/i);
+  if (edu) {
+    const idx = Number(edu[1]) || 1;
+    const bare = edu[2].toLowerCase();
+    let fieldOrder = 50;
+    if (/school/.test(bare)) fieldOrder = 1;
+    else if (/^degree/.test(bare)) fieldOrder = 2;
+    else if (/major|field of study/.test(bare)) fieldOrder = 3;
+    else if (/minor/.test(bare)) fieldOrder = 4;
+    else if (/start date|^from/.test(bare)) fieldOrder = 5;
+    else if (/end date|^to /.test(bare) || /^to$/.test(bare.trim()))
+      fieldOrder = 6;
+    else if (/country/.test(bare) && !/code/.test(bare)) fieldOrder = 7;
+    else if (/state|province/.test(bare)) fieldOrder = 8;
+    else if (/^city/.test(bare)) fieldOrder = 9;
+    else if (/g\.?p\.?a|overall result/.test(bare)) fieldOrder = 10;
+    else if (/not completed/.test(bare)) fieldOrder = 11;
+    return 5000 + idx * 20 + fieldOrder;
+  }
+
+  const compact = compactLabelKey(label);
+  if (compact === "country") return 10;
+  if (compact === "stateprovince" || compact === "state") return 11;
+  return 100;
+};
+
+const clickEducationUpdate = async (index: number): Promise<void> => {
+  const form = document.querySelector<HTMLFormElement>(
+    `#educationHistory-${index}, form[id="educationHistory-${index}"]`,
+  );
+  const btn = form?.querySelector<HTMLButtonElement>(
+    '[test-id="educationHistory-update-button"]',
+  );
+  if (!btn) return;
+  btn.click();
+  await delay(500);
 };
 
 /**
@@ -745,11 +1150,20 @@ export const autofillDayforceHcmWithAi = async (
   const { answers, emptyLabelKeys, emptyCount } =
     parseDayforceHcmAiFillResponse(response);
 
+  const eduNeeded = countEducationAnswers(answers);
+  if (eduNeeded > 0) {
+    await ensureDayforceHcmEducationRecords(eduNeeded);
+  }
+
   const candidates = collectDayforceHcmCandidateFields();
+  const ordered = [...candidates].sort(
+    (a, b) => educationFieldSortKey(a.label) - educationFieldSortKey(b.label),
+  );
 
   let filled = 0;
   let failed = 0;
   let skipped = 0;
+  let lastEducationIndex: number | null = null;
 
   if (answers.length === 0 && emptyCount === 0) {
     return {
@@ -760,7 +1174,17 @@ export const autofillDayforceHcmWithAi = async (
     };
   }
 
-  for (const field of candidates) {
+  for (const field of ordered) {
+    const educationIndex = getDayforceHcmEducationIndex(field.element);
+    if (
+      lastEducationIndex != null &&
+      educationIndex !== lastEducationIndex &&
+      (educationIndex == null || educationIndex > lastEducationIndex)
+    ) {
+      await clickEducationUpdate(lastEducationIndex);
+    }
+    if (educationIndex != null) lastEducationIndex = educationIndex;
+
     if (isDayforceHcmFieldFilled(field)) {
       skipped += 1;
       continue;
@@ -791,7 +1215,7 @@ export const autofillDayforceHcmWithAi = async (
       if (ok) {
         filled += 1;
         if (isCountryField(field.label)) {
-          await waitForStateSelectEnabled();
+          await waitForStateSelectEnabled(field.element);
         }
       } else {
         failed += 1;
@@ -801,6 +1225,10 @@ export const autofillDayforceHcmWithAi = async (
     }
 
     await delay(160);
+  }
+
+  if (lastEducationIndex != null) {
+    await clickEducationUpdate(lastEducationIndex);
   }
 
   // Known Ant Design ids — fill if still empty (e.g. Address Line 1 skipped

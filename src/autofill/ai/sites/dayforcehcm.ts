@@ -6,6 +6,7 @@ import { initDayforceHcmHtmlScanner } from "../cibtn.dayforcehcm";
 import {
   DayforceHcmScanToMakeApiOptions,
   DayforceHcmScanToMakeApiPayload,
+  prepareDayforceHcmEducationRecords,
   scanDayforceHcmHtmlToMakeApiPayload,
 } from "../scan.dayforcehcm";
 import { AiFillResult, AiSiteHandler } from "../types";
@@ -270,6 +271,7 @@ const waitForDayforceHcmParseIdle = (
  * 1. Upload resume from applicantData.pdf_url
  * 2. Wait until Dayforce parses it and autofills personal info
  * 3. Wait until the form stops updating so parse is fully applied before scan
+ * 4. Expand Education History records from applicantData.education
  */
 export const prepareDayforceHcmBeforeScan = async (
   applicantData: Applicant,
@@ -286,12 +288,14 @@ export const prepareDayforceHcmBeforeScan = async (
     }
   } else if (!alreadyParsed && alreadyAttached) {
     await waitUntilDayforceHcmResumeParsed(previousSnapshot);
-  } else if (!alreadyParsed && !fileInput) {
-    return;
   }
 
-  await delay(RESUME_PARSED_MIN_WAIT_MS);
-  await waitForDayforceHcmParseIdle();
+  if (alreadyAttached || alreadyParsed || fileInput) {
+    await delay(RESUME_PARSED_MIN_WAIT_MS);
+    await waitForDayforceHcmParseIdle();
+  }
+
+  await prepareDayforceHcmEducationRecords(applicantData);
 };
 
 const buildScanPayload = async (

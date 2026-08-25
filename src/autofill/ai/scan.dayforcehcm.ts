@@ -1,13 +1,17 @@
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 import { delay } from "../helper";
+import { Applicant } from "../data";
+import { AiNestedFieldSchema } from "./types";
 
-export type ApiElementType = "text" | "search";
+export type ApiElementType = string;
 
 export interface ApiFormElement {
   label: string;
   required: boolean;
   type: ApiElementType;
-  options?: string[];
+  options?: string[] | AiNestedFieldSchema[];
+  description?: string;
+  count?: number;
 }
 
 export interface DayforceHcmScanToMakeApiPayload {
@@ -27,9 +31,16 @@ export interface DayforceHcmScanToMakeApiOptions {
   userId?: string;
   fromAgent?: boolean;
   parser?: string;
+  applicantData?: Applicant | null;
 }
 
-export type DayforceHcmFieldKind = "text" | "combobox" | "select";
+export type DayforceHcmFieldKind =
+  | "text"
+  | "combobox"
+  | "select"
+  | "checkbox"
+  | "date"
+  | "number";
 
 export interface DayforceHcmCandidateField {
   element: HTMLElement;
@@ -62,8 +73,109 @@ const cleanLabelText = (text: string): string =>
     .replace(/\s+/g, " ")
     .trim();
 
+const EDUCATION_SECTION_SELECTOR = '[test-id="education-history"]';
+const EDUCATION_RECORD_SELECTOR =
+  'form[test-id="educationhistory-record"], form[id^="educationHistory-"]';
+const ADD_EDUCATION_BUTTON_SELECTOR =
+  '[test-id="add-educationhistory-record"]';
+
 export const isInsideExtension = (element: Element): boolean =>
   !!element.closest(`#${EXTENSION_ROOT_ID}`);
+
+export const isDayforceHcmEducationSectionPresent = (): boolean =>
+  !!document.querySelector(EDUCATION_SECTION_SELECTOR);
+
+export const isInsideDayforceHcmEducation = (element: Element): boolean =>
+  !!element.closest(
+    `${EDUCATION_RECORD_SELECTOR}, ${EDUCATION_SECTION_SELECTOR}`,
+  );
+
+export const countDayforceHcmEducationRecords = (): number =>
+  document.querySelectorAll(EDUCATION_RECORD_SELECTOR).length;
+
+/** 0-based education record index, or null when the control is not in Education. */
+export const getDayforceHcmEducationIndex = (
+  element: Element,
+): number | null => {
+  const form = element.closest<HTMLFormElement>(EDUCATION_RECORD_SELECTOR);
+  if (form?.id) {
+    const fromForm = form.id.match(/educationHistory-(\d+)/i);
+    if (fromForm) return Number(fromForm[1]);
+  }
+
+  const id = (element as HTMLElement).id || "";
+  const fromId = id.match(/educationHistory_(\d+)_/i);
+  if (fromId) return Number(fromId[1]);
+
+  if (form) return 0;
+  return null;
+};
+
+export const withDayforceHcmSectionLabel = (
+  baseLabel: string,
+  element: Element,
+): string => {
+  const base = cleanLabelText(baseLabel);
+  if (!base) return base;
+  if (/^Education\s*\d+\s*-/i.test(base)) return base;
+  const idx = getDayforceHcmEducationIndex(element);
+  if (idx == null) return base;
+  return `Education ${idx + 1} - ${base}`;
+};
+
+export const isRepeatableEducationFieldLabel = (label: string): boolean =>
+  /^education\s*\d+\s*-/i.test(label.trim());
+
+/**
+ * Click "Add Education History" until `needed` record forms exist.
+ * Mirrors Workday ensureWorkdayEntryPanels for education.
+ */
+export const ensureDayforceHcmEducationRecords = async (
+  needed: number,
+): Promise<void> => {
+  if (!isDayforceHcmEducationSectionPresent()) return;
+  if (!needed || needed < 1) return;
+
+  const findAdd = (): HTMLButtonElement | null =>
+    document.querySelector<HTMLButtonElement>(ADD_EDUCATION_BUTTON_SELECTOR);
+
+  let current = countDayforceHcmEducationRecords();
+  if (current === 0) {
+    const add = findAdd();
+    if (add) {
+      add.click();
+      await delay(600);
+      current = countDayforceHcmEducationRecords();
+    }
+  }
+
+  let guard = 0;
+  while (current < needed && guard < 20) {
+    const add = findAdd();
+    if (!add) break;
+    add.click();
+    await delay(700);
+    const next = countDayforceHcmEducationRecords();
+    if (next <= current) {
+      await delay(500);
+    }
+    current = countDayforceHcmEducationRecords();
+    guard += 1;
+  }
+};
+
+/** Expand Education History records from applicant profile before scan. */
+export const prepareDayforceHcmEducationRecords = async (
+  applicantData: Applicant | null | undefined,
+): Promise<void> => {
+  if (!isDayforceHcmEducationSectionPresent()) return;
+  const eduCount = Array.isArray(applicantData?.education)
+    ? applicantData!.education!.length
+    : 0;
+  if (eduCount > 0) {
+    await ensureDayforceHcmEducationRecords(eduCount);
+  }
+};
 
 const waitForDomUpdate = (): Promise<void> =>
   new Promise((resolve) => {
@@ -135,38 +247,42 @@ export const isDayforceHcmPhoneCountryCombobox = (
 };
 
 export const getDayforceHcmFieldLabel = (element: HTMLElement): string => {
-  const selectRoot = getDayforceHcmAntSelectRoot(element);
-  if (selectRoot && isDayforceHcmPhoneCountryCombobox(selectRoot)) {
-    const parentLabel = getFormItemLabelText(getFormItem(selectRoot));
-    if (parentLabel) return `${parentLabel} Country Code`;
-    return "Phone Country Code";
-  }
-
-  const id = element.getAttribute("id");
-  if (id) {
-    const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
-    if (label?.textContent) {
-      return cleanLabelText(label.textContent);
+  const resolveBase = (): string => {
+    const selectRoot = getDayforceHcmAntSelectRoot(element);
+    if (selectRoot && isDayforceHcmPhoneCountryCombobox(selectRoot)) {
+      const parentLabel = getFormItemLabelText(getFormItem(selectRoot));
+      if (parentLabel) return `${parentLabel} Country Code`;
+      return "Phone Country Code";
     }
-  }
 
-  const ariaLabel = element.getAttribute("aria-label");
-  if (ariaLabel && !/country dialing code/i.test(ariaLabel)) {
-    return cleanLabelText(ariaLabel);
-  }
-
-  const labelledBy = element.getAttribute("aria-labelledby");
-  if (labelledBy) {
-    const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
-    if (labelEl?.textContent) {
-      return cleanLabelText(labelEl.textContent);
+    const id = element.getAttribute("id");
+    if (id) {
+      const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+      if (label?.textContent) {
+        return cleanLabelText(label.textContent);
+      }
     }
-  }
 
-  const formItemLabel = getFormItemLabelText(getFormItem(element));
-  if (formItemLabel) return formItemLabel;
+    const ariaLabel = element.getAttribute("aria-label");
+    if (ariaLabel && !/country dialing code/i.test(ariaLabel)) {
+      return cleanLabelText(ariaLabel);
+    }
 
-  return id ?? "Unknown field";
+    const labelledBy = element.getAttribute("aria-labelledby");
+    if (labelledBy) {
+      const labelEl = document.getElementById(labelledBy.split(/\s+/)[0]);
+      if (labelEl?.textContent) {
+        return cleanLabelText(labelEl.textContent);
+      }
+    }
+
+    const formItemLabel = getFormItemLabelText(getFormItem(element));
+    if (formItemLabel) return formItemLabel;
+
+    return id ?? "Unknown field";
+  };
+
+  return withDayforceHcmSectionLabel(resolveBase(), element);
 };
 
 export const isDayforceHcmRequiredField = (element: HTMLElement): boolean => {
@@ -200,6 +316,9 @@ export const isDayforceHcmRequiredField = (element: HTMLElement): boolean => {
 export const getDayforceHcmFieldValue = (
   field: DayforceHcmCandidateField,
 ): string => {
+  if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
+    return field.element.checked ? "true" : "";
+  }
   if (field.kind === "combobox" && field.selectRoot) {
     return getAntSelectDisplayValue(field.selectRoot);
   }
@@ -421,6 +540,98 @@ const getNativeSelectOptions = (select: HTMLSelectElement): string[] => {
   return options;
 };
 
+const educationFormHas = (testId: string): boolean =>
+  !!document.querySelector(
+    `${EDUCATION_RECORD_SELECTOR} [test-id="${testId}"]`,
+  );
+
+/**
+ * Nested Education schema for the AI API (Workday-style group).
+ * Labels match Dayforce form titles so fill can prefix "Education N -".
+ */
+const buildDayforceHcmEducationSchema = (): AiNestedFieldSchema[] => {
+  const fields: AiNestedFieldSchema[] = [];
+  const first =
+    document.querySelector<HTMLElement>(EDUCATION_RECORD_SELECTOR) ??
+    document.querySelector<HTMLElement>(EDUCATION_SECTION_SELECTOR);
+  if (!first) return fields;
+
+  if (educationFormHas("education-history-degree-text-input")) {
+    fields.push({ type: "text", label: "Degree", required: true });
+  }
+  if (educationFormHas("education-history-educationnotcompleted-checkbox")) {
+    fields.push({
+      type: "checkbox",
+      label: "Not Completed",
+      options: ["Yes", "No"],
+    });
+  }
+  if (educationFormHas("education-history-major-text-input")) {
+    fields.push({ type: "text", label: "Major" });
+  }
+  if (educationFormHas("education-history-minor-text-input")) {
+    fields.push({ type: "text", label: "Minor" });
+  }
+  if (educationFormHas("education-history-startdate-datepicker")) {
+    fields.push({
+      type: "date",
+      label: "Start Date",
+      description: "YYYY-MM-DD",
+    });
+  }
+  if (educationFormHas("education-history-enddate-datepicker")) {
+    fields.push({
+      type: "date",
+      label: "End Date",
+      description: "YYYY-MM-DD",
+    });
+  }
+  if (educationFormHas("education-history-schoolname-text-input")) {
+    fields.push({ type: "text", label: "School", required: true });
+  }
+  if (first.querySelector("[id$='_countryCode'], [test-id='country-selector']")) {
+    fields.push({ type: "search", label: "Country" });
+  }
+  if (
+    first.querySelector(
+      "[id$='_stateCode'], [test-id='state-province-selector']",
+    )
+  ) {
+    fields.push({ type: "search", label: "State/Province" });
+  }
+  if (educationFormHas("education-history-city-text-input")) {
+    fields.push({ type: "text", label: "City" });
+  }
+  if (educationFormHas("education-history-gpa-text-input")) {
+    fields.push({ type: "text", label: "G.P.A." });
+  }
+
+  if (fields.length === 0) {
+    return [
+      { type: "text", label: "Degree", required: true },
+      { type: "text", label: "Major" },
+      { type: "date", label: "Start Date", description: "YYYY-MM-DD" },
+      { type: "date", label: "End Date", description: "YYYY-MM-DD" },
+      { type: "text", label: "School", required: true },
+      { type: "search", label: "Country" },
+      { type: "search", label: "State/Province" },
+      { type: "text", label: "City" },
+      { type: "text", label: "G.P.A." },
+    ];
+  }
+
+  return fields;
+};
+
+const resolveEducationCount = (
+  applicantData?: Applicant | null,
+): number => {
+  if (Array.isArray(applicantData?.education) && applicantData.education.length) {
+    return Math.max(1, applicantData.education.length);
+  }
+  return Math.max(1, countDayforceHcmEducationRecords() || 1);
+};
+
 /**
  * Collect autofillable Dayforce (Ant Design) fields on the host page.
  * Resume file input is skipped (handled in prepareBeforeScan).
@@ -479,6 +690,19 @@ export const collectDayforceHcmCandidateFields =
         if (element instanceof HTMLInputElement) {
           const type = (element.type || "text").toLowerCase();
           if (SKIP_INPUT_TYPES.has(type)) return;
+          const kind: DayforceHcmFieldKind =
+            type === "date"
+              ? "date"
+              : element.closest(".ant-input-number")
+                ? "number"
+                : "text";
+          add({
+            element,
+            label: getDayforceHcmFieldLabel(element),
+            required: isDayforceHcmRequiredField(element),
+            kind,
+          });
+          return;
         }
 
         add({
@@ -486,6 +710,24 @@ export const collectDayforceHcmCandidateFields =
           label: getDayforceHcmFieldLabel(element),
           required: isDayforceHcmRequiredField(element),
           kind: "text",
+        });
+      });
+
+    document
+      .querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+      .forEach((element) => {
+        if (isInsideExtension(element)) return;
+        if (!isInsideDayforceHcmEducation(element)) return;
+        const wrapper =
+          (element.closest(
+            ".ant-checkbox-wrapper, .ant-form-item",
+          ) as HTMLElement | null) ?? element;
+        if (!isDisplayVisible(wrapper) && !element.isConnected) return;
+        add({
+          element,
+          label: getDayforceHcmFieldLabel(element),
+          required: isDayforceHcmRequiredField(element),
+          kind: "checkbox",
         });
       });
 
@@ -506,22 +748,59 @@ export const collectDayforceHcmCandidateFields =
  * Scans the Dayforce HCM application form after resume parse.
  * Already-filled fields (from Dayforce's parser) are omitted so the AI
  * only answers remaining questions and does not overwrite parsed values.
+ * Education is sent as a nested Workday-style group, not flat Country/City
+ * labels that would collide with Personal Information.
  */
 export const scanDayforceHcmHtmlToMakeApiPayload = async (
   options: DayforceHcmScanToMakeApiOptions = {},
 ): Promise<DayforceHcmScanToMakeApiPayload> => {
   const url = window.location.href;
-  const candidates = collectDayforceHcmCandidateFields().filter(
-    (field) => !isDayforceHcmFieldFilled(field),
-  );
+
+  if (isDayforceHcmEducationSectionPresent()) {
+    await ensureDayforceHcmEducationRecords(
+      resolveEducationCount(options.applicantData),
+    );
+  }
+
+  const candidates = collectDayforceHcmCandidateFields();
   const elements: ApiFormElement[] = [];
 
-  for (const candidate of candidates) {
-    if (candidate.kind === "text") {
+  if (isDayforceHcmEducationSectionPresent()) {
+    elements.push({
+      label: "Education",
+      required: true,
+      type: "education",
+      count: resolveEducationCount(options.applicantData),
+      options: buildDayforceHcmEducationSchema(),
+    });
+  }
+
+  const remaining = candidates.filter((field) => {
+    if (isRepeatableEducationFieldLabel(field.label)) return false;
+    if (isInsideDayforceHcmEducation(field.element)) return false;
+    return !isDayforceHcmFieldFilled(field);
+  });
+
+  for (const candidate of remaining) {
+    if (
+      candidate.kind === "text" ||
+      candidate.kind === "date" ||
+      candidate.kind === "number"
+    ) {
       elements.push({
         label: candidate.label,
         required: candidate.required,
-        type: "text",
+        type: candidate.kind === "date" ? "date" : "text",
+      });
+      continue;
+    }
+
+    if (candidate.kind === "checkbox") {
+      elements.push({
+        label: candidate.label,
+        required: candidate.required,
+        type: "checkbox",
+        options: ["Yes", "No"],
       });
       continue;
     }
