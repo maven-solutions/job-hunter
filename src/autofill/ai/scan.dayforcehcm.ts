@@ -517,6 +517,70 @@ const waitForAntDropdown = (timeoutMs = 900): Promise<HTMLElement | null> =>
     });
   });
 
+const harvestDropdownOptions = (
+  selectRoot: HTMLElement,
+  fallback: HTMLElement | null,
+  seen: Set<string>,
+  results: string[],
+): void => {
+  const root = getDayforceHcmListbox(selectRoot) ?? fallback;
+  if (!root) return;
+  for (const label of collectOptionsFromDropdown(root)) {
+    if (seen.has(label)) continue;
+    seen.add(label);
+    results.push(label);
+  }
+};
+
+/** Scroll rc-virtual-list so searchable country selects yield a full option list. */
+const collectOptionsFromOpenDropdown = async (
+  selectRoot: HTMLElement,
+): Promise<string[]> => {
+  const dropdown =
+    getDayforceHcmListbox(selectRoot) ?? (await waitForAntDropdown(1200));
+  if (!dropdown) return [];
+
+  const seen = new Set<string>();
+  const results: string[] = [];
+  harvestDropdownOptions(selectRoot, dropdown, seen, results);
+
+  if (results.length === 0) {
+    await delay(250);
+    await waitForDomUpdate();
+    harvestDropdownOptions(
+      selectRoot,
+      getVisibleAntDropdown(),
+      seen,
+      results,
+    );
+  }
+
+  const holder =
+    dropdown.querySelector<HTMLElement>(".rc-virtual-list-holder") ??
+    getDayforceHcmListbox(selectRoot)?.closest<HTMLElement>(
+      ".rc-virtual-list-holder",
+    ) ??
+    null;
+  if (!holder) return results;
+
+  let stagnant = 0;
+  let lastCount = results.length;
+  for (let i = 0; i < 50 && stagnant < 4; i++) {
+    holder.scrollTop += Math.max(holder.clientHeight, 120);
+    holder.dispatchEvent(new Event("scroll"));
+    await delay(70);
+    await waitForDomUpdate();
+    harvestDropdownOptions(selectRoot, dropdown, seen, results);
+    if (results.length === lastCount) stagnant += 1;
+    else {
+      stagnant = 0;
+      lastCount = results.length;
+    }
+  }
+  holder.scrollTop = 0;
+  return results;
+};
+
 export const openAndScanDayforceHcmComboboxOptions = async (
   selectRoot: HTMLElement,
 ): Promise<string[]> => {
@@ -525,17 +589,7 @@ export const openAndScanDayforceHcmComboboxOptions = async (
   const opened = await openAntSelect(selectRoot);
   if (!opened) return [];
 
-  let dropdown =
-    getDayforceHcmListbox(selectRoot) ?? (await waitForAntDropdown(1200));
-  let options = dropdown ? collectOptionsFromDropdown(dropdown) : [];
-
-  if (options.length === 0) {
-    await delay(250);
-    await waitForDomUpdate();
-    dropdown = getDayforceHcmListbox(selectRoot) ?? getVisibleAntDropdown();
-    options = dropdown ? collectOptionsFromDropdown(dropdown) : [];
-  }
-
+  const options = await collectOptionsFromOpenDropdown(selectRoot);
   await closeAntSelect();
   return options;
 };
@@ -560,11 +614,34 @@ const educationFormHas = (testId: string): boolean =>
     `${EDUCATION_RECORD_SELECTOR} [test-id="${testId}"]`,
   );
 
-const scanEducationCountryOptions = async (): Promise<string[]> => {
-  const input = document.querySelector<HTMLInputElement>(
-    `${EDUCATION_RECORD_SELECTOR} [id$='_countryCode'], [id^="jobPostingApplication_educationHistory_"][id$="_countryCode"]`,
+const findEducationCountrySelectRoot = (
+  candidates: DayforceHcmCandidateField[] = [],
+): HTMLElement | null => {
+  const fromCandidates = candidates.find(
+    (field) =>
+      field.kind === "combobox" &&
+      !!field.selectRoot &&
+      /^education\s*\d+\s*-\s*country$/i.test(field.label.trim()),
   );
-  const root = input ? getDayforceHcmAntSelectRoot(input) : null;
+  if (fromCandidates?.selectRoot) return fromCandidates.selectRoot;
+
+  const input =
+    document.querySelector<HTMLInputElement>(
+      'input[id^="jobPostingApplication_educationHistory_"][id$="_countryCode"]',
+    ) ||
+    document.querySelector<HTMLInputElement>(
+      'form[test-id="educationhistory-record"] input[id$="_countryCode"]',
+    ) ||
+    document.querySelector<HTMLInputElement>(
+      'form[id^="educationHistory-"] input[id$="_countryCode"]',
+    );
+  return input ? getDayforceHcmAntSelectRoot(input) : null;
+};
+
+const scanEducationCountryOptions = async (
+  candidates: DayforceHcmCandidateField[] = [],
+): Promise<string[]> => {
+  const root = findEducationCountrySelectRoot(candidates);
   if (!root) return [];
   return openAndScanDayforceHcmComboboxOptions(root).catch(() => []);
 };
@@ -575,9 +652,9 @@ const scanEducationCountryOptions = async (): Promise<string[]> => {
  * Country is a searchable Ant Select (same as Personal Information).
  * State/Province is omitted — it stays disabled until Country is selected.
  */
-const buildDayforceHcmEducationSchema = async (): Promise<
-  AiNestedFieldSchema[]
-> => {
+const buildDayforceHcmEducationSchema = async (
+  candidates: DayforceHcmCandidateField[] = [],
+): Promise<AiNestedFieldSchema[]> => {
   const fields: AiNestedFieldSchema[] = [];
   const first =
     document.querySelector<HTMLElement>(EDUCATION_RECORD_SELECTOR) ??
@@ -617,8 +694,11 @@ const buildDayforceHcmEducationSchema = async (): Promise<
   if (educationFormHas("education-history-schoolname-text-input")) {
     fields.push({ type: "text", label: "School", required: true });
   }
-  if (first.querySelector("[id$='_countryCode'], [test-id='country-selector']")) {
-    const countryOptions = await scanEducationCountryOptions();
+  if (
+    first.querySelector("[id$='_countryCode'], [test-id='country-selector']") ||
+    findEducationCountrySelectRoot(candidates)
+  ) {
+    const countryOptions = await scanEducationCountryOptions(candidates);
     fields.push({
       type: "search",
       label: "Country",
@@ -798,7 +878,7 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
       required: true,
       type: "education",
       count: resolveEducationCount(options.applicantData),
-      options: await buildDayforceHcmEducationSchema(),
+      options: await buildDayforceHcmEducationSchema(candidates),
     });
   }
 
