@@ -86,7 +86,9 @@ export const getDayforceHcmAntSelectRoot = (
 ): HTMLElement | null =>
   (element.closest(".ant-select") as HTMLElement | null) ?? null;
 
-const getComboboxInput = (selectRoot: HTMLElement): HTMLInputElement | null =>
+export const getDayforceHcmComboboxInput = (
+  selectRoot: HTMLElement,
+): HTMLInputElement | null =>
   selectRoot.querySelector<HTMLInputElement>(
     "input.ant-select-selection-search-input, input[role='combobox']",
   );
@@ -94,7 +96,7 @@ const getComboboxInput = (selectRoot: HTMLElement): HTMLInputElement | null =>
 const isAntSelectDisabled = (selectRoot: HTMLElement): boolean =>
   selectRoot.classList.contains("ant-select-disabled") ||
   selectRoot.getAttribute("aria-disabled") === "true" ||
-  !!getComboboxInput(selectRoot)?.disabled;
+  !!getDayforceHcmComboboxInput(selectRoot)?.disabled;
 
 const getAntSelectDisplayValue = (selectRoot: HTMLElement): string => {
   const item = selectRoot.querySelector<HTMLElement>(
@@ -103,7 +105,7 @@ const getAntSelectDisplayValue = (selectRoot: HTMLElement): string => {
   if (item?.textContent) {
     return cleanLabelText(item.textContent);
   }
-  const input = getComboboxInput(selectRoot);
+  const input = getDayforceHcmComboboxInput(selectRoot);
   return cleanLabelText(input?.value ?? "");
 };
 
@@ -120,17 +122,21 @@ const getFormItemLabelText = (formItem: HTMLElement | null): string => {
   );
 };
 
-const isPhoneCountryCombobox = (selectRoot: HTMLElement): boolean => {
+export const isDayforceHcmPhoneCountryCombobox = (
+  selectRoot: HTMLElement,
+): boolean => {
+  const testId = selectRoot.getAttribute("test-id") || "";
+  if (/phone-dropdown/i.test(testId)) return true;
   const aria =
     selectRoot.getAttribute("aria-label") ||
-    getComboboxInput(selectRoot)?.getAttribute("aria-label") ||
+    getDayforceHcmComboboxInput(selectRoot)?.getAttribute("aria-label") ||
     "";
   return /country dialing code|dialing code|country code/i.test(aria);
 };
 
 export const getDayforceHcmFieldLabel = (element: HTMLElement): string => {
   const selectRoot = getDayforceHcmAntSelectRoot(element);
-  if (selectRoot && isPhoneCountryCombobox(selectRoot)) {
+  if (selectRoot && isDayforceHcmPhoneCountryCombobox(selectRoot)) {
     const parentLabel = getFormItemLabelText(getFormItem(selectRoot));
     if (parentLabel) return `${parentLabel} Country Code`;
     return "Phone Country Code";
@@ -229,7 +235,11 @@ const isVisibleTextControl = (element: HTMLElement): boolean => {
 
 const isVisibleSelectRoot = (selectRoot: HTMLElement): boolean => {
   if (isInsideExtension(selectRoot)) return false;
-  if (selectRoot.closest("[aria-hidden='true']")) return false;
+  if (selectRoot.getAttribute("aria-hidden") === "true") return false;
+  // Compact phone-code selects are easy to miss with rect/aria-hidden checks.
+  if (isDayforceHcmPhoneCountryCombobox(selectRoot)) {
+    return selectRoot.isConnected;
+  }
   return isDisplayVisible(selectRoot);
 };
 
@@ -244,9 +254,33 @@ const getVisibleAntDropdown = (): HTMLElement | null => {
       return false;
     }
     const rect = node.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
+    return rect.width > 0 || rect.height > 0;
   });
   return dropdowns[dropdowns.length - 1] ?? null;
+};
+
+/** Resolve the open Ant / rc-virtual-list listbox for this select. */
+export const getDayforceHcmListbox = (
+  selectRoot: HTMLElement,
+): HTMLElement | null => {
+  const input = getDayforceHcmComboboxInput(selectRoot);
+  const listId =
+    input?.getAttribute("aria-controls") || input?.getAttribute("aria-owns");
+  if (listId) {
+    const list = document.getElementById(listId);
+    if (list?.querySelector('[role="option"], .ant-select-item-option')) {
+      return list;
+    }
+  }
+
+  const virtualInner = document.querySelector<HTMLElement>(
+    ".ant-select-dropdown:not(.ant-select-dropdown-hidden) .rc-virtual-list-holder-inner[role='listbox'], .rc-virtual-list-holder-inner[role='listbox']",
+  );
+  if (virtualInner?.querySelector('[role="option"]')) {
+    return virtualInner;
+  }
+
+  return getVisibleAntDropdown();
 };
 
 const collectOptionsFromDropdown = (dropdown: HTMLElement): string[] => {
@@ -302,13 +336,20 @@ const openAntSelect = async (selectRoot: HTMLElement): Promise<boolean> => {
     }),
   );
   selector.click();
+
+  const input = getDayforceHcmComboboxInput(selectRoot);
+  if (input && !input.readOnly) {
+    input.focus();
+    input.click();
+  }
+
   await waitForDomUpdate();
-  await delay(120);
+  await delay(160);
 
   return (
     selectRoot.classList.contains("ant-select-open") ||
-    getComboboxInput(selectRoot)?.getAttribute("aria-expanded") === "true" ||
-    getVisibleAntDropdown() != null
+    input?.getAttribute("aria-expanded") === "true" ||
+    getDayforceHcmListbox(selectRoot) != null
   );
 };
 
@@ -350,13 +391,14 @@ export const openAndScanDayforceHcmComboboxOptions = async (
   const opened = await openAntSelect(selectRoot);
   if (!opened) return [];
 
-  let dropdown = await waitForAntDropdown(900);
+  let dropdown =
+    getDayforceHcmListbox(selectRoot) ?? (await waitForAntDropdown(1200));
   let options = dropdown ? collectOptionsFromDropdown(dropdown) : [];
 
   if (options.length === 0) {
-    await delay(200);
+    await delay(250);
     await waitForDomUpdate();
-    dropdown = getVisibleAntDropdown();
+    dropdown = getDayforceHcmListbox(selectRoot) ?? getVisibleAntDropdown();
     options = dropdown ? collectOptionsFromDropdown(dropdown) : [];
   }
 
@@ -397,20 +439,35 @@ export const collectDayforceHcmCandidateFields =
       results.push(field);
     };
 
+    const addSelect = (selectRoot: HTMLElement): void => {
+      if (!isVisibleSelectRoot(selectRoot)) return;
+      const input = getDayforceHcmComboboxInput(selectRoot);
+      if (!input) return;
+      add({
+        element: input,
+        selectRoot,
+        label: getDayforceHcmFieldLabel(input),
+        required: isDayforceHcmRequiredField(input),
+        kind: "combobox",
+      });
+    };
+
+    // Compact "Country dialing code" selects (home/mobile) — collect first.
+    document
+      .querySelectorAll<HTMLElement>(
+        '.ant-select[aria-label="Country dialing code"], [test-id$="-phone-dropdown"], input[aria-label="Country dialing code"]',
+      )
+      .forEach((el) => {
+        const root = el.classList.contains("ant-select")
+          ? el
+          : getDayforceHcmAntSelectRoot(el);
+        if (root) addSelect(root);
+      });
+
     document
       .querySelectorAll<HTMLElement>(".ant-select")
       .forEach((selectRoot) => {
-        if (!isVisibleSelectRoot(selectRoot)) return;
-        const input = getComboboxInput(selectRoot);
-        if (!input) return;
-
-        add({
-          element: input,
-          selectRoot,
-          label: getDayforceHcmFieldLabel(input),
-          required: isDayforceHcmRequiredField(input),
-          kind: "combobox",
-        });
+        addSelect(selectRoot);
       });
 
     document
@@ -482,7 +539,9 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
     }
 
     const comboboxOptions = candidate.selectRoot
-      ? await openAndScanDayforceHcmComboboxOptions(candidate.selectRoot)
+      ? await openAndScanDayforceHcmComboboxOptions(candidate.selectRoot).catch(
+          () => [] as string[],
+        )
       : [];
     elements.push({
       label: candidate.label,

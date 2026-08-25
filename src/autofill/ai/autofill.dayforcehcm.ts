@@ -3,7 +3,10 @@ import {
   collectDayforceHcmCandidateFields,
   DayforceHcmCandidateField,
   getDayforceHcmAntSelectRoot,
+  getDayforceHcmComboboxInput,
+  getDayforceHcmListbox,
   isDayforceHcmFieldFilled,
+  isDayforceHcmPhoneCountryCombobox,
 } from "./scan.dayforcehcm";
 
 export interface DayforceHcmAiAnswer {
@@ -277,14 +280,142 @@ const matchOption = (answer: string, options: string[]): string | null => {
   return null;
 };
 
+const stripFlagEmoji = (text: string): string =>
+  text
+    .replace(/[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const parseDialAndCountry = (
+  text: string,
+): { dial: string; name: string; raw: string } => {
+  const raw = stripFlagEmoji(text).toLowerCase();
+  const match = raw.match(/^\+?(\d+)\s*(.*)$/);
+  return {
+    raw,
+    dial: match?.[1] ?? "",
+    name: (match?.[2] ?? raw).trim(),
+  };
+};
+
+/**
+ * Match answers like "United States", "+1", "US", "🇺🇸 +1 United States of America"
+ * to Dayforce options like "🇺🇸 +1 United States of America".
+ */
+const matchPhoneCountryOption = (
+  answer: string,
+  options: string[],
+): string | null => {
+  if (!isUsableDayforceHcmAnswer(answer) || options.length === 0) return null;
+
+  const parsedAnswer = parseDialAndCountry(answer);
+  const aliases: Record<string, string> = {
+    us: "united states",
+    usa: "united states",
+    uk: "united kingdom",
+    gb: "united kingdom",
+  };
+  const answerName =
+    aliases[parsedAnswer.name.replace(/\./g, "")] || parsedAnswer.name;
+
+  let best: string | null = null;
+  let bestScore = 0;
+
+  for (const option of options) {
+    const parsedOption = parseDialAndCountry(option);
+    let score = 0;
+
+    if (parsedOption.raw === parsedAnswer.raw) score = 100;
+    if (
+      answerName &&
+      parsedOption.name === answerName &&
+      answerName.length >= 2
+    ) {
+      score = Math.max(score, 95);
+    }
+    if (
+      answerName &&
+      answerName.length >= 4 &&
+      parsedOption.name.includes(answerName)
+    ) {
+      score = Math.max(score, 88);
+    }
+    if (
+      answerName &&
+      parsedOption.name.length >= 4 &&
+      answerName.includes(parsedOption.name)
+    ) {
+      score = Math.max(score, 82);
+    }
+    if (
+      parsedAnswer.dial &&
+      parsedOption.dial === parsedAnswer.dial &&
+      answerName &&
+      parsedOption.name.includes(answerName)
+    ) {
+      score = Math.max(score, 90);
+    }
+    if (
+      parsedAnswer.dial &&
+      !answerName &&
+      parsedOption.dial === parsedAnswer.dial &&
+      /united states/.test(parsedOption.name)
+    ) {
+      score = Math.max(score, 75);
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = option;
+    }
+  }
+
+  if (best && bestScore >= 75) return best;
+  return matchOption(answer, options);
+};
+
+const getPhoneCountrySearchQuery = (answer: string): string => {
+  const cleaned = stripFlagEmoji(answer);
+  const match = cleaned.match(/^\+?\d+\s+(.+)$/);
+  if (match?.[1]) return match[1].trim();
+  const aliases: Record<string, string> = {
+    us: "United States",
+    usa: "United States",
+    uk: "United Kingdom",
+  };
+  const lower = cleaned.toLowerCase().replace(/\./g, "");
+  return aliases[lower] || cleaned;
+};
+
 const findAnswerForLabel = (
   label: string,
   answers: DayforceHcmAiAnswer[],
 ): DayforceHcmAiAnswer | undefined => {
   const exact = answers.find((item) => item.label === label);
   if (exact) return exact;
+
   const normalized = normalizeLabel(label);
-  return answers.find((item) => normalizeLabel(item.label) === normalized);
+  const byNorm = answers.find(
+    (item) => normalizeLabel(item.label) === normalized,
+  );
+  if (byNorm) return byNorm;
+
+  const isCountryCodeLabel =
+    /countrycode|dialingcode|dialing/.test(normalized) ||
+    /country code|dialing code/i.test(label);
+  if (!isCountryCodeLabel) return undefined;
+
+  return answers.find((item) => {
+    const n = normalizeLabel(item.label);
+    if (!n) return false;
+    if (normalized.includes("home") && n.includes("home")) return true;
+    if (normalized.includes("mobile") && n.includes("mobile")) return true;
+    return (
+      n.includes("countrycode") ||
+      n.includes("dialing") ||
+      n === "phonecountrycode"
+    );
+  });
 };
 
 const waitForDomUpdate = (): Promise<void> =>
@@ -359,10 +490,13 @@ const getVisibleAntDropdown = (): HTMLElement | null => {
     const style = window.getComputedStyle(node);
     if (style.display === "none" || style.visibility === "hidden") return false;
     const rect = node.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
+    return rect.width > 0 || rect.height > 0;
   });
   return dropdowns[dropdowns.length - 1] ?? null;
 };
+
+const getOpenListbox = (selectRoot: HTMLElement): HTMLElement | null =>
+  getDayforceHcmListbox(selectRoot) ?? getVisibleAntDropdown();
 
 const scanDropdownOptions = (
   dropdown: HTMLElement,
@@ -416,12 +550,19 @@ const openAntSelect = async (selectRoot: HTMLElement): Promise<boolean> => {
     }),
   );
   selector.click();
+
+  const input = getDayforceHcmComboboxInput(selectRoot);
+  if (input && !input.readOnly) {
+    input.focus();
+    input.click();
+  }
+
   await waitForDomUpdate();
-  await delay(100);
+  await delay(160);
 
   return (
     selectRoot.classList.contains("ant-select-open") ||
-    getVisibleAntDropdown() != null
+    getOpenListbox(selectRoot) != null
   );
 };
 
@@ -474,29 +615,33 @@ const fillDayforceHcmCombobox = async (
     if (!enabled) return false;
   }
 
-  const input = selectRoot.querySelector<HTMLInputElement>(
-    "input.ant-select-selection-search-input, input[role='combobox']",
-  );
+  const input = getDayforceHcmComboboxInput(selectRoot);
   if (!input) return false;
 
   const opened = await openAntSelect(selectRoot);
   if (!opened) return false;
 
+  const isPhoneCountry = isDayforceHcmPhoneCountryCombobox(selectRoot);
   const searchable =
     selectRoot.classList.contains("ant-select-show-search") && !input.readOnly;
+  const searchQuery = isPhoneCountry
+    ? getPhoneCountrySearchQuery(answer)
+    : answer;
+
   if (searchable) {
     input.focus();
     setNativeInputValue(input, "");
-    setNativeInputValue(input, answer);
-    await delay(220);
+    await delay(60);
+    setNativeInputValue(input, searchQuery);
+    await delay(280);
     await waitForDomUpdate();
   }
 
-  let dropdown = getVisibleAntDropdown();
+  let dropdown = getOpenListbox(selectRoot);
   let scanned = dropdown ? scanDropdownOptions(dropdown) : [];
   if (scanned.length === 0) {
-    await delay(250);
-    dropdown = getVisibleAntDropdown();
+    await delay(280);
+    dropdown = getOpenListbox(selectRoot);
     scanned = dropdown ? scanDropdownOptions(dropdown) : [];
   }
 
@@ -505,10 +650,10 @@ const fillDayforceHcmCombobox = async (
     return false;
   }
 
-  const matchedLabel = matchOption(
-    answer,
-    scanned.map((opt) => opt.label),
-  );
+  const labels = scanned.map((opt) => opt.label);
+  const matchedLabel = isPhoneCountry
+    ? matchPhoneCountryOption(answer, labels)
+    : matchOption(answer, labels);
   if (!matchedLabel) {
     await closeAntSelect();
     return false;
