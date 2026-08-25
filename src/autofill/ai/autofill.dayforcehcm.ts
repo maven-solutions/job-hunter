@@ -106,15 +106,14 @@ const extractRawAnswer = (item: any): unknown => {
   return undefined;
 };
 
-const addLabelKey = (set: Set<string>, label: string): void => {
-  const cleaned = cleanLabelText(label);
-  if (!cleaned) return;
-  const n = normalizeLabel(cleaned);
-  if (n) set.add(n);
-  const compact = cleaned
+const compactLabelKey = (label: string): string =>
+  cleanLabelText(label)
     .toLowerCase()
     .replace(/['’`]/g, "")
     .replace(/[^a-z0-9]+/g, "");
+
+const addLabelKey = (set: Set<string>, label: string): void => {
+  const compact = compactLabelKey(label);
   if (compact) set.add(compact);
 };
 
@@ -123,12 +122,7 @@ const isFieldMarkedEmpty = (
   emptyLabelKeys: Set<string>,
 ): boolean => {
   if (emptyLabelKeys.size === 0) return false;
-  const n = normalizeLabel(label);
-  if (n && emptyLabelKeys.has(n)) return true;
-  const compact = cleanLabelText(label)
-    .toLowerCase()
-    .replace(/['’`]/g, "")
-    .replace(/[^a-z0-9]+/g, "");
+  const compact = compactLabelKey(label);
   return !!(compact && emptyLabelKeys.has(compact));
 };
 
@@ -394,22 +388,30 @@ const findAnswerForLabel = (
   const exact = answers.find((item) => item.label === label);
   if (exact) return exact;
 
+  const compact = compactLabelKey(label);
+  const byCompact = answers.find(
+    (item) => compactLabelKey(item.label) === compact,
+  );
+  if (byCompact) return byCompact;
+
   const normalized = normalizeLabel(label);
-  const byNorm = answers.find(
+  const normMatches = answers.filter(
     (item) => normalizeLabel(item.label) === normalized,
   );
-  if (byNorm) return byNorm;
+  if (normMatches.length === 1) return normMatches[0];
 
   const isCountryCodeLabel =
-    /countrycode|dialingcode|dialing/.test(normalized) ||
+    /countrycode|dialingcode|dialing/.test(normalized || "") ||
     /country code|dialing code/i.test(label);
   if (!isCountryCodeLabel) return undefined;
 
   return answers.find((item) => {
     const n = normalizeLabel(item.label);
     if (!n) return false;
-    if (normalized.includes("home") && n.includes("home")) return true;
-    if (normalized.includes("mobile") && n.includes("mobile")) return true;
+    if ((normalized || "").includes("home") && n.includes("home")) return true;
+    if ((normalized || "").includes("mobile") && n.includes("mobile")) {
+      return true;
+    }
     return (
       n.includes("countrycode") ||
       n.includes("dialing") ||
@@ -457,9 +459,37 @@ const setNativeInputValue = (
       ? HTMLTextAreaElement.prototype
       : HTMLInputElement.prototype;
   const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
+  const tracker = (element as HTMLInputElement & {
+    _valueTracker?: { setValue: (v: string) => void };
+  })._valueTracker;
+  tracker?.setValue("");
   setter?.call(element, value);
-  element.dispatchEvent(new Event("input", { bubbles: true }));
+  element.dispatchEvent(
+    new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "insertFromPaste",
+      data: value,
+    }),
+  );
   element.dispatchEvent(new Event("change", { bubbles: true }));
+};
+
+const fillTextLikeField = async (
+  element: HTMLInputElement | HTMLTextAreaElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableDayforceHcmAnswer(answer)) return false;
+  const max = element.maxLength;
+  const value =
+    max > 0 && answer.length > max ? answer.slice(0, max) : answer;
+  element.scrollIntoView({ block: "center", inline: "nearest" });
+  element.focus();
+  element.click();
+  setNativeInputValue(element, value);
+  await handleValueChanges(element);
+  element.blur();
+  return (element.value ?? "").trim().length > 0;
 };
 
 const clickOptionElement = (optionEl: HTMLElement): void => {
@@ -564,17 +594,6 @@ const openAntSelect = async (selectRoot: HTMLElement): Promise<boolean> => {
     selectRoot.classList.contains("ant-select-open") ||
     getOpenListbox(selectRoot) != null
   );
-};
-
-const fillTextLikeField = async (
-  element: HTMLInputElement | HTMLTextAreaElement,
-  answer: string,
-): Promise<boolean> => {
-  if (!isUsableDayforceHcmAnswer(answer)) return false;
-  element.focus();
-  setNativeInputValue(element, answer);
-  await handleValueChanges(element);
-  return isUsableDayforceHcmAnswer(element.value);
 };
 
 const fillNativeSelect = async (
@@ -782,6 +801,42 @@ export const autofillDayforceHcmWithAi = async (
     }
 
     await delay(160);
+  }
+
+  // Known Ant Design ids — fill if still empty (e.g. Address Line 1 skipped
+  // because "Address Line 2" emptied the digit-stripped label key).
+  const knownTextIds: Array<{ id: string; keys: string[] }> = [
+    {
+      id: "jobPostingApplication_personalInfo_address1",
+      keys: ["addressline1", "address1"],
+    },
+    {
+      id: "jobPostingApplication_personalInfo_address2",
+      keys: ["addressline2", "address2"],
+    },
+  ];
+
+  for (const known of knownTextIds) {
+    const input = document.getElementById(known.id);
+    if (
+      !(input instanceof HTMLInputElement) &&
+      !(input instanceof HTMLTextAreaElement)
+    ) {
+      continue;
+    }
+    if ((input.value ?? "").trim()) continue;
+
+    const match = answers.find((item) =>
+      known.keys.includes(compactLabelKey(item.label)),
+    );
+    if (!isUsableDayforceHcmAnswer(match?.answer)) continue;
+
+    try {
+      const ok = await fillTextLikeField(input, match!.answer);
+      if (ok) filled += 1;
+    } catch {
+      failed += 1;
+    }
   }
 
   return {
