@@ -126,6 +126,21 @@ export const withDayforceHcmSectionLabel = (
 export const isRepeatableEducationFieldLabel = (label: string): boolean =>
   /^education\s*\d+\s*-/i.test(label.trim());
 
+/** Education State/Province stays disabled until Country is set — do not scan or fill it. */
+export const isDayforceHcmEducationStateField = (
+  element: HTMLElement,
+  label?: string,
+): boolean => {
+  if (getDayforceHcmEducationIndex(element) == null) return false;
+  const id = element.id || "";
+  if (/educationHistory_\d+_stateCode/i.test(id)) return true;
+  if (element.closest("[test-id='state-province-selector']")) {
+    return isInsideDayforceHcmEducation(element);
+  }
+  const text = label ?? "";
+  return /state|province/i.test(text);
+};
+
 /**
  * Click "Add Education History" until `needed` record forms exist.
  * Mirrors Workday ensureWorkdayEntryPanels for education.
@@ -545,11 +560,24 @@ const educationFormHas = (testId: string): boolean =>
     `${EDUCATION_RECORD_SELECTOR} [test-id="${testId}"]`,
   );
 
+const scanEducationCountryOptions = async (): Promise<string[]> => {
+  const input = document.querySelector<HTMLInputElement>(
+    `${EDUCATION_RECORD_SELECTOR} [id$='_countryCode'], [id^="jobPostingApplication_educationHistory_"][id$="_countryCode"]`,
+  );
+  const root = input ? getDayforceHcmAntSelectRoot(input) : null;
+  if (!root) return [];
+  return openAndScanDayforceHcmComboboxOptions(root).catch(() => []);
+};
+
 /**
  * Nested Education schema for the AI API (Workday-style group).
  * Labels match Dayforce form titles so fill can prefix "Education N -".
+ * Country is a searchable Ant Select (same as Personal Information).
+ * State/Province is omitted — it stays disabled until Country is selected.
  */
-const buildDayforceHcmEducationSchema = (): AiNestedFieldSchema[] => {
+const buildDayforceHcmEducationSchema = async (): Promise<
+  AiNestedFieldSchema[]
+> => {
   const fields: AiNestedFieldSchema[] = [];
   const first =
     document.querySelector<HTMLElement>(EDUCATION_RECORD_SELECTOR) ??
@@ -590,14 +618,12 @@ const buildDayforceHcmEducationSchema = (): AiNestedFieldSchema[] => {
     fields.push({ type: "text", label: "School", required: true });
   }
   if (first.querySelector("[id$='_countryCode'], [test-id='country-selector']")) {
-    fields.push({ type: "search", label: "Country" });
-  }
-  if (
-    first.querySelector(
-      "[id$='_stateCode'], [test-id='state-province-selector']",
-    )
-  ) {
-    fields.push({ type: "search", label: "State/Province" });
+    const countryOptions = await scanEducationCountryOptions();
+    fields.push({
+      type: "search",
+      label: "Country",
+      ...(countryOptions.length > 0 ? { options: countryOptions } : {}),
+    });
   }
   if (educationFormHas("education-history-city-text-input")) {
     fields.push({ type: "text", label: "City" });
@@ -614,7 +640,6 @@ const buildDayforceHcmEducationSchema = (): AiNestedFieldSchema[] => {
       { type: "date", label: "End Date", description: "YYYY-MM-DD" },
       { type: "text", label: "School", required: true },
       { type: "search", label: "Country" },
-      { type: "search", label: "State/Province" },
       { type: "text", label: "City" },
       { type: "text", label: "G.P.A." },
     ];
@@ -654,10 +679,12 @@ export const collectDayforceHcmCandidateFields =
       if (!isVisibleSelectRoot(selectRoot)) return;
       const input = getDayforceHcmComboboxInput(selectRoot);
       if (!input) return;
+      const label = getDayforceHcmFieldLabel(input);
+      if (isDayforceHcmEducationStateField(input, label)) return;
       add({
         element: input,
         selectRoot,
-        label: getDayforceHcmFieldLabel(input),
+        label,
         required: isDayforceHcmRequiredField(input),
         kind: "combobox",
       });
@@ -771,7 +798,7 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
       required: true,
       type: "education",
       count: resolveEducationCount(options.applicantData),
-      options: buildDayforceHcmEducationSchema(),
+      options: await buildDayforceHcmEducationSchema(),
     });
   }
 

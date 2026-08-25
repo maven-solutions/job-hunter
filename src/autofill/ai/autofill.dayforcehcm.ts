@@ -7,6 +7,7 @@ import {
   getDayforceHcmComboboxInput,
   getDayforceHcmEducationIndex,
   getDayforceHcmListbox,
+  isDayforceHcmEducationStateField,
   isDayforceHcmFieldFilled,
   isDayforceHcmPhoneCountryCombobox,
 } from "./scan.dayforcehcm";
@@ -168,10 +169,6 @@ const EDUCATION_FIELD_MAP: Record<string, string> = {
   country: "Country",
   countrycode: "Country",
   countryregion: "Country",
-  state: "State/Province",
-  statecode: "State/Province",
-  stateprovince: "State/Province",
-  province: "State/Province",
   city: "City",
   notcompleted: "Not Completed",
   incomplete: "Not Completed",
@@ -187,7 +184,6 @@ const EDUCATION_LABEL_ALIASES: string[][] = [
   ["startdate", "from", "fromyyyy", "effectivestart", "start", "startyear"],
   ["enddate", "to", "toyyyy", "effectiveend", "end", "endyear"],
   ["country", "countrycode", "countryregion"],
-  ["stateprovince", "state", "statecode", "province"],
   ["city"],
   ["notcompleted", "incomplete", "educationnotcompleted"],
 ];
@@ -344,6 +340,7 @@ const flattenEducationEntry = (
       const fieldLabel = resolveEducationFieldLabel(
         String(nested.name ?? nested.label ?? key),
       );
+      if (/state|province/i.test(fieldLabel)) continue;
       if (seen.has(fieldLabel)) continue;
       seen.add(fieldLabel);
       out.push({ fieldLabel, value: nested.answer ?? nested.value });
@@ -351,6 +348,7 @@ const flattenEducationEntry = (
     }
 
     const fieldLabel = resolveEducationFieldLabel(key);
+    if (/state|province/i.test(fieldLabel)) continue;
     if (seen.has(fieldLabel)) continue;
     seen.add(fieldLabel);
     out.push({ fieldLabel, value });
@@ -1115,10 +1113,9 @@ const educationFieldSortKey = (label: string): number => {
     else if (/end date|^to /.test(bare) || /^to$/.test(bare.trim()))
       fieldOrder = 6;
     else if (/country/.test(bare) && !/code/.test(bare)) fieldOrder = 7;
-    else if (/state|province/.test(bare)) fieldOrder = 8;
-    else if (/^city/.test(bare)) fieldOrder = 9;
-    else if (/g\.?p\.?a|overall result/.test(bare)) fieldOrder = 10;
-    else if (/not completed/.test(bare)) fieldOrder = 11;
+    else if (/^city/.test(bare)) fieldOrder = 8;
+    else if (/g\.?p\.?a|overall result/.test(bare)) fieldOrder = 9;
+    else if (/not completed/.test(bare)) fieldOrder = 10;
     return 5000 + idx * 20 + fieldOrder;
   }
 
@@ -1185,6 +1182,11 @@ export const autofillDayforceHcmWithAi = async (
     }
     if (educationIndex != null) lastEducationIndex = educationIndex;
 
+    if (isDayforceHcmEducationStateField(field.element, field.label)) {
+      skipped += 1;
+      continue;
+    }
+
     if (isDayforceHcmFieldFilled(field)) {
       skipped += 1;
       continue;
@@ -1214,7 +1216,10 @@ export const autofillDayforceHcmWithAi = async (
       const ok = await fillField(field, answer as string);
       if (ok) {
         filled += 1;
-        if (isCountryField(field.label)) {
+        if (
+          isCountryField(field.label) &&
+          getDayforceHcmEducationIndex(field.element) == null
+        ) {
           await waitForStateSelectEnabled(field.element);
         }
       } else {
