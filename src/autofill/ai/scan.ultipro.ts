@@ -1,13 +1,17 @@
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
+import { Applicant } from "../data";
+import { delay } from "../helper";
+import { AiNestedFieldSchema } from "./types";
 
-export type ApiElementType = "text" | "search" | "date";
+export type ApiElementType = string;
 
 export interface ApiFormElement {
   label: string;
   required: boolean;
   type: ApiElementType;
-  options?: string[];
+  options?: string[] | AiNestedFieldSchema[];
   description?: string;
+  count?: number;
 }
 
 export interface UltiproScanToMakeApiPayload {
@@ -27,6 +31,7 @@ export interface UltiproScanToMakeApiOptions {
   userId?: string;
   fromAgent?: boolean;
   parser?: string;
+  applicantData?: Applicant | null;
 }
 
 export type UltiproFieldKind =
@@ -65,6 +70,7 @@ const APPLY_SECTION_SELECTOR = [
   "#ApplicationQuestions",
   '[id^="Apply"][id$="Section"]',
   "[data-automation$='-panel']",
+  '[data-automation="education-section"]',
   "collapsible-panel",
 ].join(", ");
 
@@ -76,7 +82,6 @@ const SKIPPED_PANEL_NAMES = new Set([
   "skills",
   "work experience",
   "experience",
-  "education",
 ]);
 
 const SKIPPED_SECTION_SELECTOR = [
@@ -84,9 +89,22 @@ const SKIPPED_SECTION_SELECTOR = [
   "[data-automation='skill']",
   "[data-automation='proficiency-dropdown']",
   "[data-automation='work-experience-panel']",
-  "[data-automation='education-panel']",
   "[id^='NewWorkExperience_']",
-  "[id^='NewEducation_']",
+].join(", ");
+
+const EDUCATION_SECTION_SELECTOR = [
+  '[data-automation="education-section"]',
+  '[data-automation="education-panel"]',
+].join(", ");
+
+const EDUCATION_ITEM_SELECTOR =
+  '[data-automation="education-section"] [data-automation="panel-list-item"], [data-automation="education-panel"] [data-automation="panel-list-item"]';
+
+const ADD_EDUCATION_BUTTON_SELECTOR = [
+  '[data-automation="education-section"] button[data-automation="primary-action-button"]',
+  '[data-automation="education-panel"] button[data-automation="primary-action-button"]',
+  'button[aria-label="Add Education"]',
+  'button[aria-label="Add education"]',
 ].join(", ");
 
 const cleanLabelText = (text: string): string =>
@@ -108,13 +126,12 @@ const normalizePanelName = (text: string): string =>
 const isSkippedPanelName = (text: string): boolean =>
   SKIPPED_PANEL_NAMES.has(normalizePanelName(text));
 
-/** True when this node is a Skills / Work Experience / Education panel. */
+/** True when this node is a Skills / Work Experience panel. */
 export const isUltiproSkippedPanelRoot = (element: Element): boolean => {
   const automation = element.getAttribute("data-automation") || "";
   if (
     automation === "skills-panel" ||
-    automation === "work-experience-panel" ||
-    automation === "education-panel"
+    automation === "work-experience-panel"
   ) {
     return true;
   }
@@ -139,8 +156,9 @@ export const isUltiproSkippedPanelRoot = (element: Element): boolean => {
 export const isUltiproSkillsRoot = isUltiproSkippedPanelRoot;
 
 /**
- * Skills, Work Experience, and Education are parsed by UKG from the resume —
- * skip scan, payload, and fill for these sections.
+ * Skills and Work Experience are parsed by UKG from the resume —
+ * skip scan, payload, and fill for these sections. Education is filled
+ * like Workday (nested group).
  */
 export const isInsideUltiproSkippedSection = (element: Element): boolean => {
   if (element.closest(SKIPPED_SECTION_SELECTOR)) {
@@ -148,10 +166,7 @@ export const isInsideUltiproSkippedSection = (element: Element): boolean => {
   }
 
   const id = element.getAttribute("id") || "";
-  if (
-    id.startsWith("NewWorkExperience_") ||
-    id.startsWith("NewEducation_")
-  ) {
+  if (id.startsWith("NewWorkExperience_")) {
     return true;
   }
 
@@ -162,6 +177,235 @@ export const isInsideUltiproSkippedSection = (element: Element): boolean => {
   }
 
   return false;
+};
+
+export const isUltiproEducationSectionPresent = (): boolean =>
+  !!document.querySelector(EDUCATION_SECTION_SELECTOR);
+
+export const isInsideUltiproEducation = (element: Element): boolean => {
+  if (element.closest(EDUCATION_SECTION_SELECTOR)) return true;
+  const id = (element as HTMLElement).id || "";
+  return id.startsWith("NewEducation_");
+};
+
+export const countUltiproEducationRecords = (): number =>
+  document.querySelectorAll(EDUCATION_ITEM_SELECTOR).length;
+
+/** 0-based education record index, or null when the control is not in Education. */
+export const getUltiproEducationIndex = (
+  element: Element,
+): number | null => {
+  const item = element.closest<HTMLElement>(
+    '[data-automation="panel-list-item"]',
+  );
+  if (item && isInsideUltiproEducation(item)) {
+    const aria = item.getAttribute("aria-label") || "";
+    const fromAria = aria.match(/education\s*(\d+)/i);
+    if (fromAria) return Number(fromAria[1]) - 1;
+
+    const section = item.closest(EDUCATION_SECTION_SELECTOR);
+    if (section) {
+      const items = Array.from(
+        section.querySelectorAll<HTMLElement>(
+          '[data-automation="panel-list-item"]',
+        ),
+      );
+      const idx = items.indexOf(item);
+      if (idx >= 0) return idx;
+    }
+  }
+
+  const id = (element as HTMLElement).id || "";
+  const fromId = id.match(/NewEducation_[A-Za-z]+(\d+)$/i);
+  if (fromId) return Number(fromId[1]);
+
+  if (isInsideUltiproEducation(element)) return 0;
+  return null;
+};
+
+export const withUltiproEducationLabel = (
+  baseLabel: string,
+  element: Element,
+): string => {
+  const base = cleanLabelText(baseLabel);
+  if (!base) return base;
+  if (/^Education\s*\d+\s*-/i.test(base)) return base;
+  const idx = getUltiproEducationIndex(element);
+  if (idx == null) return base;
+  return `Education ${idx + 1} - ${base}`;
+};
+
+export const isRepeatableEducationFieldLabel = (label: string): boolean =>
+  /^education\s*\d+\s*-/i.test(label.trim());
+
+const expandUltiproEducationSection = async (): Promise<void> => {
+  const section = document.querySelector<HTMLElement>(
+    EDUCATION_SECTION_SELECTOR,
+  );
+  if (!section) return;
+
+  const toggle =
+    section.querySelector<HTMLElement>(
+      '[data-automation="expand-toggle"] [aria-expanded], [data-automation="expand-toggle"]',
+    ) ||
+    section.querySelector<HTMLElement>(
+      ".collapse-indicator[aria-expanded]",
+    );
+  if (!toggle) return;
+  if (toggle.getAttribute("aria-expanded") === "false") {
+    toggle.click();
+    await delay(400);
+  }
+};
+
+/**
+ * Click "Add Education" until `needed` education rows exist.
+ * Mirrors Workday ensureWorkdayEntryPanels / Dayforce education records.
+ */
+export const ensureUltiproEducationRecords = async (
+  needed: number,
+): Promise<void> => {
+  if (!isUltiproEducationSectionPresent()) return;
+  if (!needed || needed < 1) return;
+
+  await expandUltiproEducationSection();
+
+  const findAdd = (): HTMLButtonElement | null =>
+    document.querySelector<HTMLButtonElement>(ADD_EDUCATION_BUTTON_SELECTOR);
+
+  let current = countUltiproEducationRecords();
+  if (current === 0) {
+    const add = findAdd();
+    if (add) {
+      add.click();
+      await delay(600);
+      current = countUltiproEducationRecords();
+    }
+  }
+
+  let guard = 0;
+  while (current < needed && guard < 20) {
+    const add = findAdd();
+    if (!add) break;
+    add.click();
+    await delay(700);
+    const next = countUltiproEducationRecords();
+    if (next <= current) {
+      await delay(500);
+    }
+    current = countUltiproEducationRecords();
+    guard += 1;
+  }
+};
+
+/** Expand Education rows from applicant profile before scan. */
+export const prepareUltiproEducationRecords = async (
+  applicantData: Applicant | null | undefined,
+): Promise<void> => {
+  if (!isUltiproEducationSectionPresent()) return;
+  const eduCount = Array.isArray(applicantData?.education)
+    ? applicantData!.education!.length
+    : 0;
+  if (eduCount > 0) {
+    await ensureUltiproEducationRecords(eduCount);
+  }
+};
+
+const educationFormHas = (automation: string): boolean =>
+  !!document.querySelector(
+    `${EDUCATION_ITEM_SELECTOR} [data-automation="${automation}"]`,
+  );
+
+const resolveEducationCount = (
+  applicantData?: Applicant | null,
+): number => {
+  if (
+    Array.isArray(applicantData?.education) &&
+    applicantData.education.length
+  ) {
+    return Math.max(1, applicantData.education.length);
+  }
+  return Math.max(1, countUltiproEducationRecords() || 1);
+};
+
+/**
+ * Nested Education schema for the AI API (Workday-style group).
+ * Labels match UKG form titles so fill can prefix "Education N -".
+ */
+const buildUltiproEducationSchema = (): AiNestedFieldSchema[] => {
+  const fields: AiNestedFieldSchema[] = [];
+  const first =
+    document.querySelector<HTMLElement>(EDUCATION_ITEM_SELECTOR) ??
+    document.querySelector<HTMLElement>(EDUCATION_SECTION_SELECTOR);
+  if (!first) return fields;
+
+  if (educationFormHas("school-textbox")) {
+    fields.push({ type: "text", label: "School Name", required: true });
+  }
+  if (educationFormHas("degree-textbox")) {
+    fields.push({
+      type: "text",
+      label: "Level of Education / Degree",
+      required: true,
+    });
+  }
+  if (educationFormHas("major-dropdown")) {
+    const major = first.querySelector<HTMLSelectElement>(
+      '[data-automation="major-dropdown"]',
+    );
+    fields.push({
+      type: "search",
+      label: "Major",
+      ...(major ? { options: getUltiproNativeSelectOptions(major) } : {}),
+    });
+  }
+  if (educationFormHas("minor-dropdown")) {
+    const minor = first.querySelector<HTMLSelectElement>(
+      '[data-automation="minor-dropdown"]',
+    );
+    fields.push({
+      type: "search",
+      label: "Minor",
+      ...(minor ? { options: getUltiproNativeSelectOptions(minor) } : {}),
+    });
+  }
+  if (
+    educationFormHas("from-month-dropdown") ||
+    educationFormHas("from-year-textbox")
+  ) {
+    fields.push({
+      type: "date",
+      label: "From",
+      description: "MM/YYYY",
+    });
+  }
+  if (
+    educationFormHas("to-month-dropdown") ||
+    educationFormHas("to-year-textbox")
+  ) {
+    fields.push({
+      type: "date",
+      label: "To",
+      description: "MM/YYYY",
+    });
+  }
+  if (educationFormHas("description-textarea")) {
+    fields.push({ type: "text", label: "Description" });
+  }
+
+  if (fields.length === 0) {
+    return [
+      { type: "text", label: "School Name", required: true },
+      { type: "text", label: "Level of Education / Degree", required: true },
+      { type: "search", label: "Major" },
+      { type: "search", label: "Minor" },
+      { type: "date", label: "From", description: "MM/YYYY" },
+      { type: "date", label: "To", description: "MM/YYYY" },
+      { type: "text", label: "Description" },
+    ];
+  }
+
+  return fields;
 };
 
 /** @deprecated Use isInsideUltiproSkippedSection */
@@ -573,7 +817,10 @@ const collectFromRoot = (
         seenIds.add(key);
 
         const wrapper = getChoiceGroupWrapper(element);
-        const label = getChoiceGroupLabel(wrapper, element);
+        const label = withUltiproEducationLabel(
+          getChoiceGroupLabel(wrapper, element),
+          element,
+        );
         if (!label) return;
 
         results.push({
@@ -588,14 +835,20 @@ const collectFromRoot = (
       if (SKIP_INPUT_TYPES.has(type)) return;
     }
 
+    const eduIdx = getUltiproEducationIndex(element);
+    const automation = element.getAttribute("data-automation") || "";
     const id =
       element.getAttribute("id") ||
-      element.getAttribute("name") ||
-      `${results.length}`;
+      (eduIdx != null
+        ? `edu:${eduIdx}:${automation || element.getAttribute("name") || results.length}`
+        : element.getAttribute("name") || `${results.length}`);
     if (seenIds.has(id)) return;
     seenIds.add(id);
 
-    const label = getUltiproFieldLabel(element);
+    const label = withUltiproEducationLabel(
+      getUltiproFieldLabel(element),
+      element,
+    );
     if (!label) return;
 
     if (element instanceof HTMLSelectElement) {
@@ -636,7 +889,10 @@ const collectFromRoot = (
     if (seenIds.has(key)) return;
     seenIds.add(key);
 
-    const label = getUltiproFieldLabel(picker);
+    const label = withUltiproEducationLabel(
+      getUltiproFieldLabel(picker),
+      picker,
+    );
     const requiredLabel = picker
       .closest(".form-group")
       ?.querySelector("label.required, .control-label.required");
@@ -657,21 +913,51 @@ export const collectUltiproCandidateFields = (): UltiproCandidateField[] => {
     collectFromRoot(root, results, seenIds);
   });
 
+  document
+    .querySelectorAll<HTMLElement>(EDUCATION_SECTION_SELECTOR)
+    .forEach((section) => {
+      collectFromRoot(section, results, seenIds);
+    });
+
   return results;
 };
 
 /**
  * Scans UKG / Ultipro apply panels (Contact Information + Questions) and
  * builds an API payload with labels, required flags, types, and options.
+ * Education is sent as a nested Workday-style group.
  */
 export const scanUltiproHtmlToMakeApiPayload = async (
   options: UltiproScanToMakeApiOptions = {},
 ): Promise<UltiproScanToMakeApiPayload> => {
   const url = window.location.href;
+
+  if (isUltiproEducationSectionPresent()) {
+    await ensureUltiproEducationRecords(
+      resolveEducationCount(options.applicantData),
+    );
+  }
+
   const candidates = collectUltiproCandidateFields();
   const elements: ApiFormElement[] = [];
 
-  for (const candidate of candidates) {
+  if (isUltiproEducationSectionPresent()) {
+    elements.push({
+      label: "Education",
+      required: true,
+      type: "education",
+      count: resolveEducationCount(options.applicantData),
+      options: buildUltiproEducationSchema(),
+    });
+  }
+
+  const remaining = candidates.filter((field) => {
+    if (isRepeatableEducationFieldLabel(field.label)) return false;
+    if (isInsideUltiproEducation(field.element)) return false;
+    return true;
+  });
+
+  for (const candidate of remaining) {
     if (candidate.kind === "select") {
       const selectOptions = getUltiproNativeSelectOptions(
         candidate.element as HTMLSelectElement,

@@ -2,9 +2,12 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   UltiproCandidateField,
   collectUltiproCandidateFields,
+  ensureUltiproEducationRecords,
   getUltiproNativeSelectOptions,
   getUltiproRadioChoiceLabel,
+  isInsideUltiproEducation,
   isInsideUltiproSkippedSection,
+  isRepeatableEducationFieldLabel,
   isUltiproAddressField,
   isUltiproCountryField,
   isUltiproReferralDetailField,
@@ -172,6 +175,240 @@ export interface UltiproParsedFillResponse {
   emptyCount: number;
 }
 
+/** Map API education keys onto UKG Education labels. */
+const EDUCATION_FIELD_MAP: Record<string, string> = {
+  school: "School Name",
+  schooloruniversity: "School Name",
+  schoolname: "School Name",
+  university: "School Name",
+  college: "School Name",
+  degree: "Level of Education / Degree",
+  degreename: "Level of Education / Degree",
+  levelofeducation: "Level of Education / Degree",
+  levelofeducationdegree: "Level of Education / Degree",
+  fieldofstudy: "Major",
+  major: "Major",
+  majorname: "Major",
+  field: "Major",
+  minor: "Minor",
+  minorname: "Minor",
+  from: "From",
+  fromyyyy: "From",
+  frommonth: "From",
+  fromyear: "From",
+  firstyearattended: "From",
+  startyear: "From",
+  startdate: "From",
+  start: "From",
+  to: "To",
+  toyyyy: "To",
+  tomonth: "To",
+  toyear: "To",
+  toactualorexpected: "To",
+  lastyearattended: "To",
+  endyear: "To",
+  enddate: "To",
+  end: "To",
+  description: "Description",
+};
+
+const EDUCATION_LABEL_ALIASES: string[][] = [
+  ["schoolname", "school", "schooloruniversity", "university", "college"],
+  [
+    "levelofeducationdegree",
+    "degree",
+    "degreename",
+    "levelofeducation",
+  ],
+  ["major", "majorname", "fieldofstudy", "field"],
+  ["minor", "minorname"],
+  ["from", "frommonth", "fromyear", "startdate", "start", "startyear"],
+  [
+    "to",
+    "tomonth",
+    "toyear",
+    "enddate",
+    "end",
+    "endyear",
+    "toactualorexpected",
+  ],
+  ["description"],
+];
+
+const parseEducationPrefixedLabel = (
+  label: string,
+): { index: number; field: string } | null => {
+  const m = cleanLabelText(label).match(/^Education\s*(\d+)\s*-\s*(.+)$/i);
+  if (!m) return null;
+  return { index: Number(m[1]), field: compactLabel(m[2]) };
+};
+
+const educationFieldsAliasMatch = (a: string, b: string): boolean => {
+  for (const aliases of EDUCATION_LABEL_ALIASES) {
+    if (aliases.includes(a) && aliases.includes(b)) return true;
+  }
+  return false;
+};
+
+const GROUP_META_KEYS = new Set([
+  "label",
+  "type",
+  "required",
+  "options",
+  "count",
+  "description",
+]);
+
+const coerceGroupEntryRecord = (
+  item: unknown,
+): Record<string, unknown> | null => {
+  if (item == null) return null;
+
+  if (Array.isArray(item)) {
+    const record: Record<string, unknown> = {};
+    for (const field of item) {
+      if (field == null || typeof field !== "object") continue;
+      const f = field as Record<string, unknown>;
+      const fieldName = String(f.name ?? f.label ?? f.field ?? "").trim();
+      if (!fieldName) continue;
+      record[fieldName] = f.value ?? f.answer ?? f.fill ?? f.text;
+    }
+    return Object.keys(record).length > 0 ? record : null;
+  }
+
+  if (typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    if (
+      ("name" in obj || "label" in obj) &&
+      ("value" in obj || "answer" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj)
+    ) {
+      const fieldName = String(obj.name ?? obj.label ?? "").trim();
+      if (!fieldName) return null;
+      return { [fieldName]: obj.value ?? obj.answer };
+    }
+    return obj;
+  }
+
+  return null;
+};
+
+const normalizeGroupEntries = (raw: unknown): Record<string, unknown>[] => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    if (raw.length > 0 && Array.isArray(raw[0])) {
+      return raw
+        .map((item) => coerceGroupEntryRecord(item))
+        .filter(Boolean) as Record<string, unknown>[];
+    }
+    if (
+      raw.length > 0 &&
+      typeof raw[0] === "object" &&
+      raw[0] != null &&
+      ("name" in (raw[0] as object) || "label" in (raw[0] as object)) &&
+      ("value" in (raw[0] as object) || "answer" in (raw[0] as object)) &&
+      !Array.isArray((raw[0] as any).value) &&
+      typeof (raw[0] as any).value !== "object"
+    ) {
+      const firstName = String(
+        (raw[0] as any).name ?? (raw[0] as any).label ?? "",
+      );
+      if (/school|degree|major|from|to|start|end/i.test(firstName)) {
+        const single = coerceGroupEntryRecord(raw);
+        return single ? [single] : [];
+      }
+    }
+    return raw
+      .map((item) => coerceGroupEntryRecord(item))
+      .filter(Boolean) as Record<string, unknown>[];
+  }
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["entries", "items", "data", "records"]) {
+      if (Array.isArray(obj[key])) {
+        return normalizeGroupEntries(obj[key]);
+      }
+    }
+    if (
+      "label" in obj &&
+      ("type" in obj || "options" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj)
+    ) {
+      return normalizeGroupEntries(
+        obj.answer ?? obj.value ?? obj.fill ?? obj.data,
+      );
+    }
+    const coerced = coerceGroupEntryRecord(obj);
+    return coerced ? [coerced] : [];
+  }
+  return [];
+};
+
+const resolveEducationFieldLabel = (rawLabel: string): string => {
+  const mapped = EDUCATION_FIELD_MAP[compactLabel(rawLabel)];
+  if (mapped) return mapped;
+  let fieldLabel = cleanLabelText(rawLabel);
+  if (/^school/i.test(fieldLabel)) return "School Name";
+  if (/degree|level of education/i.test(fieldLabel)) {
+    return "Level of Education / Degree";
+  }
+  if (/field of study/i.test(fieldLabel)) return "Major";
+  if (/^from/i.test(fieldLabel) || /^start/i.test(fieldLabel)) return "From";
+  if (/^to/i.test(fieldLabel) || /^end/i.test(fieldLabel)) return "To";
+  return fieldLabel;
+};
+
+const flattenEducationEntry = (
+  entry: Record<string, unknown>,
+): { fieldLabel: string; value: unknown }[] => {
+  const out: { fieldLabel: string; value: unknown }[] = [];
+  const seen = new Set<string>();
+
+  for (const [key, value] of Object.entries(entry)) {
+    if (value == null) continue;
+    if (GROUP_META_KEYS.has(key.toLowerCase())) continue;
+
+    if (
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      ("answer" in (value as object) ||
+        "value" in (value as object) ||
+        "name" in (value as object) ||
+        "label" in (value as object))
+    ) {
+      const nested = value as {
+        name?: string;
+        label?: string;
+        answer?: unknown;
+        value?: unknown;
+      };
+      const fieldLabel = resolveEducationFieldLabel(
+        String(nested.name ?? nested.label ?? key),
+      );
+      if (seen.has(fieldLabel)) continue;
+      seen.add(fieldLabel);
+      out.push({ fieldLabel, value: nested.answer ?? nested.value });
+      continue;
+    }
+
+    const fieldLabel = resolveEducationFieldLabel(key);
+    if (seen.has(fieldLabel)) continue;
+    seen.add(fieldLabel);
+    out.push({ fieldLabel, value });
+  }
+
+  return out;
+};
+
+const isEducationGroupItem = (item: any): boolean => {
+  if (!item || typeof item !== "object") return false;
+  const label = String(item.label ?? item.field ?? item.name ?? "").trim();
+  const typeStr = String(item.type ?? "").toLowerCase();
+  return typeStr === "education" || /^education$/i.test(label);
+};
+
 const collectNameValuePairs = (
   node: unknown,
   out: any[],
@@ -185,6 +422,11 @@ const collectNameValuePairs = (
   if (typeof node !== "object") return;
 
   const obj = node as Record<string, unknown>;
+  if (isEducationGroupItem(obj)) {
+    out.push(obj);
+    return;
+  }
+
   const label = obj.label ?? obj.field ?? obj.name;
   const hasValue =
     obj.value != null ||
@@ -217,12 +459,43 @@ export const parseUltiproAiFillResponse = (
     emptyCount += 1;
   };
 
+  const pushEducationGroup = (raw: unknown): void => {
+    const entries = normalizeGroupEntries(raw);
+    if (entries.length === 0) {
+      markEmpty("Education");
+      return;
+    }
+
+    entries.forEach((entry, index) => {
+      const prefix = `Education ${index + 1}`;
+      const fields = flattenEducationEntry(entry);
+      for (const { fieldLabel, value } of fields) {
+        if (!isUsableUltiproAnswer(value)) {
+          markEmpty(`${prefix} - ${fieldLabel}`);
+          continue;
+        }
+        answers.push({
+          label: `${prefix} - ${fieldLabel}`,
+          answer: coerceAnswerString(value),
+        });
+      }
+    });
+  };
+
   const processItem = (item: any): void => {
     if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
     if (!label) return;
 
+    const typeStr = String(item.type ?? "").toLowerCase();
     const raw = extractRawAnswer(item);
+
+    if (typeStr === "education" || /^education$/i.test(label)) {
+      pushEducationGroup(
+        raw ?? item.entries ?? item.data ?? item.items,
+      );
+      return;
+    }
 
     if (isEmptyApiAnswer(raw)) {
       markEmpty(label);
@@ -242,13 +515,6 @@ export const parseUltiproAiFillResponse = (
     });
   };
 
-  const pairs: any[] = [];
-  collectNameValuePairs(response, pairs);
-  if (pairs.length > 0) {
-    pairs.forEach(processItem);
-    return { answers, emptyLabelKeys, emptyCount };
-  }
-
   let payload: any = response;
   if (payload?.data != null && typeof payload.data === "object") {
     payload = payload.data;
@@ -265,12 +531,45 @@ export const parseUltiproAiFillResponse = (
     return { answers, emptyLabelKeys, emptyCount };
   }
 
+  if (Array.isArray(payload?.elements)) {
+    payload.elements.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
+  }
+
+  if (Array.isArray(payload?.answers)) {
+    payload.answers.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
+  }
+
+  if (Array.isArray(payload?.fields)) {
+    payload.fields.forEach(processItem);
+    return { answers, emptyLabelKeys, emptyCount };
+  }
+
+  const pairs: any[] = [];
+  collectNameValuePairs(payload ?? response, pairs);
+  if (pairs.length > 0) {
+    pairs.forEach(processItem);
+    if (typeof payload === "object" && Array.isArray(payload?.education)) {
+      const already = answers.some((item) =>
+        isRepeatableEducationFieldLabel(item.label),
+      );
+      if (!already) pushEducationGroup(payload.education);
+    }
+    return { answers, emptyLabelKeys, emptyCount };
+  }
+
   if (typeof payload === "object") {
+    if (Array.isArray(payload.education)) {
+      pushEducationGroup(payload.education);
+    }
+
     const reserved = new Set([
       "elements",
       "answers",
       "fields",
       "fill_data_list",
+      "education",
       "resumeId",
       "userId",
       "parser",
@@ -285,6 +584,10 @@ export const parseUltiproAiFillResponse = (
     ]);
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
+      if (/^education$/i.test(label) && typeof value === "object") {
+        pushEducationGroup(value);
+        continue;
+      }
       if (isEmptyApiAnswer(value)) {
         markEmpty(label);
         continue;
@@ -405,6 +708,19 @@ const findAnswerForLabel = (
     (item) => canonicalLabelKey(item.label) === canonical,
   );
   if (byCanonical) return byCanonical;
+
+  const parsedField = parseEducationPrefixedLabel(label);
+  if (parsedField) {
+    const aliased = answers.find((item) => {
+      const parsedAnswer = parseEducationPrefixedLabel(item.label);
+      if (!parsedAnswer || parsedAnswer.index !== parsedField.index) {
+        return false;
+      }
+      if (parsedAnswer.field === parsedField.field) return true;
+      return educationFieldsAliasMatch(parsedField.field, parsedAnswer.field);
+    });
+    if (aliased) return aliased;
+  }
 
   const normalized = normalizeLabel(label);
   const normMatches = answers.filter(
@@ -539,7 +855,253 @@ const fillTextLikeField = async (
     // jQuery is optional.
   }
   writeKnockoutValue(element, value);
+  writeEducationKnockoutValue(element, value);
   return isUsableUltiproAnswer(element.value);
+};
+
+const writeEducationKnockoutValue = (
+  element: HTMLElement,
+  value: string,
+): void => {
+  const ko = (window as any).ko;
+  if (!ko) return;
+
+  try {
+    const data = ko.dataFor?.(element);
+    if (!data) return;
+
+    const setObs = (obs: unknown): void => {
+      if (typeof obs === "function") {
+        (obs as (next: string) => void)(value);
+      }
+    };
+
+    const automation = (element.getAttribute("data-automation") || "").toLowerCase();
+    if (automation === "school-textbox") setObs(data.SchoolName);
+    if (automation === "degree-textbox") setObs(data.DegreeName);
+    if (automation === "description-textarea") setObs(data.Description);
+    if (automation === "from-year-textbox") setObs(data.FromYear);
+    if (automation === "to-year-textbox") setObs(data.ToYear);
+    if (automation === "from-month-dropdown") setObs(data.FromMonth);
+    if (automation === "to-month-dropdown") setObs(data.ToMonth);
+    if (automation === "major-dropdown") setObs(data.MajorId);
+    if (automation === "minor-dropdown") setObs(data.MinorId);
+  } catch {
+    // Knockout context may not exist on this node.
+  }
+};
+
+const isUltiproTypeaheadInput = (element: HTMLElement): boolean => {
+  if (!(element instanceof HTMLInputElement)) return false;
+  const automation = (element.getAttribute("data-automation") || "").toLowerCase();
+  if (automation === "school-textbox" || automation === "degree-textbox") {
+    return true;
+  }
+  return (
+    element.classList.contains("tt-input") ||
+    !!element.closest(".twitter-typeahead")
+  );
+};
+
+const getTypeaheadSuggestionEls = (input: HTMLElement): HTMLElement[] => {
+  const root =
+    input.closest(".twitter-typeahead") ||
+    input.parentElement;
+  const menu = root?.querySelector<HTMLElement>(
+    ".tt-dropdown-menu, .tt-menu",
+  );
+  if (!menu) return [];
+  const style = window.getComputedStyle(menu);
+  if (style.display === "none" || style.visibility === "hidden") return [];
+  return Array.from(
+    menu.querySelectorAll<HTMLElement>(".tt-suggestion, [role='option']"),
+  ).filter((el) => {
+    const text = cleanLabelText(el.textContent ?? "");
+    if (!text) return false;
+    const elStyle = window.getComputedStyle(el);
+    return elStyle.display !== "none" && elStyle.visibility !== "hidden";
+  });
+};
+
+const waitForTypeaheadSuggestions = (
+  input: HTMLElement,
+  timeoutMs = 1400,
+): Promise<HTMLElement[]> =>
+  new Promise((resolve) => {
+    const start = Date.now();
+    const tick = (): void => {
+      const items = getTypeaheadSuggestionEls(input);
+      if (items.length > 0 || Date.now() - start >= timeoutMs) {
+        resolve(items);
+        return;
+      }
+      window.setTimeout(tick, 80);
+    };
+    tick();
+  });
+
+const buildSchoolSearchQueries = (school: string): string[] => {
+  const cleaned = cleanLabelText(school);
+  if (!cleaned) return [];
+  const queries: string[] = [cleaned];
+
+  const noParen = cleaned
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (noParen && noParen !== cleaned) queries.push(noParen);
+
+  const stripped = noParen
+    .replace(/^(the\s+)?(university|college|school)\s+of\s+/i, "")
+    .replace(/\s+(university|college|school)$/i, "")
+    .trim();
+  if (
+    stripped &&
+    stripped.length >= 3 &&
+    stripped.toLowerCase() !== cleaned.toLowerCase()
+  ) {
+    queries.push(stripped);
+  }
+
+  return [...new Set(queries)];
+};
+
+const clickTypeaheadSuggestion = async (
+  suggestion: HTMLElement,
+): Promise<void> => {
+  suggestion.dispatchEvent(
+    new MouseEvent("mousedown", { bubbles: true, cancelable: true }),
+  );
+  suggestion.click();
+  suggestion.dispatchEvent(
+    new MouseEvent("mouseup", { bubbles: true, cancelable: true }),
+  );
+  await delay(120);
+};
+
+const fillUltiproTypeahead = async (
+  input: HTMLInputElement,
+  answer: string,
+): Promise<boolean> => {
+  if (!isUsableUltiproAnswer(answer)) return false;
+
+  const queries =
+    (input.getAttribute("data-automation") || "") === "school-textbox"
+      ? buildSchoolSearchQueries(answer)
+      : [cleanLabelText(answer)];
+
+  input.focus();
+  input.click();
+  await delay(80);
+
+  for (const query of queries) {
+    setNativeValue(input, query);
+    writeEducationKnockoutValue(input, query);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        bubbles: true,
+        key: query.slice(-1) || "a",
+      }),
+    );
+    try {
+      getJquery()?.(input)?.val?.(query)?.trigger?.("input")?.trigger?.("keyup");
+    } catch {
+      // jQuery typeahead is optional.
+    }
+
+    const suggestions = await waitForTypeaheadSuggestions(input);
+    if (suggestions.length === 0) continue;
+
+    const labels = suggestions.map((el) =>
+      cleanLabelText(el.textContent ?? ""),
+    );
+    const matched = matchOption(answer, labels) || matchOption(query, labels);
+    const target =
+      suggestions.find(
+        (el, i) => labels[i] === matched,
+      ) || (suggestions.length === 1 ? suggestions[0] : null);
+
+    if (target) {
+      await clickTypeaheadSuggestion(target);
+      writeEducationKnockoutValue(input, input.value || query);
+      await notifyUltiproControl(input);
+      if (isUsableUltiproAnswer(input.value)) return true;
+    }
+  }
+
+  const fallback = queries[0] || answer;
+  setNativeValue(input, fallback);
+  writeEducationKnockoutValue(input, fallback);
+  await notifyUltiproControl(input);
+  try {
+    getJquery()?.(input)?.val?.(fallback)?.trigger?.("input")?.trigger?.("change");
+  } catch {
+    // optional
+  }
+  input.blur();
+  return isUsableUltiproAnswer(input.value);
+};
+
+const isUltiproEducationMonthField = (element: HTMLElement): boolean => {
+  const automation = (element.getAttribute("data-automation") || "").toLowerCase();
+  return (
+    automation === "from-month-dropdown" || automation === "to-month-dropdown"
+  );
+};
+
+const isUltiproEducationYearField = (element: HTMLElement): boolean => {
+  const automation = (element.getAttribute("data-automation") || "").toLowerCase();
+  return (
+    automation === "from-year-textbox" || automation === "to-year-textbox"
+  );
+};
+
+const MONTH_SHORT = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
+
+const parseMonthYearAnswer = (
+  answer: string,
+): { month?: string; year?: string } => {
+  const trimmed = answer.trim();
+  if (!trimmed) return {};
+
+  const parsed = parseDateAnswer(trimmed);
+  if (parsed) {
+    const [year, month] = parsed.iso.split("-");
+    return { month: String(Number(month)), year };
+  }
+
+  const my = trimmed.match(/^(\d{1,2})[/-](\d{4})$/);
+  if (my) return { month: String(Number(my[1])), year: my[2] };
+
+  const ym = trimmed.match(/^(\d{4})[/-](\d{1,2})$/);
+  if (ym) return { year: ym[1], month: String(Number(ym[2])) };
+
+  const yearOnly = trimmed.match(/^(\d{4})$/);
+  if (yearOnly) return { year: yearOnly[1] };
+
+  const lower = trimmed.toLowerCase();
+  const monthIdx = MONTH_SHORT.findIndex(
+    (m) => lower.startsWith(m) || lower.includes(m),
+  );
+  const yearMatch = trimmed.match(/(\d{4})/);
+  const result: { month?: string; year?: string } = {};
+  if (monthIdx >= 0) result.month = String(monthIdx + 1);
+  if (yearMatch) result.year = yearMatch[1];
+  return result;
 };
 
 const KNOWN_TEXT_INPUTS: { id: string; labels: string[] }[] = [
@@ -908,8 +1470,36 @@ const fillField = async (
 ): Promise<boolean> => {
   if (!isUsableUltiproAnswer(answer)) return false;
 
+  if (
+    isUltiproEducationMonthField(field.element) &&
+    field.element instanceof HTMLSelectElement
+  ) {
+    const { month } = parseMonthYearAnswer(answer);
+    if (!month) return false;
+    const ok = await fillNativeSelect(field.element, month);
+    if (ok) writeEducationKnockoutValue(field.element, field.element.value);
+    return ok;
+  }
+
+  if (
+    isUltiproEducationYearField(field.element) &&
+    field.element instanceof HTMLInputElement
+  ) {
+    const { year } = parseMonthYearAnswer(answer);
+    if (!year) return false;
+    return fillTextLikeField(field.element, year);
+  }
+
+  if (isUltiproTypeaheadInput(field.element)) {
+    return fillUltiproTypeahead(field.element as HTMLInputElement, answer);
+  }
+
   if (field.kind === "select" && field.element instanceof HTMLSelectElement) {
-    return fillNativeSelect(field.element, answer);
+    const ok = await fillNativeSelect(field.element, answer);
+    if (ok && isInsideUltiproEducation(field.element)) {
+      writeEducationKnockoutValue(field.element, field.element.value);
+    }
+    return ok;
   }
 
   if (field.kind === "radio-group") {
@@ -941,6 +1531,23 @@ const sortFieldsForFill = (
   fields: UltiproCandidateField[],
 ): UltiproCandidateField[] => {
   const score = (field: UltiproCandidateField): number => {
+    const edu = field.label.match(/^Education\s*(\d+)\s*-\s*(.+)$/i);
+    if (edu) {
+      const idx = Number(edu[1]) || 1;
+      const bare = edu[2].toLowerCase();
+      let fieldOrder = 50;
+      if (/school/.test(bare)) fieldOrder = 1;
+      else if (/degree|level of education/.test(bare)) fieldOrder = 2;
+      else if (/major|field of study/.test(bare)) fieldOrder = 3;
+      else if (/minor/.test(bare)) fieldOrder = 4;
+      else if (/from month|^from$/.test(bare)) fieldOrder = 5;
+      else if (/from year/.test(bare)) fieldOrder = 6;
+      else if (/to month|^to$/.test(bare)) fieldOrder = 7;
+      else if (/to year/.test(bare)) fieldOrder = 8;
+      else if (/description/.test(bare)) fieldOrder = 9;
+      return 5000 + idx * 20 + fieldOrder;
+    }
+
     if (isUltiproCountryField(field.element)) return 10;
     if (field.kind === "select" && !isUltiproStateField(field.element)) return 20;
     if (isUltiproStateField(field.element)) return 30;
@@ -963,6 +1570,18 @@ export const autofillUltiproWithAi = async (
 ): Promise<UltiproAiFillResult> => {
   const { answers, emptyLabelKeys, emptyCount } =
     parseUltiproAiFillResponse(response);
+
+  const eduNeeded = (() => {
+    const nums = new Set<number>();
+    for (const item of answers) {
+      const m = item.label.match(/^Education\s*(\d+)\s*-/i);
+      if (m) nums.add(Number(m[1]));
+    }
+    return nums.size;
+  })();
+  if (eduNeeded > 0) {
+    await ensureUltiproEducationRecords(eduNeeded);
+  }
 
   const candidates = sortFieldsForFill(collectUltiproCandidateFields());
 

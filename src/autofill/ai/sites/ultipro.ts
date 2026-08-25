@@ -6,6 +6,7 @@ import { initUltiproHtmlScanner } from "../cibtn.ultipro";
 import {
   UltiproScanToMakeApiOptions,
   UltiproScanToMakeApiPayload,
+  prepareUltiproEducationRecords,
   scanUltiproHtmlToMakeApiPayload,
 } from "../scan.ultipro";
 import { AiFillResult, AiSiteHandler } from "../types";
@@ -256,6 +257,7 @@ const uploadUltiproResume = async (
  * 1. Upload resume from applicantData.pdf_url
  * 2. Wait until the global notification says the file was used to pre-fill
  * 3. Wait until the form stops updating so parse is fully applied before scan
+ * 4. Expand Education rows from applicantData.education (Workday-style)
  */
 export const prepareUltiproBeforeScan = async (
   applicantData: Applicant,
@@ -270,11 +272,13 @@ export const prepareUltiproBeforeScan = async (
       await waitUntilUltiproResumeParsed(fileName, previousMessage);
     }
   } else if (!alreadyParsed) {
+    await prepareUltiproEducationRecords(applicantData);
     return;
   }
 
   await delay(RESUME_PARSED_MIN_WAIT_MS);
   await waitForUltiproParseIdle();
+  await prepareUltiproEducationRecords(applicantData);
 };
 
 const buildScanPayload = async (
