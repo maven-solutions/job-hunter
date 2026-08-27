@@ -1,7 +1,10 @@
 import { getAiSiteHandler } from "../../autofill/ai/registry";
 import { AiFormElement, RequestFieldAnswerFn } from "../../autofill/ai/types";
 import { Applicant } from "../../autofill/data";
-import { getJobApplicationFillWithAi } from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
+import {
+  getJobApplicationFillWithAi,
+  JobApplicationFillType,
+} from "../../store/features/scanHtmlWithAi/ScanHtmlWithAiApi";
 import { AppDispatch } from "../../store/store";
 
 type ResumeWithId = { id?: string | number };
@@ -41,6 +44,7 @@ export type ScanHtmlToMakeApiParams = {
   selectedUserId: string | number | null | undefined;
   applicantData: Applicant | any;
   setAiAutofillPhase: (phase: AiAutofillPhase) => void;
+  fillType?: JobApplicationFillType;
 };
 
 export type ScanHtmlToMakeApiResult = {
@@ -107,12 +111,14 @@ export const createRequestFieldAnswer = ({
   resumeId,
   userId,
   source,
+  fillType,
 }: {
   dispatch: AppDispatch;
   token: string;
   resumeId: string;
   userId: string;
   source: string;
+  fillType?: JobApplicationFillType;
 }): RequestFieldAnswerFn => {
   return async (element: AiFormElement): Promise<string | null> => {
     const payload = {
@@ -124,6 +130,7 @@ export const createRequestFieldAnswer = ({
       fromAgent: false,
       resumeId,
       userId,
+      type: fillType,
     };
 
     const fillResponse = await dispatch(
@@ -152,6 +159,7 @@ export const scanHtmlToMakeApi = async ({
   selectedUserId,
   applicantData,
   setAiAutofillPhase,
+  fillType,
 }: ScanHtmlToMakeApiParams): Promise<ScanHtmlToMakeApiResult> => {
   const handler = getAiSiteHandler();
   if (!handler) {
@@ -178,6 +186,7 @@ export const scanHtmlToMakeApi = async ({
       resumeId,
       userId,
       source: handler.id,
+      fillType,
     });
 
     // Site-specific prep before scan (e.g. Workday fills Country, waits for layout).
@@ -203,9 +212,8 @@ export const scanHtmlToMakeApi = async ({
 
     setAiAutofillPhase("analysing");
     const fillResponse = await dispatch(
-      getJobApplicationFillWithAi(payload),
+      getJobApplicationFillWithAi({ ...payload, type: fillType }),
     ).unwrap();
-    console.log("fillResponse::", fillResponse);
     setAiAutofillPhase("autofilling");
     const fillResult = await handler.applyFill(
       fillResponse?.data?.fill_data_list ?? fillResponse?.data ?? fillResponse,

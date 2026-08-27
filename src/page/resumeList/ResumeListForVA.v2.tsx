@@ -154,6 +154,10 @@ const ResumeListForVAV2 = (props: any) => {
       selectedUserId,
     );
 
+    const fillType = orgState?.orgSession
+      ? "organization"
+      : "individual";
+
     const { fieldsDetected: detected, fieldsFilled: filled } =
       await scanHtmlToMakeApi({
         dispatch,
@@ -163,6 +167,7 @@ const ResumeListForVAV2 = (props: any) => {
         selectedUserId,
         applicantData,
         setAiAutofillPhase,
+        fillType,
       });
 
     setFieldsDetected(detected);

@@ -21,6 +21,8 @@ export interface JobApplicationFillElement {
   count?: number;
 }
 
+export type JobApplicationFillType = "organization" | "individual";
+
 export interface JobApplicationFillPayload {
   elements: JobApplicationFillElement[];
   resumeId: string | number;
@@ -30,15 +32,17 @@ export interface JobApplicationFillPayload {
   url: string;
   token: string;
   fromAgent: boolean;
+  type?: JobApplicationFillType;
 }
 
 export const getJobApplicationFillWithAi = createAsyncThunk(
   "getJobApplicationFillWithAi",
   async (data: JobApplicationFillPayload, { rejectWithValue }) => {
     try {
+      const { type = "individual", ...body } = data;
       const res = await axiosInstance.post(
-        `${BASE_URL}/job-application-fill`,
-        data,
+        `${BASE_URL}/job-application-fill?type=${type}`,
+        body,
       );
       return res.data;
     } catch (error: any) {
