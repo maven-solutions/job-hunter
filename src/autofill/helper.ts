@@ -155,8 +155,11 @@ export const detectInputAndFillData = async (
           currentWebURL?.includes("comeet.") ||
           currentWebURL?.includes(".thyssenkrupp.")
         ) {
-          setIframeUrl(src);
-          break;
+          if (typeof setIframeUrl === "function") {
+            setIframeUrl(src);
+            stopLoading();
+            return;
+          }
         }
       }
     }

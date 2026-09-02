@@ -12,19 +12,32 @@ import { AiFillResult, AiSiteHandler } from "../types";
 
 /**
  * BambooHR career hosts where AI autofill is enabled.
- * Matches company.bamboohr.com (e.g. mealsonwheelsabq.bamboohr.com).
+ * Matches company tenant portals (e.g. mealsonwheelsabq.bamboohr.com).
+ * Does not match the official BambooHR website (www.bamboohr.com / bamboohr.com),
+ * which is a marketing careers page — often Greenhouse-embedded, not a portal.
  */
-const BAMBOOHR_HOST_SUFFIXES = ["bamboohr.com"] as const;
+const BAMBOOHR_PORTAL_HOST = "bamboohr.com";
+const BAMBOOHR_OFFICIAL_HOSTS = new Set([
+  "bamboohr.com",
+  "www.bamboohr.com",
+]);
 
 export const isBambooHrUrl = (url: string = window.location.href): boolean => {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    return BAMBOOHR_HOST_SUFFIXES.some(
-      (suffix) => host === suffix || host.endsWith(`.${suffix}`),
-    );
+    if (BAMBOOHR_OFFICIAL_HOSTS.has(host)) {
+      return false;
+    }
+    return host.endsWith(`.${BAMBOOHR_PORTAL_HOST}`);
   } catch {
     const lower = url.toLowerCase();
-    return BAMBOOHR_HOST_SUFFIXES.some((suffix) => lower.includes(suffix));
+    if (
+      lower.includes("://www.bamboohr.com") ||
+      lower.includes("://bamboohr.com")
+    ) {
+      return false;
+    }
+    return lower.includes(BAMBOOHR_PORTAL_HOST);
   }
 };
 
