@@ -314,6 +314,42 @@ const findAnswerForLabel = (
   return undefined;
 };
 
+const isJobLocationQuestion = (label: string): boolean => {
+  const n = normalizeLabel(label);
+  return (
+    n.includes("whichlocation") ||
+    n.includes("applyingfor") ||
+    n.includes("opportunitylocation")
+  );
+};
+
+const isCurrentLocationLabel = (label: string): boolean => {
+  const n = normalizeLabel(label);
+  if (!n || isJobLocationQuestion(label)) return false;
+  return (
+    n === "currentlocation" ||
+    n === "location" ||
+    n.includes("currentlocation") ||
+    (n.includes("current") && n.includes("location"))
+  );
+};
+
+const findCurrentLocationAnswer = (
+  answers: LeverAiAnswer[],
+): LeverAiAnswer | undefined => {
+  const exact = answers.find(
+    (item) =>
+      isCurrentLocationLabel(item.label) && isUsableLeverAnswer(item.answer),
+  );
+  if (exact) return exact;
+
+  return answers.find((item) => {
+    if (isJobLocationQuestion(item.label)) return false;
+    const n = normalizeLabel(item.label);
+    return n.includes("location") && isUsableLeverAnswer(item.answer);
+  });
+};
+
 const parseAnswerList = (answer: string): string[] => {
   const trimmed = answer.trim();
   if (!trimmed) return [];
@@ -434,46 +470,95 @@ const fillNativeSelect = async (
   return false;
 };
 
+const isStyleVisible = (element: HTMLElement | null): boolean => {
+  if (!element) return false;
+  const style = window.getComputedStyle(element);
+  return style.display !== "none" && style.visibility !== "hidden";
+};
+
+const findLocationDropdown = (input: HTMLInputElement): HTMLElement | null =>
+  input.closest(".application-field")?.querySelector<HTMLElement>(
+    ".dropdown-container",
+  ) ??
+  input.closest(".application-question")?.querySelector<HTMLElement>(
+    ".dropdown-container",
+  ) ??
+  input.parentElement?.querySelector<HTMLElement>(".dropdown-container") ??
+  null;
+
+const getSelectedLocationInput = (): HTMLInputElement | null =>
+  (document.getElementById("selected-location") as HTMLInputElement | null) ??
+  document.querySelector<HTMLInputElement>("input[name='selectedLocation']");
+
+const isLocationCommitted = (input: HTMLInputElement): boolean => {
+  const hidden = getSelectedLocationInput();
+  if (hidden && isUsableLeverAnswer(hidden.value)) return true;
+  return isUsableLeverAnswer(input.value);
+};
+
+const readLocationResults = (container: HTMLElement | null): HTMLElement[] => {
+  if (!container || !isStyleVisible(container)) return [];
+  const resultsRoot = container.querySelector(".dropdown-results");
+  if (!resultsRoot) return [];
+  return Array.from(resultsRoot.children).filter(
+    (el): el is HTMLElement =>
+      el instanceof HTMLElement && !!cleanLabelText(el.textContent ?? ""),
+  );
+};
+
 const waitForLeverLocationResults = (
   container: HTMLElement | null,
-  timeoutMs = 800,
+  timeoutMs = 3000,
 ): Promise<HTMLElement[]> =>
   new Promise((resolve) => {
-    const read = (): HTMLElement[] => {
-      if (!container) return [];
-      const resultsRoot = container.querySelector(".dropdown-results");
-      if (!resultsRoot) return [];
-      return Array.from(resultsRoot.children).filter(
-        (el): el is HTMLElement =>
-          el instanceof HTMLElement &&
-          !!cleanLabelText(el.textContent ?? "") &&
-          el.getBoundingClientRect().height > 0,
-      );
-    };
-
-    const existing = read();
-    if (existing.length > 0) {
-      resolve(existing);
-      return;
-    }
     if (!container) {
       resolve([]);
       return;
     }
 
+    const noResultsVisible = (): boolean =>
+      isStyleVisible(
+        container.querySelector<HTMLElement>(".dropdown-no-results"),
+      );
+
+    const loadingVisible = (): boolean =>
+      isStyleVisible(
+        container.querySelector<HTMLElement>(".dropdown-loading-results"),
+      );
+
     let observer: MutationObserver | null = null;
-    const timer = window.setTimeout(() => {
+    let timer: number | undefined;
+    let sawLoading = loadingVisible();
+
+    const finish = (items: HTMLElement[]): void => {
+      if (timer != null) window.clearTimeout(timer);
       observer?.disconnect();
-      resolve(read());
+      resolve(items);
+    };
+
+    const check = (): boolean => {
+      if (loadingVisible()) sawLoading = true;
+      const items = readLocationResults(container);
+      if (items.length > 0) {
+        finish(items);
+        return true;
+      }
+      if (sawLoading && noResultsVisible() && !loadingVisible()) {
+        finish([]);
+        return true;
+      }
+      return false;
+    };
+
+    if (check()) return;
+
+    timer = window.setTimeout(() => {
+      observer?.disconnect();
+      resolve(readLocationResults(container));
     }, timeoutMs);
 
     observer = new MutationObserver(() => {
-      const items = read();
-      if (items.length > 0) {
-        window.clearTimeout(timer);
-        observer?.disconnect();
-        resolve(items);
-      }
+      check();
     });
     observer.observe(container, {
       childList: true,
@@ -482,9 +567,69 @@ const waitForLeverLocationResults = (
     });
   });
 
+const typeLocationQuery = async (
+  input: HTMLInputElement,
+  query: string,
+): Promise<void> => {
+  input.focus();
+  input.click();
+  setNativeValue(input, "");
+  input.dispatchEvent(
+    new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "deleteContentBackward",
+    }),
+  );
+  await delay(80);
+
+  setNativeValue(input, query);
+  input.dispatchEvent(
+    new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      data: query,
+      inputType: "insertText",
+    }),
+  );
+  const lastKey = query.slice(-1) || "a";
+  input.dispatchEvent(
+    new KeyboardEvent("keydown", { key: lastKey, bubbles: true }),
+  );
+  input.dispatchEvent(
+    new KeyboardEvent("keyup", { key: lastKey, bubbles: true }),
+  );
+};
+
+const clickLocationResult = async (target: HTMLElement): Promise<void> => {
+  target.scrollIntoView({ block: "nearest" });
+  target.dispatchEvent(
+    new PointerEvent("pointerdown", { bubbles: true, cancelable: true }),
+  );
+  target.dispatchEvent(
+    new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
+  );
+  target.dispatchEvent(
+    new MouseEvent("mouseup", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }),
+  );
+  target.dispatchEvent(
+    new PointerEvent("pointerup", { bubbles: true, cancelable: true }),
+  );
+  target.click();
+  await delay(200);
+};
+
 /**
- * Lever "Current location" is a typeahead. Type the answer, then click a
- * matching dropdown result when Lever returns suggestions.
+ * Lever Current location: type the fill_data_list value, wait for the
+ * Mapbox dropdown (~1–2s), then click the first suggestion.
  */
 const fillLeverLocationTypeahead = async (
   element: HTMLInputElement,
@@ -492,29 +637,23 @@ const fillLeverLocationTypeahead = async (
 ): Promise<boolean> => {
   if (!isUsableLeverAnswer(answer)) return false;
 
-  element.focus();
-  setNativeValue(element, answer);
-  element.dispatchEvent(new Event("input", { bubbles: true }));
-  element.dispatchEvent(new Event("change", { bubbles: true }));
-  await handleValueChanges(element);
+  const container = findLocationDropdown(element);
+  await typeLocationQuery(element, answer);
+  // Popup appears after 1–2 seconds; stay focused so it is not dismissed.
+  await delay(1500);
 
-  const container =
-    element
-      .closest(".application-field")
-      ?.querySelector<HTMLElement>(".dropdown-container") ?? null;
-  const results = await waitForLeverLocationResults(container);
-  if (results.length > 0) {
-    const labels = results.map((el) => cleanLabelText(el.textContent ?? ""));
-    const matched = matchOption(answer, labels);
-    const target = matched
-      ? results[labels.indexOf(matched)] ?? results[0]
-      : results[0];
-    target.scrollIntoView({ block: "nearest" });
-    target.click();
-    await delay(150);
+  let results = readLocationResults(container);
+  if (results.length === 0) {
+    results = await waitForLeverLocationResults(container, 2500);
   }
 
-  return isUsableLeverAnswer(element.value);
+  const first = results[0];
+  if (first) {
+    await clickLocationResult(first);
+    return isLocationCommitted(element);
+  }
+
+  return isLocationCommitted(element);
 };
 
 const fillCheckboxGroup = async (
@@ -631,7 +770,12 @@ export const autofillLeverWithAi = async (
   const { answers, emptyLabelKeys, emptyCount } =
     parseLeverAiFillResponse(response);
 
-  const candidates = collectLeverCandidateFields();
+  const collected = collectLeverCandidateFields();
+  // Location first so Lever can unhide EEO after a place is selected.
+  const candidates = [
+    ...collected.filter((field) => field.kind === "location"),
+    ...collected.filter((field) => field.kind !== "location"),
+  ];
 
   let filled = 0;
   let failed = 0;
@@ -647,13 +791,20 @@ export const autofillLeverWithAi = async (
   }
 
   for (const field of candidates) {
-    if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
+    const match =
+      field.kind === "location"
+        ? findCurrentLocationAnswer(answers) ??
+          findAnswerForLabel(field.label, answers)
+        : findAnswerForLabel(field.label, answers);
+    const answer = match?.answer;
+
+    if (
+      field.kind !== "location" &&
+      isFieldMarkedEmpty(field.label, emptyLabelKeys)
+    ) {
       skipped += 1;
       continue;
     }
-
-    const match = findAnswerForLabel(field.label, answers);
-    const answer = match?.answer;
 
     if (!isUsableLeverAnswer(answer)) {
       skipped += 1;
