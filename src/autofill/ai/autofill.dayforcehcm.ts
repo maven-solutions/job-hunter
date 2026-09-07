@@ -11,6 +11,7 @@ import {
   isDayforceHcmEducationStateField,
   isDayforceHcmFieldFilled,
   isDayforceHcmPhoneCountryCombobox,
+  isInsideDayforceHcmWorkHistory,
 } from "./scan.dayforcehcm";
 
 export interface DayforceHcmAiAnswer {
@@ -1185,6 +1186,7 @@ const clickEducationUpdate = async (index: number): Promise<void> => {
 /**
  * Applies AI fill answers to remaining empty Dayforce HCM fields.
  * Fields already populated by resume parse are skipped (not overwritten).
+ * Work History is never filled — Dayforce populates it from the resume.
  */
 export const autofillDayforceHcmWithAi = async (
   response: unknown,
@@ -1226,6 +1228,11 @@ export const autofillDayforceHcmWithAi = async (
       await clickEducationUpdate(lastEducationIndex);
     }
     if (educationIndex != null) lastEducationIndex = educationIndex;
+
+    if (isInsideDayforceHcmWorkHistory(field.element)) {
+      skipped += 1;
+      continue;
+    }
 
     if (isDayforceHcmEducationStateField(field.element, field.label)) {
       skipped += 1;

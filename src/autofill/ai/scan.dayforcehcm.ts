@@ -81,6 +81,11 @@ const EDUCATION_RECORD_SELECTOR =
 const ADD_EDUCATION_BUTTON_SELECTOR =
   '[test-id="add-educationhistory-record"]';
 
+/** Dayforce resume parse fills this entire section — do not scan or AI-fill it. */
+const WORK_HISTORY_SECTION_SELECTOR = '[test-id="work-history"]';
+const WORK_HISTORY_RECORD_SELECTOR =
+  'form[test-id="workhistory-record"], form[id^="workHistory-"]';
+
 export const isInsideExtension = (element: Element): boolean =>
   !!element.closest(`#${EXTENSION_ROOT_ID}`);
 
@@ -91,6 +96,14 @@ export const isInsideDayforceHcmEducation = (element: Element): boolean =>
   !!element.closest(
     `${EDUCATION_RECORD_SELECTOR}, ${EDUCATION_SECTION_SELECTOR}`,
   );
+
+/** Work History is populated by Dayforce resume parse — leave it alone. */
+export const isInsideDayforceHcmWorkHistory = (element: Element): boolean => {
+  if (element.closest(WORK_HISTORY_SECTION_SELECTOR)) return true;
+  if (element.closest(WORK_HISTORY_RECORD_SELECTOR)) return true;
+  const id = (element as HTMLElement).id || "";
+  return /workHistory/i.test(id);
+};
 
 export const countDayforceHcmEducationRecords = (): number =>
   document.querySelectorAll(EDUCATION_RECORD_SELECTOR).length;
@@ -791,6 +804,7 @@ const resolveEducationCount = (
 /**
  * Collect autofillable Dayforce (Ant Design) fields on the host page.
  * Resume file input is skipped (handled in prepareBeforeScan).
+ * Work History is skipped — Dayforce fills it from the imported resume.
  */
 export const collectDayforceHcmCandidateFields =
   (): DayforceHcmCandidateField[] => {
@@ -798,6 +812,10 @@ export const collectDayforceHcmCandidateFields =
     const seen = new Set<string>();
 
     const add = (field: DayforceHcmCandidateField): void => {
+      if (isInsideDayforceHcmWorkHistory(field.element)) return;
+      if (field.selectRoot && isInsideDayforceHcmWorkHistory(field.selectRoot)) {
+        return;
+      }
       const key =
         field.element.getAttribute("id") ||
         `${field.label}:${field.kind}:${results.length}`;
@@ -807,6 +825,7 @@ export const collectDayforceHcmCandidateFields =
     };
 
     const addSelect = (selectRoot: HTMLElement): void => {
+      if (isInsideDayforceHcmWorkHistory(selectRoot)) return;
       if (!isVisibleSelectRoot(selectRoot)) return;
       const input = getDayforceHcmComboboxInput(selectRoot);
       if (!input) return;
@@ -844,6 +863,7 @@ export const collectDayforceHcmCandidateFields =
         "input, textarea",
       )
       .forEach((element) => {
+        if (isInsideDayforceHcmWorkHistory(element)) return;
         if (!isVisibleTextControl(element)) return;
         if (element instanceof HTMLInputElement) {
           const type = (element.type || "text").toLowerCase();
@@ -875,6 +895,7 @@ export const collectDayforceHcmCandidateFields =
       .querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
       .forEach((element) => {
         if (isInsideExtension(element)) return;
+        if (isInsideDayforceHcmWorkHistory(element)) return;
         if (!isInsideDayforceHcmEducation(element)) return;
         const wrapper =
           (element.closest(
@@ -891,6 +912,7 @@ export const collectDayforceHcmCandidateFields =
 
     document.querySelectorAll<HTMLElement>(".ant-radio-group").forEach((group) => {
       if (isInsideExtension(group)) return;
+      if (isInsideDayforceHcmWorkHistory(group)) return;
       const formItem = getFormItem(group);
       if (
         !isDisplayVisible(group) &&
@@ -910,6 +932,7 @@ export const collectDayforceHcmCandidateFields =
     });
 
     document.querySelectorAll<HTMLSelectElement>("select").forEach((element) => {
+      if (isInsideDayforceHcmWorkHistory(element)) return;
       if (!isVisibleTextControl(element)) return;
       add({
         element,
@@ -922,10 +945,21 @@ export const collectDayforceHcmCandidateFields =
     return results;
   };
 
+const hasUnfilledEducationFields = (
+  candidates: DayforceHcmCandidateField[],
+): boolean =>
+  candidates.some(
+    (field) =>
+      isInsideDayforceHcmEducation(field.element) &&
+      !isDayforceHcmEducationStateField(field.element, field.label) &&
+      !isDayforceHcmFieldFilled(field),
+  );
+
 /**
  * Scans the Dayforce HCM application form after resume parse.
  * Already-filled fields (from Dayforce's parser) are omitted so the AI
  * only answers remaining questions and does not overwrite parsed values.
+ * Work History is never scanned — the site fills that section from the resume.
  * Education is sent as a nested Workday-style group, not flat Country/City
  * labels that would collide with Personal Information.
  */
@@ -943,7 +977,10 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
   const candidates = collectDayforceHcmCandidateFields();
   const elements: ApiFormElement[] = [];
 
-  if (isDayforceHcmEducationSectionPresent()) {
+  if (
+    isDayforceHcmEducationSectionPresent() &&
+    hasUnfilledEducationFields(candidates)
+  ) {
     elements.push({
       label: "Education",
       required: true,
@@ -954,6 +991,7 @@ export const scanDayforceHcmHtmlToMakeApiPayload = async (
   }
 
   const remaining = candidates.filter((field) => {
+    if (isInsideDayforceHcmWorkHistory(field.element)) return false;
     if (isRepeatableEducationFieldLabel(field.label)) return false;
     if (isInsideDayforceHcmEducation(field.element)) return false;
     return !isDayforceHcmFieldFilled(field);
