@@ -7,6 +7,7 @@ import {
   getWorkdayWorkSectionTitle,
   isWorkdayPrefillExcludedLabel,
   prepareWorkdayExperiencePanels,
+  withSectionLabel,
 } from "./scan.workday";
 import { getWorkdayApplySectionId } from "./workday/detect";
 
@@ -261,11 +262,6 @@ const ensureWorkLocationField = (
 
 const isCurrentlyWorkHereLabel = (label: string): boolean =>
   /currentlyworkhere|icurrentlyworkhere|currently\s*work/.test(fieldKey(label));
-
-const isWorkToDateLabel = (label: string): boolean => {
-  const key = fieldKey(label);
-  return key === "to" || key === "tommyyyy" || key === "enddate" || key === "end";
-};
 
 /** Coerce one employment/education entry into a plain field map. */
 const coerceGroupEntryRecord = (
@@ -2422,66 +2418,56 @@ const forceWorkdayCheckboxState = async (
   );
 };
 
-const getWorkPanelIndexFromElement = (element: Element): number | null => {
-  const panel =
-    element.closest('[role="group"]') ?? element.closest(".css-1ebprri");
-  if (!panel) return null;
-  const labelledBy = panel.getAttribute("aria-labelledby");
-  const headingText =
-    (labelledBy
-      ? document.getElementById(labelledBy.split(/\s+/)[0])?.textContent
-      : null) ??
-    panel.querySelector("h5")?.textContent ??
-    "";
-  const m = String(headingText).match(
-    /^(?:Employment History|Work Experience)\s*(\d+)/i,
-  );
-  return m ? Number(m[1]) : null;
-};
-
 const isCurrentlyWorkHereYesAnswer = (answer: string): boolean => {
   if (!isUsableWorkdayAnswer(answer)) return false;
   const n = normalizeForMatch(answer);
   if (NO_ANSWERS.has(n)) return false;
-  return true;
-};
-
-const answerSaysCurrentlyWorkHere = (
-  input: HTMLInputElement,
-  answers: WorkdayAiAnswer[],
-): boolean => {
-  const idx = getWorkPanelIndexFromElement(input);
-  if (idx != null) {
-    const current = answers.find((a) => {
-      const m = a.label.match(
-        /^(?:Employment History|Work Experience)\s*(\d+)\s*-\s*I currently work here/i,
-      );
-      return m && Number(m[1]) === idx;
-    });
-    return !!current && isCurrentlyWorkHereYesAnswer(current.answer);
-  }
-
-  const unlabeled = answers.filter((a) =>
-    /currently work here/i.test(a.label),
-  );
   return (
-    unlabeled.length === 1 &&
-    isCurrentlyWorkHereYesAnswer(unlabeled[0].answer)
+    YES_ANSWERS.has(n) ||
+    n === "icurrentlyworkhere" ||
+    n === "currentlyworkhere" ||
+    /currently\s*work\s*here/i.test(answer)
   );
 };
 
+/** Indexes whose response actually has currently-work-here data (not `[]`). */
+const currentlyWorkHereYesIndexes = (
+  answers: WorkdayAiAnswer[],
+): Set<number> => {
+  const yes = new Set<number>();
+  for (const item of answers) {
+    if (!/currently work here/i.test(item.label)) continue;
+    if (!isCurrentlyWorkHereYesAnswer(item.answer)) continue;
+    const m = item.label.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)/i,
+    );
+    yes.add(m ? Number(m[1]) : 1);
+  }
+  return yes;
+};
+
+/**
+ * Check "I currently work here" only when that job's value is non-empty.
+ * `value: []` is not in answers — never check those boxes.
+ */
 const fillCurrentlyWorkHereCheckboxes = async (
   answers: WorkdayAiAnswer[],
 ): Promise<number> => {
+  const yesIndexes = currentlyWorkHereYesIndexes(answers);
+  if (yesIndexes.size === 0) return 0;
+
   const inputs = Array.from(
-    document.querySelectorAll<HTMLInputElement>(
-      'input[type="checkbox"][name="currentlyWorkHere"], input[type="checkbox"][id*="currentlyWorkHere"]',
-    ),
-  );
+    document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+  ).filter(isCurrentlyWorkHereInput);
 
   let filled = 0;
-  for (const input of inputs) {
-    if (!answerSaysCurrentlyWorkHere(input, answers)) continue;
+  for (const [index, input] of inputs.entries()) {
+    const labelled = withSectionLabel("I currently work here", input);
+    const fromLabel = labelled.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)/i,
+    );
+    const panelIndex = fromLabel ? Number(fromLabel[1]) : index + 1;
+    if (!yesIndexes.has(panelIndex)) continue;
 
     const ok = await forceWorkdayCheckboxState(input, true);
     if (ok) filled += 1;
@@ -2494,6 +2480,9 @@ const fillCheckbox = async (
   input: HTMLInputElement,
   answer: string,
 ): Promise<boolean> => {
+  if (isCurrentlyWorkHereInput(input)) {
+    return false;
+  }
   if (!isUsableWorkdayAnswer(answer)) return false;
 
   const n = normalizeForMatch(answer);
@@ -2709,8 +2698,11 @@ const fillDateMmyyyy = async (
   );
   if (!monthInput || !yearInput) return false;
 
-  await fillDateSpinInput(monthInput, parsed.month);
+  await fillDateSpinInput(monthInput, String(Number(parsed.month)));
   await fillDateSpinInput(yearInput, parsed.year);
+  closeListbox();
+  monthInput.blur();
+  yearInput.blur();
   await delay(100);
 
   return (
@@ -2899,10 +2891,7 @@ export const autofillWorkdayWithAi = async (
     };
   }
 
-  // Fill order:
-  // 1) "I currently work here" before To dates
-  // 2) Education panels in order: School → Degree → Field of Study → other
-  // 3) Employment panels by index
+  // Fill whatever the response has: From, To, and "I currently work here" independently.
   const fieldSortKey = (label: string): number => {
     if (/i currently work here/i.test(label)) return 0;
 
@@ -2954,39 +2943,12 @@ export const autofillWorkdayWithAi = async (
       continue;
     }
 
-    const sectionPrefix = field.label.includes(" - ")
-      ? field.label.slice(0, field.label.lastIndexOf(" - ")).trim()
-      : "";
-    const bareField = field.label.includes(" - ")
-      ? field.label.slice(field.label.lastIndexOf(" - ") + 3).trim()
-      : field.label;
-
-    // Don't fill To when this job is current — checkbox clears / hides it
-    if (
-      sectionPrefix &&
-      (field.kind === "date-mmyyyy" || field.kind === "date-yyyy") &&
-      isWorkToDateLabel(bareField)
-    ) {
-      const current = findAnswerForLabel(
-        `${sectionPrefix} - I currently work here`,
-        answers,
-      );
-      if (
-        current &&
-        (YES_ANSWERS.has(normalizeForMatch(current.answer)) ||
-          /currently|yes|true/i.test(current.answer))
-      ) {
-        skipped += 1;
-        continue;
-      }
-    }
-
     const isCurrentWorkCheckbox =
-      (field.kind === "checkbox" && isCurrentlyWorkHereLabel(field.label)) ||
+      isCurrentlyWorkHereLabel(field.label) ||
       (field.element instanceof HTMLInputElement &&
         isCurrentlyWorkHereInput(field.element));
 
-    // Check this input in a dedicated pass after dates are filled
+    // Dedicated pass: only check when this job's value is non-empty
     if (isCurrentWorkCheckbox) {
       continue;
     }
