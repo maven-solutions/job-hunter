@@ -10,6 +10,7 @@ import { leverAiHandler } from "./sites/lever";
 import { metacareersAiHandler } from "./sites/metacareers";
 import { ultiproAiHandler } from "./sites/ultipro";
 import { workdayAiHandler } from "./sites/workday";
+import { workableAiHandler } from "./sites/workable";
 import { AiSiteHandler } from "./types";
 
 /**
@@ -23,6 +24,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   greenhouseAiHandler,
   ashbyAiHandler,
   workdayAiHandler,
+  workableAiHandler,
   icimsAiHandler,
   leverAiHandler,
   metacareersAiHandler,
