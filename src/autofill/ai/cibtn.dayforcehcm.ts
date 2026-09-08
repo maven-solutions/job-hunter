@@ -1,5 +1,8 @@
 import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import { collectDayforceHcmCandidateFields } from "./scan.dayforcehcm";
+import {
+  collectDayforceHcmCandidateFields,
+  isDayforceHcmFieldFilled,
+} from "./scan.dayforcehcm";
 import {
   AiFieldScannerOptions,
   AiFormElement,
@@ -224,7 +227,8 @@ export const initDayforceHcmHtmlScanner = (
     (
       candidate,
     ): candidate is typeof candidate & { element: HTMLTextAreaElement } =>
-      candidate.element instanceof HTMLTextAreaElement,
+      candidate.element instanceof HTMLTextAreaElement &&
+      !isDayforceHcmFieldFilled(candidate),
   );
 
   textareaCandidates.forEach((candidate, index) => {
