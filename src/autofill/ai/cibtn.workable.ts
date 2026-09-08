@@ -1,18 +1,16 @@
 import { fromatStirngInLowerCase, handleValueChanges } from "../helper";
-import {
-  collectDayforceHcmCandidateFields,
-  isDayforceHcmFieldFilled,
-} from "./scan.dayforcehcm";
+import { collectWorkableCandidateFields } from "./scan.workable";
 import {
   AiFieldScannerOptions,
   AiFormElement,
   RequestFieldAnswerFn,
 } from "./types";
 
-const SCAN_ICON_CLASS = "careerai-dayforcehcm-scan-field-icon";
-const SCAN_ICON_WRAPPER_CLASS = "careerai-dayforcehcm-scan-icon-wrapper";
-const SCAN_STYLE_ID = "careerai-dayforcehcm-scan-html-styles";
+const SCAN_ICON_CLASS = "careerai-workable-scan-field-icon";
+const SCAN_ICON_WRAPPER_CLASS = "careerai-workable-scan-icon-wrapper";
+const SCAN_STYLE_ID = "careerai-workable-scan-html-styles";
 
+/** Per-field icons are textarea-only on Workable. */
 export type ScannableFieldType = "textarea";
 
 export interface ScannableFieldData {
@@ -64,7 +62,7 @@ const injectScanStyles = (): void => {
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
       padding: 0;
       line-height: 1;
     }
@@ -86,8 +84,14 @@ const injectScanStyles = (): void => {
 };
 
 const findIconAnchor = (element: HTMLElement): HTMLElement => {
-  const item = element.closest(".ant-form-item") as HTMLElement | null;
-  if (item) return item;
+  const illustrated = element.closest(
+    "[data-role='illustrated-input']",
+  ) as HTMLElement | null;
+  if (illustrated) return illustrated;
+
+  const label = element.closest("label") as HTMLElement | null;
+  if (label) return label;
+
   return (element.parentElement as HTMLElement) || element;
 };
 
@@ -143,14 +147,25 @@ const requestAiAnswerForField = async (
   return answer;
 };
 
+const setNativeValue = (element: HTMLTextAreaElement, value: string): void => {
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLTextAreaElement.prototype,
+    "value",
+  );
+  if (descriptor?.set) {
+    descriptor.set.call(element, value);
+  } else {
+    element.value = value;
+  }
+};
+
 const fillTextareaField = async (
   element: HTMLTextAreaElement,
   answer: string,
 ): Promise<boolean> => {
   element.focus();
-  const max = element.maxLength;
-  const value = max > 0 && answer.length > max ? answer.slice(0, max) : answer;
-  element.value = value;
+  setNativeValue(element, answer);
+  element.dispatchEvent(new Event("input", { bubbles: true }));
   await handleValueChanges(element);
   return true;
 };
@@ -202,7 +217,7 @@ const attachIconToField = (entry: ScannableFieldEntry): void => {
 
       setIconState(button, "filled");
     } catch (error) {
-      console.error("[CareerAI FieldAI:dayforcehcm]", error);
+      console.error("[CareerAI FieldAI:workable]", error);
       setIconState(button, "error");
     }
   });
@@ -212,23 +227,22 @@ const attachIconToField = (entry: ScannableFieldEntry): void => {
 };
 
 /**
- * Scans the Dayforce HCM form and injects field icons on **textareas only**.
- * Personal Information has none; later sections with textareas get icons.
+ * Scans the Workable application form and injects field icons on **empty textareas only**.
+ * Radios, comboboxes, and inputs are filled only via full Autofill with AI.
  */
-export const initDayforceHcmHtmlScanner = (
+export const initWorkableHtmlScanner = (
   _applicantData: ApplicantContext | null = null,
   options: AiFieldScannerOptions = {},
 ): number => {
   injectScanStyles();
-  removeDayforceHcmHtmlScannerIcons();
+  removeWorkableHtmlScannerIcons();
   requestFieldAnswerFn = options.requestFieldAnswer ?? null;
 
-  const textareaCandidates = collectDayforceHcmCandidateFields().filter(
+  const textareaCandidates = collectWorkableCandidateFields().filter(
     (
       candidate,
     ): candidate is typeof candidate & { element: HTMLTextAreaElement } =>
-      candidate.element instanceof HTMLTextAreaElement &&
-      !isDayforceHcmFieldFilled(candidate),
+      candidate.element instanceof HTMLTextAreaElement,
   );
 
   textareaCandidates.forEach((candidate, index) => {
@@ -251,7 +265,7 @@ export const initDayforceHcmHtmlScanner = (
   return textareaCandidates.length;
 };
 
-export const removeDayforceHcmHtmlScannerIcons = (): void => {
+export const removeWorkableHtmlScannerIcons = (): void => {
   document
     .querySelectorAll(`.${SCAN_ICON_WRAPPER_CLASS}`)
     .forEach((el) => el.remove());
@@ -259,4 +273,4 @@ export const removeDayforceHcmHtmlScannerIcons = (): void => {
   requestFieldAnswerFn = null;
 };
 
-export const getDayforceHcmScannedFieldCount = (): number => scannedFields.size;
+export const getWorkableScannedFieldCount = (): number => scannedFields.size;

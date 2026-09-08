@@ -7,6 +7,7 @@ import {
   getWorkdayWorkSectionTitle,
   isWorkdayPrefillExcludedLabel,
   prepareWorkdayExperiencePanels,
+  withSectionLabel,
 } from "./scan.workday";
 import { getWorkdayApplySectionId } from "./workday/detect";
 
@@ -258,6 +259,9 @@ const ensureWorkLocationField = (
   }
   return [...fields, { fieldLabel: "Location", value: extracted }];
 };
+
+const isCurrentlyWorkHereLabel = (label: string): boolean =>
+  /currentlyworkhere|icurrentlyworkhere|currently\s*work/.test(fieldKey(label));
 
 /** Coerce one employment/education entry into a plain field map. */
 const coerceGroupEntryRecord = (
@@ -2334,10 +2338,151 @@ const parseAnswerList = (answer: string): string[] => {
     .filter(Boolean);
 };
 
+const isNativeCheckboxChecked = (input: HTMLInputElement): boolean =>
+  input.checked || input.getAttribute("aria-checked") === "true";
+
+const isCurrentlyWorkHereInput = (input: HTMLInputElement): boolean =>
+  input.name === "currentlyWorkHere" ||
+  (input.id ?? "").toLowerCase().includes("currentlyworkhere");
+
+/**
+ * Workday "I currently work here" is a native checkbox. Clicking the wrapper
+ * toggles twice; set checked + aria-checked on the input itself.
+ */
+const forceWorkdayCheckboxState = async (
+  input: HTMLInputElement,
+  target: boolean,
+): Promise<boolean> => {
+  if (!input.isConnected) return false;
+
+  input.scrollIntoView({ block: "center", inline: "nearest" });
+  await delay(50);
+
+  // Native click toggles once — only when state still needs to change
+  if (isNativeCheckboxChecked(input) !== target) {
+    try {
+      input.click();
+    } catch {
+      /* ignore */
+    }
+    await delay(40);
+  }
+
+  setNativeChecked(input, target);
+  input.checked = target;
+  input.setAttribute("aria-checked", target ? "true" : "false");
+  input.dispatchEvent(new Event("focus", { bubbles: true }));
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+
+  if (isNativeCheckboxChecked(input) !== target) {
+    const visual =
+      input.nextElementSibling instanceof HTMLElement
+        ? input.nextElementSibling
+        : null;
+    const label = input.id
+      ? document.querySelector<HTMLElement>(
+          `label[for="${CSS.escape(input.id)}"]`,
+        )
+      : null;
+    try {
+      visual?.click();
+    } catch {
+      /* ignore */
+    }
+    await delay(40);
+    if (isNativeCheckboxChecked(input) !== target) {
+      try {
+        label?.click();
+      } catch {
+        /* ignore */
+      }
+      await delay(40);
+    }
+    setNativeChecked(input, target);
+    input.checked = target;
+    input.setAttribute("aria-checked", target ? "true" : "false");
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  await delay(50);
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+  setNativeChecked(input, target);
+  input.checked = target;
+  input.setAttribute("aria-checked", target ? "true" : "false");
+  return (
+    input.checked === target ||
+    input.getAttribute("aria-checked") === (target ? "true" : "false")
+  );
+};
+
+const isCurrentlyWorkHereYesAnswer = (answer: string): boolean => {
+  if (!isUsableWorkdayAnswer(answer)) return false;
+  const n = normalizeForMatch(answer);
+  if (NO_ANSWERS.has(n)) return false;
+  return (
+    YES_ANSWERS.has(n) ||
+    n === "icurrentlyworkhere" ||
+    n === "currentlyworkhere" ||
+    /currently\s*work\s*here/i.test(answer)
+  );
+};
+
+/** Indexes whose response actually has currently-work-here data (not `[]`). */
+const currentlyWorkHereYesIndexes = (
+  answers: WorkdayAiAnswer[],
+): Set<number> => {
+  const yes = new Set<number>();
+  for (const item of answers) {
+    if (!/currently work here/i.test(item.label)) continue;
+    if (!isCurrentlyWorkHereYesAnswer(item.answer)) continue;
+    const m = item.label.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)/i,
+    );
+    yes.add(m ? Number(m[1]) : 1);
+  }
+  return yes;
+};
+
+/**
+ * Check "I currently work here" only when that job's value is non-empty.
+ * `value: []` is not in answers — never check those boxes.
+ */
+const fillCurrentlyWorkHereCheckboxes = async (
+  answers: WorkdayAiAnswer[],
+): Promise<number> => {
+  const yesIndexes = currentlyWorkHereYesIndexes(answers);
+  if (yesIndexes.size === 0) return 0;
+
+  const inputs = Array.from(
+    document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+  ).filter(isCurrentlyWorkHereInput);
+
+  let filled = 0;
+  for (const [index, input] of inputs.entries()) {
+    const labelled = withSectionLabel("I currently work here", input);
+    const fromLabel = labelled.match(
+      /^(?:Employment History|Work Experience)\s*(\d+)/i,
+    );
+    const panelIndex = fromLabel ? Number(fromLabel[1]) : index + 1;
+    if (!yesIndexes.has(panelIndex)) continue;
+
+    const ok = await forceWorkdayCheckboxState(input, true);
+    if (ok) filled += 1;
+    await delay(120);
+  }
+  return filled;
+};
+
 const fillCheckbox = async (
   input: HTMLInputElement,
   answer: string,
 ): Promise<boolean> => {
+  if (isCurrentlyWorkHereInput(input)) {
+    return false;
+  }
   if (!isUsableWorkdayAnswer(answer)) return false;
 
   const n = normalizeForMatch(answer);
@@ -2360,28 +2505,7 @@ const fillCheckbox = async (
     return false;
   }
 
-  const isChecked =
-    input.checked || input.getAttribute("aria-checked") === "true";
-  if (isChecked === target) return true;
-
-  const labelEl = input.id
-    ? document.querySelector<HTMLElement>(
-        `label[for="${CSS.escape(input.id)}"]`,
-      )
-    : null;
-  fullClick(labelEl ?? input);
-  if (
-    (input.checked || input.getAttribute("aria-checked") === "true") !== target
-  ) {
-    setNativeChecked(input, target);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-    fullClick(input);
-  }
-  await delay(80);
-  const now =
-    input.checked || input.getAttribute("aria-checked") === "true";
-  return now === target;
+  return forceWorkdayCheckboxState(input, target);
 };
 
 const MONTH_NAME_TO_NUM: Record<string, string> = {
@@ -2574,8 +2698,11 @@ const fillDateMmyyyy = async (
   );
   if (!monthInput || !yearInput) return false;
 
-  await fillDateSpinInput(monthInput, parsed.month);
+  await fillDateSpinInput(monthInput, String(Number(parsed.month)));
   await fillDateSpinInput(yearInput, parsed.year);
+  closeListbox();
+  monthInput.blur();
+  yearInput.blur();
   await delay(100);
 
   return (
@@ -2764,10 +2891,7 @@ export const autofillWorkdayWithAi = async (
     };
   }
 
-  // Fill order:
-  // 1) "I currently work here" before To dates
-  // 2) Education panels in order: School → Degree → Field of Study → other
-  // 3) Employment panels by index
+  // Fill whatever the response has: From, To, and "I currently work here" independently.
   const fieldSortKey = (label: string): number => {
     if (/i currently work here/i.test(label)) return 0;
 
@@ -2819,6 +2943,16 @@ export const autofillWorkdayWithAi = async (
       continue;
     }
 
+    const isCurrentWorkCheckbox =
+      isCurrentlyWorkHereLabel(field.label) ||
+      (field.element instanceof HTMLInputElement &&
+        isCurrentlyWorkHereInput(field.element));
+
+    // Dedicated pass: only check when this job's value is non-empty
+    if (isCurrentWorkCheckbox) {
+      continue;
+    }
+
     if (isFieldMarkedEmpty(field.label, emptyLabelKeys)) {
       skipped += 1;
       continue;
@@ -2860,6 +2994,9 @@ export const autofillWorkdayWithAi = async (
       await delay(200);
     }
   }
+
+  const currentFilled = await fillCurrentlyWorkHereCheckboxes(answers);
+  filled += currentFilled;
 
   return {
     total: answers.length + emptyCount,

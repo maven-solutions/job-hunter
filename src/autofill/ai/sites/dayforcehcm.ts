@@ -18,7 +18,7 @@ import { AiFillResult, AiSiteHandler } from "../types";
 const DAYFORCEHCM_HOST_SUFFIXES = ["dayforcehcm.com"] as const;
 
 /** Minimum wait after upload before treating parse as in progress. */
-const RESUME_PARSED_MIN_WAIT_MS = 1500;
+const RESUME_PARSED_MIN_WAIT_MS = 2500;
 
 /** DOM must stay quiet this long after parse before we scan. */
 const RESUME_PARSE_IDLE_MS = 2000;
@@ -65,36 +65,38 @@ const getResumeUploadWrapper = (
   (fileInput?.closest(".ant-upload-wrapper") as HTMLElement | null) ??
   document.querySelector<HTMLElement>('[test-id="import-resume-section"]');
 
-const getUploadListItem = (): HTMLElement | null => {
+/** Resume import finished: Dayforce shows the file chip with ant-upload-list-item-done. */
+const getParsedResumeListItem = (): HTMLElement | null => {
+  const byTestId = document.querySelector<HTMLElement>(
+    '[test-id="upload-file-item-test"] .ant-upload-list-item-done',
+  );
+  if (byTestId) return byTestId;
+
   const wrapper = getResumeUploadWrapper(findDayforceHcmResumeFileInput());
   return (
     wrapper?.querySelector<HTMLElement>(
-      ".ant-upload-list-item-done, .ant-upload-list-item:not(.ant-upload-list-item-uploading)",
-    ) ??
-    wrapper?.querySelector<HTMLElement>(".ant-upload-list-item") ??
-    null
+      ".ant-upload-list-item.ant-upload-list-item-done",
+    ) ?? null
   );
 };
 
 const isUploadInProgress = (): boolean => {
   const wrapper = getResumeUploadWrapper(findDayforceHcmResumeFileInput());
-  if (!wrapper) return false;
+  const section = document.querySelector<HTMLElement>(
+    '[test-id="import-resume-section"]',
+  );
+  const root = wrapper ?? section;
+  if (!root) return false;
   return !!(
-    wrapper.querySelector(".ant-upload-list-item-uploading") ||
-    wrapper.querySelector(".ant-spin-spinning") ||
-    document.querySelector(
-      '[test-id="import-resume-section"] .ant-spin-spinning',
-    )
+    root.querySelector(".ant-upload-list-item-uploading") ||
+    root.querySelector(".ant-spin-spinning")
   );
 };
 
-const isResumeAlreadyAttached = (): boolean => {
-  const fileInput = findDayforceHcmResumeFileInput();
-  if (fileInput?.files && fileInput.files.length > 0) return true;
-  const item = getUploadListItem();
-  if (!item) return false;
-  return !item.classList.contains("ant-upload-list-item-uploading");
-};
+const isResumeListedAsDone = (): boolean =>
+  !!getParsedResumeListItem() && !isUploadInProgress();
+
+const isResumeAlreadyAttached = (): boolean => isResumeListedAsDone();
 
 const getPersonalInfoParseSnapshot = (): string => {
   const ids = [
@@ -175,18 +177,96 @@ const uploadDayforceHcmResume = async (
   }
 };
 
-const waitUntilDayforceHcmResumeParsed = async (
+const getResumeParseWatchRoots = (): HTMLElement[] => {
+  const selectors = [
+    '[test-id="import-resume-section"]',
+    '[test-id="personal-information"]',
+    '[test-id="work-history"]',
+    '[test-id="education-history"]',
+  ];
+  const roots = selectors
+    .map((selector) => document.querySelector<HTMLElement>(selector))
+    .filter((el): el is HTMLElement => !!el);
+  return roots.length > 0 ? roots : [document.body];
+};
+
+const observeResumeParseRoots = (
+  observer: MutationObserver,
+  options: MutationObserverInit,
+): void => {
+  for (const root of getResumeParseWatchRoots()) {
+    observer.observe(root, options);
+  }
+};
+
+/**
+ * Wait until Dayforce lists the imported resume as done
+ * (`[test-id="upload-file-item-test"] .ant-upload-list-item-done`).
+ */
+const waitUntilDayforceHcmResumeListed = async (
+  maxWaitMs = RESUME_PARSE_TIMEOUT_MS,
+): Promise<boolean> => {
+  const start = Date.now();
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      observer.disconnect();
+      window.clearInterval(poll);
+      resolve(ok);
+    };
+
+    const check = (): boolean => {
+      if (isUploadInProgress()) return false;
+      if (isResumeListedAsDone()) {
+        finish(true);
+        return true;
+      }
+      if (Date.now() - start >= maxWaitMs) {
+        console.warn(
+          "[CareerAI DayforceHcm] Timed out waiting for resume import",
+        );
+        finish(isResumeListedAsDone());
+        return true;
+      }
+      return false;
+    };
+
+    const observer = new MutationObserver(() => {
+      check();
+    });
+    observeResumeParseRoots(observer, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
+
+    const poll = window.setInterval(() => {
+      check();
+    }, 400);
+
+    if (check()) return;
+  });
+};
+
+/**
+ * After the file chip appears, wait until Dayforce finishes auto-filling
+ * parsed values (personal info, work history, etc.).
+ */
+const waitUntilDayforceHcmResumeAutoFilled = async (
   previousSnapshot: string,
   maxWaitMs = RESUME_PARSE_TIMEOUT_MS,
 ): Promise<boolean> => {
   const start = Date.now();
-  const root =
-    document.querySelector('[test-id="personal-information"]') ||
-    document.querySelector('[test-id="import-resume-section"]') ||
-    document.body;
 
   return new Promise((resolve) => {
+    let settled = false;
     const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
       observer.disconnect();
       window.clearInterval(poll);
       resolve(ok);
@@ -198,17 +278,17 @@ const waitUntilDayforceHcmResumeParsed = async (
       const parsedValues = hasPersonalInfoParsedValues();
       const snapshotChanged =
         getPersonalInfoParseSnapshot() !== previousSnapshot && parsedValues;
-      const listReady = !!getUploadListItem() && parsedValues;
+      const listedAndParsed = isResumeListedAsDone() && parsedValues;
 
-      if (snapshotChanged || listReady) {
+      if (snapshotChanged || listedAndParsed) {
         finish(true);
         return true;
       }
       if (Date.now() - start >= maxWaitMs) {
         console.warn(
-          "[CareerAI DayforceHcm] Timed out waiting for resume parse",
+          "[CareerAI DayforceHcm] Timed out waiting for resume auto-fill",
         );
-        finish(!!getUploadListItem() || parsedValues);
+        finish(parsedValues || isResumeListedAsDone());
         return true;
       }
       return false;
@@ -217,7 +297,7 @@ const waitUntilDayforceHcmResumeParsed = async (
     const observer = new MutationObserver(() => {
       check();
     });
-    observer.observe(root, {
+    observeResumeParseRoots(observer, {
       childList: true,
       subtree: true,
       characterData: true,
@@ -242,14 +322,10 @@ const waitForDayforceHcmParseIdle = (
     const start = Date.now();
     let lastChange = Date.now();
 
-    const root =
-      document.querySelector('[test-id="personal-information"]') ||
-      document.body;
-
     const observer = new MutationObserver(() => {
       lastChange = Date.now();
     });
-    observer.observe(root, {
+    observeResumeParseRoots(observer, {
       childList: true,
       subtree: true,
       characterData: true,
@@ -269,9 +345,10 @@ const waitForDayforceHcmParseIdle = (
 /**
  * Dayforce-specific prep:
  * 1. Upload resume from applicantData.pdf_url
- * 2. Wait until Dayforce parses it and autofills personal info
- * 3. Wait until the form stops updating so parse is fully applied before scan
- * 4. Expand Education History records from applicantData.education
+ * 2. Wait until the import chip is done (`upload-file-item-test`)
+ * 3. Wait until Dayforce parses the resume and auto-fills the form
+ * 4. Wait until the form stops updating (including Work History)
+ * 5. Expand Education History records from applicantData.education
  */
 export const prepareDayforceHcmBeforeScan = async (
   applicantData: Applicant,
@@ -284,10 +361,11 @@ export const prepareDayforceHcmBeforeScan = async (
   if (!alreadyAttached && applicantData?.pdf_url && fileInput) {
     const uploaded = await uploadDayforceHcmResume(applicantData);
     if (uploaded) {
-      await waitUntilDayforceHcmResumeParsed(previousSnapshot);
+      await waitUntilDayforceHcmResumeListed();
+      await waitUntilDayforceHcmResumeAutoFilled(previousSnapshot);
     }
-  } else if (!alreadyParsed && alreadyAttached) {
-    await waitUntilDayforceHcmResumeParsed(previousSnapshot);
+  } else if (alreadyAttached && !alreadyParsed) {
+    await waitUntilDayforceHcmResumeAutoFilled(previousSnapshot);
   }
 
   if (alreadyAttached || alreadyParsed || fileInput) {
