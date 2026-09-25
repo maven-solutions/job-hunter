@@ -33,30 +33,8 @@ function cleanCompanyAria(aria: string | null): string {
   );
 }
 
-const EMPLOYMENT_OPTIONS: Record<string, { value: string; label: string }> = {
-  "full-time": { value: "full-time", label: "Full-time" },
-  "full time": { value: "full-time", label: "Full-time" },
-  "part-time": { value: "part-time", label: "Part-time" },
-  "part time": { value: "part-time", label: "Part-time" },
-  contract: { value: "contract", label: "Contract" },
-  contractor: { value: "contract", label: "Contract" },
-};
-
-const JOB_TYPE_OPTIONS: Record<string, { value: string; label: string }> = {
-  remote: { value: "remote", label: "Remote" },
-  hybrid: { value: "hybrid", label: "Hybrid" },
-  "on-site": { value: "on-site", label: "On-site" },
-  onsite: { value: "on-site", label: "On-site" },
-  "in-person": { value: "on-site", label: "On-site" },
-  "in person": { value: "on-site", label: "On-site" },
-};
-
-function matchEmployment(text: string) {
-  return EMPLOYMENT_OPTIONS[text.toLowerCase()] ?? null;
-}
-
-function matchJobType(text: string) {
-  return JOB_TYPE_OPTIONS[text.toLowerCase()] ?? null;
+function isWorkplace(text: string): boolean {
+  return /^(remote|hybrid|on-?site|in-?person)$/i.test(text);
 }
 
 function extractTitle(root: ParentNode): string {
@@ -93,7 +71,7 @@ function extractCompanyName(root: ParentNode): string {
     for (const chunk of chunks) {
       if (!chunk || chunk === "•" || chunk === "·") continue;
       if (/^\d+(\.\d+)?$/.test(chunk)) continue;
-      if (matchJobType(chunk)) continue;
+      if (isWorkplace(chunk)) continue;
       if (chunk.includes("•") || chunk.startsWith("$")) continue;
       return chunk;
     }
@@ -110,51 +88,33 @@ function isSeparator(text: string): boolean {
   return /^[\s•·\u2022\u00b7\u2013\u2014-]+$/.test(text);
 }
 
-function parseLocationLine(raw: string): {
-  location: string;
-  jobType: { value: string; label: string } | null;
-} {
+function parseLocationLine(raw: string): string {
   const parts = raw
     .split(/[•·\u2022\u00b7]/)
     .map((part) => part.trim())
-    .filter((part) => part && !isSeparator(part));
+    .filter((part) => part && !isSeparator(part) && !isWorkplace(part) && !part.startsWith("$"));
 
-  let jobType: { value: string; label: string } | null = null;
-  const locationParts: string[] = [];
-
-  for (const part of parts) {
-    const workplace = matchJobType(part);
-    if (workplace) {
-      jobType = workplace;
-    } else if (!part.startsWith("$")) {
-      locationParts.push(part);
-    }
-  }
-
-  return { location: locationParts.join(", "), jobType };
+  return parts.join(", ");
 }
 
-function extractLocation(root: ParentNode): {
-  location: string;
-  jobType: { value: string; label: string } | null;
-} {
+function extractLocation(root: ParentNode): string {
   const metadata = root.querySelector('[data-testid="company-info-metadata"]');
   if (metadata) {
     const rows = Array.from(metadata.querySelectorAll("div")).filter((div) => {
       const directTexts = Array.from(div.children).map((child) => textOf(child));
       return directTexts.some(
-        (text) => text === "•" || text === "·" || !!matchJobType(text),
+        (text) => text === "•" || text === "·" || isWorkplace(text),
       );
     });
     const row = rows.sort((a, b) => textOf(a).length - textOf(b).length)[0];
     if (row) {
-      const parsed = parseLocationLine(
+      const location = parseLocationLine(
         Array.from(row.children)
           .map((child) => textOf(child))
           .filter((text) => text && !isSeparator(text))
           .join(" • "),
       );
-      if (parsed.location || parsed.jobType) return parsed;
+      if (location) return location;
     }
   }
 
@@ -179,31 +139,7 @@ function extractLocation(root: ParentNode): {
   );
   if (legacy) return parseLocationLine(legacy);
 
-  return { location: "", jobType: null };
-}
-
-function extractEmployment(root: ParentNode) {
-  const group = root.querySelector('[role="group"][aria-label="Job type"]');
-  const labels = group
-    ? Array.from(group.querySelectorAll("[dir='ltr'], [data-testid]")).map(
-        (el) => textOf(el) || el.getAttribute("data-testid") || "",
-      )
-    : [];
-
-  for (const label of labels) {
-    const match = matchEmployment(label);
-    if (match) return match;
-  }
-
-  const headerLabels = Array.from(
-    root.querySelectorAll('[data-testid="desktop-job-header"] [dir="ltr"]'),
-  ).map(textOf);
-  for (const label of headerLabels) {
-    const match = matchEmployment(label);
-    if (match) return match;
-  }
-
-  return null;
+  return "";
 }
 
 function extractPay(root: ParentNode): string {
@@ -236,21 +172,6 @@ function extractDescription(root: ParentNode): string {
   return clone.innerHTML.trim();
 }
 
-function extractEasyApply(root: ParentNode) {
-  const apply = root.querySelector('[data-testid="viewjob-apply"]');
-  const label = normalizeText(
-    `${textOf(apply)} ${apply?.getAttribute("aria-label") ?? ""}`,
-  ).toLowerCase();
-  if (!label) return null;
-  if (/company site|company website/.test(label)) {
-    return { value: 0, label: "Company" };
-  }
-  if (/easy apply|easily apply|apply now/.test(label)) {
-    return { value: 1, label: "Easy Apply" };
-  }
-  return null;
-}
-
 export const getJobsFromIndeed = (
   setPostUrl,
   clearStateAndCity,
@@ -269,17 +190,16 @@ export const getJobsFromIndeed = (
   clearStateAndCity();
 
   const root = getJobRoot();
-  const { location, jobType } = extractLocation(root);
   const pay = extractPay(root);
 
   setJobstitle(extractTitle(root));
   setCompanyName(extractCompanyName(root));
-  setLocation(location);
+  setLocation(extractLocation(root));
   setJobDescription(extractDescription(root));
-  setJobType(jobType);
-  setEmployment(extractEmployment(root));
   setJoboverview(pay ? [pay] : []);
   setPostedDate("n/a");
-  setEasyApply(extractEasyApply(root));
+  setEmployment(null);
+  setJobType(null);
+  setEasyApply(null);
   setSource("Indeed");
 };
