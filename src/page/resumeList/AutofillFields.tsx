@@ -14,7 +14,7 @@ import AutofillButton from "./AutofillButton";
 import { Bookmark, Camera, Zap } from "react-feather";
 import { handleScreenshot } from "./handleScreenshot";
 
-const extractInfo = (resumeData, applicationForm) => {
+export const extractInfo = (resumeData, applicationForm) => {
   const { pdfUrl, fields, title, name: applicantName } = resumeData;
 
   const {
