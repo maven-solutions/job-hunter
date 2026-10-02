@@ -52,6 +52,126 @@ const waitForPaint = async () => {
   await wait(400);
 };
 
+const SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+  "Spacebar",
+]);
+
+/**
+ * captureVisibleTab fails when the viewport moves while Chrome is reading
+ * pixels. A trackpad nudge, mouse-wheel tick, or scrollbar drag changes
+ * scrollY between the measured position and the bitmap, so the stitch either
+ * gets a Chrome error or sees no new page content and aborts. Block those
+ * inputs until every segment has been captured.
+ */
+const lockPageInput = (): (() => void) => {
+  const blockGesture = (event: Event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+
+  const blockScrollKeys = (event: KeyboardEvent) => {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+
+  const blockMiddleClick = (event: MouseEvent) => {
+    if (event.button !== 1) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
+
+  const listenerOptions: AddEventListenerOptions = {
+    capture: true,
+    passive: false,
+  };
+
+  window.addEventListener("wheel", blockGesture, listenerOptions);
+  window.addEventListener("touchmove", blockGesture, listenerOptions);
+  window.addEventListener("keydown", blockScrollKeys, listenerOptions);
+  window.addEventListener("mousedown", blockMiddleClick, listenerOptions);
+
+  const htmlOverscroll = document.documentElement.style.overscrollBehavior;
+  const bodyOverscroll = document.body.style.overscrollBehavior;
+  document.documentElement.style.setProperty(
+    "overscroll-behavior",
+    "none",
+    "important",
+  );
+  document.body.style.setProperty("overscroll-behavior", "none", "important");
+
+  const style = document.createElement("style");
+  style.setAttribute("data-screenshot-scroll-lock", "true");
+  style.textContent =
+    "html::-webkit-scrollbar,body::-webkit-scrollbar{width:0!important;height:0!important;display:none!important;}";
+  document.documentElement.appendChild(style);
+  document.documentElement.style.setProperty(
+    "scrollbar-width",
+    "none",
+    "important",
+  );
+
+  // Sit above the page so hover menus and click targets cannot change layout
+  // while frames are being captured. The extension UI is already hidden.
+  const shield = document.createElement("div");
+  shield.setAttribute("data-screenshot-input-shield", "true");
+  shield.style.cssText = [
+    "position:fixed",
+    "inset:0",
+    "z-index:2147483647",
+    "background:transparent",
+    "cursor:progress",
+    "pointer-events:auto",
+  ].join(";");
+  document.documentElement.appendChild(shield);
+
+  return () => {
+    window.removeEventListener("wheel", blockGesture, listenerOptions);
+    window.removeEventListener("touchmove", blockGesture, listenerOptions);
+    window.removeEventListener("keydown", blockScrollKeys, listenerOptions);
+    window.removeEventListener("mousedown", blockMiddleClick, listenerOptions);
+
+    if (htmlOverscroll) {
+      document.documentElement.style.overscrollBehavior = htmlOverscroll;
+    } else {
+      document.documentElement.style.removeProperty("overscroll-behavior");
+    }
+    if (bodyOverscroll) {
+      document.body.style.overscrollBehavior = bodyOverscroll;
+    } else {
+      document.body.style.removeProperty("overscroll-behavior");
+    }
+
+    document.documentElement.style.removeProperty("scrollbar-width");
+    style.remove();
+    shield.remove();
+  };
+};
+
+const captureVisibleTabWithRetry = async (): Promise<string> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      return await captureVisibleTab();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      await wait(250);
+    }
+  }
+
+  throw lastError ?? new Error("Capture failed");
+};
+
 const setExtensionVisibility = (visible: boolean) => {
   const extensionRoot = document.getElementById(EXTENSION_ROOT_ID);
   if (!extensionRoot) return;
@@ -274,8 +394,10 @@ export const handleScreenshot = async (
   };
 
   let restoreFloatingElements = () => {};
+  let unlockPageInput = () => {};
 
   setExtensionVisibility(false);
+  unlockPageInput = lockPageInput();
   document.documentElement.style.setProperty(
     "scroll-behavior",
     "auto",
@@ -340,6 +462,7 @@ export const handleScreenshot = async (
     let drawnUntilY = 0;
     let targetY = 0;
     let captureCount = 0;
+    let segmentRetries = 0;
 
     while (drawnUntilY < fullHeight) {
       const maximumY = Math.max(0, fullHeight - viewportHeight);
@@ -356,7 +479,19 @@ export const handleScreenshot = async (
         await waitForPaint();
       }
 
-      const dataUrl = await captureVisibleTab();
+      // If the viewport moved after we measured it, recapture this segment
+      // instead of stitching a bitmap that no longer matches scrollY.
+      if (Math.abs(getActualScrollY() - actualScrollY) > 2) {
+        segmentRetries += 1;
+        if (segmentRetries > 4) {
+          throw new Error(
+            "The page kept moving while the screenshot was being captured.",
+          );
+        }
+        continue;
+      }
+
+      const dataUrl = await captureVisibleTabWithRetry();
       const screenshot = await loadImage(dataUrl);
 
       const sourceScaleX = screenshot.width / viewportWidth;
@@ -405,9 +540,14 @@ export const handleScreenshot = async (
       const drawHeight = captureBottomY - destinationTopY;
 
       if (drawHeight <= 0) {
-        throw new Error(
-          "The page stopped scrolling before the full screenshot was captured.",
-        );
+        segmentRetries += 1;
+        if (segmentRetries > 4) {
+          throw new Error(
+            "The page stopped scrolling before the full screenshot was captured.",
+          );
+        }
+        targetY = Math.min(maximumY, drawnUntilY);
+        continue;
       }
 
       const sourceTopY = destinationTopY - captureTopY;
@@ -431,6 +571,7 @@ export const handleScreenshot = async (
       const previousDrawnUntilY = drawnUntilY;
       drawnUntilY = captureBottomY;
       captureCount += 1;
+      segmentRetries = 0;
 
       if (drawnUntilY <= previousDrawnUntilY) {
         throw new Error(
@@ -481,6 +622,7 @@ export const handleScreenshot = async (
         : "Unable to capture or upload screenshot on this page.");
     resultMessage = `Unable to capture or upload screenshot: ${message}`;
   } finally {
+    unlockPageInput();
     restoreFloatingElements();
 
     restoreStyleProperty(
