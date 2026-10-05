@@ -1,4 +1,4 @@
-import { handleValueChanges } from "../helper";
+import { delay, handleValueChanges } from "../helper";
 import {
   closeSearchCareersCombobox,
   collectSearchCareersCandidateFields,
@@ -7,7 +7,6 @@ import {
   readSearchCareersListboxOptions,
   SearchCareersCandidateField,
   SearchCareersOptionNode,
-  waitForSearchCareersFieldsToSettle,
 } from "./scan.searchcareers";
 import { Applicant } from "../data";
 
@@ -633,26 +632,82 @@ export const autofillSearchCareersWithAi = async (
   };
 };
 
+const SEARCHCAREERS_PREP_WAIT_MS = 3000;
+
+const findPrepCombobox = (wrapperId: string): HTMLInputElement | null => {
+  const wrap = document.getElementById(wrapperId);
+  const input = wrap?.querySelector<HTMLInputElement>(
+    "input[role='combobox'], input[class*='select-module_select-input']",
+  );
+  return input ?? null;
+};
+
+const valueAlreadyMatches = (current: string, desired: string): boolean => {
+  const trimmed = cleanLabelText(current);
+  if (!trimmed) return false;
+  return !!matchOption(desired, [trimmed]) || !!matchOption(trimmed, [desired]);
+};
+
 /**
- * Location questions (legal name, address) render only after Country is set.
- * Select the applicant country before the scan so those fields are in the payload.
+ * Fill one SearchCareers select before the scan.
+ * Returns true when the value changed and the form needs time to re-render.
+ */
+const fillPrepCombobox = async (
+  input: HTMLInputElement | null,
+  answer: string,
+  label: string,
+): Promise<boolean> => {
+  if (!input) {
+    console.warn(`[CareerAI SearchCareers] ${label} control missing — skipping pre-fill`);
+    return false;
+  }
+  if (valueAlreadyMatches(input.value, answer)) return false;
+
+  const filled = await fillCombobox(input, answer);
+  await closeSearchCareersCombobox(input);
+  if (!filled) {
+    console.warn(
+      `[CareerAI SearchCareers] Could not set ${label} to:`,
+      answer,
+      "(current:",
+      input.value,
+      ")",
+    );
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Same order as Workday country prep: set Country, wait for dependent
+ * questions, set Language to English, wait, then the scan starts.
  */
 export const prepareSearchCareersBeforeScan = async (
   applicantData: Applicant | null | undefined,
 ): Promise<void> => {
-  await waitForSearchCareersFieldsToSettle();
-  const country = applicantData?.country?.trim();
-  if (!country) return;
+  const country = String(applicantData?.country ?? "").trim();
+  const countryInput = findPrepCombobox("Application_questions_location_country");
 
-  const countryField = collectSearchCareersCandidateFields().find(
-    (field) =>
-      field.kind === "combobox" &&
-      field.label.trim().toLowerCase() === "country",
+  if (!country) {
+    console.warn(
+      "[CareerAI SearchCareers] No applicant country — skipping country pre-fill",
+    );
+  } else {
+    const countryChanged = await fillPrepCombobox(countryInput, country, "Country");
+    if (countryChanged) {
+      await delay(SEARCHCAREERS_PREP_WAIT_MS);
+    }
+  }
+
+  const languageInput = findPrepCombobox(
+    "Voluntary_Self_Identification_of_Disability_Q_LANGUAGE",
   );
-  if (!(countryField?.element instanceof HTMLInputElement)) return;
-  if (countryField.element.value.trim()) return;
-
-  await fillCombobox(countryField.element, country);
-  await closeSearchCareersCombobox(countryField.element);
-  await waitForSearchCareersFieldsToSettle();
+  const languageChanged = await fillPrepCombobox(
+    languageInput,
+    "English",
+    "Language",
+  );
+  if (languageChanged) {
+    await delay(SEARCHCAREERS_PREP_WAIT_MS);
+  }
 };
