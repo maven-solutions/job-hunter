@@ -536,9 +536,20 @@ const fillCheckboxField = (field: SearchCareersCandidateField, answer: string): 
 
 const fillRadioGroup = (field: SearchCareersCandidateField, answer: string): boolean => {
   if (!isUsableSearchCareersAnswer(answer)) return false;
-  const radios = Array.from(
+
+  let radios = Array.from(
     field.element.querySelectorAll<HTMLInputElement>("input[type='radio']"),
   );
+  if (radios.length <= 1) {
+    const name = radios[0]?.name || "";
+    if (name) {
+      radios = Array.from(
+        document.querySelectorAll<HTMLInputElement>(
+          `input[type='radio'][name='${CSS.escape(name)}']`,
+        ),
+      );
+    }
+  }
   if (radios.length === 0) return false;
 
   const labeled = radios.map((input) => ({
@@ -553,12 +564,21 @@ const fillRadioGroup = (field: SearchCareersCandidateField, answer: string): boo
   const target = labeled.find((item) => item.label === matched);
   if (!target) return false;
   if (target.input.checked) return true;
+
   const label = target.input.id
     ? document.querySelector<HTMLElement>(
         `label[for="${CSS.escape(target.input.id)}"]`,
       )
     : null;
-  (label ?? target.input).click();
+  const custom = target.input.id
+    ? document.getElementById(`${target.input.id}-custom-radio`)
+    : target.input.parentElement?.querySelector<HTMLElement>(
+        "[class*='radio-module_radio-button']",
+      );
+
+  (label ?? custom ?? target.input).click();
+  if (!target.input.checked) target.input.click();
+  if (!target.input.checked && custom) custom.click();
   return target.input.checked;
 };
 

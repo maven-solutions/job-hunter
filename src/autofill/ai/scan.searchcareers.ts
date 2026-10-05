@@ -283,17 +283,28 @@ const isRequiredField = (element: HTMLElement, labelHost?: Element | null): bool
 };
 
 export const getSearchCareersChoiceLabel = (input: HTMLInputElement): string => {
-  const aria = input.getAttribute("aria-label");
-  if (aria) return cleanLabelText(aria);
-
   if (input.id) {
     const byFor = document.querySelector<HTMLElement>(
       `label[for="${CSS.escape(input.id)}"]`,
     );
+    const visible = byFor?.querySelector<HTMLElement>(
+      "[class*='selector-label'], [class*='radio-module_selector-label']",
+    );
+    if (visible?.textContent) {
+      const fromVisible = cleanLabelText(visible.textContent);
+      if (fromVisible) return fromVisible;
+    }
     if (byFor) {
       const fromFor = getOwnText(byFor);
       if (fromFor) return fromFor;
     }
+  }
+
+  const aria = input.getAttribute("aria-label");
+  if (aria) {
+    return cleanLabelText(
+      aria.replace(/,?\s*please check one of the boxes below:?/i, ""),
+    );
   }
 
   const parentLabel = input.closest("label");
@@ -744,8 +755,10 @@ export const collectSearchCareersCandidateFields =
     radioGroups.forEach((radios, key) => {
       const host =
         radios[0].closest<HTMLElement>(
-          "[class*='radio-module'], fieldset, [class*='field-']",
-        ) ?? radios[0];
+          "[role='radiogroup'], [class*='radio-module_radio-group']",
+        ) ??
+        radios[0].closest<HTMLElement>("fieldset, [class*='field-']") ??
+        radios[0];
       const question = getGroupQuestionLabel(host);
       const optionLabels = radios
         .map((radio) => getSearchCareersChoiceLabel(radio))
