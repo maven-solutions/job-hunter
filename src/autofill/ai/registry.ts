@@ -5,6 +5,7 @@ import { bamboohrAiHandler } from "./sites/bamboohr";
 import { dayforcehcmAiHandler } from "./sites/dayforcehcm";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
+import { jobdivaAiHandler } from "./sites/jobdiva";
 import { jobviteAiHandler } from "./sites/jobvite";
 import { leverAiHandler } from "./sites/lever";
 import { metacareersAiHandler } from "./sites/metacareers";
@@ -32,6 +33,7 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   searchcareersAiHandler,
   amazonAiHandler,
   bamboohrAiHandler,
+  jobdivaAiHandler,
   jobviteAiHandler,
   applytojobAiHandler,
   ultiproAiHandler,
