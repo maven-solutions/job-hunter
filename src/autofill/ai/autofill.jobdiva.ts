@@ -1,4 +1,4 @@
-import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
+import { delay, handleValueChanges } from "../helper";
 import {
   closeJobdivaFlyout,
   collectJobdivaCandidateFields,
@@ -33,8 +33,15 @@ const cleanLabelText = (text: string): string =>
     .replace(/\s+/g, " ")
     .trim();
 
+/**
+ * Keep digits. The shared lower-case helper strips them, so "Address 1" and
+ * "Address 2" collapse to the same key and an empty Address 2 skips Address 1.
+ */
 const normalizeLabel = (label: string): string =>
-  fromatStirngInLowerCase(cleanLabelText(label)) ?? "";
+  cleanLabelText(label)
+    .toLowerCase()
+    .replace(/['’`]/g, "")
+    .replace(/[^a-z0-9]+/g, "");
 
 const EMPTY_ANSWER_TOKENS = new Set([
   "",
@@ -278,15 +285,15 @@ export const normalizeJobdivaAiAnswers = (
 
 const matchOption = (answer: string, options: string[]): string | null => {
   if (!isUsableJobdivaAnswer(answer)) return null;
-  const normalizedAnswer = fromatStirngInLowerCase(answer);
+  const normalizedAnswer = normalizeLabel(answer);
   if (!normalizedAnswer) return null;
 
   for (const option of options) {
-    if (fromatStirngInLowerCase(option) === normalizedAnswer) return option;
+    if (normalizeLabel(option) === normalizedAnswer) return option;
   }
 
   for (const option of options) {
-    const normalizedOption = fromatStirngInLowerCase(option);
+    const normalizedOption = normalizeLabel(option);
     if (
       normalizedOption?.includes(normalizedAnswer) ||
       normalizedAnswer.includes(normalizedOption ?? "")
