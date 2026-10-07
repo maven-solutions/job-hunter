@@ -35,15 +35,20 @@
   min-width: 0;
 }
 
-.tc_job_copy h1 {
-  margin: 0 0 3px;
-  color: var(--text, #202035);
-  font-size: 14px;
-  line-height: 1.2;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+.tc_job_title {
+  margin: 0 0 3px !important;
+  padding: 0 !important;
+  color: var(--text, #202035) !important;
+  font-family: Manrope, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
 }
 
 .tc_job_copy p {

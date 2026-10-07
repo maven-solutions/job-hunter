@@ -43,9 +43,10 @@ const ScreenshotGallery = ({
 
   return (
     <section className="screenshots-section">
-      <h2>
-        Saved screenshots <span>· {count}</span>
-      </h2>
+      <div className="ciautofill_v2_screenshots_heading">
+        Saved screenshots{" "}
+        <span className="ciautofill_v2_screenshots_count">· {count}</span>
+      </div>
       {count > 0 ? (
         <div className="ciautofill_v2_screenshot_grid">
           {screenshots.map((screenshot) => (

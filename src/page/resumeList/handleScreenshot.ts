@@ -7,6 +7,12 @@ import { EXTENSION_ACTION, EXTENSION_ROOT_ID } from "../../utils/constant";
 const wait = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+let screenshotInProgress = false;
+let lastCaptureStartedAt = 0;
+
+const CAPTURE_MIN_INTERVAL_MS = 550;
+const SCROLL_TOLERANCE_PX = 2;
+
 const captureVisibleTab = async (): Promise<string> => {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(
@@ -16,14 +22,31 @@ const captureVisibleTab = async (): Promise<string> => {
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
+
         if (!response?.success || !response?.dataUrl) {
           reject(new Error(response?.error || "Capture failed"));
           return;
         }
+
         resolve(response.dataUrl);
       },
     );
   });
+};
+
+/**
+ * Chrome limits captureVisibleTab calls. Keep at least ~550 ms between calls
+ * so normal captures and retries do not hit the browser rate limit.
+ */
+const captureVisibleTabRateLimited = async (): Promise<string> => {
+  const elapsed = Date.now() - lastCaptureStartedAt;
+
+  if (elapsed < CAPTURE_MIN_INTERVAL_MS) {
+    await wait(CAPTURE_MIN_INTERVAL_MS - elapsed);
+  }
+
+  lastCaptureStartedAt = Date.now();
+  return captureVisibleTab();
 };
 
 const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -49,7 +72,207 @@ const waitForPaint = async () => {
   await new Promise<void>((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
   );
+
   await wait(400);
+};
+
+const SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+  "Spacebar",
+]);
+
+type ScreenshotInteractionLock = {
+  setExpectedPosition: (x: number, y: number) => void;
+  getUnexpectedMovementVersion: () => number;
+  release: () => void;
+};
+
+/**
+ * Prevent the user from moving/interacting with the page while the screenshot
+ * is being stitched.
+ *
+ * Important: programmatic scrolling must still work, because we need to move
+ * the page between captures. setExpectedPosition() tells the lock which scroll
+ * movement is intentional.
+ */
+const lockPageInteractionForScreenshot = (
+  scrollElement: Element,
+): ScreenshotInteractionLock => {
+  let expectedX = Math.round(window.scrollX || 0);
+  let expectedY = Math.round(window.scrollY || scrollElement.scrollTop || 0);
+  let unexpectedMovementVersion = 0;
+  let correctingScroll = false;
+
+  const listenerOptions: AddEventListenerOptions = {
+    capture: true,
+    passive: false,
+  };
+
+  const preventInteraction = (event: Event) => {
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    event.stopImmediatePropagation();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const isScrollKey = SCROLL_KEYS.has(event.key);
+    const isZoomShortcut =
+      (event.ctrlKey || event.metaKey) &&
+      ["+", "-", "=", "0"].includes(event.key);
+
+    if (!isScrollKey && !isZoomShortcut) {
+      return;
+    }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    event.stopImmediatePropagation();
+  };
+
+  const handleMiddleClick = (event: MouseEvent) => {
+    if (event.button !== 1) {
+      return;
+    }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    event.stopImmediatePropagation();
+  };
+
+  /**
+   * wheel/touch prevention handles normal user input. This listener is a
+   * second line of defence for scrollbar dragging or page scripts that change
+   * the scroll position.
+   */
+  const handleUnexpectedScroll = () => {
+    if (correctingScroll) {
+      return;
+    }
+
+    const currentX = Math.round(window.scrollX || 0);
+    const currentY = Math.round(window.scrollY || scrollElement.scrollTop || 0);
+
+    const movedUnexpectedly =
+      Math.abs(currentX - expectedX) > SCROLL_TOLERANCE_PX ||
+      Math.abs(currentY - expectedY) > SCROLL_TOLERANCE_PX;
+
+    if (!movedUnexpectedly) {
+      return;
+    }
+
+    unexpectedMovementVersion += 1;
+    correctingScroll = true;
+
+    window.scrollTo(expectedX, expectedY);
+    scrollElement.scrollTop = expectedY;
+
+    requestAnimationFrame(() => {
+      correctingScroll = false;
+    });
+  };
+
+  window.addEventListener("wheel", preventInteraction, listenerOptions);
+  window.addEventListener("touchmove", preventInteraction, listenerOptions);
+  window.addEventListener("keydown", handleKeyDown, listenerOptions);
+  window.addEventListener("mousedown", handleMiddleClick, listenerOptions);
+  window.addEventListener("scroll", handleUnexpectedScroll, true);
+
+  const htmlOverscroll = {
+    value: document.documentElement.style.getPropertyValue(
+      "overscroll-behavior",
+    ),
+    priority: document.documentElement.style.getPropertyPriority(
+      "overscroll-behavior",
+    ),
+  };
+
+  const bodyOverscroll = {
+    value: document.body.style.getPropertyValue("overscroll-behavior"),
+    priority: document.body.style.getPropertyPriority("overscroll-behavior"),
+  };
+
+  document.documentElement.style.setProperty(
+    "overscroll-behavior",
+    "none",
+    "important",
+  );
+  document.body.style.setProperty("overscroll-behavior", "none", "important");
+
+  // Prevent clicks, pointer drags, hover interactions, etc. from changing the
+  // page while capture is in progress. Programmatic scrolling is unaffected.
+  const shield = document.createElement("div");
+  shield.setAttribute("data-screenshot-input-shield", "true");
+  shield.style.setProperty("position", "fixed", "important");
+  shield.style.setProperty("inset", "0", "important");
+  shield.style.setProperty("width", "100vw", "important");
+  shield.style.setProperty("height", "100vh", "important");
+  shield.style.setProperty("z-index", "2147483647", "important");
+  shield.style.setProperty("background", "transparent", "important");
+  shield.style.setProperty("cursor", "progress", "important");
+  shield.style.setProperty("pointer-events", "auto", "important");
+  shield.style.setProperty("touch-action", "none", "important");
+  document.documentElement.appendChild(shield);
+
+  const restoreStyleProperty = (
+    element: HTMLElement,
+    property: string,
+    value: string,
+    priority: string,
+  ) => {
+    if (value) {
+      element.style.setProperty(property, value, priority);
+    } else {
+      element.style.removeProperty(property);
+    }
+  };
+
+  return {
+    setExpectedPosition(x: number, y: number) {
+      expectedX = Math.round(x);
+      expectedY = Math.round(y);
+    },
+
+    getUnexpectedMovementVersion() {
+      return unexpectedMovementVersion;
+    },
+
+    release() {
+      window.removeEventListener("wheel", preventInteraction, true);
+      window.removeEventListener("touchmove", preventInteraction, true);
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("mousedown", handleMiddleClick, true);
+      window.removeEventListener("scroll", handleUnexpectedScroll, true);
+
+      restoreStyleProperty(
+        document.documentElement,
+        "overscroll-behavior",
+        htmlOverscroll.value,
+        htmlOverscroll.priority,
+      );
+      restoreStyleProperty(
+        document.body,
+        "overscroll-behavior",
+        bodyOverscroll.value,
+        bodyOverscroll.priority,
+      );
+
+      shield.remove();
+    },
+  };
 };
 
 const setExtensionVisibility = (visible: boolean) => {
@@ -89,6 +312,7 @@ const neutralizeFloatingElementsForScreenshot = (): (() => void) => {
     if (
       element === extensionRoot ||
       extensionRoot?.contains(element) ||
+      element.hasAttribute("data-screenshot-input-shield") ||
       element.tagName === "SCRIPT" ||
       element.tagName === "STYLE"
     ) {
@@ -120,8 +344,6 @@ const neutralizeFloatingElementsForScreenshot = (): (() => void) => {
     });
 
     if (position === "sticky") {
-      // Sticky elements already occupy space in normal flow. Relative removes
-      // the sticking behavior without removing the element or its content.
       element.style.setProperty("position", "relative", "important");
       element.style.setProperty("top", "auto", "important");
       element.style.setProperty("right", "auto", "important");
@@ -137,14 +359,12 @@ const neutralizeFloatingElementsForScreenshot = (): (() => void) => {
     const touchesRight = rect.right >= viewportWidth - 8;
     const isWideBar = rect.width >= viewportWidth * 0.5;
     const isTallPanel = rect.height >= viewportHeight * 0.35;
+
     const isEdgeContent =
       (isWideBar && (touchesTop || touchesBottom)) ||
       (isTallPanel && (touchesLeft || touchesRight));
 
     if (isEdgeContent) {
-      // Headers, footers, cookie bars, and side panels are useful content.
-      // Move them into normal flow so they appear only once instead of in
-      // every viewport screenshot.
       element.style.setProperty("position", "relative", "important");
       element.style.setProperty("top", "auto", "important");
       element.style.setProperty("right", "auto", "important");
@@ -153,15 +373,12 @@ const neutralizeFloatingElementsForScreenshot = (): (() => void) => {
       element.style.setProperty("transform", "none", "important");
       element.style.setProperty("max-width", "100%", "important");
     } else {
-      // Small floating widgets do not belong to a document position. Hiding
-      // them prevents the same button/badge from being repeated 3-5 times.
       element.style.setProperty("visibility", "hidden", "important");
       element.style.setProperty("pointer-events", "none", "important");
     }
   });
 
   return () => {
-    // Restore in reverse order because fixed/sticky elements may be nested.
     for (let index = changedElements.length - 1; index >= 0; index -= 1) {
       const { element, originalStyle } = changedElements[index];
 
@@ -178,29 +395,39 @@ export const handleScreenshot = async (
   dispatch: AppDispatch,
   applicantMode: string,
 ) => {
+  if (screenshotInProgress) {
+    alert(
+      "A screenshot is already being captured. Please wait for it to finish.",
+    );
+    return;
+  }
+
+  screenshotInProgress = true;
+
   const scrollElement =
     document.scrollingElement || document.documentElement || document.body;
+
   const originalX = window.scrollX;
   const originalY = window.scrollY;
   let resultMessage = "";
 
-  // Smooth scrolling and scroll snapping can leave the page between two
-  // requested positions when captureVisibleTab runs. Save and temporarily
-  // disable both so each screenshot has a reliable document position.
   const htmlScrollBehavior = {
     value: document.documentElement.style.getPropertyValue("scroll-behavior"),
     priority:
       document.documentElement.style.getPropertyPriority("scroll-behavior"),
   };
+
   const bodyScrollBehavior = {
     value: document.body.style.getPropertyValue("scroll-behavior"),
     priority: document.body.style.getPropertyPriority("scroll-behavior"),
   };
+
   const htmlScrollSnap = {
     value: document.documentElement.style.getPropertyValue("scroll-snap-type"),
     priority:
       document.documentElement.style.getPropertyPriority("scroll-snap-type"),
   };
+
   const bodyScrollSnap = {
     value: document.body.style.getPropertyValue("scroll-snap-type"),
     priority: document.body.style.getPropertyPriority("scroll-snap-type"),
@@ -227,8 +454,13 @@ export const handleScreenshot = async (
       window.innerHeight,
     );
 
+  const getActualScrollX = () => Math.round(window.scrollX || 0);
+
   const getActualScrollY = () =>
     Math.round(window.scrollY || scrollElement.scrollTop || 0);
+
+  let restoreFloatingElements = () => {};
+  let interactionLock: ScreenshotInteractionLock | null = null;
 
   const scrollToAndWait = async (
     requestedY: number,
@@ -236,14 +468,15 @@ export const handleScreenshot = async (
   ): Promise<number> => {
     const targetY = Math.max(0, Math.min(Math.round(requestedY), maximumY));
 
+    // This movement is intentional. Tell the protection layer before moving.
+    interactionLock?.setExpectedPosition(0, targetY);
+
     window.scrollTo(0, targetY);
     scrollElement.scrollTop = targetY;
 
     let previousY = -1;
     let stableFrames = 0;
 
-    // Wait until the actual scroll position stops changing. Re-issuing the
-    // scroll periodically also prevents site scripts from leaving it midway.
     for (let frame = 0; frame < 30; frame += 1) {
       await new Promise<void>((resolve) =>
         requestAnimationFrame(() => resolve()),
@@ -259,11 +492,15 @@ export const handleScreenshot = async (
 
       previousY = currentY;
 
-      if (Math.abs(currentY - targetY) <= 1 && stableFrames >= 2) {
+      if (
+        Math.abs(currentY - targetY) <= SCROLL_TOLERANCE_PX &&
+        stableFrames >= 2
+      ) {
         break;
       }
 
       if (frame % 5 === 4) {
+        interactionLock?.setExpectedPosition(0, targetY);
         window.scrollTo(0, targetY);
         scrollElement.scrollTop = targetY;
       }
@@ -273,31 +510,31 @@ export const handleScreenshot = async (
     return getActualScrollY();
   };
 
-  let restoreFloatingElements = () => {};
-
-  setExtensionVisibility(false);
-  document.documentElement.style.setProperty(
-    "scroll-behavior",
-    "auto",
-    "important",
-  );
-  document.body.style.setProperty("scroll-behavior", "auto", "important");
-  document.documentElement.style.setProperty(
-    "scroll-snap-type",
-    "none",
-    "important",
-  );
-  document.body.style.setProperty("scroll-snap-type", "none", "important");
-
   try {
+    setExtensionVisibility(false);
+
+    document.documentElement.style.setProperty(
+      "scroll-behavior",
+      "auto",
+      "important",
+    );
+    document.body.style.setProperty("scroll-behavior", "auto", "important");
+
+    document.documentElement.style.setProperty(
+      "scroll-snap-type",
+      "none",
+      "important",
+    );
+    document.body.style.setProperty("scroll-snap-type", "none", "important");
+
     restoreFloatingElements = neutralizeFloatingElementsForScreenshot();
+    interactionLock = lockPageInteractionForScreenshot(scrollElement);
+
     await waitForPaint();
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // captureVisibleTab only captures the visible horizontal viewport.
-    // Using a wider document width would create an unfilled area on the right.
     const canvasCssWidth = Math.min(
       viewportWidth,
       Math.max(
@@ -308,16 +545,18 @@ export const handleScreenshot = async (
       ),
     );
 
-    // Give lazy-loaded sections a chance to expand the document before the
-    // output canvas is created. The limit prevents infinite-scroll pages from
-    // loading forever.
+    // Give lazy-loaded sections a chance to render/expand before allocating the
+    // final canvas. The loop limit prevents infinite-scroll pages from running
+    // forever.
     let fullHeight = getFullHeight();
+
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const maximumY = Math.max(0, fullHeight - viewportHeight);
       await scrollToAndWait(maximumY, maximumY);
       await waitForPaint();
 
       const expandedHeight = getFullHeight();
+
       if (expandedHeight <= fullHeight + 1) {
         break;
       }
@@ -328,10 +567,6 @@ export const handleScreenshot = async (
     await scrollToAndWait(0, Math.max(0, fullHeight - viewportHeight));
     await waitForPaint();
 
-    // Do not intentionally overlap captures. The previous 120-240px
-    // overlap could appear as duplicated content when two images were
-    // stitched. Any overlap caused by browser scroll clamping is still
-    // removed below using actualScrollY and drawnUntilY.
     const overlap = 0;
 
     let stitchedCanvas: HTMLCanvasElement | null = null;
@@ -341,35 +576,117 @@ export const handleScreenshot = async (
     let targetY = 0;
     let captureCount = 0;
 
+    /**
+     * Scroll to a viewport, capture it, then verify that neither the scroll
+     * position nor the viewport size changed while Chrome was capturing.
+     *
+     * The movement version catches even a temporary movement that gets restored
+     * before captureVisibleTab() resolves.
+     */
+    const captureStableViewport = async (
+      requestedY: number,
+      maximumY: number,
+    ): Promise<{
+      dataUrl: string;
+      actualScrollY: number;
+    }> => {
+      let lastError: Error | null = null;
+
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const settledY = await scrollToAndWait(requestedY, maximumY);
+        await waitForPaint();
+
+        const beforeX = getActualScrollX();
+        const beforeY = getActualScrollY();
+        const movementVersionBefore =
+          interactionLock?.getUnexpectedMovementVersion() ?? 0;
+
+        if (
+          Math.abs(beforeX) > SCROLL_TOLERANCE_PX ||
+          Math.abs(beforeY - settledY) > SCROLL_TOLERANCE_PX
+        ) {
+          continue;
+        }
+
+        if (
+          window.innerWidth !== viewportWidth ||
+          window.innerHeight !== viewportHeight
+        ) {
+          throw new Error(
+            "The browser viewport changed while the screenshot was being captured.",
+          );
+        }
+
+        try {
+          const dataUrl = await captureVisibleTabRateLimited();
+
+          const afterX = getActualScrollX();
+          const afterY = getActualScrollY();
+          const movementVersionAfter =
+            interactionLock?.getUnexpectedMovementVersion() ?? 0;
+
+          const viewportChanged =
+            window.innerWidth !== viewportWidth ||
+            window.innerHeight !== viewportHeight;
+
+          const movedDuringCapture =
+            movementVersionAfter !== movementVersionBefore ||
+            Math.abs(afterX - beforeX) > SCROLL_TOLERANCE_PX ||
+            Math.abs(afterY - beforeY) > SCROLL_TOLERANCE_PX;
+
+          if (!viewportChanged && !movedDuringCapture) {
+            return {
+              dataUrl,
+              actualScrollY: beforeY,
+            };
+          }
+
+          lastError = new Error(
+            viewportChanged
+              ? "The browser viewport changed during capture."
+              : "The page moved during capture.",
+          );
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+        }
+
+        await wait(CAPTURE_MIN_INTERVAL_MS);
+      }
+
+      throw (
+        lastError ??
+        new Error("The page kept moving while the screenshot was captured.")
+      );
+    };
+
     while (drawnUntilY < fullHeight) {
       const maximumY = Math.max(0, fullHeight - viewportHeight);
-      let actualScrollY = await scrollToAndWait(targetY, maximumY);
-      await waitForPaint();
 
-      // A page script may still force a scroll position. Never allow that to
-      // create an uncaptured gap.
-      if (actualScrollY > drawnUntilY + 1) {
-        actualScrollY = await scrollToAndWait(
+      let capturedViewport = await captureStableViewport(targetY, maximumY);
+
+      // Never allow a site-controlled jump to create a gap in the stitched
+      // image. Re-capture from the first undrawn position if necessary.
+      if (capturedViewport.actualScrollY > drawnUntilY + 1) {
+        capturedViewport = await captureStableViewport(
           Math.max(0, drawnUntilY - overlap),
           maximumY,
         );
-        await waitForPaint();
       }
 
-      const dataUrl = await captureVisibleTab();
-      const screenshot = await loadImage(dataUrl);
+      const actualScrollY = capturedViewport.actualScrollY;
+      const screenshot = await loadImage(capturedViewport.dataUrl);
 
       const sourceScaleX = screenshot.width / viewportWidth;
       const sourceScaleY = screenshot.height / viewportHeight;
 
       if (!stitchedCanvas || !ctx) {
-        // Keep as much native screenshot detail as possible while staying
-        // below common browser canvas dimension and memory limits.
         const nativeScale = Math.min(sourceScaleX, sourceScaleY);
+
         const dimensionScale = Math.min(
           32760 / Math.max(1, canvasCssWidth),
           32760 / Math.max(1, fullHeight),
         );
+
         const areaScale = Math.sqrt(
           120_000_000 / Math.max(1, canvasCssWidth * fullHeight),
         );
@@ -390,6 +707,7 @@ export const handleScreenshot = async (
         );
 
         ctx = stitchedCanvas.getContext("2d");
+
         if (!ctx) {
           throw new Error("Canvas context unavailable");
         }
@@ -398,9 +716,6 @@ export const handleScreenshot = async (
       const captureTopY = Math.max(0, actualScrollY);
       const captureBottomY = Math.min(fullHeight, captureTopY + viewportHeight);
 
-      // Draw only the part that has not already been drawn. This is the key
-      // difference from incrementing by viewportHeight: the stitch follows
-      // the actual browser scroll position, not the requested one.
       const destinationTopY = Math.max(drawnUntilY, captureTopY);
       const drawHeight = captureBottomY - destinationTopY;
 
@@ -442,12 +757,8 @@ export const handleScreenshot = async (
         break;
       }
 
-      // Continue exactly where the previous capture ended. If the browser
-      // clamps the final scroll position, destinationTopY/sourceTopY above
-      // crop the already-drawn portion automatically.
       targetY = Math.min(maximumY, drawnUntilY);
 
-      // Safety guard for pages that continuously manipulate their own scroll.
       if (captureCount > Math.ceil(fullHeight / 100) + 50) {
         throw new Error("Too many screenshot segments were required.");
       }
@@ -458,11 +769,13 @@ export const handleScreenshot = async (
     }
 
     const screenshotBlob = await canvasToBlob(stitchedCanvas);
+
     if (applicantMode === "individual") {
       await dispatch(
         uploadIndividualSessionScreenshot(screenshotBlob),
       ).unwrap();
     }
+
     if (applicantMode === "va") {
       await dispatch(uploadOrgSessionScreenshot(screenshotBlob)).unwrap();
     }
@@ -470,17 +783,24 @@ export const handleScreenshot = async (
     if (applicantMode === "applicant") {
       await dispatch(uploadApplicantSessionScreenshot(screenshotBlob)).unwrap();
     }
+
     resultMessage = "Screenshot uploaded successfully.";
   } catch (error: any) {
     console.error("Unable to capture or upload screenshot:", error);
+
     const message =
       error?.message ||
       error?.error ||
       (error instanceof Error
         ? error.message
         : "Unable to capture or upload screenshot on this page.");
+
     resultMessage = `Unable to capture or upload screenshot: ${message}`;
   } finally {
+    // Release the lock before restoring the user's original scroll position.
+    interactionLock?.release();
+    interactionLock = null;
+
     restoreFloatingElements();
 
     restoreStyleProperty(
@@ -510,6 +830,8 @@ export const handleScreenshot = async (
 
     setExtensionVisibility(true);
     window.scrollTo(originalX, originalY);
+
+    screenshotInProgress = false;
   }
 
   if (resultMessage) {
