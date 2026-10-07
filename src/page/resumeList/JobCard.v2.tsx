@@ -16,7 +16,7 @@ const JobCardV2 = ({ jobTitle, userName }: JobCardProps) => (
       </svg>
     </div>
     <div className="tc_job_copy">
-      <h1>{jobTitle}</h1>
+      <div className="tc_job_title">{jobTitle}</div>
       <p>Applying as: {userName}</p>
     </div>
   </section>
