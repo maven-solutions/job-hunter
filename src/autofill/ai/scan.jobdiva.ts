@@ -287,12 +287,17 @@ const isPhoneTypeMenu = (element: HTMLElement): boolean => {
 const isPhoneCountryDropdown = (element: HTMLElement): boolean =>
   element instanceof HTMLButtonElement && !!element.closest(".jd-form-phone");
 
-const getCheckboxLabel = (input: HTMLInputElement): string => {
+const checkboxInnerLabel = (input: HTMLInputElement): HTMLElement | null => {
   const wrap = input.closest(".jd-checkbox");
-  if (input.id && wrap) {
-    const inner = wrap.querySelector(`label[for="${CSS.escape(input.id)}"]`);
-    if (inner?.textContent) return cleanLabelText(inner.textContent);
-  }
+  if (!(wrap instanceof HTMLElement) || !input.id) return null;
+  const inner = wrap.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+  return inner instanceof HTMLElement ? inner : null;
+};
+
+const getCheckboxLabel = (input: HTMLInputElement): string => {
+  const inner = checkboxInnerLabel(input);
+  if (inner?.textContent) return cleanLabelText(inner.textContent);
+  const wrap = input.closest(".jd-checkbox");
   if (wrap) {
     const clone = wrap.cloneNode(true) as HTMLElement;
     clone.querySelectorAll("input, svg").forEach((node) => node.remove());
@@ -304,7 +309,14 @@ const getCheckboxLabel = (input: HTMLInputElement): string => {
 
 const isCheckboxVisible = (input: HTMLInputElement): boolean => {
   const wrap = input.closest(".jd-checkbox");
-  if (wrap instanceof HTMLElement) return isVisibleElement(wrap);
+  if (wrap instanceof HTMLElement && isVisibleElement(wrap)) return true;
+  const inner = checkboxInnerLabel(input);
+  if (inner && isVisibleElement(inner)) return true;
+  const svg = wrap?.querySelector("svg");
+  if (svg instanceof SVGElement) {
+    const rect = svg.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) return true;
+  }
   return isVisibleElement(input);
 };
 

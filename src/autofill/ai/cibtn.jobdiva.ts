@@ -38,7 +38,7 @@ const injectScanStyles = (): void => {
     .${SCAN_ICON_WRAPPER_CLASS} {
       position: absolute;
       top: 50%;
-      left: 8px;
+      right: 8px;
       transform: translateY(-50%);
       z-index: 2147483646;
       pointer-events: auto;
@@ -114,7 +114,9 @@ const setIconState = (
   }
 };
 
-const buildApiElementForField = (entry: ScannableFieldEntry): AiFormElement => ({
+const buildApiElementForField = (
+  entry: ScannableFieldEntry,
+): AiFormElement => ({
   label: entry.data.label,
   required: entry.data.required,
   type: "text",

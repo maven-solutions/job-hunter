@@ -871,10 +871,22 @@ const checkboxShouldBeChecked = (
   if (/^(yes|true|on|checked|check|agree|agreed|consent|y)$/i.test(value)) {
     return true;
   }
-  if (normalizeLabel(answer) && normalizeLabel(answer) === normalizeLabel(label)) {
+  const answerKey = normalizeLabel(answer);
+  const labelKey = normalizeLabel(label);
+  if (answerKey && labelKey && answerKey === labelKey) return true;
+  if (
+    answerKey.length >= 12 &&
+    labelKey.length >= 12 &&
+    (answerKey.includes(labelKey) || labelKey.includes(answerKey))
+  ) {
     return true;
   }
-  if (/\b(consent|agree)\b/i.test(value)) return true;
+  if (
+    /\b(consent|agree)\b/i.test(value) &&
+    !/\b(do not|don't|dont|decline|refuse)\b/i.test(value)
+  ) {
+    return true;
+  }
   return null;
 };
 
@@ -929,13 +941,14 @@ const fillCheckbox = (
   if (desired === null) return false;
   if (input.checked === desired) return true;
 
-  input.click();
-  if (input.checked === desired) return true;
-
   const wrap = input.closest("label.jd-checkbox");
-  if (wrap instanceof HTMLElement) {
-    wrap.click();
-  }
+  const inner =
+    input.id && wrap instanceof HTMLElement
+      ? wrap.querySelector<HTMLElement>(`label[for="${CSS.escape(input.id)}"]`)
+      : null;
+  // Click the text label once. The outer label also wraps the input, so a
+  // second click there toggles the box back off.
+  (inner ?? input).click();
   if (input.checked === desired) return true;
 
   const descriptor = Object.getOwnPropertyDescriptor(
