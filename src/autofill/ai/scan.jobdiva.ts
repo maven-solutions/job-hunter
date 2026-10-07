@@ -560,20 +560,30 @@ const collectStaticComboboxLabels = (element: HTMLElement): string[] => {
 };
 
 const educationEntryTitle = (card: HTMLElement): string => {
-  const span = Array.from(card.querySelectorAll("span")).find((el) =>
-    /^education\s*\d+$/i.test(cleanLabelText(el.textContent ?? "")),
-  );
+  const span = Array.from(card.querySelectorAll("span")).find((el) => {
+    if (!isVisibleElement(el)) return false;
+    return /^education\s*\d+$/i.test(cleanLabelText(el.textContent ?? ""));
+  });
   return span ? cleanLabelText(span.textContent ?? "") : "";
 };
 
-/** The empty "Add a Education" card is not an entry. Education 1, 2, … are. */
+/**
+ * "Add a Education" is the opener, not an entry. A hidden template inside that
+ * card must not count as Education 1, or the plus is never clicked.
+ */
 const isEducationEntryCard = (card: HTMLElement): boolean => {
-  if (educationEntryTitle(card)) return true;
-  const text = cleanLabelText(card.textContent ?? "");
-  if (/add\s+an?\s+education/i.test(text) && !card.querySelector(LAYOUT_SELECTOR)) {
+  const visible = cleanLabelText(card.innerText || "");
+  if (
+    /add\s+(an?\s+)?education/i.test(visible) &&
+    !/education\s+\d+/i.test(visible) &&
+    !/add\s+another/i.test(visible)
+  ) {
     return false;
   }
-  return !!card.querySelector(LAYOUT_SELECTOR);
+  if (educationEntryTitle(card)) return true;
+  return Array.from(card.querySelectorAll<HTMLElement>(LAYOUT_SELECTOR)).some(
+    (layout) => isVisibleElement(layout),
+  );
 };
 
 const listEducationEntryCards = (): HTMLElement[] =>
@@ -609,7 +619,8 @@ const isInsideEducationCard = (element: HTMLElement): boolean => {
 const isAddEducationLauncher = (card: HTMLElement): boolean => {
   if (isEducationEntryCard(card)) return false;
   if (card.closest(`#${EXTENSION_ROOT_ID}`)) return false;
-  return /add\s+an?\s+education/i.test(cleanLabelText(card.textContent ?? ""));
+  const text = cleanLabelText(card.innerText || card.textContent || "");
+  return /add\s+(an?\s+)?education/i.test(text) && !/add\s+another/i.test(text);
 };
 
 /** Plus icon, its clickable span, then the card. React ignores a bare .click(). */
@@ -635,6 +646,91 @@ const initialAddEntryTargets = (card: HTMLElement): Element[] => {
   if (plusSpan) targets.push(plusSpan);
   targets.push(card);
   return targets.filter((el, index) => targets.indexOf(el) === index);
+};
+
+/** Plus icon on the empty "Add a Education" card. Path is unique to that button. */
+const EDUCATION_PLUS_PATH = "M10 2.5c4.125";
+
+const findEducationPlusButton = (): HTMLElement | null => {
+  const cards = document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR);
+  for (const card of cards) {
+    if (card.closest(`#${EXTENSION_ROOT_ID}`)) continue;
+    const text = cleanLabelText(card.innerText || card.textContent || "");
+    if (!/add\s+a\s+education/i.test(text)) continue;
+    const svg = Array.from(card.querySelectorAll("svg")).find((node) =>
+      (node.querySelector("path")?.getAttribute("d") ?? "").startsWith(
+        EDUCATION_PLUS_PATH,
+      ),
+    );
+    const host = svg?.parentElement;
+    if (host instanceof HTMLElement) return host;
+  }
+  return null;
+};
+
+/**
+ * The plus is an SVG inside a span. Work experience's add control is a text
+ * span and accepts a normal click. This plus only runs its React onClick, so
+ * call that handler in the page as well as dispatching the click.
+ */
+const clickEducationPlusButton = (button: HTMLElement): void => {
+  pressJobdivaControl(button);
+  const svg = button.querySelector("svg");
+  if (svg) pressJobdivaControl(svg);
+  button.setAttribute("data-ci-edu-plus", "1");
+  const script = document.createElement("script");
+  script.textContent = `(function(){
+    var el = document.querySelector('[data-ci-edu-plus="1"]');
+    if (!el) return;
+    el.removeAttribute('data-ci-edu-plus');
+    var node = el.querySelector("svg") || el;
+    for (var depth = 0; node && depth < 5; depth++, node = node.parentElement) {
+      var keys = Object.keys(node);
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (key.indexOf("__reactProps") === 0) {
+          var props = node[key];
+          if (props && typeof props.onClick === "function") {
+            props.onClick({
+              preventDefault: function(){},
+              stopPropagation: function(){},
+              target: el,
+              currentTarget: node,
+              nativeEvent: { target: el },
+              type: "click",
+              button: 0,
+              bubbles: true,
+              persist: function(){}
+            });
+            return;
+          }
+        }
+        if (key.indexOf("__reactFiber") === 0 || key.indexOf("__reactInternalInstance") === 0) {
+          var fiber = node[key];
+          while (fiber) {
+            var memo = fiber.memoizedProps || fiber.pendingProps;
+            if (memo && typeof memo.onClick === "function") {
+              memo.onClick({
+                preventDefault: function(){},
+                stopPropagation: function(){},
+                target: el,
+                currentTarget: fiber.stateNode || node,
+                nativeEvent: { target: el },
+                type: "click",
+                button: 0,
+                bubbles: true,
+                persist: function(){}
+              });
+              return;
+            }
+            fiber = fiber.return;
+          }
+        }
+      }
+    }
+  })();`;
+  document.documentElement.appendChild(script);
+  script.remove();
 };
 
 /**
@@ -729,19 +825,11 @@ export const ensureJobdivaEducationCards = async (
     let opened = false;
 
     if (before === 0) {
-      const launchers = Array.from(
-        document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR),
-      ).filter(isAddEducationLauncher);
-      for (const card of launchers) {
-        for (const target of initialAddEntryTargets(card)) {
-          pressJobdivaControl(target);
-          const next = await waitForMoreEducationCards(before);
-          if (next > before) {
-            opened = true;
-            break;
-          }
-        }
-        if (opened) break;
+      const plus = findEducationPlusButton();
+      if (plus) {
+        clickEducationPlusButton(plus);
+        const next = await waitForMoreEducationCards(before);
+        opened = next > before;
       }
     } else {
       const add = findAddAnotherEducationControl();
