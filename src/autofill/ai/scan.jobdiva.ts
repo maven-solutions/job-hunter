@@ -1118,6 +1118,35 @@ const buildJobdivaWorkExperienceGroup = (
   };
 };
 
+const RADIO_NAME_LABELS: Record<string, string> = {
+  gender: "Sex",
+  race: "Race",
+  lgbt: "LGBTQ+ Self-Identification",
+  disability: "Disability",
+};
+
+/** Sex/Race use `.eeo-label`. Disability puts the prompt in the previous row. */
+const radioGroupLabel = (group: HTMLElement): string => {
+  const eeo = cleanLabelText(group.querySelector(".eeo-label")?.textContent ?? "");
+  if (eeo) return eeo;
+
+  const name =
+    group.querySelector("input[type='radio']")?.getAttribute("name")?.toLowerCase() ??
+    "";
+  if (RADIO_NAME_LABELS[name]) return RADIO_NAME_LABELS[name];
+
+  const prompt = cleanLabelText(group.previousElementSibling?.textContent ?? "");
+  if (prompt && !/^please check one of the boxes below:?$/i.test(prompt)) {
+    return prompt;
+  }
+  return cleanLabelText(name);
+};
+
+const radioGroupRequired = (group: HTMLElement): boolean => {
+  if (group.querySelector(".eeo-label-mandatory")) return true;
+  return (group.previousElementSibling?.textContent ?? "").includes("*");
+};
+
 /**
  * Visible JobDiva application fields on the current wizard step.
  * Password inputs are included because this registration step requires them.
@@ -1196,17 +1225,21 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
     });
 
   document.querySelectorAll<HTMLElement>(".radio-buttons-div").forEach((group) => {
-    if (isInsideExtension(group) || !isVisibleElement(group)) return;
-    if (!group.querySelector("input[type='radio']")) return;
-    const label = cleanLabelText(
-      group.querySelector(".eeo-label")?.textContent ?? "",
+    if (isInsideExtension(group) || seen.has(group)) return;
+    const radios = group.querySelectorAll<HTMLElement>(
+      "input[type='radio'], .radio-button",
     );
-    if (!label || seen.has(group)) return;
+    const visible =
+      isVisibleElement(group) ||
+      Array.from(radios).some((node) => isVisibleElement(node));
+    if (!visible || radios.length === 0) return;
+    const label = radioGroupLabel(group);
+    if (!label) return;
     seen.add(group);
     results.push({
       element: group,
       label,
-      required: !!group.querySelector(".eeo-label-mandatory"),
+      required: radioGroupRequired(group),
       kind: "radio",
     });
   });
