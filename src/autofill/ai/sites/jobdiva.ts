@@ -102,6 +102,13 @@ const applyFill = async (
   fillData: unknown,
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
+  const needed = Array.isArray(applicantData?.education)
+    ? applicantData.education.length
+    : 0;
+  if (needed > 0) {
+    await ensureJobdivaEducationCards(needed);
+  }
+
   const fillResult = await autofillJobdivaWithAi(fillData, {
     password: applicantData?.password,
   });

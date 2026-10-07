@@ -538,15 +538,35 @@ const collectStaticComboboxLabels = (element: HTMLElement): string[] => {
   return readJobdivaMenuOptions(layout, false).map((option) => option.label);
 };
 
-export const countJobdivaEducationCards = (): number =>
-  document.querySelectorAll(EDUCATION_CARD_SELECTOR).length;
-
-const educationCardTitle = (card: HTMLElement): string => {
-  const span = Array.from(card.querySelectorAll(":scope > span")).find((el) =>
+const educationEntryTitle = (card: HTMLElement): string => {
+  const span = Array.from(card.querySelectorAll("span")).find((el) =>
     /^education\s*\d+$/i.test(cleanLabelText(el.textContent ?? "")),
   );
-  if (span) return cleanLabelText(span.textContent ?? "");
-  const cards = Array.from(document.querySelectorAll(EDUCATION_CARD_SELECTOR));
+  return span ? cleanLabelText(span.textContent ?? "") : "";
+};
+
+/** The empty "Add a Education" card is not an entry. Education 1, 2, … are. */
+const isEducationEntryCard = (card: HTMLElement): boolean => {
+  if (educationEntryTitle(card)) return true;
+  const text = cleanLabelText(card.textContent ?? "");
+  if (/add\s+an?\s+education/i.test(text) && !card.querySelector(LAYOUT_SELECTOR)) {
+    return false;
+  }
+  return !!card.querySelector(LAYOUT_SELECTOR);
+};
+
+const listEducationEntryCards = (): HTMLElement[] =>
+  Array.from(
+    document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR),
+  ).filter(isEducationEntryCard);
+
+export const countJobdivaEducationCards = (): number =>
+  listEducationEntryCards().length;
+
+const educationCardTitle = (card: HTMLElement): string => {
+  const title = educationEntryTitle(card);
+  if (title) return title;
+  const cards = listEducationEntryCards();
   const index = Math.max(0, cards.indexOf(card));
   return `Education ${index + 1}`;
 };
@@ -554,75 +574,164 @@ const educationCardTitle = (card: HTMLElement): string => {
 /** "Education 1 - School" so repeated cards do not share one label. */
 const prefixEducationLabel = (element: HTMLElement, label: string): string => {
   const card = element.closest(EDUCATION_CARD_SELECTOR);
-  if (!(card instanceof HTMLElement)) return label;
+  if (!(card instanceof HTMLElement) || !isEducationEntryCard(card)) return label;
   const title = educationCardTitle(card);
   if (label.toLowerCase().startsWith(title.toLowerCase())) return label;
   return `${title} - ${label}`;
 };
 
-const isInsideEducationCard = (element: HTMLElement): boolean =>
-  !!element.closest(EDUCATION_CARD_SELECTOR);
+const isInsideEducationCard = (element: HTMLElement): boolean => {
+  const card = element.closest(EDUCATION_CARD_SELECTOR);
+  return card instanceof HTMLElement && isEducationEntryCard(card);
+};
+
+const isAddEducationLauncher = (card: HTMLElement): boolean => {
+  if (isEducationEntryCard(card)) return false;
+  if (card.closest(`#${EXTENSION_ROOT_ID}`)) return false;
+  return /add\s+an?\s+education/i.test(cleanLabelText(card.textContent ?? ""));
+};
+
+/** Plus icon, its clickable span, then the card. React ignores a bare .click(). */
+const initialAddEducationTargets = (card: HTMLElement): Element[] => {
+  const targets: Element[] = [];
+  const pointer = Array.from(card.querySelectorAll<HTMLElement>("span")).find(
+    (el) => {
+      const style = el.getAttribute("style") ?? "";
+      if (/cursor:\s*pointer/i.test(style)) return true;
+      return window.getComputedStyle(el).cursor === "pointer" && !!el.querySelector("svg");
+    },
+  );
+  const svg =
+    pointer?.querySelector("svg") ??
+    Array.from(card.querySelectorAll("svg")).find(
+      (node) => !/add\s+an?\s+education/i.test(cleanLabelText(node.parentElement?.textContent ?? "")),
+    );
+  if (svg) targets.push(svg);
+  if (pointer) targets.push(pointer);
+  const plusSpan = Array.from(card.querySelectorAll<HTMLElement>("span"))
+    .reverse()
+    .find((el) => el.querySelector(":scope > svg"));
+  if (plusSpan) targets.push(plusSpan);
+  targets.push(card);
+  return targets.filter((el, index) => targets.indexOf(el) === index);
+};
 
 /**
- * Add control beside the education cards. Remove Entry stays inside the card
- * and is never clicked. The add label is not in the sample HTML, so this
- * matches Add Education / Add Entry / Add Another, or a `.jd-reg-entrybtn`
- * outside the cards whose text starts with Add.
+ * "+ Add another education entry". Remove Entry uses the same class and is skipped.
  */
-const findAddEducationControl = (): HTMLElement | null => {
-  const card = document.querySelector(EDUCATION_CARD_SELECTOR);
-  if (!(card instanceof HTMLElement)) return null;
-
-  const scopes: HTMLElement[] = [];
-  let node: HTMLElement | null = card.parentElement;
-  for (let depth = 0; depth < 3 && node; depth += 1) {
-    scopes.push(node);
-    node = node.parentElement;
+const findAddAnotherEducationControl = (): HTMLElement | null => {
+  const nodes = document.querySelectorAll<HTMLElement>(".jd-reg-entrybtn");
+  for (const el of nodes) {
+    if (el.closest(`#${EXTENSION_ROOT_ID}`)) continue;
+    const text = cleanLabelText(el.textContent ?? "").replace(/^\+\s*/, "");
+    if (/remove/i.test(text)) continue;
+    if (/add\s+another\s+education/i.test(text)) return el;
   }
-
-  const textMatches = (text: string): boolean =>
-    /^add\s*(education|entry|another)$/i.test(text);
-
-  for (const scope of scopes) {
-    const nodes = scope.querySelectorAll<HTMLElement>(
-      "button, a, span, [role='button']",
-    );
-    for (const el of nodes) {
-      if (el.closest(EDUCATION_CARD_SELECTOR)) continue;
-      if (el.closest(`#${EXTENSION_ROOT_ID}`)) continue;
-      if (el.querySelector(EDUCATION_CARD_SELECTOR)) continue;
-      const text = cleanLabelText(el.textContent ?? "");
-      if (!text || text.length > 40 || /remove/i.test(text)) continue;
-      if (el.classList.contains("jd-reg-entrybtn") && /^add\b/i.test(text)) {
-        return el;
-      }
-      if (textMatches(text)) return el;
-    }
-  }
-
   return null;
 };
 
 /**
- * Click Add until the education section has `needed` cards.
- * No-op when this wizard step has no education cards.
+ * Pointer sequence plus click. JobDiva's add control is a span, and a single
+ * element.click() does not run its React handler.
+ */
+const pressJobdivaControl = (element: Element): void => {
+  if (!(element instanceof HTMLElement) && !(element instanceof SVGElement)) return;
+  element.scrollIntoView({ block: "center", inline: "nearest" });
+  const rect = element.getBoundingClientRect();
+  const clientX = rect.left + Math.max(rect.width, 1) / 2;
+  const clientY = rect.top + Math.max(rect.height, 1) / 2;
+  const base = {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    view: window,
+    clientX,
+    clientY,
+    button: 0,
+  };
+  element.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      ...base,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+      buttons: 1,
+    }),
+  );
+  element.dispatchEvent(new MouseEvent("mousedown", { ...base, buttons: 1 }));
+  element.dispatchEvent(
+    new PointerEvent("pointerup", {
+      ...base,
+      pointerId: 1,
+      pointerType: "mouse",
+      isPrimary: true,
+      buttons: 0,
+    }),
+  );
+  element.dispatchEvent(new MouseEvent("mouseup", { ...base, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("click", { ...base, buttons: 0 }));
+  element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+  if (typeof (element as HTMLElement).click === "function") {
+    (element as HTMLElement).click();
+  }
+};
+
+const waitForMoreEducationCards = async (previous: number): Promise<number> => {
+  const started = Date.now();
+  let current = countJobdivaEducationCards();
+  while (current <= previous && Date.now() - started < 1600) {
+    await delay(200);
+    current = countJobdivaEducationCards();
+  }
+  return current;
+};
+
+/**
+ * Open one card per education record, the same way Workday clicks Add.
+ * No cards yet: press the plus on "Add a Education".
+ * Each further record: press "+ Add another education entry".
  */
 export const ensureJobdivaEducationCards = async (
   needed: number,
 ): Promise<void> => {
   if (!needed || needed < 1) return;
-  if (!document.querySelector(EDUCATION_CARD_SELECTOR)) return;
+  if (
+    !document.querySelector(EDUCATION_CARD_SELECTOR) &&
+    !findAddAnotherEducationControl()
+  ) {
+    return;
+  }
 
-  let current = countJobdivaEducationCards();
   let guard = 0;
-  while (current < needed && guard < 12) {
-    const add = findAddEducationControl();
-    if (!add) break;
-    add.click();
-    await delay(600);
-    const next = countJobdivaEducationCards();
-    if (next <= current) break;
-    current = next;
+  while (countJobdivaEducationCards() < needed && guard < 12) {
+    const before = countJobdivaEducationCards();
+    let opened = false;
+
+    if (before === 0) {
+      const launchers = Array.from(
+        document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR),
+      ).filter(isAddEducationLauncher);
+      for (const card of launchers) {
+        for (const target of initialAddEducationTargets(card)) {
+          pressJobdivaControl(target);
+          const next = await waitForMoreEducationCards(before);
+          if (next > before) {
+            opened = true;
+            break;
+          }
+        }
+        if (opened) break;
+      }
+    } else {
+      const add = findAddAnotherEducationControl();
+      if (add) {
+        pressJobdivaControl(add);
+        const next = await waitForMoreEducationCards(before);
+        opened = next > before;
+      }
+    }
+
+    if (!opened) break;
     guard += 1;
   }
 };
@@ -630,7 +739,7 @@ export const ensureJobdivaEducationCards = async (
 const buildJobdivaEducationGroup = (
   applicantData?: Applicant | null,
 ): ApiFormElement | null => {
-  const cards = document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR);
+  const cards = listEducationEntryCards();
   if (cards.length === 0) return null;
 
   const profileCount = Array.isArray(applicantData?.education)
