@@ -2,8 +2,8 @@ import { delay, fromatStirngInLowerCase, handleValueChanges } from "../helper";
 import {
   closeJobdivaFlyout,
   collectJobdivaCandidateFields,
+  getJobdivaDropdownRoot,
   JobdivaCandidateField,
-  JobdivaOptionNode,
   openJobdivaCombobox,
   readJobdivaMenuOptions,
 } from "./scan.jobdiva";
@@ -426,17 +426,6 @@ const clickOptionElement = (optionEl: HTMLElement): void => {
   optionEl.click();
 };
 
-const dedupeOptions = (options: JobdivaOptionNode[]): JobdivaOptionNode[] => {
-  const seen = new Set<string>();
-  const results: JobdivaOptionNode[] = [];
-  options.forEach((option) => {
-    if (seen.has(option.label)) return;
-    seen.add(option.label);
-    results.push(option);
-  });
-  return results;
-};
-
 const getControlDisplayValue = (element: HTMLElement): string => {
   if (
     element instanceof HTMLInputElement ||
@@ -450,6 +439,88 @@ const getControlDisplayValue = (element: HTMLElement): string => {
     .querySelectorAll("[role='listbox'], .dropdown-menu, svg")
     .forEach((node) => node.remove());
   return cleanLabelText(clone.textContent ?? "");
+};
+
+const checkboxShouldBeChecked = (
+  answer: string,
+  label: string,
+): boolean | null => {
+  const value = cleanLabelText(answer).toLowerCase();
+  if (/^(no|false|off|unchecked|disagree|n)$/i.test(value)) return false;
+  if (/^(yes|true|on|checked|check|agree|agreed|consent|y)$/i.test(value)) {
+    return true;
+  }
+  if (normalizeLabel(answer) && normalizeLabel(answer) === normalizeLabel(label)) {
+    return true;
+  }
+  if (/\b(consent|agree)\b/i.test(value)) return true;
+  return null;
+};
+
+const fillCheckbox = (
+  input: HTMLInputElement,
+  answer: string,
+  label: string,
+): boolean => {
+  const desired = checkboxShouldBeChecked(answer, label);
+  if (desired === null) return false;
+  if (input.checked === desired) return true;
+
+  input.click();
+  if (input.checked === desired) return true;
+
+  const wrap = input.closest("label.jd-checkbox");
+  if (wrap instanceof HTMLElement) {
+    wrap.click();
+  }
+  if (input.checked === desired) return true;
+
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "checked",
+  );
+  const tracker = (
+    input as HTMLInputElement & {
+      _valueTracker?: { setValue: (value: string) => void };
+    }
+  )._valueTracker;
+  tracker?.setValue(String(input.checked));
+  descriptor?.set?.call(input, desired);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  return input.checked === desired;
+};
+
+const dropdownSelectionLanded = (
+  element: HTMLElement,
+  matchedLabel: string,
+  target: HTMLElement,
+): boolean => {
+  const root = getJobdivaDropdownRoot(element);
+  const truncate = root.querySelector(".text-truncate");
+  if (
+    truncate &&
+    valuesMatch(cleanLabelText(truncate.textContent ?? ""), matchedLabel)
+  ) {
+    return true;
+  }
+  const selected = root.querySelector(".dropdown-item.selected");
+  if (
+    selected &&
+    valuesMatch(cleanLabelText(selected.textContent ?? ""), matchedLabel)
+  ) {
+    return true;
+  }
+  if (
+    target.classList.contains("selected") &&
+    valuesMatch(cleanLabelText(target.textContent ?? ""), matchedLabel)
+  ) {
+    return true;
+  }
+  return (
+    valuesMatch(getControlDisplayValue(element), matchedLabel) ||
+    target.getAttribute("aria-selected") === "true"
+  );
 };
 
 const fillCombobox = async (
@@ -466,16 +537,15 @@ const fillCombobox = async (
     return fillJobdivaTextControl(element, matched);
   }
 
-  const layout = element.closest(".jd-form-layout");
-  let options: JobdivaOptionNode[] = [];
-  try {
-    options = dedupeOptions([
-      ...(await openJobdivaCombobox(element)),
-      ...(layout ? readJobdivaMenuOptions(layout, false) : []),
-    ]);
-  } catch {
-    closeJobdivaFlyout();
-    return false;
+  const root = getJobdivaDropdownRoot(element);
+  let options = readJobdivaMenuOptions(root, false);
+  if (options.length === 0) {
+    try {
+      options = await openJobdivaCombobox(element);
+    } catch {
+      closeJobdivaFlyout();
+      return false;
+    }
   }
 
   const matchedLabel = matchOption(
@@ -493,6 +563,17 @@ const fillCombobox = async (
     return false;
   }
 
+  if (dropdownSelectionLanded(element, matchedLabel, target.element)) {
+    return true;
+  }
+
+  const trigger =
+    element instanceof HTMLButtonElement
+      ? element
+      : root.querySelector<HTMLElement>("button[data-bs-toggle='dropdown']");
+  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+    trigger.click();
+  }
   clickOptionElement(target.element);
 
   if (
@@ -503,15 +584,14 @@ const fillCombobox = async (
   }
 
   const selectionLanded = (): boolean =>
-    valuesMatch(getControlDisplayValue(element), matchedLabel) ||
-    target.element.getAttribute("aria-selected") === "true";
+    dropdownSelectionLanded(element, matchedLabel, target.element);
 
   const ok = await new Promise<boolean>((resolve) => {
     if (selectionLanded()) {
       resolve(true);
       return;
     }
-    const watchRoot = layout ?? element.parentElement ?? element;
+    const watchRoot = root;
     let observer: MutationObserver | null = null;
     const timer = window.setTimeout(() => {
       observer?.disconnect();
@@ -549,6 +629,10 @@ const fillField = async (
 
   if (field.kind === "combobox") {
     return fillCombobox(field.element, answer);
+  }
+
+  if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
+    return fillCheckbox(field.element, answer, field.label);
   }
 
   if (

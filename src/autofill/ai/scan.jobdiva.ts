@@ -1,6 +1,6 @@
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 
-export type ApiElementType = "text" | "search";
+export type ApiElementType = "text" | "search" | "checkbox";
 
 export interface ApiFormElement {
   label: string;
@@ -28,8 +28,13 @@ export interface JobdivaScanToMakeApiOptions {
   parser?: string;
 }
 
-/** Text inputs, account-password inputs, native selects, and custom dropdowns. */
-export type JobdivaFieldKind = "text" | "password" | "select" | "combobox";
+/** Text inputs, passwords, selects, Bootstrap dropdowns, and consent checkboxes. */
+export type JobdivaFieldKind =
+  | "text"
+  | "password"
+  | "select"
+  | "combobox"
+  | "checkbox";
 
 export interface JobdivaCandidateField {
   element: HTMLElement;
@@ -228,33 +233,89 @@ const isEligibleControl = (element: HTMLElement): boolean => {
   );
 };
 
-const pickControl = (layout: HTMLElement): HTMLElement | null => {
-  const combo = Array.from(
-    layout.querySelectorAll<HTMLElement>(
-      "[role='combobox'], [aria-haspopup='listbox']",
-    ),
-  ).find((el) => isEligibleControl(el));
-  if (combo) return combo;
+/** Bootstrap dropdown that owns this toggle (`jd-form-select`, country `dropright`, etc.). */
+export const getJobdivaDropdownRoot = (element: HTMLElement): HTMLElement =>
+  (element.closest(
+    ".jd-form-select, .dropright, .dropup, .dropdown",
+  ) as HTMLElement) ?? element;
 
-  const select = Array.from(layout.querySelectorAll<HTMLSelectElement>("select")).find(
-    (el) => isEligibleControl(el),
+const isPhoneTypeMenu = (element: HTMLElement): boolean => {
+  const names = readJobdivaMenuOptions(getJobdivaDropdownRoot(element)).map(
+    (option) => option.label.toLowerCase(),
   );
-  if (select) return select;
-
-  const textarea = Array.from(
-    layout.querySelectorAll<HTMLTextAreaElement>("textarea"),
-  ).find((el) => isEligibleControl(el));
-  if (textarea) return textarea;
-
-  const input = Array.from(layout.querySelectorAll<HTMLInputElement>("input")).find(
-    (el) => isEligibleControl(el),
+  return (
+    names.includes("mobile") && (names.includes("work") || names.includes("home"))
   );
-  if (input) return input;
+};
 
-  const button = Array.from(layout.querySelectorAll<HTMLButtonElement>("button")).find(
-    (el) => isEligibleControl(el),
+const isPhoneCountryDropdown = (element: HTMLElement): boolean =>
+  element instanceof HTMLButtonElement && !!element.closest(".jd-form-phone");
+
+const getCheckboxLabel = (input: HTMLInputElement): string => {
+  const wrap = input.closest(".jd-checkbox");
+  if (input.id && wrap) {
+    const inner = wrap.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+    if (inner?.textContent) return cleanLabelText(inner.textContent);
+  }
+  if (wrap) {
+    const clone = wrap.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll("input, svg").forEach((node) => node.remove());
+    const text = cleanLabelText(clone.textContent ?? "");
+    if (text) return text;
+  }
+  return getJobdivaFieldLabel(input);
+};
+
+const isCheckboxVisible = (input: HTMLInputElement): boolean => {
+  const wrap = input.closest(".jd-checkbox");
+  if (wrap instanceof HTMLElement) return isVisibleElement(wrap);
+  return isVisibleElement(input);
+};
+
+const collectLayoutControls = (layout: HTMLElement): HTMLElement[] => {
+  const controls: HTMLElement[] = [];
+  const seen = new Set<HTMLElement>();
+  const push = (element: HTMLElement): void => {
+    if (seen.has(element) || isInsideExtension(element)) return;
+    seen.add(element);
+    controls.push(element);
+  };
+
+  layout
+    .querySelectorAll<HTMLButtonElement>(
+      ".jd-form-select button[data-bs-toggle='dropdown'], .jd-form-phone .dropright > button, .jd-form-phone .dropdown > button[data-bs-toggle='dropdown']",
+    )
+    .forEach((button) => {
+      if (isVisibleElement(button)) push(button);
+    });
+
+  layout.querySelectorAll<HTMLSelectElement>("select").forEach((select) => {
+    if (isEligibleControl(select)) push(select);
+  });
+  layout.querySelectorAll<HTMLTextAreaElement>("textarea").forEach((textarea) => {
+    if (isEligibleControl(textarea)) push(textarea);
+  });
+  layout.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
+    const type = (input.type || "text").toLowerCase();
+    if (type === "checkbox" || type === "radio") return;
+    if (isEligibleControl(input)) push(input);
+  });
+
+  return controls;
+};
+
+const readOptionLabel = (optionEl: HTMLElement): string => {
+  const textSpan = Array.from(optionEl.children).find(
+    (child) =>
+      child.tagName === "SPAN" &&
+      !child.querySelector("svg") &&
+      cleanLabelText(child.textContent ?? ""),
   );
-  return button ?? null;
+  if (textSpan) return cleanLabelText(textSpan.textContent ?? "");
+
+  const clone = optionEl.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("svg").forEach((node) => node.remove());
+  return cleanLabelText(clone.textContent ?? "");
 };
 
 const pushUniqueOptions = (
@@ -263,7 +324,7 @@ const pushUniqueOptions = (
   optionEl: HTMLElement,
 ): void => {
   if (isInsideExtension(optionEl)) return;
-  const label = cleanLabelText(optionEl.textContent ?? "");
+  const label = readOptionLabel(optionEl);
   if (!label || seen.has(label) || isPlaceholderOption(label)) return;
   if (label.length > 200) return;
   seen.add(label);
@@ -452,6 +513,12 @@ const collectStaticComboboxLabels = (element: HTMLElement): string[] => {
   const owned = readOwnedListbox(element).map((option) => option.label);
   if (owned.length > 0) return owned;
 
+  const scoped = readJobdivaMenuOptions(
+    getJobdivaDropdownRoot(element),
+    false,
+  ).map((option) => option.label);
+  if (scoped.length > 0) return scoped;
+
   const layout = element.closest(LAYOUT_SELECTOR);
   if (!layout) return [];
   return readJobdivaMenuOptions(layout, false).map((option) => option.label);
@@ -460,7 +527,9 @@ const collectStaticComboboxLabels = (element: HTMLElement): string[] => {
 /**
  * Visible JobDiva application fields on the current wizard step.
  * Password inputs are included because this registration step requires them.
- * Hidden, file, checkbox, and radio inputs are skipped.
+ * A phone row can contain a type menu, a country menu, and the number.
+ * Consent checkboxes live in `.jd-checkbox`, outside `.jd-form-layout`.
+ * Hidden, file, and radio inputs are skipped.
  */
 export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
   const results: JobdivaCandidateField[] = [];
@@ -472,13 +541,20 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
     seen.add(element);
 
     let label = getJobdivaFieldLabel(element);
-    if (!label || label === "Unknown field") return;
 
-    if (isPhoneCountryField(element, label)) {
+    if (element instanceof HTMLButtonElement && isPhoneTypeMenu(element)) {
+      label = "Phone Type";
+    } else if (isPhoneCountryDropdown(element)) {
+      if (phoneCountryAdded) return;
+      phoneCountryAdded = true;
+      label = "Phone Country Code";
+    } else if (isPhoneCountryField(element, label)) {
       if (phoneCountryAdded) return;
       phoneCountryAdded = true;
       label = "Phone Country Code";
     }
+
+    if (!label || label === "Unknown field") return;
 
     results.push({
       element,
@@ -490,9 +566,25 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
 
   document.querySelectorAll<HTMLElement>(LAYOUT_SELECTOR).forEach((layout) => {
     if (isInsideExtension(layout) || !isVisibleElement(layout)) return;
-    const control = pickControl(layout);
-    if (control) add(control);
+    collectLayoutControls(layout).forEach(add);
   });
+
+  document
+    .querySelectorAll<HTMLInputElement>(".jd-checkbox input[type='checkbox']")
+    .forEach((input) => {
+      if (seen.has(input) || isInsideExtension(input) || !isCheckboxVisible(input)) {
+        return;
+      }
+      const label = getCheckboxLabel(input);
+      if (!label || label === "Unknown field") return;
+      seen.add(input);
+      results.push({
+        element: input,
+        label,
+        required: isRequiredField(input),
+        kind: "checkbox",
+      });
+    });
 
   document
     .querySelectorAll<HTMLElement>(
@@ -514,6 +606,14 @@ const toApiElement = async (
       label: field.label,
       required: field.required,
       type: "text",
+    };
+  }
+
+  if (field.kind === "checkbox") {
+    return {
+      label: field.label,
+      required: field.required,
+      type: "checkbox",
     };
   }
 
