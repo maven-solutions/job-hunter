@@ -2,6 +2,7 @@ import { delay, handleValueChanges } from "../helper";
 import {
   closeJobdivaFlyout,
   collectJobdivaCandidateFields,
+  ensureJobdivaEducationCards,
   getJobdivaDropdownRoot,
   JobdivaCandidateField,
   openJobdivaCombobox,
@@ -164,6 +165,151 @@ interface JobdivaParsedFillResponse {
   emptyCount: number;
 }
 
+const educationFieldKey = (label: string): string =>
+  cleanLabelText(label)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+
+/** Profile and API keys mapped onto this form's education labels. */
+const JOBDIVA_EDUCATION_FIELD_MAP: Record<string, string> = {
+  school: "School",
+  schoolname: "School",
+  university: "School",
+  college: "School",
+  degree: "Degree/Diploma",
+  diploma: "Degree/Diploma",
+  degreediploma: "Degree/Diploma",
+  major: "Major",
+  fieldofstudy: "Major",
+  field: "Major",
+  graduationyear: "Graduation Year",
+  graduation: "Graduation Year",
+  year: "Graduation Year",
+  endyear: "Graduation Year",
+  enddate: "Graduation Year",
+  to: "Graduation Year",
+  lastyearattended: "Graduation Year",
+};
+
+const EDUCATION_ENTRY_META_KEYS = new Set([
+  "label",
+  "type",
+  "required",
+  "options",
+  "count",
+  "description",
+  "id",
+]);
+
+const graduationYearAnswer = (value: unknown): string => {
+  const text = coerceAnswerString(value);
+  const match = text.match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : text;
+};
+
+const coerceEducationEntry = (
+  item: unknown,
+): Record<string, unknown> | null => {
+  if (item == null) return null;
+
+  if (Array.isArray(item)) {
+    const record: Record<string, unknown> = {};
+    for (const field of item) {
+      if (field == null || typeof field !== "object") continue;
+      const row = field as Record<string, unknown>;
+      const fieldName = String(row.name ?? row.label ?? row.field ?? "").trim();
+      if (!fieldName) continue;
+      record[fieldName] = row.value ?? row.answer ?? row.fill ?? row.text;
+    }
+    return Object.keys(record).length > 0 ? record : null;
+  }
+
+  if (typeof item === "object") {
+    const obj = item as Record<string, unknown>;
+    const looksLikeField =
+      ("name" in obj || "label" in obj) &&
+      ("value" in obj || "answer" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj) &&
+      !("major" in obj);
+    if (looksLikeField) {
+      const fieldName = String(obj.name ?? obj.label ?? "").trim();
+      if (!fieldName) return null;
+      const fieldValue = obj.value ?? obj.answer;
+      if (
+        fieldValue != null &&
+        typeof fieldValue === "object" &&
+        !Array.isArray(fieldValue)
+      ) {
+        return coerceEducationEntry(fieldValue);
+      }
+      return { [fieldName]: fieldValue };
+    }
+    return obj;
+  }
+
+  return null;
+};
+
+const normalizeEducationEntries = (raw: unknown): Record<string, unknown>[] => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    if (raw.length > 0 && Array.isArray(raw[0])) {
+      return raw
+        .map((item) => coerceEducationEntry(item))
+        .filter((item): item is Record<string, unknown> => !!item);
+    }
+    if (
+      raw.length > 0 &&
+      typeof raw[0] === "object" &&
+      raw[0] != null &&
+      ("name" in (raw[0] as object) || "label" in (raw[0] as object)) &&
+      ("value" in (raw[0] as object) || "answer" in (raw[0] as object)) &&
+      !Array.isArray((raw[0] as { value?: unknown }).value) &&
+      typeof (raw[0] as { value?: unknown }).value !== "object"
+    ) {
+      const firstName = String(
+        (raw[0] as { name?: unknown; label?: unknown }).name ??
+          (raw[0] as { label?: unknown }).label ??
+          "",
+      );
+      if (/school|degree|major|graduation|diploma/i.test(firstName)) {
+        const single = coerceEducationEntry(raw);
+        return single ? [single] : [];
+      }
+    }
+    return raw
+      .map((item) => coerceEducationEntry(item))
+      .filter((item): item is Record<string, unknown> => !!item);
+  }
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["entries", "items", "data", "records", "education"]) {
+      if (Array.isArray(obj[key])) return normalizeEducationEntries(obj[key]);
+    }
+    if (
+      "label" in obj &&
+      ("type" in obj || "options" in obj) &&
+      !("school" in obj) &&
+      !("degree" in obj)
+    ) {
+      return normalizeEducationEntries(
+        obj.answer ?? obj.value ?? obj.fill ?? obj.data,
+      );
+    }
+    const coerced = coerceEducationEntry(obj);
+    return coerced ? [coerced] : [];
+  }
+  return [];
+};
+
+const educationAnswerCount = (answers: JobdivaAiAnswer[]): number =>
+  answers.reduce((max, item) => {
+    const match = item.label.match(/^education\s*(\d+)\s*-/i);
+    if (!match) return max;
+    return Math.max(max, Number(match[1]));
+  }, 0);
+
 const parseJobdivaAiFillResponse = (
   response: unknown,
 ): JobdivaParsedFillResponse => {
@@ -191,12 +337,65 @@ const parseJobdivaAiFillResponse = (
     emptyCount += 1;
   };
 
+  const pushEducationGroup = (raw: unknown): void => {
+    const entries = normalizeEducationEntries(raw);
+    entries.forEach((entry, index) => {
+      const prefix = `Education ${index + 1}`;
+      const seen = new Set<string>();
+      for (const [key, value] of Object.entries(entry)) {
+        if (value == null) continue;
+        if (EDUCATION_ENTRY_META_KEYS.has(key.toLowerCase())) continue;
+
+        let fieldName = key;
+        let fieldValue: unknown = value;
+        if (
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          ("answer" in (value as object) ||
+            "value" in (value as object) ||
+            "name" in (value as object) ||
+            "label" in (value as object))
+        ) {
+          const nested = value as {
+            name?: string;
+            label?: string;
+            answer?: unknown;
+            value?: unknown;
+          };
+          fieldName = String(nested.name ?? nested.label ?? key);
+          fieldValue = nested.answer ?? nested.value;
+        }
+
+        const fieldLabel = JOBDIVA_EDUCATION_FIELD_MAP[educationFieldKey(fieldName)];
+        if (!fieldLabel || seen.has(fieldLabel)) continue;
+        seen.add(fieldLabel);
+
+        const answer =
+          fieldLabel === "Graduation Year"
+            ? graduationYearAnswer(fieldValue)
+            : coerceAnswerString(fieldValue);
+        const labeled = `${prefix} - ${fieldLabel}`;
+        if (!answer) {
+          markEmpty(labeled);
+          continue;
+        }
+        answers.push({ label: labeled, answer });
+      }
+    });
+  };
+
   const processItem = (item: any): void => {
     if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
     if (!label) return;
 
+    const typeStr = String(item.type ?? "").toLowerCase();
     const raw = extractRawAnswer(item);
+    if (typeStr === "education" || /^education$/i.test(label)) {
+      pushEducationGroup(raw ?? item.entries ?? item.items ?? item.data);
+      return;
+    }
+
     if (isEmptyApiAnswer(raw)) {
       markEmpty(label);
       return;
@@ -255,6 +454,13 @@ const parseJobdivaAiFillResponse = (
     ]);
     for (const [label, value] of Object.entries(payload)) {
       if (reserved.has(label)) continue;
+      if (
+        /^education$/i.test(label) &&
+        (Array.isArray(value) || (value != null && typeof value === "object"))
+      ) {
+        pushEducationGroup(value);
+        continue;
+      }
       if (isEmptyApiAnswer(value)) {
         markEmpty(label);
         continue;
@@ -663,6 +869,10 @@ export const autofillJobdivaWithAi = async (
 ): Promise<JobdivaAiFillResult> => {
   const { answers, emptyLabelKeys, emptyCount } =
     parseJobdivaAiFillResponse(response);
+  const educationNeeded = educationAnswerCount(answers);
+  if (educationNeeded > 0) {
+    await ensureJobdivaEducationCards(educationNeeded);
+  }
   const fields = collectJobdivaCandidateFields();
   const profilePassword = options.password?.trim() ?? "";
 

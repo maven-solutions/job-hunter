@@ -3,6 +3,7 @@ import { createFile } from "../../FromFiller/fileTypeDataFiller";
 import { autofillJobdivaWithAi } from "../autofill.jobdiva";
 import { initJobdivaHtmlScanner } from "../cibtn.jobdiva";
 import {
+  ensureJobdivaEducationCards,
   scanJobdivaHtmlToMakeApiPayload,
   JobdivaScanToMakeApiOptions,
   JobdivaScanToMakeApiPayload,
@@ -127,6 +128,14 @@ export const jobdivaAiHandler: AiSiteHandler = {
   matches: isJobdivaUrl,
   initFieldScanner: (applicantData, options) =>
     initJobdivaHtmlScanner(applicantData as Record<string, unknown>, options),
+  prepareBeforeScan: async (applicantData) => {
+    const needed = Array.isArray(applicantData?.education)
+      ? applicantData.education.length
+      : 0;
+    if (needed > 0) {
+      await ensureJobdivaEducationCards(needed);
+    }
+  },
   buildScanPayload,
   applyFill,
 };

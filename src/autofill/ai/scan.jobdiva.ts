@@ -1,12 +1,24 @@
+import { delay } from "../helper";
+import { Applicant } from "../data";
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 
-export type ApiElementType = "text" | "search" | "checkbox";
+export type ApiElementType = "text" | "search" | "checkbox" | "education";
+
+/** One field inside an Education group, matching the Workday nested schema. */
+export interface JobdivaNestedField {
+  type: string;
+  label: string;
+  required?: boolean;
+  options?: string[];
+}
 
 export interface ApiFormElement {
   label: string;
   required: boolean;
   type: ApiElementType;
-  options?: string[];
+  options?: string[] | JobdivaNestedField[];
+  /** How many education entries the applicant has. */
+  count?: number;
 }
 
 export interface JobdivaScanToMakeApiPayload {
@@ -26,6 +38,7 @@ export interface JobdivaScanToMakeApiOptions {
   userId?: string;
   fromAgent?: boolean;
   parser?: string;
+  applicantData?: Applicant | null;
 }
 
 /** Text inputs, passwords, selects, Bootstrap dropdowns, and consent checkboxes. */
@@ -60,6 +73,7 @@ const SKIP_INPUT_TYPES = new Set([
 ]);
 
 const LAYOUT_SELECTOR = ".jd-form-layout";
+const EDUCATION_CARD_SELECTOR = ".jd-reg-card.id-reg-education";
 
 const OPTION_SELECTOR = [
   "[role='option']",
@@ -524,11 +538,155 @@ const collectStaticComboboxLabels = (element: HTMLElement): string[] => {
   return readJobdivaMenuOptions(layout, false).map((option) => option.label);
 };
 
+export const countJobdivaEducationCards = (): number =>
+  document.querySelectorAll(EDUCATION_CARD_SELECTOR).length;
+
+const educationCardTitle = (card: HTMLElement): string => {
+  const span = Array.from(card.querySelectorAll(":scope > span")).find((el) =>
+    /^education\s*\d+$/i.test(cleanLabelText(el.textContent ?? "")),
+  );
+  if (span) return cleanLabelText(span.textContent ?? "");
+  const cards = Array.from(document.querySelectorAll(EDUCATION_CARD_SELECTOR));
+  const index = Math.max(0, cards.indexOf(card));
+  return `Education ${index + 1}`;
+};
+
+/** "Education 1 - School" so repeated cards do not share one label. */
+const prefixEducationLabel = (element: HTMLElement, label: string): string => {
+  const card = element.closest(EDUCATION_CARD_SELECTOR);
+  if (!(card instanceof HTMLElement)) return label;
+  const title = educationCardTitle(card);
+  if (label.toLowerCase().startsWith(title.toLowerCase())) return label;
+  return `${title} - ${label}`;
+};
+
+const isInsideEducationCard = (element: HTMLElement): boolean =>
+  !!element.closest(EDUCATION_CARD_SELECTOR);
+
+/**
+ * Add control beside the education cards. Remove Entry stays inside the card
+ * and is never clicked. The add label is not in the sample HTML, so this
+ * matches Add Education / Add Entry / Add Another, or a `.jd-reg-entrybtn`
+ * outside the cards whose text starts with Add.
+ */
+const findAddEducationControl = (): HTMLElement | null => {
+  const card = document.querySelector(EDUCATION_CARD_SELECTOR);
+  if (!(card instanceof HTMLElement)) return null;
+
+  const scopes: HTMLElement[] = [];
+  let node: HTMLElement | null = card.parentElement;
+  for (let depth = 0; depth < 3 && node; depth += 1) {
+    scopes.push(node);
+    node = node.parentElement;
+  }
+
+  const textMatches = (text: string): boolean =>
+    /^add\s*(education|entry|another)$/i.test(text);
+
+  for (const scope of scopes) {
+    const nodes = scope.querySelectorAll<HTMLElement>(
+      "button, a, span, [role='button']",
+    );
+    for (const el of nodes) {
+      if (el.closest(EDUCATION_CARD_SELECTOR)) continue;
+      if (el.closest(`#${EXTENSION_ROOT_ID}`)) continue;
+      if (el.querySelector(EDUCATION_CARD_SELECTOR)) continue;
+      const text = cleanLabelText(el.textContent ?? "");
+      if (!text || text.length > 40 || /remove/i.test(text)) continue;
+      if (el.classList.contains("jd-reg-entrybtn") && /^add\b/i.test(text)) {
+        return el;
+      }
+      if (textMatches(text)) return el;
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Click Add until the education section has `needed` cards.
+ * No-op when this wizard step has no education cards.
+ */
+export const ensureJobdivaEducationCards = async (
+  needed: number,
+): Promise<void> => {
+  if (!needed || needed < 1) return;
+  if (!document.querySelector(EDUCATION_CARD_SELECTOR)) return;
+
+  let current = countJobdivaEducationCards();
+  let guard = 0;
+  while (current < needed && guard < 12) {
+    const add = findAddEducationControl();
+    if (!add) break;
+    add.click();
+    await delay(600);
+    const next = countJobdivaEducationCards();
+    if (next <= current) break;
+    current = next;
+    guard += 1;
+  }
+};
+
+const buildJobdivaEducationGroup = (
+  applicantData?: Applicant | null,
+): ApiFormElement | null => {
+  const cards = document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR);
+  if (cards.length === 0) return null;
+
+  const profileCount = Array.isArray(applicantData?.education)
+    ? applicantData.education.length
+    : 0;
+  const count = Math.max(cards.length, profileCount, 1);
+  const nested: JobdivaNestedField[] = [];
+  const seen = new Set<string>();
+
+  cards[0].querySelectorAll<HTMLElement>(LAYOUT_SELECTOR).forEach((layout) => {
+    const label = cleanLabelText(
+      layout.querySelector(".jd-label")?.textContent ?? "",
+    );
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+
+    const control = collectLayoutControls(layout)[0];
+    const required = !!layout.querySelector(".jd-text-red");
+    const isMenu =
+      !!control &&
+      (control instanceof HTMLSelectElement ||
+        control instanceof HTMLButtonElement ||
+        control.getAttribute("role") === "combobox" ||
+        !!control.closest(".jd-form-select, .dropdown"));
+
+    if (isMenu && control) {
+      const options = collectStaticComboboxLabels(control);
+      nested.push({
+        type: "search",
+        label,
+        required,
+        ...(options.length > 0 ? { options } : {}),
+      });
+      return;
+    }
+
+    nested.push({ type: "text", label, required });
+  });
+
+  if (nested.length === 0) return null;
+
+  return {
+    label: "Education",
+    required: nested.some((field) => field.required),
+    type: "education",
+    count,
+    options: nested,
+  };
+};
+
 /**
  * Visible JobDiva application fields on the current wizard step.
  * Password inputs are included because this registration step requires them.
  * A phone row can contain a type menu, a country menu, and the number.
  * Consent checkboxes live in `.jd-checkbox`, outside `.jd-form-layout`.
+ * Education cards are labeled "Education N - School" so each entry stays distinct.
  * Hidden, file, and radio inputs are skipped.
  */
 export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
@@ -555,6 +713,7 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
     }
 
     if (!label || label === "Unknown field") return;
+    label = prefixEducationLabel(element, label);
 
     results.push({
       element,
@@ -655,9 +814,19 @@ export const scanJobdivaHtmlToMakeApiPayload = async (
 ): Promise<JobdivaScanToMakeApiPayload> => {
   const fields = collectJobdivaCandidateFields();
   const elements: ApiFormElement[] = [];
+  let hasEducation = false;
 
   for (const field of fields) {
+    if (isInsideEducationCard(field.element)) {
+      hasEducation = true;
+      continue;
+    }
     elements.push(await toApiElement(field));
+  }
+
+  if (hasEducation) {
+    const education = buildJobdivaEducationGroup(options.applicantData);
+    if (education) elements.push(education);
   }
 
   return {
