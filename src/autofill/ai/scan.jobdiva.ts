@@ -46,13 +46,14 @@ export interface JobdivaScanToMakeApiOptions {
   applicantData?: Applicant | null;
 }
 
-/** Text inputs, passwords, selects, Bootstrap dropdowns, and consent checkboxes. */
+/** Text inputs, passwords, selects, Bootstrap dropdowns, consent checkboxes, and EEO radios. */
 export type JobdivaFieldKind =
   | "text"
   | "password"
   | "select"
   | "combobox"
-  | "checkbox";
+  | "checkbox"
+  | "radio";
 
 export interface JobdivaCandidateField {
   element: HTMLElement;
@@ -1122,9 +1123,10 @@ const buildJobdivaWorkExperienceGroup = (
  * Password inputs are included because this registration step requires them.
  * A phone row can contain a type menu, a country menu, and the number.
  * Consent checkboxes live in `.jd-checkbox`, outside `.jd-form-layout`.
+ * EEO questions are one radio group per `.radio-buttons-div`.
  * Education cards are labeled "Education N - School" so each entry stays distinct.
  * Work cards are labeled "Work Experience N - Company", and From/To split into Month and Year.
- * Hidden, file, and radio inputs are skipped.
+ * Hidden and file inputs are skipped.
  */
 export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
   const results: JobdivaCandidateField[] = [];
@@ -1193,6 +1195,22 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
       add(element);
     });
 
+  document.querySelectorAll<HTMLElement>(".radio-buttons-div").forEach((group) => {
+    if (isInsideExtension(group) || !isVisibleElement(group)) return;
+    if (!group.querySelector("input[type='radio']")) return;
+    const label = cleanLabelText(
+      group.querySelector(".eeo-label")?.textContent ?? "",
+    );
+    if (!label || seen.has(group)) return;
+    seen.add(group);
+    results.push({
+      element: group,
+      label,
+      required: !!group.querySelector(".eeo-label-mandatory"),
+      kind: "radio",
+    });
+  });
+
   return results;
 };
 
@@ -1212,6 +1230,20 @@ const toApiElement = async (
       label: field.label,
       required: field.required,
       type: "checkbox",
+    };
+  }
+
+  if (field.kind === "radio") {
+    const options = Array.from(
+      field.element.querySelectorAll<HTMLElement>(".radio-buttons-label"),
+    )
+      .map((label) => cleanLabelText(label.textContent ?? ""))
+      .filter((label) => label.length > 0);
+    return {
+      label: field.label,
+      required: field.required,
+      type: "search",
+      ...(options.length > 0 ? { options } : {}),
     };
   }
 

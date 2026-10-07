@@ -878,6 +878,48 @@ const checkboxShouldBeChecked = (
   return null;
 };
 
+const fillRadioGroup = async (
+  group: HTMLElement,
+  answer: string,
+): Promise<boolean> => {
+  const rows = Array.from(group.querySelectorAll<HTMLElement>(".radio-button"));
+  const labels = rows.map((row) =>
+    cleanLabelText(row.querySelector(".radio-buttons-label")?.textContent ?? ""),
+  );
+  const matched = matchOption(answer, labels.filter((label) => label.length > 0));
+  if (!matched) return false;
+
+  const row = rows.find(
+    (item) =>
+      cleanLabelText(item.querySelector(".radio-buttons-label")?.textContent ?? "") ===
+      matched,
+  );
+  const input = row?.querySelector<HTMLInputElement>("input[type='radio']");
+  if (!row || !input) return false;
+  if (input.checked) return true;
+
+  row.scrollIntoView({ block: "nearest", inline: "nearest" });
+  input.click();
+  if (!input.checked) row.click();
+  if (input.checked) return true;
+
+  const descriptor = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "checked",
+  );
+  const tracker = (
+    input as HTMLInputElement & {
+      _valueTracker?: { setValue: (value: string) => void };
+    }
+  )._valueTracker;
+  tracker?.setValue(String(input.checked));
+  descriptor?.set?.call(input, true);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await handleValueChanges(input);
+  return input.checked;
+};
+
 const fillCheckbox = (
   input: HTMLInputElement,
   answer: string,
@@ -1054,6 +1096,10 @@ const fillField = async (
 
   if (field.kind === "checkbox" && field.element instanceof HTMLInputElement) {
     return fillCheckbox(field.element, answer, field.label);
+  }
+
+  if (field.kind === "radio") {
+    return fillRadioGroup(field.element, answer);
   }
 
   if (
