@@ -5,9 +5,11 @@ import { bamboohrAiHandler } from "./sites/bamboohr";
 import { dayforcehcmAiHandler } from "./sites/dayforcehcm";
 import { greenhouseAiHandler } from "./sites/greenhouse";
 import { icimsAiHandler } from "./sites/icims";
+import { jobdivaAiHandler } from "./sites/jobdiva";
 import { jobviteAiHandler } from "./sites/jobvite";
 import { leverAiHandler } from "./sites/lever";
 import { metacareersAiHandler } from "./sites/metacareers";
+import { searchcareersAiHandler } from "./sites/searchcareers";
 import { ultiproAiHandler } from "./sites/ultipro";
 import { workdayAiHandler } from "./sites/workday";
 import { workableAiHandler } from "./sites/workable";
@@ -28,8 +30,10 @@ const AI_SITE_HANDLERS: AiSiteHandler[] = [
   icimsAiHandler,
   leverAiHandler,
   metacareersAiHandler,
+  searchcareersAiHandler,
   amazonAiHandler,
   bamboohrAiHandler,
+  jobdivaAiHandler,
   jobviteAiHandler,
   applytojobAiHandler,
   ultiproAiHandler,
