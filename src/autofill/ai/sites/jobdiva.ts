@@ -4,6 +4,7 @@ import { autofillJobdivaWithAi } from "../autofill.jobdiva";
 import { initJobdivaHtmlScanner } from "../cibtn.jobdiva";
 import {
   ensureJobdivaEducationCards,
+  ensureJobdivaWorkExperienceCards,
   scanJobdivaHtmlToMakeApiPayload,
   JobdivaScanToMakeApiOptions,
   JobdivaScanToMakeApiPayload,
@@ -102,11 +103,16 @@ const applyFill = async (
   fillData: unknown,
   applicantData: Applicant,
 ): Promise<AiFillResult> => {
-  const needed = Array.isArray(applicantData?.education)
+  const educationNeeded = Array.isArray(applicantData?.education)
     ? applicantData.education.length
     : 0;
-  if (needed > 0) {
-    await ensureJobdivaEducationCards(needed);
+  if (educationNeeded > 0) {
+    await ensureJobdivaEducationCards(educationNeeded);
+  }
+  const workHistory = applicantData?.employment_history as unknown;
+  const workNeeded = Array.isArray(workHistory) ? workHistory.length : 0;
+  if (workNeeded > 0) {
+    await ensureJobdivaWorkExperienceCards(workNeeded);
   }
 
   const fillResult = await autofillJobdivaWithAi(fillData, {
@@ -136,11 +142,16 @@ export const jobdivaAiHandler: AiSiteHandler = {
   initFieldScanner: (applicantData, options) =>
     initJobdivaHtmlScanner(applicantData as Record<string, unknown>, options),
   prepareBeforeScan: async (applicantData) => {
-    const needed = Array.isArray(applicantData?.education)
+    const educationNeeded = Array.isArray(applicantData?.education)
       ? applicantData.education.length
       : 0;
-    if (needed > 0) {
-      await ensureJobdivaEducationCards(needed);
+    if (educationNeeded > 0) {
+      await ensureJobdivaEducationCards(educationNeeded);
+    }
+    const workHistory = applicantData?.employment_history as unknown;
+    const workNeeded = Array.isArray(workHistory) ? workHistory.length : 0;
+    if (workNeeded > 0) {
+      await ensureJobdivaWorkExperienceCards(workNeeded);
     }
   },
   buildScanPayload,

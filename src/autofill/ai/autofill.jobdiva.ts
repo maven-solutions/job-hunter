@@ -3,6 +3,7 @@ import {
   closeJobdivaFlyout,
   collectJobdivaCandidateFields,
   ensureJobdivaEducationCards,
+  ensureJobdivaWorkExperienceCards,
   getJobdivaDropdownRoot,
   JobdivaCandidateField,
   openJobdivaCombobox,
@@ -310,6 +311,128 @@ const educationAnswerCount = (answers: JobdivaAiAnswer[]): number =>
     return Math.max(max, Number(match[1]));
   }, 0);
 
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const ROLE_LABEL = "Describe your role and responsibilities";
+
+/** Profile and API keys mapped onto this form's work-experience labels. */
+const JOBDIVA_WORK_FIELD_MAP: Record<string, string> = {
+  company: "Company",
+  companyname: "Company",
+  employer: "Company",
+  jobtitle: "Job Title",
+  title: "Job Title",
+  position: "Job Title",
+  description: ROLE_LABEL,
+  roledescription: ROLE_LABEL,
+  responsibilities: ROLE_LABEL,
+  role: ROLE_LABEL,
+  describeyourroleandresponsibilities: ROLE_LABEL,
+  frommonth: "From Month",
+  startmonth: "From Month",
+  tomonth: "To Month",
+  endmonth: "To Month",
+  fromyear: "From Year",
+  startyear: "From Year",
+  toyear: "To Year",
+  endyear: "To Year",
+};
+
+const monthNameFrom = (value: unknown): string => {
+  const text = coerceAnswerString(value);
+  const named = MONTH_NAMES.find((month) =>
+    text.toLowerCase().includes(month.toLowerCase()),
+  );
+  if (named) return named;
+  const iso = text.match(/\b(?:19|20)\d{2}[-/](\d{1,2})\b/);
+  if (iso) {
+    const month = Number(iso[1]);
+    if (month >= 1 && month <= 12) return MONTH_NAMES[month - 1];
+  }
+  const us = text.match(/\b(\d{1,2})[-/](?:19|20)\d{2}\b/);
+  if (us) {
+    const month = Number(us[1]);
+    if (month >= 1 && month <= 12) return MONTH_NAMES[month - 1];
+  }
+  return "";
+};
+
+const yearFrom = (value: unknown): string => {
+  const text = coerceAnswerString(value);
+  const match = text.match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : "";
+};
+
+const normalizeWorkEntries = (raw: unknown): Record<string, unknown>[] => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    if (raw.length > 0 && Array.isArray(raw[0])) {
+      return raw
+        .map((item) => coerceEducationEntry(item))
+        .filter((item): item is Record<string, unknown> => !!item);
+    }
+    if (
+      raw.length > 0 &&
+      typeof raw[0] === "object" &&
+      raw[0] != null &&
+      ("name" in (raw[0] as object) || "label" in (raw[0] as object)) &&
+      ("value" in (raw[0] as object) || "answer" in (raw[0] as object)) &&
+      !Array.isArray((raw[0] as { value?: unknown }).value) &&
+      typeof (raw[0] as { value?: unknown }).value !== "object"
+    ) {
+      const firstName = String(
+        (raw[0] as { name?: unknown; label?: unknown }).name ??
+          (raw[0] as { label?: unknown }).label ??
+          "",
+      );
+      if (/company|job\s*title|from|to|describe|role|responsibilit/i.test(firstName)) {
+        const single = coerceEducationEntry(raw);
+        return single ? [single] : [];
+      }
+    }
+    return raw
+      .map((item) => coerceEducationEntry(item))
+      .filter((item): item is Record<string, unknown> => !!item);
+  }
+  if (typeof raw === "object") {
+    const obj = raw as Record<string, unknown>;
+    for (const key of ["entries", "items", "data", "records", "jobs", "employment"]) {
+      if (Array.isArray(obj[key])) return normalizeWorkEntries(obj[key]);
+    }
+    if (
+      "label" in obj &&
+      ("type" in obj || "options" in obj) &&
+      !("company" in obj) &&
+      !("jobTitle" in obj)
+    ) {
+      return normalizeWorkEntries(obj.answer ?? obj.value ?? obj.fill ?? obj.data);
+    }
+    const coerced = coerceEducationEntry(obj);
+    return coerced ? [coerced] : [];
+  }
+  return [];
+};
+
+const workAnswerCount = (answers: JobdivaAiAnswer[]): number =>
+  answers.reduce((max, item) => {
+    const match = item.label.match(/^work\s*experience\s*(\d+)\s*-/i);
+    if (!match) return max;
+    return Math.max(max, Number(match[1]));
+  }, 0);
+
 const parseJobdivaAiFillResponse = (
   response: unknown,
 ): JobdivaParsedFillResponse => {
@@ -384,6 +507,75 @@ const parseJobdivaAiFillResponse = (
     });
   };
 
+  const pushWorkPart = (
+    prefix: string,
+    fieldLabel: string,
+    answer: string,
+    seen: Set<string>,
+  ): void => {
+    if (seen.has(fieldLabel)) return;
+    seen.add(fieldLabel);
+    const labeled = `${prefix} - ${fieldLabel}`;
+    if (!answer) {
+      markEmpty(labeled);
+      return;
+    }
+    answers.push({ label: labeled, answer });
+  };
+
+  const pushWorkGroup = (raw: unknown): void => {
+    const entries = normalizeWorkEntries(raw);
+    entries.forEach((entry, index) => {
+      const prefix = `Work Experience ${index + 1}`;
+      const seen = new Set<string>();
+      for (const [key, value] of Object.entries(entry)) {
+        if (value == null) continue;
+        if (EDUCATION_ENTRY_META_KEYS.has(key.toLowerCase())) continue;
+
+        let fieldName = key;
+        let fieldValue: unknown = value;
+        if (
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          ("answer" in (value as object) ||
+            "value" in (value as object) ||
+            "name" in (value as object) ||
+            "label" in (value as object))
+        ) {
+          const nested = value as {
+            name?: string;
+            label?: string;
+            answer?: unknown;
+            value?: unknown;
+          };
+          fieldName = String(nested.name ?? nested.label ?? key);
+          fieldValue = nested.answer ?? nested.value;
+        }
+
+        const keyNorm = educationFieldKey(fieldName);
+        if (keyNorm === "from" || keyNorm === "startdate" || keyNorm === "start") {
+          pushWorkPart(prefix, "From Month", monthNameFrom(fieldValue), seen);
+          pushWorkPart(prefix, "From Year", yearFrom(fieldValue), seen);
+          continue;
+        }
+        if (keyNorm === "to" || keyNorm === "enddate" || keyNorm === "end") {
+          pushWorkPart(prefix, "To Month", monthNameFrom(fieldValue), seen);
+          pushWorkPart(prefix, "To Year", yearFrom(fieldValue), seen);
+          continue;
+        }
+
+        const fieldLabel = JOBDIVA_WORK_FIELD_MAP[keyNorm];
+        if (!fieldLabel) continue;
+        const answer = fieldLabel.endsWith("Month")
+          ? monthNameFrom(fieldValue) || coerceAnswerString(fieldValue)
+          : fieldLabel.endsWith("Year")
+            ? yearFrom(fieldValue) || coerceAnswerString(fieldValue)
+            : coerceAnswerString(fieldValue);
+        pushWorkPart(prefix, fieldLabel, answer, seen);
+      }
+    });
+  };
+
   const processItem = (item: any): void => {
     if (!item || typeof item !== "object") return;
     const label = String(item.label ?? item.field ?? item.name ?? "").trim();
@@ -393,6 +585,15 @@ const parseJobdivaAiFillResponse = (
     const raw = extractRawAnswer(item);
     if (typeStr === "education" || /^education$/i.test(label)) {
       pushEducationGroup(raw ?? item.entries ?? item.items ?? item.data);
+      return;
+    }
+    if (
+      typeStr === "employment" ||
+      typeStr === "workexperience" ||
+      /^work experience$/i.test(label) ||
+      /^employment$/i.test(label)
+    ) {
+      pushWorkGroup(raw ?? item.entries ?? item.jobs ?? item.items ?? item.data);
       return;
     }
 
@@ -459,6 +660,13 @@ const parseJobdivaAiFillResponse = (
         (Array.isArray(value) || (value != null && typeof value === "object"))
       ) {
         pushEducationGroup(value);
+        continue;
+      }
+      if (
+        /^(work experience|employment|employment_history)$/i.test(label) &&
+        (Array.isArray(value) || (value != null && typeof value === "object"))
+      ) {
+        pushWorkGroup(value);
         continue;
       }
       if (isEmptyApiAnswer(value)) {
@@ -872,6 +1080,10 @@ export const autofillJobdivaWithAi = async (
   const educationNeeded = educationAnswerCount(answers);
   if (educationNeeded > 0) {
     await ensureJobdivaEducationCards(educationNeeded);
+  }
+  const workNeeded = workAnswerCount(answers);
+  if (workNeeded > 0) {
+    await ensureJobdivaWorkExperienceCards(workNeeded);
   }
   const fields = collectJobdivaCandidateFields();
   const profilePassword = options.password?.trim() ?? "";

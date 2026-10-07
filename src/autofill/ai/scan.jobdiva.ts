@@ -2,7 +2,12 @@ import { delay } from "../helper";
 import { Applicant } from "../data";
 import { EXTENSION_ROOT_ID } from "../../utils/constant";
 
-export type ApiElementType = "text" | "search" | "checkbox" | "education";
+export type ApiElementType =
+  | "text"
+  | "search"
+  | "checkbox"
+  | "education"
+  | "employment";
 
 /** One field inside an Education group, matching the Workday nested schema. */
 export interface JobdivaNestedField {
@@ -74,6 +79,22 @@ const SKIP_INPUT_TYPES = new Set([
 
 const LAYOUT_SELECTOR = ".jd-form-layout";
 const EDUCATION_CARD_SELECTOR = ".jd-reg-card.id-reg-education";
+const WORK_CARD_SELECTOR = ".jd-reg-card.id-reg-workexperience";
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 const OPTION_SELECTOR = [
   "[role='option']",
@@ -592,7 +613,7 @@ const isAddEducationLauncher = (card: HTMLElement): boolean => {
 };
 
 /** Plus icon, its clickable span, then the card. React ignores a bare .click(). */
-const initialAddEducationTargets = (card: HTMLElement): Element[] => {
+const initialAddEntryTargets = (card: HTMLElement): Element[] => {
   const targets: Element[] = [];
   const pointer = Array.from(card.querySelectorAll<HTMLElement>("span")).find(
     (el) => {
@@ -712,7 +733,7 @@ export const ensureJobdivaEducationCards = async (
         document.querySelectorAll<HTMLElement>(EDUCATION_CARD_SELECTOR),
       ).filter(isAddEducationLauncher);
       for (const card of launchers) {
-        for (const target of initialAddEducationTargets(card)) {
+        for (const target of initialAddEntryTargets(card)) {
           pressJobdivaControl(target);
           const next = await waitForMoreEducationCards(before);
           if (next > before) {
@@ -734,6 +755,166 @@ export const ensureJobdivaEducationCards = async (
     if (!opened) break;
     guard += 1;
   }
+};
+
+const workEntryTitle = (card: HTMLElement): string => {
+  const span = Array.from(card.querySelectorAll("span")).find((el) =>
+    /^work\s*experience\s*\d+$/i.test(cleanLabelText(el.textContent ?? "")),
+  );
+  return span ? cleanLabelText(span.textContent ?? "") : "";
+};
+
+/** The empty "Add a Work Experience" card is not an entry. */
+const isWorkEntryCard = (card: HTMLElement): boolean => {
+  if (workEntryTitle(card)) return true;
+  const text = cleanLabelText(card.textContent ?? "");
+  if (
+    /add\s+(an?\s+)?work\s*experience/i.test(text) &&
+    !/add\s+another/i.test(text) &&
+    !card.querySelector(LAYOUT_SELECTOR)
+  ) {
+    return false;
+  }
+  return !!card.querySelector(LAYOUT_SELECTOR);
+};
+
+const listWorkEntryCards = (): HTMLElement[] =>
+  Array.from(document.querySelectorAll<HTMLElement>(WORK_CARD_SELECTOR)).filter(
+    isWorkEntryCard,
+  );
+
+export const countJobdivaWorkExperienceCards = (): number =>
+  listWorkEntryCards().length;
+
+const workCardTitle = (card: HTMLElement): string => {
+  const title = workEntryTitle(card);
+  if (title) return title;
+  const cards = listWorkEntryCards();
+  const index = Math.max(0, cards.indexOf(card));
+  return `Work Experience ${index + 1}`;
+};
+
+const prefixWorkExperienceLabel = (element: HTMLElement, label: string): string => {
+  const card = element.closest(WORK_CARD_SELECTOR);
+  if (!(card instanceof HTMLElement) || !isWorkEntryCard(card)) return label;
+  const title = workCardTitle(card);
+  if (label.toLowerCase().startsWith(title.toLowerCase())) return label;
+  return `${title} - ${label}`;
+};
+
+const isInsideWorkCard = (element: HTMLElement): boolean => {
+  const card = element.closest(WORK_CARD_SELECTOR);
+  return card instanceof HTMLElement && isWorkEntryCard(card);
+};
+
+const isAddWorkLauncher = (card: HTMLElement): boolean => {
+  if (isWorkEntryCard(card)) return false;
+  if (card.closest(`#${EXTENSION_ROOT_ID}`)) return false;
+  const text = cleanLabelText(card.textContent ?? "");
+  return (
+    /add\s+(an?\s+)?work\s*experience/i.test(text) && !/add\s+another/i.test(text)
+  );
+};
+
+const findAddAnotherWorkControl = (): HTMLElement | null => {
+  const nodes = document.querySelectorAll<HTMLElement>(".jd-reg-entrybtn");
+  for (const el of nodes) {
+    if (el.closest(`#${EXTENSION_ROOT_ID}`)) continue;
+    const text = cleanLabelText(el.textContent ?? "").replace(/^\+\s*/, "");
+    if (/remove/i.test(text)) continue;
+    if (/add\s+another\s+work\s*experience/i.test(text)) return el;
+  }
+  return null;
+};
+
+const waitForMoreWorkCards = async (previous: number): Promise<number> => {
+  const started = Date.now();
+  let current = countJobdivaWorkExperienceCards();
+  while (current <= previous && Date.now() - started < 1600) {
+    await delay(200);
+    current = countJobdivaWorkExperienceCards();
+  }
+  return current;
+};
+
+/**
+ * Open one card per job, the same way education cards are opened.
+ * No cards yet: press the plus on "Add a Work Experience".
+ * Each further job: press "+ Add another work experience entry".
+ */
+export const ensureJobdivaWorkExperienceCards = async (
+  needed: number,
+): Promise<void> => {
+  if (!needed || needed < 1) return;
+  if (!document.querySelector(WORK_CARD_SELECTOR) && !findAddAnotherWorkControl()) {
+    return;
+  }
+
+  let guard = 0;
+  while (countJobdivaWorkExperienceCards() < needed && guard < 12) {
+    const before = countJobdivaWorkExperienceCards();
+    let opened = false;
+
+    if (before === 0) {
+      const launchers = Array.from(
+        document.querySelectorAll<HTMLElement>(WORK_CARD_SELECTOR),
+      ).filter(isAddWorkLauncher);
+      for (const card of launchers) {
+        for (const target of initialAddEntryTargets(card)) {
+          pressJobdivaControl(target);
+          const next = await waitForMoreWorkCards(before);
+          if (next > before) {
+            opened = true;
+            break;
+          }
+        }
+        if (opened) break;
+      }
+    } else {
+      const add = findAddAnotherWorkControl();
+      if (add) {
+        pressJobdivaControl(add);
+        const next = await waitForMoreWorkCards(before);
+        opened = next > before;
+      }
+    }
+
+    if (!opened) break;
+    guard += 1;
+  }
+};
+
+const menuPartKind = (element: HTMLElement): "month" | "year" | "other" => {
+  const labels = collectStaticComboboxLabels(element).map((label) =>
+    label.toLowerCase(),
+  );
+  const shown = cleanLabelText(
+    element.querySelector(".text-truncate")?.textContent ?? "",
+  ).toLowerCase();
+  const values = shown ? [...labels, shown] : labels;
+  if (values.some((value) => MONTH_NAMES.some((month) => month.toLowerCase() === value))) {
+    return "month";
+  }
+  if (values.some((value) => /^(19|20)\d{2}$/.test(value))) return "year";
+  return "other";
+};
+
+/** From and To each contain a month menu and a year menu. */
+const withDatePartLabel = (element: HTMLElement, label: string): string => {
+  if (!/^(from|to)$/i.test(label)) return label;
+  const kind = menuPartKind(element);
+  if (kind === "month") return `${label} Month`;
+  if (kind === "year") return `${label} Year`;
+  const layout = element.closest(LAYOUT_SELECTOR);
+  if (!(layout instanceof HTMLElement)) return label;
+  const menus = collectLayoutControls(layout).filter(
+    (control): control is HTMLButtonElement =>
+      control instanceof HTMLButtonElement,
+  );
+  const index = menus.findIndex((control) => control === element);
+  if (index === 0) return `${label} Month`;
+  if (index === 1) return `${label} Year`;
+  return label;
 };
 
 const buildJobdivaEducationGroup = (
@@ -790,12 +971,71 @@ const buildJobdivaEducationGroup = (
   };
 };
 
+const employmentProfileCount = (applicantData?: Applicant | null): number => {
+  const history = applicantData?.employment_history as unknown;
+  return Array.isArray(history) ? history.length : 0;
+};
+
+const buildJobdivaWorkExperienceGroup = (
+  applicantData?: Applicant | null,
+): ApiFormElement | null => {
+  const cards = listWorkEntryCards();
+  if (cards.length === 0) return null;
+
+  const count = Math.max(cards.length, employmentProfileCount(applicantData), 1);
+  const nested: JobdivaNestedField[] = [];
+  const seen = new Set<string>();
+
+  cards[0].querySelectorAll<HTMLElement>(LAYOUT_SELECTOR).forEach((layout) => {
+    const base = cleanLabelText(
+      layout.querySelector(".jd-label")?.textContent ?? "",
+    );
+    if (!base) return;
+    const controls = collectLayoutControls(layout);
+    const required = !!layout.querySelector(".jd-text-red");
+    const targets = controls.length > 0 ? controls : [];
+
+    targets.forEach((control) => {
+      const label = withDatePartLabel(control, base);
+      if (!label || seen.has(label)) return;
+      seen.add(label);
+      const isMenu =
+        control instanceof HTMLSelectElement ||
+        control instanceof HTMLButtonElement ||
+        control.getAttribute("role") === "combobox" ||
+        !!control.closest(".jd-form-select, .dropdown");
+      if (isMenu) {
+        const options = collectStaticComboboxLabels(control);
+        nested.push({
+          type: "search",
+          label,
+          required,
+          ...(options.length > 0 ? { options } : {}),
+        });
+        return;
+      }
+      nested.push({ type: "text", label, required });
+    });
+  });
+
+  if (nested.length === 0) return null;
+
+  return {
+    label: "Work Experience",
+    required: nested.some((field) => field.required),
+    type: "employment",
+    count,
+    options: nested,
+  };
+};
+
 /**
  * Visible JobDiva application fields on the current wizard step.
  * Password inputs are included because this registration step requires them.
  * A phone row can contain a type menu, a country menu, and the number.
  * Consent checkboxes live in `.jd-checkbox`, outside `.jd-form-layout`.
  * Education cards are labeled "Education N - School" so each entry stays distinct.
+ * Work cards are labeled "Work Experience N - Company", and From/To split into Month and Year.
  * Hidden, file, and radio inputs are skipped.
  */
 export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
@@ -822,7 +1062,9 @@ export const collectJobdivaCandidateFields = (): JobdivaCandidateField[] => {
     }
 
     if (!label || label === "Unknown field") return;
+    label = withDatePartLabel(element, label);
     label = prefixEducationLabel(element, label);
+    label = prefixWorkExperienceLabel(element, label);
 
     results.push({
       element,
@@ -924,10 +1166,15 @@ export const scanJobdivaHtmlToMakeApiPayload = async (
   const fields = collectJobdivaCandidateFields();
   const elements: ApiFormElement[] = [];
   let hasEducation = false;
+  let hasWork = false;
 
   for (const field of fields) {
     if (isInsideEducationCard(field.element)) {
       hasEducation = true;
+      continue;
+    }
+    if (isInsideWorkCard(field.element)) {
+      hasWork = true;
       continue;
     }
     elements.push(await toApiElement(field));
@@ -936,6 +1183,10 @@ export const scanJobdivaHtmlToMakeApiPayload = async (
   if (hasEducation) {
     const education = buildJobdivaEducationGroup(options.applicantData);
     if (education) elements.push(education);
+  }
+  if (hasWork) {
+    const work = buildJobdivaWorkExperienceGroup(options.applicantData);
+    if (work) elements.push(work);
   }
 
   return {
